@@ -1,0 +1,25 @@
+name: contracts
+
+on:
+  push:
+    branches: [main]
+    paths: ["contracts/**", "tools/**", ".github/workflows/contracts.yml"]
+  pull_request:
+    paths: ["contracts/**", "tools/**", ".github/workflows/contracts.yml"]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install msgpack
+      - name: Generated files are up to date
+        run: |
+          python3 tools/gen_city_plan.py
+          python3 tools/gen_protocol_vectors.py
+          git diff --exit-code contracts/ || (echo "Run the generators and commit the result." && exit 1)
+      - name: Check contracts
+        run: python3 tools/check_contracts.py

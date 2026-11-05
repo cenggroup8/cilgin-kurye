@@ -1,0 +1,507 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+\documentclass[
+  english,
+  10pt,
+  a4paper,
+]{article}
+\usepackage{xcolor}
+\usepackage[top=22mm,bottom=20mm,left=18mm,right=18mm]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{longtable,booktabs,array}
+\usepackage{caption}
+\captionsetup[table]{skip=6pt}
+\newcounter{none} % for unnumbered tables
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+\ifLuaTeX
+\usepackage[bidi=basic,shorthands=off]{babel}
+\else
+\usepackage[bidi=default,shorthands=off]{babel}
+\fi
+\ifLuaTeX
+  \usepackage{selnolig} % disable illegal ligatures
+\fi
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+% ---- Çılgın Kurye document theme: same look as the CSE 396 project proposal ----
+% Compile with XeLaTeX (also works on Overleaf). Fonts: TeX Gyre Termes (Times), DejaVu Sans Mono.
+\usepackage{fontspec}
+\setmainfont{texgyretermes}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold, ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
+\setsansfont{texgyreheros}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold, ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
+\setmonofont{DejaVuSansMono}[Extension=.ttf, UprightFont=*, BoldFont=*-Bold, ItalicFont=*-Oblique, BoldItalicFont=*-BoldOblique, Scale=0.80]
+\setmathfont{texgyretermes-math.otf}
+
+\usepackage{xcolor}
+\definecolor{ckblue}{HTML}{1F3A5F}
+\definecolor{cklight}{HTML}{E8EEF5}
+\definecolor{ckgrey}{HTML}{F2F2F2}
+\definecolor{ckline}{HTML}{555555}
+\definecolor{shadecolor}{HTML}{F4F5F7}
+
+% Headings as in the proposal: serif, bold; subsections bold italic. Numbers are part of the heading text.
+\setcounter{secnumdepth}{0}
+\usepackage{titlesec}
+\titleformat{\section}{\rmfamily\Large\bfseries}{}{0pt}{}
+\titleformat{\subsection}{\rmfamily\large\bfseries\itshape}{}{0pt}{}
+\titleformat{\subsubsection}{\rmfamily\normalsize\bfseries}{}{0pt}{}
+\titlespacing*{\section}{0pt}{12pt}{4pt}
+\titlespacing*{\subsection}{0pt}{8pt}{3pt}
+
+% Header and footer (the first page has only the footer, like the proposal)
+\usepackage{fancyhdr,lastpage}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\itshape CSE 396 · Group 8 · Çılgın Kurye}
+\fancyhead[R]{\footnotesize\itshape\ckmodule}
+\fancyfoot[C]{\footnotesize Page \thepage\ of \pageref*{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\setlength{\headheight}{14pt}
+\fancypagestyle{ckfirst}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}\fancyfoot[C]{\footnotesize Page \thepage\ of \pageref*{LastPage}}}
+
+% Inline code: breaks only after . : ( , / _ and spaces, never inside a name
+\usepackage[obeyspaces,spaces]{url}
+\AtBeginDocument{%
+  \renewcommand{\UrlBreaks}{\do\.\do\:\do\(\do\,\do\/\do\_\do\|}%
+  \renewcommand{\UrlBigBreaks}{}%
+  \renewcommand{\UrlNoBreaks}{}%
+  \urlstyle{tt}}
+
+% Tables: boxed grid as in the proposal, smaller text
+\usepackage{etoolbox}
+\AtBeginEnvironment{longtable}{\footnotesize\renewcommand{\arraystretch}{1.2}}
+\setlength{\LTpre}{6pt}
+\setlength{\LTpost}{8pt}
+\setlength{\arrayrulewidth}{0.4pt}
+
+% Code blocks: long lines wrap; diagrams stay in one piece
+\usepackage{framed}
+\usepackage{fvextra}
+\RecustomVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\footnotesize, breaklines}
+\makeatletter
+\@ifundefined{Shaded}{}{\renewenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}}
+\@ifundefined{Highlighting}{}{\RecustomVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}, fontsize=\footnotesize, breaklines, breakanywhere}}
+\makeatother
+
+% Figures drawn with TikZ
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,calc,backgrounds,shapes.geometric}
+\tikzset{
+  ck/.style={font=\footnotesize, >={Stealth[length=5pt]}, line width=0.6pt},
+  box/.style={draw=ckline, fill=white, rounded corners=2pt, align=center, inner sep=4pt, minimum height=7mm},
+  mod/.style={box, fill=ckgrey},
+  this/.style={box, fill=cklight, draw=ckblue, line width=0.9pt},
+  group/.style={draw=ckline, dashed, rounded corners=3pt, inner sep=6pt},
+  lbl/.style={font=\scriptsize, align=center, inner sep=1.5pt},
+  msg/.style={->, draw=ckline},
+}
+\usepackage{caption}
+\captionsetup[figure]{font=small, labelfont=bf, skip=4pt}
+\newcommand{\ckfigure}[2]{\begin{figure}[htbp]\centering #1\caption{#2}\end{figure}}
+
+\usepackage{enumitem}
+\setlist{itemsep=1pt, topsep=3pt}
+\setlength{\parskip}{4pt}
+\setlength{\parindent}{0pt}
+\raggedbottom
+% ---- end of theme ----
+\newcommand{\ckmodule}{M4 Traffic and AI}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+% fallback for those not using the hyperref driver hyperxmp:
+\makeatletter
+\@ifundefined{xmpquote}{\newcommand{\xmpquote}[1]{#1}}{}
+\makeatother
+\hypersetup{
+  pdftitle={M4 Traffic and AI},
+  pdflang={en},
+  colorlinks=true,
+  linkcolor={black},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={black},
+  pdfcreator={LaTeX}}
+
+\title{M4 Traffic and AI --- Module Documentation}
+\author{}
+\date{}
+
+
+% ---- colours and drawings ----
+% ---- colours ----
+\definecolor{srv}{HTML}{2E6FB7}\colorlet{srvL}{srv!15}
+\definecolor{cli}{HTML}{2E9E5B}\colorlet{cliL}{cli!15}
+\definecolor{adm}{HTML}{E08A1E}\colorlet{admL}{adm!18}
+\definecolor{brd}{HTML}{7B4FB3}\colorlet{brdL}{brd!15}
+\definecolor{tcpc}{HTML}{1F5FA8}
+\definecolor{udpc}{HTML}{D9531E}
+\definecolor{obs}{HTML}{D7263D}
+\definecolor{tA}{HTML}{00A6D6}
+\definecolor{tB}{HTML}{3BB273}
+\definecolor{tC}{HTML}{F2C14E}
+\definecolor{tD}{HTML}{9B5DE5}
+
+% ---- styles ----
+\tikzset{
+  nb/.style={rounded corners=3pt, line width=0.9pt, align=center, inner sep=4pt, minimum height=9mm, font=\footnotesize},
+  sv/.style={nb, draw=srv, fill=srvL},
+  cl/.style={nb, draw=cli, fill=cliL},
+  ad/.style={nb, draw=adm, fill=admL},
+  bd/.style={nb, draw=brd, fill=brdL},
+  hwb/.style={nb, draw=black!50, fill=black!5},
+  tcpa/.style={draw=tcpc, line width=1.5pt},
+  udpa/.style={draw=udpc, line width=1.5pt, dash pattern=on 5pt off 2.5pt},
+  inna/.style={draw=black!55, line width=1pt},
+  al/.style={font=\scriptsize, fill=white, inner sep=1.2pt, rounded corners=1pt},
+  grp/.style={draw=black!35, dashed, rounded corners=5pt, inner sep=7pt},
+  glbl/.style={font=\scriptsize\bfseries, text=black!65},
+  hl/.style={line width=2.6pt},
+  st/.style={nb, rounded corners=8pt, minimum width=24mm},
+  co/.style={draw=black!60, line width=0.5pt},
+  cot/.style={font=\scriptsize, align=left, text=black!80},
+}
+
+% ---- system map; argument = module to highlight (M1 ... M8, or none) ----
+\newcommand{\systemmap}[1]{%
+\tikzset{M1/.style={},M2/.style={},M3/.style={},M4/.style={},M5/.style={},M6/.style={},M7/.style={},M8/.style={},none/.style={}}%
+\tikzset{#1/.style={hl}}%
+\begin{tikzpicture}[ck]
+\node[cl, M5, minimum width=27mm] (m5) at (0,3) {\textbf{M5}\\Player phones};
+\node[ad, M6, minimum width=27mm] (m6) at (0,0.4) {\textbf{M6}\\Admin panel};
+\node[sv, M2, minimum width=27mm, minimum height=38mm] (m2) at (4.6,1.7) {\textbf{M2}\\Network\\and sync};
+\node[sv, M1, minimum width=27mm, minimum height=38mm] (m1) at (8.4,1.7) {\textbf{M1}\\Game server\\and rules};
+\node[sv, M3, minimum width=25mm] (m3) at (12,2.8) {\textbf{M3}\\Physics};
+\node[sv, M4, minimum width=25mm] (m4) at (12,0.6) {\textbf{M4}\\Traffic and AI};
+\node[grp, fit=(m2)(m1)(m3)(m4)] (pc) {};
+\node[glbl, anchor=south west] at (pc.north west) {MAIN COMPUTER};
+\node[bd, M7, minimum width=27mm] (m7) at (4.6,-2.7) {\textbf{M7}\\ESP32 software};
+\node[bd, M8, minimum width=27mm] (m8) at (8.4,-2.7) {\textbf{M8}\\LED engine};
+\node[hwb, minimum width=25mm] (led) at (12,-2.7) {344 LEDs};
+\node[hwb, minimum width=27mm] (sm) at (4.6,-4.4) {Sensor and\\4 motors};
+\node[grp, fit=(m7)(m8)(led)(sm)] (bb) {};
+\node[glbl, anchor=north east] at (bb.south east) {LED CITY BOARD};
+\draw[tcpa, <->] (m5.east) -- node[al]{WebSocket} (m5.east -| m2.west);
+\draw[tcpa, <->] (m6.east) -- node[al]{WebSocket} (m6.east -| m2.west);
+\draw[tcpa, <->] ([xshift=-6mm]m7.north) -- node[al]{TCP} ([xshift=-6mm]m2.south);
+\draw[udpa, <->] ([xshift=6mm]m7.north) -- node[al]{UDP} ([xshift=6mm]m2.south);
+\draw[inna, <->] (m2) -- (m1);
+\draw[inna, <->] (m1.east |- m3) -- (m3);
+\draw[inna, <->] (m1.east |- m4) -- (m4);
+\draw[inna, ->] (m7) -- node[al]{state} (m8);
+\draw[inna, ->] (m8) -- (led);
+\draw[inna, <->] (m7) -- (sm);
+\draw[tcpa] (-1.3,-6.0) -- ++(0.9,0) node[right, font=\scriptsize]{TCP: every message arrives, in order};
+\draw[udpa] (4.0,-6.0) -- ++(0.9,0) node[right, font=\scriptsize]{UDP: fast, the newest message wins};
+\draw[inna] (9.3,-6.0) -- ++(0.9,0) node[right, font=\scriptsize]{inside one program or chip};
+\end{tikzpicture}}
+
+% ---- LED board seen from above (6 x 6 roads, 1 unit = 10 cm) ----
+\newcommand{\boardbase}{%
+\fill[black!88, rounded corners=3pt] (-0.5,-0.5) rectangle (5.5,5.5);
+\foreach \i in {0,...,4}{\foreach \j in {0,...,4}{%
+  \fill[black!60] (\i+0.13,\j+0.13) rectangle (\i+0.87,\j+0.87);
+  \fill[black!22] (\i+0.24,\j+0.24) rectangle (\i+0.52,\j+0.52);
+  \fill[black!30] (\i+0.56,\j+0.30) rectangle (\i+0.78,\j+0.62);
+  \fill[black!38] (\i+0.28,\j+0.58) rectangle (\i+0.66,\j+0.78);}}
+\foreach \i in {0,...,5}{%
+  \draw[black, line width=4.5pt] (\i,-0.05) -- (\i,5.05);
+  \draw[black, line width=4.5pt] (-0.05,\i) -- (5.05,\i);}
+\foreach \i in {0,...,5}{\foreach \k in {0,...,30}{%
+  \fill[black!55] (\i,\k/6) circle (0.025);
+  \fill[black!55] (\k/6,\i) circle (0.025);}}
+\foreach \x/\y/\c in {0/4/tA, 4/4/tB, 0/0/tC, 4/0/tD}{%
+  \fill[\c!30!black!60] (\x+0.13,\y+0.13) rectangle (\x+0.87,\y+0.87);
+  \fill[\c] (\x+0.3,\y+0.3) rectangle (\x+0.7,\y+0.7);
+  \fill[white] (\x+0.4,\y+0.5) circle (0.05); \fill[white] (\x+0.6,\y+0.5) circle (0.05);}}
+\newcommand{\nmark}[3]{\node[circle, fill=yellow!85!orange, draw=black, line width=0.4pt, inner sep=0.6pt, minimum size=3.6mm, font=\tiny\bfseries] at (#1,#2) {#3};}
+\newcommand{\bike}[4]{%
+\fill[#3!35] ($(#1,#2)+(#4:0.40)$) circle (0.05);
+\fill[#3!65] ($(#1,#2)+(#4:0.21)$) circle (0.075);
+\fill[#3, draw=white, line width=0.4pt] (#1,#2) circle (0.12);}
+\newcommand{\dpoint}[3]{\draw[#3!50, line width=0.8pt] (#1,#2) circle (0.26); \draw[#3, line width=1.4pt] (#1,#2) circle (0.16); \fill[#3] (#1,#2) circle (0.07);}
+\newcommand{\heavy}[2]{\draw[obs!60!black, line width=4pt] (#1) -- (#2); \draw[obs, line width=4pt, dash pattern=on 3pt off 5pt] (#1) -- (#2);}
+\newcommand{\roadwork}[2]{\draw[obs, line width=4pt] (#1) -- (#2);}
+\newcommand{\accident}[2]{\draw[obs, line width=4pt] (#1) -- (#2); \draw[white, line width=4pt, dash pattern=on 2.5pt off 3.5pt] (#1) -- (#2);}
+\newcommand{\puddle}[2]{\draw[cyan!35, line width=4pt] (#1) -- (#2); \draw[white, line width=1.6pt, dash pattern=on 1pt off 2.5pt] (#1) -- (#2);}
+\newcommand{\findme}[2]{\fill[white, opacity=0.25] (#1,#2) circle (0.36); \fill[white, opacity=0.5] (#1,#2) circle (0.24); \fill[white] (#1,#2) circle (0.13);}
+
+% ---- phone game screen (7 x 3.4 units) ----
+\newcommand{\phonemock}{%
+\fill[black!85, rounded corners=9pt] (-0.3,-0.3) rectangle (7.3,3.7);
+\fill[cyan!20] (0,1.7) rectangle (7,3.4);
+\fill[cli!14] (0,0) rectangle (7,1.7);
+\filldraw[fill=srv!30, draw=srv!70!black] (0.2,1.5) rectangle (1.0,3.0);
+\filldraw[fill=adm!35, draw=adm!70!black] (1.1,1.6) rectangle (1.8,2.4);
+\filldraw[fill=brd!30, draw=brd!70!black] (1.9,1.65) -- (2.6,1.65) -- (2.6,2.2) -- (2.25,2.5) -- (1.9,2.2) -- cycle;
+\filldraw[fill=adm!35, draw=adm!70!black] (4.5,1.65) rectangle (5.1,2.3);
+\filldraw[fill=srv!30, draw=srv!70!black] (5.2,1.55) rectangle (6.0,3.1);
+\filldraw[fill=cli!35, draw=cli!70!black] (6.1,1.6) rectangle (6.85,2.6);
+\fill[brown!60!black] (4.17,1.6) rectangle (4.23,1.8); \fill[cli!70!black] (4.2,1.95) circle (0.18);
+\fill[black!55] (1.8,0) -- (5.2,0) -- (3.75,1.7) -- (3.25,1.7) -- cycle;
+\draw[white, line width=0.8pt, dash pattern=on 4pt off 4pt] (3.5,0) -- (3.5,1.7);
+\filldraw[fill=black!15, draw=black!70] (3.62,1.12) rectangle (3.88,1.32);
+\fill[obs] (3.05,1.22) -- (3.15,1.48) -- (3.25,1.22) -- cycle;
+\fill[black!85] (3.43,0.08) rectangle (3.57,0.3);
+\fill[tA] (3.3,0.28) rectangle (3.7,0.6);
+\fill[brown!65] (3.34,0.6) rectangle (3.66,0.82);
+\fill[tA!60!black] (3.5,0.95) circle (0.13);
+\node[fill=black!70, text=white, rounded corners=2pt, font=\scriptsize\bfseries, inner sep=2pt] at (3.5,3.15) {2:41};
+\foreach \c/\s/\x in {tA/120/0.35,tB/95/0.95,tC/140/1.55,tD/80/2.15}
+  \node[fill=\c, text=white, font=\tiny\bfseries, rounded corners=1pt, inner sep=1.5pt, minimum width=5mm] at (\x,3.15) {\s};
+\fill[white, opacity=0.9] (6.45,2.85) circle (0.38); \draw[black!60] (6.45,2.85) circle (0.38);
+\draw[-{Stealth[length=5pt]}, line width=1.8pt, obs] (6.45,2.85) ++(230:0.2) -- ++(50:0.5);
+\fill[white, opacity=0.85] (0.55,0.5) circle (0.32); \fill[black!70] (0.43,0.5) -- (0.65,0.63) -- (0.65,0.37) -- cycle;
+\fill[white, opacity=0.85] (1.4,0.5) circle (0.32); \fill[black!70] (1.52,0.5) -- (1.3,0.63) -- (1.3,0.37) -- cycle;
+\node[fill=obs!80, text=white, rounded corners=3pt, font=\tiny\bfseries, minimum width=8mm, minimum height=6mm] at (5.6,0.5) {Brake};
+\node[fill=cli, text=white, rounded corners=3pt, font=\tiny\bfseries, minimum width=8mm, minimum height=8mm] at (6.5,0.6) {Gas};
+\node[fill=tC, text=black, rounded corners=3pt, font=\tiny\bfseries, minimum width=9mm, minimum height=5mm] at (6.15,1.45) {Deliver};
+\node[fill=white, text=black, rounded corners=3pt, font=\tiny\bfseries, minimum width=9mm, minimum height=5mm] at (0.9,1.45) {Find me};}
+
+% ---- side cut of the board (14 units wide) ----
+\newcommand{\boardside}{%
+\fill[brown!20] (-0.6,-0.35) rectangle (14.6,0);
+\foreach \x/\h/\c in {1.0/0.7/black!18, 2.2/1.1/black!22, 4.6/1.9/black!25, 5.8/2.6/black!28, 7.4/2.2/black!25, 8.6/1.6/black!22, 10.9/1.0/black!18}
+  \filldraw[fill=\c, draw=black!45] (\x,1.5) rectangle (\x+0.9,1.5+\h);
+\filldraw[fill=tB!35, draw=tB!70!black] (12.4,1.5) rectangle (13.4,2.3);
+\fill[black!70, rounded corners=1pt] (0.5,0) rectangle (1.1,0.9);
+\fill[black!70, rounded corners=1pt] (12.9,0) rectangle (13.5,0.9);
+\filldraw[fill=brown!45, draw=brown!70!black] (0,0.9) rectangle (14,1.3);
+\fill[black!80] (0,1.3) rectangle (14,1.38);
+\foreach \x in {0.3,0.9,...,13.8} \fill[black!35] (\x,1.42) circle (0.06);
+\foreach \x/\c in {3.3/tA, 3.9/tA, 6.9/obs, 7.5/obs, 10.5/tC} \fill[\c] (\x,1.42) circle (0.07);
+\fill[white, opacity=0.55] (0,1.38) rectangle (14,1.52);
+\filldraw[fill=brd!40, draw=brd] (2.3,0.35) rectangle (4.3,0.85);
+\node[font=\tiny] at (3.3,0.6) {ESP32};
+\filldraw[fill=brd, draw=brd!60!black] (6.75,0.62) rectangle (7.25,0.88);
+\filldraw[fill=adm!60, draw=adm!70!black] (1.8,0.6) circle (0.24);
+\filldraw[fill=adm!60, draw=adm!70!black] (12.2,0.6) circle (0.24);
+\filldraw[fill=black!15, draw=black!50] (9.3,0.35) rectangle (10.9,0.85);
+\node[font=\tiny] at (10.1,0.6) {Power};}
+
+\begin{document}
+
+\thispagestyle{ckfirst}
+\begin{center}
+{\bfseries GEBZE TECHNICAL UNIVERSITY\par}
+{Computer Engineering Department\par}
+{CSE 396 Module Documentation\par}
+\vspace{8pt}
+{\LARGE\bfseries Çılgın Kurye\par}
+\vspace{3pt}
+{\large\itshape Module M4: Traffic and AI\par}
+\vspace{6pt}
+\textbf{Instructor:} Erkan Zergeroğlu\hspace{1.4em}\textbf{Company:} Board\&Byte\hspace{1.4em}\textbf{Group:} Group-8\hspace{1.4em}\textbf{Date:} 6 November 2026
+\end{center}
+\begin{center}\footnotesize\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{0.27\linewidth}|p{0.15\linewidth}|p{0.27\linewidth}|p{0.15\linewidth}|}\hline
+\textbf{Name} & \textbf{Student No.} & \textbf{Name} & \textbf{Student No.} \\ \hline
+Hasan Alperen Elmas & 1801042604 & Batuhan Yanar & 220104004059 \\ \hline
+Muhib Taha Boy & 230104004165 &  &  \\ \hline
+\end{tabular}
+\end{center}
+\vspace{2pt}
+
+
+
+
+% ---- table and list helpers ----
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{\dimexpr#1\linewidth-2\tabcolsep-\arrayrulewidth\relax}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{\dimexpr#1\linewidth-2\tabcolsep-\arrayrulewidth\relax}}
+\newcommand{\ckdone}{\item[$\boxtimes$]}
+\newcommand{\ckopen}{\item[$\square$]}
+\newcommand{\mdot}{$\bullet$}
+\newcounter{msec}
+\newcounter{chap}
+% ---- end of helpers ----
+\newcommand{\msection}[1]{\stepcounter{msec}\section{\arabic{msec}. #1}}
+
+\msection{Purpose}
+
+M4 brings the city to life. It finds routes and travel times on the road network. It moves the NPC
+cars that make the traffic. It also drives the AI bots that fill the empty places in a game. A bot
+makes the same control message that a phone sends, so for M1 a bot and a human player look the
+same.
+
+\begin{longtable}[]{|L{0.18}|L{0.82}|}
+\hline Runs on & Main computer inside the game server; M1 runs it once in every tick \\ \hline
+Technology & TypeScript; our own shortest-path search (Dijkstra); a car-following model for NPC cars; a state machine and path following for bots; seeded random numbers \\ \hline
+Requirements & R1 R2 R4 R6 R11 \\ \hline
+\end{longtable}
+
+\begin{figure}[htbp]\centering
+\systemmap{M4}
+\caption{Where M4 sits in the system. M4 talks only to M1, inside the same program.}
+\end{figure}
+
+\msection{Requirements covered}
+
+\begin{longtable}[]{|L{0.07}|L{0.25}|L{0.68}|}
+\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M4 does for it} \\ \hline \endhead
+R1 & Multiplayer game & Bots take the empty places and play like players \\ \hline
+R2 & Delivery cycle & Travel-time table from each store, which M1 uses for fair near and far points \\ \hline
+R4 & Traffic & NPC cars make real traffic on the roads \\ \hline
+R6 & Obstacles & Heavy traffic adds slow cars; an accident closes a lane; road work closes the road for routes and cars \\ \hline
+R11 & Independent development & Talks only to M1 with plain data; tested with its own test program \\ \hline
+\end{longtable}
+
+\msection{Inputs and outputs}
+
+\begin{longtable}[]{|L{0.08}|L{0.20}|L{0.18}|L{0.54}|}
+\hline \textbf{Dir.} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline \endhead
+In & City plan & Shared file & Intersections, roads, lanes, stores, possible delivery points \\ \hline
+In & Game data & M1 & Every tick: players, obstacles with a version number, car-hit events \\ \hline
+In & Parameters & M6, through M1 & Number of NPC cars, traffic effects, bot skill \\ \hline
+Out & NPC cars & M1, then M3, M5, M6 & Position, direction, speed, lane, size \\ \hline
+Out & Bot controls & M1, then M3 & The same record as a phone: throttle, brake, steer, deliver \\ \hline
+Out & Travel times & M1 & Seconds from each team store to every possible delivery point \\ \hline
+Out & Traffic metrics & M1, then M6 & Number of NPC cars, mean NPC speed, bot route changes \\ \hline
+\end{longtable}
+
+\msection{Main components}
+
+\begin{longtable}[]{|L{0.20}|L{0.52}|L{0.28}|}
+\hline \textbf{Component} & \textbf{What it does} & \textbf{Related modules} \\ \hline \endhead
+Road graph & 36 intersections and 60 two-way roads with lanes and turn costs & --- \\ \hline
+Route planner & Fastest routes and the travel-time table; computed again only when the obstacles change & M1 \\ \hline
+NPC traffic & Moves, adds and removes NPC cars & M1, M3 \\ \hline
+Bot drivers & One state machine for each bot & M1, M3 \\ \hline
+Traffic metrics & Values for the admin graphs & M6 \\ \hline
+\end{longtable}
+
+\msection{How it works}
+
+\textbf{The road graph and routes.} The city has 6 roads in each direction. Where two roads cross,
+there is an intersection, so the graph has 36 intersections. Between them there are 60 road
+segments, and cars can drive both ways. Each segment has a cost: the expected time to drive it.
+Turning left or making a U-turn adds a small extra cost. Obstacles change the costs. Heavy traffic
+and an accident make a segment slower, and road work closes it. M4 uses Dijkstra's shortest-path
+search to find the fastest routes. The graph is small, so one search takes much less than a
+millisecond. M4 computes the routes again only when the version number of the obstacle list
+changes. From the results it makes the travel-time table: the time from each of the four stores to
+every possible delivery point. M1 uses this table to choose fair near and far points.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[x=0.85cm, y=0.85cm]
+\boardbase
+\draw[tA, line width=2.4pt, rounded corners=3pt] (1,4) -- (1,2) -- (3,2) -- (3,1) -- (3.5,1);
+\draw[tA!50, line width=1.4pt, dashed, rounded corners=3pt] (1,4) -- (3,4) -- (3,2.6);
+\roadwork{3,3}{3,2}
+\heavy{1,1}{2,1}
+\dpoint{3.5}{1}{tA}
+\foreach \x in {0,...,5}{\foreach \y in {0,...,5}{\fill[white] (\x,\y) circle (0.06);}}
+\nmark{0.55}{5.15}{1}\nmark{0.6}{2.6}{2}\nmark{3.35}{3.4}{3}\nmark{3.4}{2.5}{4}\nmark{1.5}{0.65}{5}\nmark{3.95}{1.4}{6}
+\node[anchor=west, font=\scriptsize, align=left] at (6.0,2.5) {\begin{tabular}{@{}c@{\ \ }l@{}}
+\textbf{1} & Start: the team store\\[2pt]
+\textbf{2} & Fastest route, found by Dijkstra\\[2pt]
+\textbf{3} & Shorter road, but closed\\[2pt]
+\textbf{4} & Road work: cost is infinite\\[2pt]
+\textbf{5} & Heavy traffic: cost is higher\\[2pt]
+\textbf{6} & Delivery point\\[2pt]
+$\circ$ & Intersection, a node of the graph\end{tabular}};
+\end{tikzpicture}
+\caption{A route on the road graph, drawn on the board. Obstacles change the cost of the roads.}
+\end{figure}
+
+\textbf{NPC traffic.} Each NPC car follows a lane and picks a new turn at each intersection. A car
+keeps a safe gap behind the car or the motorcycle in front of it. If the gap gets small, it slows
+down smoothly, and it speeds up again when the road is free. A car enters an intersection only when
+the intersection is free, so cars do not drive through each other. New cars never appear close to a
+player. If a car is stuck for 10 seconds, M4 removes it and adds it again somewhere else, so the
+traffic never locks up. The admin sets the number of cars, and heavy-traffic obstacles add extra slow
+cars on their road.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[ck]
+\fill[black!65] (0,0) rectangle (13,1.4);
+\draw[white, dash pattern=on 6pt off 6pt] (0,0.7) -- (13,0.7);
+\fill[tD!70, rounded corners=1.5pt] (1,0.15) rectangle (2.2,0.55);
+\fill[adm!80, rounded corners=1.5pt] (5.2,0.15) rectangle (6.4,0.55);
+\fill[tA] (9.6,0.35) circle (0.17);
+\draw[cli, line width=1pt, <->] (2.3,-0.2) -- node[below, font=\scriptsize]{gap is big: speed up} (5.1,-0.2);
+\draw[obs, line width=1pt, <->] (6.5,-0.2) -- node[below, font=\scriptsize]{gap is small: slow down} (9.4,-0.2);
+\draw[white, ->, line width=1pt] (2.3,0.35) -- (3.3,0.35);
+\draw[white, ->, line width=1pt] (6.5,0.35) -- (6.9,0.35);
+\fill[black!65] (11.2,1.4) rectangle (12.6,3.0);
+\fill[black!65] (11.2,-1.6) rectangle (12.6,0);
+\fill[tC!80, rounded corners=1.5pt] (11.5,2.2) rectangle (11.9,2.9);
+\node[font=\scriptsize, anchor=west] at (12.7,2.4) {waits until the};
+\node[font=\scriptsize, anchor=west] at (12.7,2.05) {crossing is free};
+\end{tikzpicture}
+\caption{How NPC cars drive: a safe gap behind the next vehicle, and a free crossing before they enter.}
+\end{figure}
+
+\textbf{Bots.} Every bot has a small state machine that follows the delivery cycle, as the figure
+below shows. The bot drives to the store, gets the package, drives to the delivery point, slows down
+and presses ``Deliver'', and then goes back. On the way it follows the route from the planner. It
+steers toward a point a little ahead on the path, so the motion looks smooth. If it falls, it waits
+for the penalty time. If it is stuck, it asks for a new route. One ``bot skill'' value sets the top
+speed, the reaction time and some steering noise, so the admin can make bots weaker or stronger.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[ck]
+\node[st, draw=tA, fill=tA!15] (s) at (0,0) {Go to store};
+\node[st, draw=tC!80!black, fill=tC!20] (p) at (3.8,0) {Get package};
+\node[st, draw=srv, fill=srvL] (d) at (7.6,0) {Drive to point};
+\node[st, draw=cli, fill=cliL] (v) at (11.4,0) {Deliver};
+\node[st, draw=obs, fill=obs!10] (f) at (5.7,-1.9) {Fallen: wait};
+\node[st, draw=adm, fill=admL] (r) at (9.5,-1.9) {Stuck: new route};
+\draw[inna,->] (s) -- node[al]{arrived} (p);
+\draw[inna,->] (p) -- node[al]{got it} (d);
+\draw[inna,->] (d) -- node[al]{slow, near} (v);
+\draw[inna,->] (v.north) -- ++(0,0.6) -| node[al, pos=0.25]{delivered, go back} (s.north);
+\draw[inna,->] ([xshift=-9mm]d.south) -- node[al]{fall} ([xshift=-2mm]f.north);
+\draw[inna,->] ([xshift=8mm]f.north) -- node[al]{up} ([xshift=-2mm]d.south);
+\draw[inna,->] ([xshift=5mm]d.south) -- node[al]{stuck} ([xshift=-6mm]r.north);
+\draw[inna,->] ([xshift=6mm]r.north) -- node[al]{ok} ([xshift=12mm]d.south);
+\end{tikzpicture}
+\caption{The state machine of one bot.}
+\end{figure}
+
+\msection{Testing and demonstration}
+
+A small test program plays the role of M1 and draws the city from above. We test routes with and
+without closed roads, equal travel times for all teams in a city that is the same on all sides, 80
+cars for 30 minutes without a traffic lock, obstacles that change during play, 8 bots that finish
+deliveries, and the same result with the same seed. In the demonstration the admin adds obstacles
+and more traffic, and the cars and bots change their way at once.
+
+\end{document}

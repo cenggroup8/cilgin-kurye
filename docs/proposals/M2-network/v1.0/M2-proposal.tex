@@ -167,6 +167,8 @@
 
 
 % ---- colours and drawings ----
+\usepackage{colortbl}
+\usepackage{float}
 % ---- colours ----
 \definecolor{srv}{HTML}{2E6FB7}\colorlet{srvL}{srv!15}
 \definecolor{cli}{HTML}{2E9E5B}\colorlet{cliL}{cli!15}
@@ -215,7 +217,7 @@
 \node[glbl, anchor=south west] at (pc.north west) {MAIN COMPUTER};
 \node[bd, M7, minimum width=27mm] (m7) at (4.6,-2.7) {\textbf{M7}\\ESP32 software};
 \node[bd, M8, minimum width=27mm] (m8) at (8.4,-2.7) {\textbf{M8}\\LED engine};
-\node[hwb, minimum width=25mm] (led) at (12,-2.7) {344 LEDs};
+\node[hwb, minimum width=25mm] (led) at (12,-2.7) {RGB LED\\strips};
 \node[hwb, minimum width=27mm] (sm) at (4.6,-4.4) {Sensor and\\4 motors};
 \node[grp, fit=(m7)(m8)(led)(sm)] (bb) {};
 \node[glbl, anchor=north east] at (bb.south east) {LED CITY BOARD};
@@ -229,9 +231,7 @@
 \draw[inna, ->] (m7) -- node[al]{state} (m8);
 \draw[inna, ->] (m8) -- (led);
 \draw[inna, <->] (m7) -- (sm);
-\draw[tcpa] (-1.3,-6.0) -- ++(0.9,0) node[right, font=\scriptsize]{TCP: every message arrives, in order};
-\draw[udpa] (4.0,-6.0) -- ++(0.9,0) node[right, font=\scriptsize]{UDP: fast, the newest message wins};
-\draw[inna] (9.3,-6.0) -- ++(0.9,0) node[right, font=\scriptsize]{inside one program or chip};
+\ckleg{-1.3,-6.0}{tcpa/TCP or WebSocket: every message arrives in order, udpa/UDP: fast and the newest message wins, inna/inside one program or chip}
 \end{tikzpicture}}
 
 % ---- LED board seen from above (6 x 6 roads, 1 unit = 10 cm) ----
@@ -248,7 +248,7 @@
 \foreach \i in {0,...,5}{\foreach \k in {0,...,30}{%
   \fill[black!55] (\i,\k/6) circle (0.025);
   \fill[black!55] (\k/6,\i) circle (0.025);}}
-\foreach \x/\y/\c in {0/4/tA, 4/4/tB, 0/0/tC, 4/0/tD}{%
+\foreach \x/\y/\c in {0/4/tA, 4/4/tB, 0/0/tD, 4/0/tC}{%
   \fill[\c!30!black!60] (\x+0.13,\y+0.13) rectangle (\x+0.87,\y+0.87);
   \fill[\c] (\x+0.3,\y+0.3) rectangle (\x+0.7,\y+0.7);
   \fill[white] (\x+0.4,\y+0.5) circle (0.05); \fill[white] (\x+0.6,\y+0.5) circle (0.05);}}
@@ -260,8 +260,8 @@
 \newcommand{\dpoint}[3]{\draw[#3!50, line width=0.8pt] (#1,#2) circle (0.26); \draw[#3, line width=1.4pt] (#1,#2) circle (0.16); \fill[#3] (#1,#2) circle (0.07);}
 \newcommand{\heavy}[2]{\draw[obs!60!black, line width=4pt] (#1) -- (#2); \draw[obs, line width=4pt, dash pattern=on 3pt off 5pt] (#1) -- (#2);}
 \newcommand{\roadwork}[2]{\draw[obs, line width=4pt] (#1) -- (#2);}
-\newcommand{\accident}[2]{\draw[obs, line width=4pt] (#1) -- (#2); \draw[white, line width=4pt, dash pattern=on 2.5pt off 3.5pt] (#1) -- (#2);}
-\newcommand{\puddle}[2]{\draw[cyan!35, line width=4pt] (#1) -- (#2); \draw[white, line width=1.6pt, dash pattern=on 1pt off 2.5pt] (#1) -- (#2);}
+\newcommand{\accident}[2]{\draw[obs, line width=4pt, dash pattern=on 3pt off 3pt] (#1) -- (#2);}
+\newcommand{\puddle}[2]{\draw[cyan!55, line width=4pt] (#1) -- (#2); \draw[cyan!15, line width=1.6pt, dash pattern=on 1pt off 2.5pt] (#1) -- (#2);}
 \newcommand{\findme}[2]{\fill[white, opacity=0.25] (#1,#2) circle (0.36); \fill[white, opacity=0.5] (#1,#2) circle (0.24); \fill[white] (#1,#2) circle (0.13);}
 
 % ---- phone game screen (7 x 3.4 units) ----
@@ -317,6 +317,42 @@
 \filldraw[fill=black!15, draw=black!50] (9.3,0.35) rectangle (10.9,0.85);
 \node[font=\tiny] at (10.1,0.6) {Power};}
 
+% ---- layout helpers ----
+\newenvironment{ckfig}{\begin{figure}[H]\centering}{\end{figure}}
+\newcommand{\msub}[1]{\par\smallskip\noindent{\bfseries #1:}\par\nobreak\vspace{-2pt}}
+\tikzset{msga/.style={draw=cli!70!black, line width=0.8pt}, cmda/.style={draw=obs, line width=1pt}, loopa/.style={draw=srv, line width=1pt}, hwa/.style={draw=black!60, line width=1.2pt, dash pattern=on 1.5pt off 1.5pt}, wanta/.style={draw=cli, line width=1.6pt}, reala/.style={draw=obs, line width=1.6pt}, siga/.style={draw=srv, line width=0.8pt}, thra/.style={draw=obs, line width=0.9pt, dash pattern=on 4pt off 2pt}, evta/.style={draw=cli, line width=1pt}}
+\tikzset{iol/.style={font=\scriptsize, fill=white, inner sep=1.2pt, rounded corners=1pt, align=center}}
+% legend row: start point, list of style/text
+\newcommand{\ckleg}[2]{%
+\coordinate (lgp) at (#1);
+\foreach \ls/\lt in {#2}{%
+  \draw[\ls,->] (lgp) -- ++(0.8,0) node[right, font=\scriptsize, text=black] (lgt) {\lt};
+  \coordinate (lgp) at ([xshift=5mm]lgt.east);}}
+% purpose table: colour (unused), runs on, technology, requirements
+\newcommand{\ckinfo}[4]{\par\smallskip\noindent{\renewcommand{\arraystretch}{1.25}%
+\begin{tabular}{|L{0.30}|L{0.50}|L{0.20}|}\hline
+\textbf{Runs on} & \textbf{Technology} & \textbf{Requirements} \\ \hline
+#2 & #3 & #4 \\ \hline
+\end{tabular}}\par\smallskip}
+% module data map: n in, n out, centre text, centre style, inputs, outputs, legend list
+% inputs and outputs: {name}/style/{data}/arrow style
+\newcommand{\iomap}[7]{%
+\begin{tikzpicture}[ck]
+\pgfmathsetmacro{\nmax}{max(#1,#2)}
+\node[#4, line width=2pt, minimum width=30mm, minimum height=\nmax*10.5mm+2mm, font=\normalsize] (c) at (0,0) {#3};
+\foreach \nm/\st/\dd/\ar [count=\ii] in {#5}{%
+  \pgfmathsetmacro{\yy}{((#1+1)/2-\ii)*1.05}
+  \node[\st, minimum width=25mm, minimum height=8.5mm, font=\scriptsize] (in\ii) at (-6.6,\yy) {\nm};
+  \draw[\ar,->] (in\ii.east) -- node[iol]{\dd} (c.west |- in\ii);}
+\foreach \nm/\st/\dd/\ar [count=\ii] in {#6}{%
+  \pgfmathsetmacro{\yy}{((#2+1)/2-\ii)*1.05}
+  \node[\st, minimum width=25mm, minimum height=8.5mm, font=\scriptsize] (out\ii) at (6.6,\yy) {\nm};
+  \draw[\ar,->] (c.east |- out\ii) -- node[iol]{\dd} (out\ii.west);}
+\node[font=\scriptsize\bfseries, text=black!60] at (-6.6,\nmax*0.525+0.4) {Inputs come from};
+\node[font=\scriptsize\bfseries, text=black!60] at (6.6,\nmax*0.525+0.4) {Outputs go to};
+\ckleg{-7.6,-\nmax*0.525-0.5}{#7}
+\end{tikzpicture}}
+
 \begin{document}
 
 \thispagestyle{ckfirst}
@@ -356,76 +392,81 @@ Hasan Hüseyin Özdemir & 230104004048 & Umutcan Ocak & 220104004903 \\ \hline
 \msection{Purpose}
 
 M2 connects the phones, the admin page and the LED board to the game server. It does not make game
-decisions. It takes messages from outside, checks them and gives them to M1. After each tick it
-takes the state from M1 and sends it to everybody. M2 also makes sure that nothing from outside can
-change the game state directly. For the admin, it measures the network and it can add delay and
-packet loss on purpose.
+decisions. It takes messages from outside, checks them and gives them to M1. After each tick it takes
+the state from M1 and sends it to everybody. M2 also makes sure that nothing from outside can change
+the game state directly. For the admin, it measures the network and it can make the network worse on
+purpose for tests.
 
-\begin{longtable}[]{|L{0.18}|L{0.82}|}
-\hline Runs on & Main computer, in the same server program as M1 \\ \hline
-Technology & TypeScript on Node.js; WebSocket for phones and admin; TCP and UDP for the LED board; MessagePack encoding; mDNS announcement; QR code for joining \\ \hline
-Requirements & R1 R9 R10 R11 \\ \hline
-\end{longtable}
+\ckinfo{srv}{Main computer, in the same server program as M1}{TypeScript on Node.js, WebSocket for phones and admin, TCP and UDP for the LED board, MessagePack binary messages, QR code for joining}{R1 R9 R10 R11}
 
-\begin{figure}[htbp]\centering
-\systemmap{M2}
-\caption{Where M2 sits in the system. All traffic from outside passes through M2.}
-\end{figure}
+M2 is the only module with links to the outside. The figure shows every neighbour and the kind of link
+that each message uses.
+
+\begin{ckfig}
+\iomap{5}{5}{\textbf{M2}\\Network\\and sync}{sv}
+{{M5 Phones}/cl/{hello, join, controls,\\``Find me'', ping replies}/tcpa, {M6 Admin page}/ad/{login, commands,\\parameters}/tcpa, {M7 Board (TCP)}/bd/{earthquake events,\\status}/tcpa, {M7 Board (UDP)}/bd/{sensor samples,\\delay replies}/udpa, {M1 Game server}/sv/{frozen state,\\metrics}/inna}
+{{M1 Game server}/sv/{checked inputs,\\lost players}/inna, {M5 Phones}/cl/{game state, join reply,\\ping, frame rate limit}/tcpa, {M6 Admin page}/ad/{state, metrics,\\replies, board data}/tcpa, {M7 Board (TCP)}/bd/{config, vibrate}/tcpa, {M7 Board (UDP)}/bd/{board state,\\delay probe}/udpa}
+{tcpa/WebSocket or TCP, udpa/UDP, inna/inside the server program}
+\end{ckfig}
 
 \msection{Requirements covered}
 
-\begin{longtable}[]{|L{0.07}|L{0.25}|L{0.68}|}
-\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M2 does for it} \\ \hline \endhead
-R1 & Multiplayer game & Up to 8 phones join with a QR code or a 6-digit game code, only with the browser \\ \hline
-R9 & Live admin panel & Admin channel for commands, parameters, state, metrics and board data \\ \hline
-R10 & Network and measurement & Ping, packet loss and frame rate for each player; added delay and loss for each player and for the board \\ \hline
-R11 & Single authority & Inputs are checked and queued; every phone gets the same frozen state of each tick \\ \hline
+M2 takes part in four requirements. The last column says what will work when M2 is finished.
+
+\begin{longtable}[]{|L{0.06}|L{0.15}|L{0.40}|L{0.39}|}
+\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M2 does for it} & \textbf{When M2 is done} \\ \hline \endhead
+R1 & Multiplayer game & Up to 8 phones join with a QR code or a six digit game code, only with the browser & Players join in seconds without installing anything \\ \hline
+R9 & Live admin panel & Admin channel with a password for commands, parameters, state, metrics and board data & The admin page controls the game from any computer on the game Wi-Fi \\ \hline
+R10 & Network and measurement & Ping and jitter for each phone, real loss on the board link. Added delay, jitter and loss for each player and for the board & The admin can make the network worse and see the effect live \\ \hline
+R11 & Engineering requirements & Inputs are checked and queued. Every phone gets the same frozen state of each tick & No phone can change the game by itself, and all players see the same game \\ \hline
 \end{longtable}
 
 \msection{Inputs and outputs}
 
-\begin{longtable}[]{|L{0.08}|L{0.20}|L{0.18}|L{0.54}|}
-\hline \textbf{Dir.} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline \endhead
-In & Phone messages & M5 & Hello with player key, name and game code; join with team; controls; ``Find me''; ping replies \\ \hline
-In & Admin messages & M6 & Login, commands, parameter changes, requests for parameters and the game log \\ \hline
-In & Board messages & M7 & Earthquake events, sensor samples, board status, delay replies \\ \hline
-In & State and metrics & M1 & Frozen game state and board state every tick; metrics twice per second \\ \hline
-Out & To M1 & M1 & Checked controls, joins, ``Find me'', admin commands, board events; network metrics \\ \hline
-Out & To phones & M5 & Game state 30 times per second; join replies; ping; frame-rate limit \\ \hline
-Out & To admin & M6 & State 10 times per second, metrics, replies, board data \\ \hline
-Out & To board & M7 & Board state 10 to 30 times per second; config; vibrate commands \\ \hline
+The table lists every message group with its link. All messages are MessagePack, a compact binary
+form of JSON.
+
+\begin{longtable}[]{|L{0.11}|L{0.17}|L{0.18}|L{0.54}|}
+\hline \textbf{Direction} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline \endhead
+In & Phone messages & M5, WebSocket & Hello with player key, name and game code, join with team, controls, ``Find me'', ping replies \\ \hline
+In & Admin messages & M6, WebSocket & Login with the password, commands, parameter changes, requests for parameters and the game log \\ \hline
+In & Board messages & M7, TCP and UDP & Earthquake events and status on TCP. Sensor samples and delay replies on UDP \\ \hline
+In & State and metrics & M1 & Frozen game state and board state every tick, metrics twice per second \\ \hline
+Out & To M1 & M1 & Checked controls, joins, ``Find me'', admin commands, board events, lost and returning players, network metrics \\ \hline
+Out & To phones & M5, WebSocket & Game state 30 times per second, join replies, ping, frame rate limit \\ \hline
+Out & To admin & M6, WebSocket & State 10 times per second, metrics, replies, board data \\ \hline
+Out & To board & M7, TCP and UDP & Config and vibrate commands on TCP. Board state and delay probes on UDP \\ \hline
 \end{longtable}
 
 \msection{Main components}
 
-\begin{longtable}[]{|L{0.20}|L{0.52}|L{0.28}|}
-\hline \textbf{Component} & \textbf{What it does} & \textbf{Related modules} \\ \hline \endhead
-Web server and join & Serves the phone and admin pages, the QR code and the game code; announces the server on the local network & M5, M6, M7 \\ \hline
-Sessions & One session for each phone and the admin; player key for reconnecting within 30 s; one admin at a time & M1, M5, M6 \\ \hline
-Codec and checker & MessagePack encode and decode; checks type, fields and value ranges; a bad message gets an error reply & all \\ \hline
-Input queue & Holds checked inputs until M1 reads them at the start of the next tick & M1 \\ \hline
-State broadcaster & Encodes the frozen state once and sends the same bytes to every phone & M1, M5, M6, M7 \\ \hline
-Delay and loss emulator & An up queue and a down queue for each player and for the board, set by the admin & M6 \\ \hline
-Ping and metrics & Ping twice per second, clock offset for the phone, ping, loss and frame-rate metrics & M1, M5, M6 \\ \hline
-Board link & Server side of the board connection: one TCP channel and one UDP stream & M7 \\ \hline
+M2 is made of eight parts. Each one takes some data and gives a result to the next part.
+
+\begin{longtable}[]{|L{0.21}|L{0.39}|L{0.40}|}
+\hline \textbf{Component} & \textbf{Takes} & \textbf{Gives} \\ \hline \endhead
+Web server and join & Page requests from phones and the admin & The phone and admin pages, the 3D models, the city plan, the QR code and the game code \\ \hline
+Sessions and access & New links, player keys, the admin password & One session for each phone and one admin. A player key keeps the same motorcycle after a reload \\ \hline
+Codec and checker & Raw messages & Checked messages. A bad message gets an error reply. Too many or too large messages are dropped \\ \hline
+Input queue & Checked inputs & The inputs of one tick for M1 \\ \hline
+State broadcaster & Frozen state from M1 & The same encoded bytes for every phone, a smaller state for the admin and the board \\ \hline
+Network emulator & Admin network settings & Added delay, jitter and loss for each player and for the board \\ \hline
+Ping and metrics & Ping replies, order numbers & Ping, jitter, loss, clock offset and frame rate for the admin graphs \\ \hline
+Board link & Board messages & One TCP channel and one UDP stream to the board \\ \hline
 \end{longtable}
 
 \msection{How it works}
 
-\textbf{Which link uses which protocol.} This choice is important, so we made it message by message.
-A web browser can only open a WebSocket for two-way talk, so phones and the admin page use
-WebSocket. WebSocket runs on TCP, so every message arrives and the order is kept. The LED board is
-not a browser, so it can use both TCP and UDP. On TCP it gets the messages that must never be lost:
-the config (player colours, brightness, current limit) and the vibrate commands. The board also
-sends earthquake events and its status report on TCP. If one of these is lost, the game goes wrong,
-so TCP sends it again. The fast and repeated data goes on UDP: the board state, which comes 10 to 30
-times per second, the sensor samples for the seismic graph, and the small delay probes. Here only
-the newest message is useful. If one UDP packet is lost, the next one comes 33 to 100 ms later and
-replaces it. TCP would wait for the lost packet and the LEDs would stop for a moment, so UDP is the
-better choice for this data. Each board state fits in one UDP packet (under 1 KB), so a packet is
-never split.
+\msub{Which link uses which protocol}
+A web browser can only open a WebSocket for talk in both directions, so phones and the admin page use
+WebSocket. WebSocket runs on TCP, so every message arrives and the order is kept. The LED board is not
+a browser, so it can use both TCP and UDP. On TCP it gets the messages that must never be lost: the
+config (player colours, brightness, power limit) and the vibrate commands. The board also sends
+earthquake events and its status report on TCP. The fast and repeated data goes on UDP: the board
+state, the sensor samples and the small delay probes. Here only the newest message is useful. If one
+UDP packet is lost, the next one replaces it. TCP would wait for the lost packet and the LEDs would
+stop for a moment, so UDP is the better choice for this data.
 
-\begin{figure}[htbp]\centering
+\begin{ckfig}
 \begin{tikzpicture}[ck]
 \fill[tcpc!8, rounded corners=4pt] (2.0,0.95) rectangle (11.0,-0.95);
 \fill[tcpc!8, rounded corners=4pt] (2.0,-1.35) rectangle (11.0,-3.25);
@@ -439,28 +480,36 @@ never split.
 \node[cl, minimum width=22mm, minimum height=16mm] (ph) at (12.4,0) {\textbf{M5}\\Phones};
 \node[ad, minimum width=22mm, minimum height=16mm] (ad) at (12.4,-2.3) {\textbf{M6}\\Admin page};
 \node[bd, minimum width=22mm, minimum height=39mm] (bo) at (12.4,-5.9) {\textbf{M7}\\LED board};
-\draw[tcpa,->] (2.0,0.2) -- node[al]{game state, 30 per s} (11.0,0.2);
+\draw[tcpa,->] (2.0,0.2) -- node[al]{game state, 30 per second} (11.0,0.2);
 \draw[tcpa,<-] (2.0,-0.4) -- node[al]{controls, ``Find me''} (11.0,-0.4);
 \draw[tcpa,->] (2.0,-2.1) -- node[al]{state, metrics, board data} (11.0,-2.1);
 \draw[tcpa,<-] (2.0,-2.7) -- node[al]{commands, parameters} (11.0,-2.7);
 \draw[tcpa,->] (2.0,-4.4) -- node[al]{config, vibrate} (11.0,-4.4);
 \draw[tcpa,<-] (2.0,-5.0) -- node[al]{earthquake event, status} (11.0,-5.0);
-\draw[udpa,->] (2.0,-6.7) -- node[al]{board state, 10 to 30 per s} (11.0,-6.7);
+\draw[udpa,->] (2.0,-6.7) -- node[al]{board state} (11.0,-6.7);
 \draw[udpa,<-] (2.0,-7.25) -- node[al]{sensor samples} (11.0,-7.25);
 \draw[udpa,<->] (2.0,-7.8) -- node[al]{delay probe} (11.0,-7.8);
+\ckleg{-0.4,-8.8}{tcpa/TCP or WebSocket: every message arrives in order, udpa/UDP: fast and the newest message wins}
 \end{tikzpicture}
-\caption{Every link and every message type. Blue solid arrows use TCP, orange dashed arrows use UDP.}
-\end{figure}
+\end{ckfig}
 
-\textbf{Joining.} At the start the admin screen shows a QR code and a 6-digit game code. A player
-scans the QR code with the phone camera. The phone opens the game page from the main computer, so
-there is nothing to install. A player without a camera can open the short local address and type
-the code. The phone then chooses a team. The first time, the browser saves a random player key. If
-the page reloads or Wi-Fi drops, the phone sends the same key and gets the same motorcycle back
-within 30 seconds. The LED board finds the server by itself, because the server announces its name
-and port on the local network with mDNS.
+\msub{Messages on the board TCP channel}
+WebSocket cuts the data into messages by itself, but plain TCP is only a stream of bytes. So each
+message on the board TCP channel starts with its length, and the other side reads exactly that many
+bytes. Small messages like a vibrate command are sent at once, without waiting to fill a bigger
+packet. Every message on both board channels has an order number, so old UDP packets can be dropped.
+Each start of the server makes a new session number. When the board sees a new session number, it
+starts its order numbers again, so new messages are not dropped as old ones.
 
-\begin{figure}[htbp]\centering
+\msub{Joining}
+At the start the admin screen shows a QR code and a six digit game code. The QR code holds the IP
+address of the main computer and the game code, so it works on every network. A player scans it, and
+the phone opens the game page from the main computer. A player without a camera types the address and
+the code. The first time, the browser saves a random player key. If the page reloads or Wi-Fi drops,
+the phone sends the same key and gets the same motorcycle back. The LED board first looks for the
+server on the local network. If it finds nothing, it uses a backup server address saved in its flash.
+
+\begin{ckfig}
 \begin{tikzpicture}[ck]
 \fill[black!80, rounded corners=4pt] (-0.2,-0.2) rectangle (6.2,4.2);
 \fill[white] (0,0) rectangle (6,4);
@@ -475,7 +524,7 @@ and port on the local network with mDNS.
   \fill[black] (\x*0.11,\y*0.11) rectangle ++(0.77,0.77); \fill[white] (\x*0.11+0.11,\y*0.11+0.11) rectangle ++(0.55,0.55); \fill[black] (\x*0.11+0.22,\y*0.11+0.22) rectangle ++(0.33,0.33);}
 \end{scope}
 \node[font=\scriptsize, anchor=west] at (3.3,2.9) {or open};
-\node[font=\scriptsize\ttfamily, anchor=west] at (3.3,2.5) {kurye.local};
+\node[font=\scriptsize\ttfamily, anchor=west] at (3.3,2.5) {192.168.1.20};
 \node[font=\scriptsize, anchor=west] at (3.3,1.9) {Game code};
 \node[draw=srv, fill=srvL, font=\large\bfseries, rounded corners=2pt, anchor=west] at (3.3,1.3) {482 913};
 \node[font=\tiny, anchor=west, text=black!60] at (3.3,0.45) {Players: 3 of 8};
@@ -493,21 +542,23 @@ and port on the local network with mDNS.
 \node[fill=cli, text=white, font=\tiny\bfseries, minimum width=20mm, minimum height=6mm, rounded corners=2pt] at (1.2,0.6) {Ready};
 \end{scope}
 \draw[inna,->, line width=1.2pt] (6.3,1.9) -- node[al]{scan} (7.75,1.9);
+\node[font=\scriptsize\bfseries, text=black!60] at (3,-0.6) {Admin screen};
+\node[font=\scriptsize\bfseries, text=black!60] at (9.2,-0.8) {Phone};
 \end{tikzpicture}
-\caption{Joining: the QR code and game code on the admin screen, and the join page on a phone.}
-\end{figure}
+\end{ckfig}
 
-\textbf{Keeping the game state safe.} Many phones send messages at the same time, but only M1 may
-change the game state, and only inside a tick. So M2 never writes to the state. A phone can only
-send controls; it can never send a position or a score. M2 decodes each message, checks its type
-and fields, and cuts every value into its range (for example steer is kept between −1 and 1). Each
-session can only control its own player, so one phone cannot move another motorcycle. Every message
-has an order number. A message with an old or repeated number is dropped. Good inputs wait in a
-queue, and M1 reads the queue at the start of the next tick. At the end of the tick M1 gives a
-frozen copy of the state. M2 encodes it once with MessagePack and sends the same bytes to all phones,
-so all players see exactly the same tick. The full game state is under 4 KB.
+\msub{Keeping the game state safe}
+Many phones send messages at the same time, but only M1 may change the game state, and only inside a
+tick. So M2 never writes to the state. A phone can only send controls. It can never send a position or
+a score. M2 decodes each message, checks its type and fields, and keeps every value in its range (for
+example steer stays between −1 and 1). Each session can only control its own player. A message with
+an old or repeated order number is dropped. Each session also has a limit on the number and size of
+its messages, so one phone cannot flood the server. The admin page needs a password, which the server
+shows on the main computer at the start. Good inputs wait in a queue, and M1 reads the queue at the
+start of the next tick. At the end of the tick M2 encodes the frozen state once and sends the same
+bytes to all phones.
 
-\begin{figure}[htbp]\centering
+\begin{ckfig}
 \begin{tikzpicture}[ck, node distance=4mm]
 \node[cl, minimum width=16mm] (p) {Phone\\message};
 \node[sv, minimum width=16mm, right=of p] (c) {Decode\\and check};
@@ -517,28 +568,43 @@ so all players see exactly the same tick. The full game state is under 4 KB.
 \node[sv, minimum width=16mm, right=of f] (e) {Encode\\once};
 \node[cl, minimum width=16mm, right=of e] (a) {All\\phones};
 \node[nb, draw=obs, fill=obs!10, below=8mm of c] (x) {Dropped,\\error reply};
-\foreach \u/\v in {p/c,c/q,q/t,t/f,f/e} \draw[inna,->] (\u) -- (\v);
+\draw[tcpa,->] (p) -- (c);
+\foreach \u/\v in {c/q,q/t,t/f,f/e} \draw[inna,->] (\u) -- (\v);
 \draw[tcpa,->] (e) -- (a);
-\draw[inna,->, obs] (c) -- node[al]{bad} (x);
+\draw[cmda,->] (c) -- node[al]{bad} (x);
+\ckleg{4.2,-1.75}{tcpa/WebSocket, inna/inside the server, cmda/refused message}
 \end{tikzpicture}
-\caption{The path of an input. Only M1 writes the state, and everybody gets the same bytes.}
-\end{figure}
+\end{ckfig}
 
-\textbf{Ping, delay and loss.} Twice per second M2 sends a ping with the server time. The phone
-answers with its own time, its frame rate and the number of the last state it got. From this M2
-finds the round-trip time and the clock offset of the phone. Gaps in the order numbers give the
-packet loss. These values go to the admin graphs. For tests the admin can make the network worse
-for one player. Each player has an up queue and a down queue. A queue drops a message with the loss
-chance that the admin set, and holds the other messages for half of the added ping. The same tool
-works on the board link. The admin can also set a frame-rate limit, which M2 sends to the phone.
+\msub{Network settings from the admin}
+For tests the admin can make the network worse by hand. Each player has an up queue and a down queue,
+and the board link has the same pair. The admin sets three values for each queue: an added delay, a
+jitter that makes the delay change randomly, and a loss chance. The loss is used only on the state and
+control messages. Join, ``Deliver'', ``Find me'' and admin replies are never dropped, because the game
+would break without them. The admin can also set a frame rate limit for a phone and the board state
+rate, from 10 to 30 per second.
 
-\msection{Testing and demonstration}
+\msub{Measuring the network}
+Twice per second M2 sends a ping with the server time. The phone answers with its own time, its frame
+rate and the number of the last state it got. From this M2 finds the round trip time, the jitter and
+the clock offset of the phone. On WebSocket a real Wi-Fi loss is not seen as a missing message,
+because TCP sends it again. It shows as a jump in the delay. So for phones M2 reports ping and jitter.
+On the board UDP stream a lost packet is really missing, so gaps in the order numbers give the real
+packet loss.
 
-M2 is tested with a fake M1 that sends a moving test state, with up to 8 scripted bot phones, and
-with the board emulator of M7. The tests check the message codec, bad and broken input, the load
-with 8 phones, how exact the added delay and loss are, reconnecting within 30 seconds, and the board
-link with 20\% packet loss. In the demonstration phones join with the QR code or the game code. Then
-the admin changes one player's ping and loss live, and we watch the change on that phone and in the
-graphs.
+\msub{How much data}
+We expect the full game state to be a few kilobytes. Sent 30 times per second to 8 phones, this is
+only a few megabits per second in total, which
+a normal 2.4 GHz Wi-Fi router can carry. The board state is much smaller and fits in one UDP packet.
+To keep it small, the admin can place only a limited number of obstacles.
+
+\msection{Testing}
+
+M2 is tested alone with test data instead of the real neighbours. A fake M1 sends a moving test state,
+scripted bot phones play the role of up to 8 real phones, and a small test program plays the board.
+With this setup we send good, broken and too large messages and check that no bad value reaches M1.
+We also check the load with 8 phones, how exact the added delay, jitter and loss are, that join and
+``Deliver'' are never dropped, reconnecting with the player key, and a server restart with the test
+board.
 
 \end{document}

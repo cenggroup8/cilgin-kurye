@@ -23,7 +23,7 @@ M2 takes part in four requirements. The last column says what will work when M2 
 | **ID** | **Requirement** | **What M2 does for it** | **When M2 is done** |
 |---|---|---|---|
 | R1 | Multiplayer game | Up to 8 phones join with a QR code or a six digit game code, only with the browser | Players join in seconds without installing anything |
-| R9 | Live admin panel | Admin channel with a password for commands, parameters, state, metrics and board data | The admin page controls the game from any computer on the game Wi-Fi |
+| R9 | Live admin panel | Admin channel for commands, parameters, state, metrics and board data | The admin page controls the game from any computer on the game Wi-Fi |
 | R10 | Network and measurement | Ping and jitter for each phone, real loss on the board link. Added delay, jitter and loss for each player and for the board | The admin can make the network worse and see the effect live |
 | R11 | Engineering requirements | Inputs are checked and queued. Every phone gets the same frozen state of each tick | No phone can change the game by itself, and all players see the same game |
 
@@ -34,7 +34,7 @@ The table lists every message group with its link. All messages are MessagePack,
 | **Direction** | **Data** | **From / to** | **Content** |
 |---|---|---|---|
 | In | Phone messages | M5, WebSocket | Hello with player key, name and game code, join with team, controls, “Find me”, ping replies |
-| In | Admin messages | M6, WebSocket | Login with the password, commands, parameter changes, requests for parameters and the game log |
+| In | Admin messages | M6, WebSocket | Commands, parameter changes, requests for parameters and the game log |
 | In | Board messages | M7, TCP and UDP | Earthquake events and status on TCP. Sensor samples and delay replies on UDP |
 | In | State and metrics | M1 | Frozen game state and board state every tick, metrics twice per second |
 | Out | To M1 | M1 | Checked controls, joins, “Find me”, admin commands, board events, lost and returning players, network metrics |
@@ -49,7 +49,7 @@ M2 is made of eight parts. Each one takes some data and gives a result to the ne
 | **Component** | **Takes** | **Gives** |
 |---|---|---|
 | Web server and join | Page requests from phones and the admin | The phone and admin pages, the 3D models, the city plan, the QR code and the game code |
-| Sessions and access | New links, player keys, the admin password | One session for each phone and one admin. A player key keeps the same motorcycle after a reload |
+| Sessions and access | New links, player keys | One session for each phone and one admin. A player key keeps the same motorcycle after a reload |
 | Codec and checker | Raw messages | Checked messages. A bad message gets an error reply. Too many or too large messages are dropped |
 | Input queue | Checked inputs | The inputs of one tick for M1 |
 | State broadcaster | Frozen state from M1 | The same encoded bytes for every phone, a smaller state for the admin and the board |
@@ -69,15 +69,15 @@ WebSocket cuts the data into messages by itself, but plain TCP is only a stream 
 
 **Joining:**
 
-At the start the admin screen shows a QR code and a six digit game code. The QR code holds the IP address of the main computer and the game code, so it works on every network. A player scans it, and the phone opens the game page from the main computer. A player without a camera types the address and the code. The first time, the browser saves a random player key. If the page reloads or Wi-Fi drops, the phone sends the same key and gets the same motorcycle back. The LED board first looks for the server on the local network. If it finds nothing, it uses a backup server address saved in its flash.
+At the start the admin screen shows a QR code and a six digit game code. The QR code holds the IP address of the main computer and the game code. A player scans it, and the phone opens the game page from the main computer. A player without a camera types the address and the code. The first time, the browser saves a random player key. If the page reloads or Wi-Fi drops, the phone sends the same key and gets the same motorcycle back. The LED board first looks for the server on the local network. If it finds nothing, it uses a backup server address saved in the ESP32's flash memory.
 
 **Keeping the game state safe:**
 
-Many phones send messages at the same time, but only M1 may change the game state, and only inside a tick. So M2 never writes to the state. A phone can only send controls. It can never send a position or a score. M2 decodes each message, checks its type and fields, and keeps every value in its range (for example steer stays between −1 and 1). Each session can only control its own player. A message with an old or repeated order number is dropped. Each session also has a limit on the number and size of its messages, so one phone cannot flood the server. The admin page needs a password, which the server shows on the main computer at the start. Good inputs wait in a queue, and M1 reads the queue at the start of the next tick. At the end of the tick M2 encodes the frozen state once and sends the same bytes to all phones.
+Many phones send messages at the same time, but only M1 may change the game state, and only inside a tick. So M2 never writes to the state. A phone can only send controls. It can never send a position or a score. M2 decodes each message, checks its type and fields, and keeps every value in its range (for example steer stays between −1 and 1). Each session can only control its own player. A message with an old or repeated order number is dropped. Each session also has a limit on the number and size of its messages, so one phone cannot flood the server. Good inputs wait in a queue, and M1 reads the queue at the start of the next tick. At the end of the tick M2 encodes the frozen state once and sends the same bytes to all phones.
 
 **Network settings from the admin:**
 
-For tests the admin can make the network worse by hand. Each player has an up queue and a down queue, and the board link has the same pair. The admin sets three values for each queue: an added delay, a jitter that makes the delay change randomly, and a loss chance. The loss is used only on the state and control messages. Join, “Deliver”, “Find me” and admin replies are never dropped, because the game would break without them. The admin can also set a frame rate limit for a phone and the board state rate, from 10 to 30 per second.
+For tests the admin can make the network worse by hand. Each player has an up queue and a down queue, and the board link has the same pair. The admin sets three values for each queue: an added delay, a jitter that makes the delay change randomly, and a loss chance. The loss is used only on the state and control messages. Join, “Find me” and admin replies are never dropped, because the game would break without them. The admin can also set a frame rate limit for a phone and the board state rate, from 10 to 30 per second.
 
 **Measuring the network:**
 
@@ -85,8 +85,8 @@ Twice per second M2 sends a ping with the server time. The phone answers with it
 
 **How much data:**
 
-We expect the full game state to be a few kilobytes. Sent 30 times per second to 8 phones, this is only a few megabits per second in total, which a normal 2.4 GHz Wi-Fi router can carry. The board state is much smaller and fits in one UDP packet. To keep it small, the admin can place only a limited number of obstacles.
+We expect the full game state to be a few kilobytes. Sent 30 times per second to 8 phones, this is only a few megabits per second in total, which a normal 2.4 GHz Wi-Fi router can carry.
 
 ## 6. Testing
 
-M2 is tested alone with test data instead of the real neighbours. A fake M1 sends a moving test state, scripted bot phones play the role of up to 8 real phones, and a small test program plays the board. With this setup we send good, broken and too large messages and check that no bad value reaches M1. We also check the load with 8 phones, how exact the added delay, jitter and loss are, that join and “Deliver” are never dropped, reconnecting with the player key, and a server restart with the test board.
+M2 is tested alone with test data instead of the real neighbours. A fake M1 sends a moving test state, scripted bot phones play the role of up to 8 real phones, and a small test program plays the board. With this setup we send good, broken and too large messages and check that no bad value reaches M1. We also check the load with 8 phones, how exact the added delay, jitter and loss are, that join and “Find me” are never dropped, reconnecting with the player key, and a server restart with the test board.

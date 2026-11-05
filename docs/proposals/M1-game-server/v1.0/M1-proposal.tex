@@ -167,6 +167,8 @@
 
 
 % ---- colours and drawings ----
+\usepackage{colortbl}
+\usepackage{float}
 % ---- colours ----
 \definecolor{srv}{HTML}{2E6FB7}\colorlet{srvL}{srv!15}
 \definecolor{cli}{HTML}{2E9E5B}\colorlet{cliL}{cli!15}
@@ -215,7 +217,7 @@
 \node[glbl, anchor=south west] at (pc.north west) {MAIN COMPUTER};
 \node[bd, M7, minimum width=27mm] (m7) at (4.6,-2.7) {\textbf{M7}\\ESP32 software};
 \node[bd, M8, minimum width=27mm] (m8) at (8.4,-2.7) {\textbf{M8}\\LED engine};
-\node[hwb, minimum width=25mm] (led) at (12,-2.7) {344 LEDs};
+\node[hwb, minimum width=25mm] (led) at (12,-2.7) {RGB LED\\strips};
 \node[hwb, minimum width=27mm] (sm) at (4.6,-4.4) {Sensor and\\4 motors};
 \node[grp, fit=(m7)(m8)(led)(sm)] (bb) {};
 \node[glbl, anchor=north east] at (bb.south east) {LED CITY BOARD};
@@ -229,9 +231,7 @@
 \draw[inna, ->] (m7) -- node[al]{state} (m8);
 \draw[inna, ->] (m8) -- (led);
 \draw[inna, <->] (m7) -- (sm);
-\draw[tcpa] (-1.3,-6.0) -- ++(0.9,0) node[right, font=\scriptsize]{TCP: every message arrives, in order};
-\draw[udpa] (4.0,-6.0) -- ++(0.9,0) node[right, font=\scriptsize]{UDP: fast, the newest message wins};
-\draw[inna] (9.3,-6.0) -- ++(0.9,0) node[right, font=\scriptsize]{inside one program or chip};
+\ckleg{-1.3,-6.0}{tcpa/TCP or WebSocket: every message arrives in order, udpa/UDP: fast and the newest message wins, inna/inside one program or chip}
 \end{tikzpicture}}
 
 % ---- LED board seen from above (6 x 6 roads, 1 unit = 10 cm) ----
@@ -248,7 +248,7 @@
 \foreach \i in {0,...,5}{\foreach \k in {0,...,30}{%
   \fill[black!55] (\i,\k/6) circle (0.025);
   \fill[black!55] (\k/6,\i) circle (0.025);}}
-\foreach \x/\y/\c in {0/4/tA, 4/4/tB, 0/0/tC, 4/0/tD}{%
+\foreach \x/\y/\c in {0/4/tA, 4/4/tB, 0/0/tD, 4/0/tC}{%
   \fill[\c!30!black!60] (\x+0.13,\y+0.13) rectangle (\x+0.87,\y+0.87);
   \fill[\c] (\x+0.3,\y+0.3) rectangle (\x+0.7,\y+0.7);
   \fill[white] (\x+0.4,\y+0.5) circle (0.05); \fill[white] (\x+0.6,\y+0.5) circle (0.05);}}
@@ -260,8 +260,8 @@
 \newcommand{\dpoint}[3]{\draw[#3!50, line width=0.8pt] (#1,#2) circle (0.26); \draw[#3, line width=1.4pt] (#1,#2) circle (0.16); \fill[#3] (#1,#2) circle (0.07);}
 \newcommand{\heavy}[2]{\draw[obs!60!black, line width=4pt] (#1) -- (#2); \draw[obs, line width=4pt, dash pattern=on 3pt off 5pt] (#1) -- (#2);}
 \newcommand{\roadwork}[2]{\draw[obs, line width=4pt] (#1) -- (#2);}
-\newcommand{\accident}[2]{\draw[obs, line width=4pt] (#1) -- (#2); \draw[white, line width=4pt, dash pattern=on 2.5pt off 3.5pt] (#1) -- (#2);}
-\newcommand{\puddle}[2]{\draw[cyan!35, line width=4pt] (#1) -- (#2); \draw[white, line width=1.6pt, dash pattern=on 1pt off 2.5pt] (#1) -- (#2);}
+\newcommand{\accident}[2]{\draw[obs, line width=4pt, dash pattern=on 3pt off 3pt] (#1) -- (#2);}
+\newcommand{\puddle}[2]{\draw[cyan!55, line width=4pt] (#1) -- (#2); \draw[cyan!15, line width=1.6pt, dash pattern=on 1pt off 2.5pt] (#1) -- (#2);}
 \newcommand{\findme}[2]{\fill[white, opacity=0.25] (#1,#2) circle (0.36); \fill[white, opacity=0.5] (#1,#2) circle (0.24); \fill[white] (#1,#2) circle (0.13);}
 
 % ---- phone game screen (7 x 3.4 units) ----
@@ -317,6 +317,42 @@
 \filldraw[fill=black!15, draw=black!50] (9.3,0.35) rectangle (10.9,0.85);
 \node[font=\tiny] at (10.1,0.6) {Power};}
 
+% ---- layout helpers ----
+\newenvironment{ckfig}{\begin{figure}[H]\centering}{\end{figure}}
+\newcommand{\msub}[1]{\par\smallskip\noindent{\bfseries #1:}\par\nobreak\vspace{-2pt}}
+\tikzset{msga/.style={draw=cli!70!black, line width=0.8pt}, cmda/.style={draw=obs, line width=1pt}, loopa/.style={draw=srv, line width=1pt}, hwa/.style={draw=black!60, line width=1.2pt, dash pattern=on 1.5pt off 1.5pt}, wanta/.style={draw=cli, line width=1.6pt}, reala/.style={draw=obs, line width=1.6pt}, siga/.style={draw=srv, line width=0.8pt}, thra/.style={draw=obs, line width=0.9pt, dash pattern=on 4pt off 2pt}, evta/.style={draw=cli, line width=1pt}}
+\tikzset{iol/.style={font=\scriptsize, fill=white, inner sep=1.2pt, rounded corners=1pt, align=center}}
+% legend row: start point, list of style/text
+\newcommand{\ckleg}[2]{%
+\coordinate (lgp) at (#1);
+\foreach \ls/\lt in {#2}{%
+  \draw[\ls,->] (lgp) -- ++(0.8,0) node[right, font=\scriptsize, text=black] (lgt) {\lt};
+  \coordinate (lgp) at ([xshift=5mm]lgt.east);}}
+% purpose table: colour (unused), runs on, technology, requirements
+\newcommand{\ckinfo}[4]{\par\smallskip\noindent{\renewcommand{\arraystretch}{1.25}%
+\begin{tabular}{|L{0.30}|L{0.50}|L{0.20}|}\hline
+\textbf{Runs on} & \textbf{Technology} & \textbf{Requirements} \\ \hline
+#2 & #3 & #4 \\ \hline
+\end{tabular}}\par\smallskip}
+% module data map: n in, n out, centre text, centre style, inputs, outputs, legend list
+% inputs and outputs: {name}/style/{data}/arrow style
+\newcommand{\iomap}[7]{%
+\begin{tikzpicture}[ck]
+\pgfmathsetmacro{\nmax}{max(#1,#2)}
+\node[#4, line width=2pt, minimum width=30mm, minimum height=\nmax*10.5mm+2mm, font=\normalsize] (c) at (0,0) {#3};
+\foreach \nm/\st/\dd/\ar [count=\ii] in {#5}{%
+  \pgfmathsetmacro{\yy}{((#1+1)/2-\ii)*1.05}
+  \node[\st, minimum width=25mm, minimum height=8.5mm, font=\scriptsize] (in\ii) at (-6.6,\yy) {\nm};
+  \draw[\ar,->] (in\ii.east) -- node[iol]{\dd} (c.west |- in\ii);}
+\foreach \nm/\st/\dd/\ar [count=\ii] in {#6}{%
+  \pgfmathsetmacro{\yy}{((#2+1)/2-\ii)*1.05}
+  \node[\st, minimum width=25mm, minimum height=8.5mm, font=\scriptsize] (out\ii) at (6.6,\yy) {\nm};
+  \draw[\ar,->] (c.east |- out\ii) -- node[iol]{\dd} (out\ii.west);}
+\node[font=\scriptsize\bfseries, text=black!60] at (-6.6,\nmax*0.525+0.4) {Inputs come from};
+\node[font=\scriptsize\bfseries, text=black!60] at (6.6,\nmax*0.525+0.4) {Outputs go to};
+\ckleg{-7.6,-\nmax*0.525-0.5}{#7}
+\end{tikzpicture}}
+
 \begin{document}
 
 \thispagestyle{ckfirst}
@@ -361,72 +397,103 @@ the game. It keeps the game clock and the one true game state. It knows every te
 delivery point, score, fall, obstacle and earthquake. Phones only send their buttons. M1 decides
 what happens, and then everybody sees the same result.
 
-\begin{longtable}[]{|L{0.18}|L{0.82}|}
-\hline Runs on & Main computer, in one server program together with M2, M3 and M4 \\ \hline
-Technology & TypeScript on Node.js; fixed-step game loop at 30 ticks per second; seeded random numbers; JSON files for the city plan and the game log \\ \hline
-Requirements & R1 R2 R4 R5 R6 R7 R9 R11 \\ \hline
-\end{longtable}
+\ckinfo{srv}{Main computer, in one server program together with M2, M3 and M4}{TypeScript on Node.js, a fixed step game loop with 30 ticks per second, seeded random numbers, JSON files for the city plan and the game log}{R1 R2 R4 R5 R6 R7 R9 R11}
 
-\begin{figure}[htbp]\centering
-\systemmap{M1}
-\caption{Where M1 sits in the system. The thick box is M1.}
-\end{figure}
+M1 has no network code. All its inputs and outputs are data in the memory of the server program. The
+figure shows which module gives M1 each kind of data and which module gets each result.
+
+\begin{ckfig}
+\iomap{6}{6}{\textbf{M1}\\Game server\\and rules}{sv}
+{{M2, from phones}/cl/{controls, joins,\\``Find me''}/inna, {M2, from admin}/ad/{commands,\\parameters}/inna, {M2, from board}/bd/{earthquake\\events}/inna, {M4 Traffic}/sv/{NPC cars, bot controls,\\travel times}/inna, {M3 Physics}/sv/{poses, collisions,\\falls}/inna, {City plan file}/hwb/{roads, stores,\\delivery points}/inna}
+{{M2, to phones}/cl/{game state\\30 per second}/inna, {M2, to admin}/ad/{state, metrics,\\replies}/inna, {M2, to board}/bd/{board state,\\vibrate}/inna, {M3 Physics}/sv/{controls, obstacles,\\earthquake}/inna, {M4 Traffic}/sv/{players, obstacles,\\parameters}/inna, {Disk}/hwb/{game log}/inna}
+{inna/data in the memory of the server program}
+\end{ckfig}
 
 \msection{Requirements covered}
 
-\begin{longtable}[]{|L{0.07}|L{0.25}|L{0.68}|}
-\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M1 does for it} \\ \hline \endhead
-R1 & Multiplayer game & Lobby with 4 teams and at most 2 players in a team; bots fill empty places; a game is at most 5 minutes; the team with the most points wins \\ \hline
-R2 & Delivery cycle & Automatic pickup at the store; picks a delivery point by travel time; near or far chance per player \\ \hline
-R4 & Collisions and falls & Gives a penalty time after every fall that M3 reports \\ \hline
-R5 & No map on the phone & Puts the compass target and the ``Find me'' flag into the game state \\ \hline
-R6 & Obstacles & Keeps the obstacle list that M3, M4, M5 and M8 use \\ \hline
-R7 & Earthquake & One path for a hand hit, the motors and the admin button; road work and falls inside the radius \\ \hline
-R9 & Live admin panel & Applies admin commands and sends each parameter to the module that uses it \\ \hline
-R11 & Single authority & Only M1 changes the game state; every tick can be played again from the log \\ \hline
+M1 takes part in eight of the eleven system requirements. The last column says what will work when
+M1 is finished.
+
+\begin{longtable}[]{|L{0.06}|L{0.15}|L{0.40}|L{0.39}|}
+\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M1 does for it} & \textbf{When M1 is done} \\ \hline \endhead
+R1 & Multiplayer game & Lobby with 4 teams and at most 2 players in a team. Bots fill the empty places. A game is at most 5 minutes. & A full game runs from the lobby to the winner, with humans and bots together \\ \hline
+R2 & Delivery cycle & Automatic pickup at the store. Picks a delivery point by travel time, with a near or far chance per player & Every player always has a package or a point to go to, and points are fair \\ \hline
+R4 & Collisions and falls & Gives a penalty time after every fall that M3 reports & A fallen player waits and then rides on with the package \\ \hline
+R5 & No map on the phone & Puts the compass target and the ``Find me'' waiting time into the game state & The phone can show the arrow and the button without a map \\ \hline
+R6 & Obstacles & Keeps the one obstacle list that M3, M4, M5 and M8 use & An obstacle from the admin is seen everywhere in the same tick \\ \hline
+R7 & Earthquake & One path for a hand hit, the motors and the admin button. Road work and falls inside the radius & A hit on the board changes the game for everybody \\ \hline
+R9 & Live admin panel & Checks admin commands and sends each parameter to the module that uses it & Every parameter can be changed during the game \\ \hline
+R11 & Engineering requirements & Only M1 changes the game state. Every game can be played again from the log & The same log always gives the same game \\ \hline
 \end{longtable}
 
 \msection{Inputs and outputs}
 
-\begin{longtable}[]{|L{0.08}|L{0.20}|L{0.18}|L{0.54}|}
-\hline \textbf{Dir.} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline \endhead
-In & Controls & M2, from phones & Throttle and brake 0--1, steer −1 to 1, deliver; the newest one in each tick \\ \hline
-In & Join, ``Find me'' & M2, from phones & Player key, name, team; ``Find me'' request \\ \hline
-In & Admin commands & M2, from admin & Parameter changes, start, pause, end, obstacles, earthquake \\ \hline
-In & Board events & M2, from board & Earthquake strength 0--10, centre, zone, confidence \\ \hline
-In & Traffic & M4 & NPC cars, bot controls, travel-time table \\ \hline
-In & Physics & M3 & New motorcycle positions, collision and fall events \\ \hline
-Out & Game state & M2, to phones and admin & Every tick: phase, time, scores, players, NPC cars, obstacles, earthquake \\ \hline
-Out & Board state & M2, to board & Players, delivery points, obstacles, earthquake in board coordinates \\ \hline
+The table gives the content of each input and output. Value ranges are shown only for the main
+control values.
+
+\begin{longtable}[]{|L{0.11}|L{0.17}|L{0.18}|L{0.54}|}
+\hline \textbf{Direction} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline \endhead
+In & Controls & M2, from phones & Throttle and brake from 0 to 1, steer from −1 to 1, a control number. ``Deliver'' and ``Find me'' come as events \\ \hline
+In & Join & M2, from phones & Player key, name, team. M2 also reports when a player is lost or comes back \\ \hline
+In & Admin commands & M2, from admin & Parameter changes, start, pause, resume, end, reset, new game code, obstacles, earthquake \\ \hline
+In & Board events & M2, from board & Source (hand or motors), strength from 0 to 10, zone, confidence \\ \hline
+In & Traffic & M4 & NPC cars, bot controls, travel time table \\ \hline
+In & Physics & M3 & New motorcycle poses, collision and fall events \\ \hline
+Out & Game state & M2, to phones and admin & Every tick: phase, time, scores, players, NPC cars, obstacles, earthquake. For each player also the compass target, the ``Find me'' waiting time and the number of the last control that M1 used \\ \hline
+Out & Board state & M2, to board & Phase, players, delivery points, obstacles and earthquake in board coordinates \\ \hline
 Out & Metrics & M2, to admin & Twice per second: the values of all admin graphs \\ \hline
-Out & Game log & Disk & The inputs of every tick, one JSON line per tick \\ \hline
+Out & Game log & Disk & The seed and, for every tick, the controls, admin commands and board events \\ \hline
 \end{longtable}
 
 \msection{Main components}
 
-\begin{longtable}[]{|L{0.20}|L{0.52}|L{0.28}|}
-\hline \textbf{Component} & \textbf{What it does} & \textbf{Related modules} \\ \hline \endhead
-Game loop & Runs the steps of a tick in a fixed order, 30 times per second & M3, M4 \\ \hline
-Match and lobby & Game phases, teams, bots, keeps a place for 30 s after a player drops & M2, M4 \\ \hline
-Delivery and scoring & Pickup, delivery check with a reason when it says no, choice of the delivery point, points & M4, M5, M8 \\ \hline
-Penalties & Penalty time after a fall; asks M3 to stand the motorcycle up again & M3 \\ \hline
-Obstacles and earthquake & Obstacle list with a version number; earthquake strength, radius, road work and falls & M3, M4, M7 \\ \hline
-Admin and parameters & Checks commands, keeps every parameter with its limits, sends each group to its owner & M2, M3, M4, M6 \\ \hline
-State builder and recorder & Builds the frozen game state, the board state and the metrics; writes and replays the game log & M2 \\ \hline
+M1 is made of seven parts. Each part takes some data and gives a result to the next part or to
+another module.
+
+\begin{longtable}[]{|L{0.21}|L{0.39}|L{0.40}|}
+\hline \textbf{Component} & \textbf{Takes} & \textbf{Gives} \\ \hline \endhead
+Game loop & The clock & Runs the steps of a tick in a fixed order, 30 times per second \\ \hline
+Match and lobby & Joins, lost players, admin start and pause & Game phase, teams, bots in empty places \\ \hline
+Delivery and scoring & Poses, ``Deliver'' events, travel times & Packages, delivery points, points, a reason when a delivery is refused \\ \hline
+Penalties & Fall events from M3 & Penalty time, then a stand up request to M3 \\ \hline
+Obstacles and earthquake & Admin obstacles, board events & Obstacle list with a version number, earthquake centre and radius \\ \hline
+Admin and parameters & Admin commands & Checked values sent to the owner module, ok or error replies \\ \hline
+State builder and recorder & The world after the tick & Frozen game state, board state, metrics with a short history, the game log \\ \hline
 \end{longtable}
 
 \msection{How it works}
 
-\textbf{The tick.} The game moves in small steps called ticks. There are 30 ticks in one second, so
-one tick has about 33 ms. A tick always runs the same eight steps in the same order, as the figure
-below shows. First M1 takes the inputs that M2 has collected since the last tick. If a phone sent
-more than one control message, only the newest one is used. Then M1 applies admin commands and
-board events, updates the game phase, asks M4 for traffic and bot controls, and asks M3 to move all
-motorcycles. After that the game rules run. At the end M1 builds a frozen copy of the state for M2
-and writes one line to the game log. Because the order never changes and all random numbers come
-from one seed, the same inputs always give the same game.
+\msub{What a tick is}
+The game world does not change all the time. It changes in small steps, like the pictures of a film.
+One step is called a tick, and the server makes 30 ticks in one second. Between two ticks, M2 only
+collects the messages from the phones, the admin and the board. In a tick, M1 uses all of them
+together, moves the world one step forward and makes a new state. Then M2 sends this state to
+everybody. So every player sees the same world after every tick.
 
-\begin{figure}[htbp]\centering
+\begin{ckfig}
+\begin{tikzpicture}[ck]
+\draw[black!45, ->, line width=0.8pt] (-0.3,0) -- (14.6,0) node[right, font=\scriptsize]{time};
+\foreach \x/\l in {1.2/1, 5.8/2, 10.4/3}{%
+  \node[sv, minimum width=17mm, minimum height=8mm, font=\scriptsize] (t\l) at (\x,0) {Tick \l};
+  \draw[inna, ->] (t\l.north) -- ++(0,0.8) node[above, font=\scriptsize, align=center]{new state\\to M2};}
+\foreach \qa/\qb/\n in {2.3/4.3/2, 6.9/8.9/3}{%
+  \node[nb, draw=cli, fill=cliL, minimum width=20mm, minimum height=7mm, font=\scriptsize] (q\n) at ({(\qa+\qb)/2},-1.5) {};
+  \foreach \k in {0,1,2} \fill[cli] ({\qa+0.45+\k*0.55},-1.5) circle (0.09);
+  \node[font=\scriptsize, text=cli!70!black] at ({(\qa+\qb)/2},-2.15) {messages wait in the queue};
+  \draw[msga, ->] (q\n.east) -| (t\n.south);}
+\draw[srv, <->, line width=0.9pt] (1.2,2.25) -- node[iol]{one tick: one thirtieth of a second} (5.8,2.25);
+\ckleg{0,-2.85}{inna/new state after each tick, msga/{messages from phones, admin and board}}
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{The steps of one tick}
+A tick always runs the same eight steps in the same order. First M1 takes the inputs that M2 has
+collected. Then it applies admin commands and board events, updates the game phase, asks M4 for
+traffic and bot controls, and asks M3 to move all motorcycles. After that the game rules run. At the
+end M1 builds a frozen copy of the state for M2 and writes one line to the game log. Because the order
+never changes and all random numbers come from one seed, the same inputs always give the same game.
+
+\begin{ckfig}
 \begin{tikzpicture}[ck, node distance=3.5mm]
 \node[cl, minimum width=17mm] (a) {Inputs};
 \node[ad, minimum width=17mm, right=of a] (b) {Admin and\\board events};
@@ -437,89 +504,116 @@ from one seed, the same inputs always give the same game.
 \node[sv, minimum width=17mm, right=of f] (g) {Frozen\\state};
 \node[hwb, minimum width=17mm, right=of g] (h) {Log};
 \foreach \u/\v in {a/b,b/c,c/d,d/e,e/f,f/g,g/h} \draw[inna,->] (\u) -- (\v);
-\draw[inna,->, srv] (h.south) -- ++(0,-0.6) -| node[al, pos=0.25]{next tick, 33 ms later} (a.south);
-\draw[tcpa,->] (g.north) -- ++(0,0.6) node[above, font=\scriptsize]{to M2};
+\draw[inna,->, srv] (h.south) -- ++(0,-0.6) -| node[al, pos=0.25]{next tick} (a.south);
+\ckleg{0,-1.6}{inna/order of the steps, loopa/start of the next tick}
 \end{tikzpicture}
-\caption{The eight steps of one tick.}
-\end{figure}
+\end{ckfig}
 
-\textbf{Game flow.} A game has five phases. In the lobby players join and choose a team. When the
-admin presses start, a 3 second countdown begins and nobody can move. Then the game runs for at most
-5 minutes. The admin can pause and resume the game at any time. When the time ends, M1 shows the
-final scores and the game is finished. If a phone loses its connection, M1 keeps that player's
-place for 30 seconds. If the player does not come back, a bot takes the motorcycle and continues.
+\msub{Controls inside a tick}
+A phone sends its controls on every change and at least 10 times per second, but there are 30 ticks
+per second. So in some ticks a new control comes and in some ticks nothing comes. If nothing comes,
+M1 keeps the last control of that player. If more than one control comes, M1 uses the newest one for
+throttle, brake and steer. ``Deliver'' and ``Find me'' are different. They are events, not values. If
+any message in the tick has a ``Deliver'' press, the press counts, even when a newer message has no
+press. So a button press is never lost.
 
-\begin{figure}[htbp]\centering
+\msub{Game flow}
+A game has five phases. In the lobby players join and choose a team. When the admin presses start, a
+3 second countdown begins and nobody can move. Then the game runs for at most 5 minutes. The admin can
+end the game early. The admin can also pause and resume at any time. During a pause everything stops:
+the game time, the penalty times, the waiting time for lost players and the NPC cars. A pause during
+the countdown starts the countdown again after the resume. When the time ends, the team with the most
+points wins. If two teams have the same points, the game ends in a draw between them.
+
+\begin{ckfig}
 \begin{tikzpicture}[ck]
 \node[st, draw=cli, fill=cliL] (l) at (0,0) {Lobby};
 \node[st, draw=adm, fill=admL] (c) at (3.6,0) {Countdown};
 \node[st, draw=srv, fill=srvL, line width=1.4pt] (r) at (7.2,0) {Running};
-\node[st, draw=brd, fill=brdL] (f) at (10.8,0) {Finished};
-\node[st, draw=black!50, fill=black!6] (p) at (7.2,-1.7) {Paused};
+\node[st, draw=brd, fill=brdL] (f) at (11.2,0) {Finished};
+\node[st, draw=black!50, fill=black!6] (p) at (5.4,-2.0) {Paused};
 \draw[inna,->] (l) -- node[al]{start} (c);
 \draw[inna,->] (c) -- node[al]{3 s} (r);
-\draw[inna,->] (r) -- node[al]{time over} (f);
-\draw[inna,->] ([xshift=-5mm]r.south) -- node[al]{pause} ([xshift=-5mm]p.north);
-\draw[inna,->] ([xshift=5mm]p.north) -- node[al]{resume} ([xshift=5mm]r.south);
+\draw[inna,->] ([yshift=1.5mm]r.east) -- node[al, above=1pt]{time over} ([yshift=1.5mm]f.west);
+\draw[inna,->, obs] ([yshift=-1.5mm]r.east) -- node[al, below=1pt]{admin end} ([yshift=-1.5mm]f.west);
+\draw[inna,->] ([xshift=-6mm]r.south) |- node[al, pos=0.3]{pause} ([yshift=1.5mm]p.east);
+\draw[inna,->] ([yshift=-1.5mm]p.east) -| node[al, pos=0.7]{resume} ([xshift=6mm]r.south);
+\draw[inna,->] (c.south) |- node[al, pos=0.3]{pause} (p.west);
 \draw[inna,->] (f.north) -- ++(0,0.6) -| node[al, pos=0.25]{new game} (l.north);
+\ckleg{0.2,-3.0}{inna/phase change, cmda/admin command}
 \end{tikzpicture}
-\caption{Phases of one game.}
-\end{figure}
+\end{ckfig}
 
-\textbf{Deliveries and points.} A player gets a package automatically when the motorcycle is inside
-the area of the own team's store. M1 then picks a delivery point for this player. M4 gives a table
-with the travel time from the store to every possible point. The times also count the obstacles that
-are on the roads at that moment. M1 sorts this list and cuts it in the middle, so it gets a near
-half and a far half. The admin sets a ``near chance'' for each player, and M1 uses it to choose the
-half. A far point gives more points: points are a base value plus a bonus for each second of the
-expected travel time. Both numbers are admin parameters. To deliver, the player presses
-``Deliver''. The button is always active. M1 accepts it only inside the delivery radius and below
-the speed limit. If M1 says no, it sends the reason, for example ``too fast'' or ``too far''. A fall
-does not lose the package; the player only waits for the penalty time.
+\msub{Players who leave and come back}
+M2 sees when the link of a phone is lost and tells M1. M1 keeps the place of this player for 30
+seconds. If the player does not come back in this time, a bot takes the motorcycle and plays on. If
+the player comes back later with the same player key, the bot gives the motorcycle back. The admin
+sets how many bots fill the empty places at the start.
 
-\begin{figure}[htbp]\centering
-\begin{tikzpicture}[x=0.85cm, y=0.85cm]
+\msub{Deliveries and points}
+A player gets a package automatically when the motorcycle is inside the area of the own team's store.
+M1 then picks a delivery point for this player. M4 gives a table with the travel time from the store
+to every possible point. The times count the obstacles that are on the roads at that moment. M1 sorts
+this list and cuts it in the middle, so it gets a near half and a far half. The admin sets a ``near
+chance'' for each player, and M1 uses it to choose the half. Two players never get the same point at
+the same time. A far point gives more points. Every delivery gets a base value, and the longer the
+expected travel time is, the bigger the bonus on top of it. The admin sets both the base value and
+the bonus. The points are fixed when the point is chosen, so a new obstacle
+later does not change them.
+
+To deliver, the player presses ``Deliver''. The button is always active. M1 accepts it only inside the
+delivery radius and below the speed limit. Both are admin parameters. If M1 says no, it sends the
+reason, for example ``too fast'' or ``too far''. A fall does not lose the package. The player only
+waits for the penalty time.
+
+\begin{ckfig}
+\begin{tikzpicture}[x=1.1cm, y=1.1cm]
 \boardbase
-\draw[tA, line width=2.2pt, rounded corners=3pt, opacity=0.9] (1,4) -- (1,3) -- (2,3) -- (2,2) -- (2.5,2);
+\draw[tA, line width=2.4pt, rounded corners=3pt, opacity=0.9] (1,4) -- (1,3) -- (2,3) -- (2,2) -- (2.5,2);
 \dpoint{2.5}{2}{tA}
 \draw[tA!45, line width=1pt, dashed] (4,1.5) circle (0.18);
 \bike{1}{3.5}{tA}{90}
 \bike{3.5}{4}{tB}{0}
-\bike{4}{2.5}{tD}{-90}
-\bike{1.5}{1}{tC}{180}
+\bike{4}{2.5}{tC}{-90}
+\bike{1.5}{1}{tD}{180}
 \roadwork{3,2}{3,3}
 \nmark{0.5}{5.2}{1}\nmark{0.55}{3.5}{2}\nmark{1.5}{2.7}{3}\nmark{2.5}{2.5}{4}\nmark{4.45}{1.5}{5}\nmark{3.35}{2.5}{6}
-\node[anchor=west, font=\scriptsize, align=left] at (6.0,2.5) {\begin{tabular}{@{}c@{\ \ }l@{}}
-\textbf{1} & Team store, two LEDs in team colour\\[2pt]
-\textbf{2} & Player with a package, dot with a tail\\[2pt]
-\textbf{3} & Fastest route found by M4\\[2pt]
-\textbf{4} & Near delivery point, blinks in team colour\\[2pt]
-\textbf{5} & A far point, worth more points\\[2pt]
-\textbf{6} & Road work, so the route goes around\end{tabular}};
+\node[anchor=west, font=\small, align=left] at (6.0,2.5) {\begin{tabular}{@{}c@{\ \ }l@{}}
+\textbf{1} & Team store in the team colour\\[3pt]
+\textbf{2} & Player with a package,\\ & a dot with a tail\\[3pt]
+\textbf{3} & Fastest route found by M4\\[3pt]
+\textbf{4} & Near delivery point,\\ & blinks in the player's colour\\[3pt]
+\textbf{5} & A far point, worth more points\\[3pt]
+\textbf{6} & Road work, so the route\\ & goes around\end{tabular}};
 \end{tikzpicture}
-\caption{One delivery as it will look on the LED board. The phone shows only a compass arrow.}
-\end{figure}
+\end{ckfig}
 
-\textbf{Obstacles and earthquakes.} M1 keeps one list of obstacles. Each obstacle has a type, a road
-segment, a lane and a position. The list has a version number, and the number goes up on every
-change. So M4 can see when it must compute routes again, and M5 and M8 can see when they must draw
-again. All earthquakes take one path in M1, so a hand hit on the board, the motors and the admin
-button act in the same way. The game strength is the measured strength times an admin factor. Roads
-inside the earthquake radius get road work, and motorcycles inside the radius may fall.
+\msub{Earthquakes}
+An earthquake can come from a hand hit on the board, from the vibration motors or from the admin
+button. All of them take the same path in M1. The board sends a strength from 0 to 10 and one of
+9 zones. M1 uses the centre of that zone as the centre of the earthquake. A stronger hit makes a
+bigger earthquake, so the radius grows with the strength. The strongest hit reaches the largest
+radius, which the admin sets. Roads inside the radius get road work, and
+motorcycles inside the radius may fall. Events with a low confidence value are ignored. If the board
+is not connected, M1 makes the event itself when the admin presses the button, so the admin
+earthquake always works.
 
-\textbf{Admin parameters.} Every parameter has a name, a group, a minimum, a maximum and an owner
-module. When the admin changes a value, M1 checks the limits first. Then it saves the value,
-sends it to the owner (for example grip to M3 or traffic density to M4) and sends ``ok'' back to the
-panel. A wrong value gets an error and the old value stays. Twice per second M1 also puts all graph
-values (scores, delivery times, speeds, falls, traffic) into one metrics message.
+\msub{Obstacles and admin parameters}
+M1 keeps one list of obstacles. Each obstacle has a type, a road segment, a lane and a position. The
+list has a version number, and the number goes up on every change. So M4 can see when it must compute
+routes again, and M5 and M8 can see when they must draw again. Every parameter has a name, a group, a
+minimum, a maximum and an owner module. When the admin changes a value, M1 checks the limits first.
+Then it saves the value, sends it to the owner (for example grip to M3) and sends ``ok'' back to the
+panel. A wrong value gets an error and the old value stays.
 
-\msection{Testing and demonstration}
+\msection{Testing}
 
-M1 has no network code. So we can test every rule with fake M2, M3 and M4 parts that run inside the
-test. The tests check the game flow, the lobby and the bots, the delivery cycle, the fair choice of
-points, every admin command and the earthquake. One test plays a recorded game again with the same
-seed and checks that the result is the same. In the demonstration, a full game with bots runs on the
-main computer. The admin changes parameters live, starts an earthquake, and then plays the game log
-again.
+M1 is tested alone, without the network and without the real M2, M3 and M4. Small fake parts take
+their place inside the test and give fixed test data: scripted controls and joins, fixed poses and fall
+events, a fixed travel time table and recorded admin commands and board events. With this data we
+check every rule: the game phases with pause and end, the lobby and the bots, a lost player who comes
+back, the delivery cycle and the fair choice of points, two ``Deliver'' presses in one tick, every
+admin command with good and wrong values, and the earthquake radius. Because all random numbers come
+from one seed, the same test data must always give exactly the same game state.
 
 \end{document}

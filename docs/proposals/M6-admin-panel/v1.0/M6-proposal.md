@@ -14,7 +14,7 @@ M6 is the admin screen. On one page the admin starts and controls the game, chan
 |---|---|---|
 | Browser on the main computer, or a laptop on the game Wi-Fi. The page comes from M2 | TypeScript web page, a light chart library for the live graphs, a 2D drawing of the city for the live map, MessagePack messages over one WebSocket | R6 R7 R9 R10 R11 |
 
-The admin page talks only to M2, over one WebSocket that needs the admin password. The figure shows what the page gets and what it sends.
+The admin page talks only to M2, over one WebSocket. The figure shows what the page gets and what it sends.
 
 ## 2. Requirements covered
 
@@ -37,7 +37,7 @@ All data comes through M2. The game state for the map comes less often than to t
 | In | Game state | M1, through M2 | 10 times per second, for the live map |
 | In | Metrics | M1, through M2 | Twice per second: scores, delivery times and distances, speeds, falls, traffic, ping, jitter, loss, frame rate, board delay. After a reconnect also the recent history |
 | In | Parameters, replies | M1, through M2 | Every parameter with its value and limits, ok or error for each command |
-| In | Board data | M7, through M2 | Sensor samples (100 per second), board status, earthquake events |
+| In | Board data | M7, through M2 | Sensor data, board status, earthquake events |
 | Out | Commands | M2, then M1 | Parameter changes, start, pause, resume, end, reset, obstacles, earthquake, new game code |
 | Out | Files | Admin | Graph data as CSV, game log |
 
@@ -48,7 +48,7 @@ The page is made of five parts. The communication manager is the only part that 
 | **Component** | **Takes** | **Gives** |
 |---|---|---|
 | Communication manager | Messages from M2, commands from the other parts | Decoded data for each part, reconnect and full update after a lost link |
-| Parameter manager | Parameter list with limits, admin input | Forms built from the list, changes with a “pending” mark until the reply |
+| Parameter manager | Parameter list with limits, admin input | Forms built from the list, changes sent to M1 |
 | Map manager | Game state, clicks on the map | The live map, and obstacle commands with road, lane and position |
 | Graph engine | Metrics, board samples, change marks | Live graphs, the seismic graph, CSV files |
 | Top bar and earthquake panel | Phase, time, board status, button presses | Game commands, earthquake command, the event log |
@@ -61,7 +61,7 @@ The figure below shows the planned layout. The top bar shows the game phase, the
 
 **Parameters:**
 
-The parameters are in groups: game, obstacles, players, physics, earthquake, network (one set for each player) and board link. When the page opens, it asks M1 for all parameters with their limits and builds the forms from this list, so a new parameter needs no new page code. A slider sends its value only when it stops moving, so one drag does not send many messages. Until the server answers, the value is marked “pending”. If the answer is “ok”, the mark goes away. If the answer is an error, the slider goes back to the old value and the log shows the reason.
+The parameters are in groups: game, obstacles, players, physics, earthquake, network (one set for each player) and board link. When the page opens, it asks M1 for all parameters with their limits and builds the forms from this list, so a new parameter needs no new page code.
 
 **Network settings:**
 
@@ -73,16 +73,16 @@ The main goal of the panel is to show the effect of a change. So every change pu
 
 **Adding an obstacle:**
 
-The admin first chooses a tool, for example the road work brush. Then the admin clicks on a road on the live map. The map manager finds the nearest road segment, the lane and the position on it with the numbering of the city plan. The communication manager sends an “add obstacle” command with the type, road, lane and position. M1 checks that the road exists and that the obstacle limit is not reached. Then it adds the obstacle to the list and raises the version number. In the next tick the obstacle is in the game state, so the map, the phones and the board show it at the same time. The eraser sends a “remove obstacle” command in the same way. “Close road” puts road work on a whole segment, and “in front of a player” puts the chosen obstacle a little ahead of that player's motorcycle.
+The admin first chooses a tool, for example the road work brush. Then the admin clicks on a road on the live map. The map manager finds the nearest road segment, the lane and the position on it with the numbering of the city plan. The communication manager sends an “add obstacle” command with the type, road, lane and position. M1 checks that the road exists. Then it adds the obstacle to the list. In the next tick the obstacle is in the game state, so the map, the phones and the board show it at the same time. The eraser sends a “remove obstacle” command in the same way. “Close road” puts road work on a whole segment, and “in front of a player” puts the chosen obstacle a little ahead of that player's motorcycle.
 
 **Earthquake:**
 
-The start button sends a command to M1, and M1 asks the board to run its motors. If the board is not connected, M1 makes the earthquake by itself. The seismic graph shows the sensor signal of the board live, 100 samples per second. Each earthquake event puts a mark on the graph with its strength and zone. A hand hit on the board shows on the same graph, so the admin can compare the two.
+The start button sends a command to M1, and M1 asks the board to run its motors. The seismic graph shows the sensor signal of the board live. Each earthquake event puts a mark on the graph with its strength and zone. A hand hit on the board shows on the same graph, so the admin can compare the two.
 
 **After a lost link:**
 
-If the WebSocket breaks, the page shows a grey bar and tries to connect again. After the new login, M2 sends the full parameter list, the current game state and the recent history of all graphs that M1 keeps. So the page fills the forms, the map and the graphs again and the admin can go on at once.
+If the WebSocket breaks, the page shows a grey bar and tries to connect again. After the new connection, M2 sends the full parameter list, the current game state and the recent history of all graphs that M1 keeps. So the page fills the forms, the map and the graphs again and the admin can go on at once.
 
 ## 6. Testing
 
-M6 is tested alone against a fake server that plays back a recorded game with its metrics, parameter list and board data. We check every parameter form with good and wrong values, every map tool, all graphs and the CSV export, a wrong password, a second admin login, and that after a lost link the forms, the map and the graphs are complete again.
+M6 is tested alone against a fake server that plays back a recorded game with its metrics, parameter list and board data. We check every parameter form with good and wrong values, every map tool, all graphs and the CSV export, a second admin login, and that after a lost link the forms, the map and the graphs are complete again.

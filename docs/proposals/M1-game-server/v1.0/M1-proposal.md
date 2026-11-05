@@ -37,7 +37,7 @@ The table gives the content of each input and output. Value ranges are shown onl
 
 | **Direction** | **Data** | **From / to** | **Content** |
 |---|---|---|---|
-| In | Controls | M2, from phones | Throttle and brake from 0 to 1, steer from −1 to 1, a control number. “Deliver” and “Find me” come as events |
+| In | Controls | M2, from phones | Throttle and brake from 0 to 1, steer from −1 to 1, a control number. “Find me” comes as an event |
 | In | Join | M2, from phones | Player key, name, team. M2 also reports when a player is lost or comes back |
 | In | Admin commands | M2, from admin | Parameter changes, start, pause, resume, end, reset, new game code, obstacles, earthquake |
 | In | Board events | M2, from board | Source (hand or motors), strength from 0 to 10, zone, confidence |
@@ -56,9 +56,9 @@ M1 is made of seven parts. Each part takes some data and gives a result to the n
 |---|---|---|
 | Game loop | The clock | Runs the steps of a tick in a fixed order, 30 times per second |
 | Match and lobby | Joins, lost players, admin start and pause | Game phase, teams, bots in empty places |
-| Delivery and scoring | Poses, “Deliver” events, travel times | Packages, delivery points, points, a reason when a delivery is refused |
+| Delivery and scoring | Poses, travel times | Packages, delivery points, automatic deliveries, points |
 | Penalties | Fall events from M3 | Penalty time, then a stand up request to M3 |
-| Obstacles and earthquake | Admin obstacles, board events | Obstacle list with a version number, earthquake centre and radius |
+| Obstacles and earthquake | Admin obstacles, board events | The obstacle list, earthquake centre and radius |
 | Admin and parameters | Admin commands | Checked values sent to the owner module, ok or error replies |
 | State builder and recorder | The world after the tick | Frozen game state, board state, metrics with a short history, the game log |
 
@@ -74,7 +74,7 @@ A tick always runs the same eight steps in the same order. First M1 takes the in
 
 **Controls inside a tick:**
 
-A phone sends its controls on every change and at least 10 times per second, but there are 30 ticks per second. So in some ticks a new control comes and in some ticks nothing comes. If nothing comes, M1 keeps the last control of that player. If more than one control comes, M1 uses the newest one for throttle, brake and steer. “Deliver” and “Find me” are different. They are events, not values. If any message in the tick has a “Deliver” press, the press counts, even when a newer message has no press. So a button press is never lost.
+A phone sends its controls on every change and at least 10 times per second, but there are 30 ticks per second. So in some ticks a new control comes and in some ticks nothing comes. If nothing comes, M1 keeps the last control of that player. If more than one control comes, M1 uses the newest one for throttle, brake and steer. “Find me” is different. It is an event, not a value. If any message in the tick has a “Find me” press, the press counts, even when a newer message has no press. So a button press is never lost.
 
 **Game flow:**
 
@@ -86,18 +86,22 @@ M2 sees when the link of a phone is lost and tells M1. M1 keeps the place of thi
 
 **Deliveries and points:**
 
-A player gets a package automatically when the motorcycle is inside the area of the own team's store. M1 then picks a delivery point for this player. M4 gives a table with the travel time from the store to every possible point. The times count the obstacles that are on the roads at that moment. M1 sorts this list and cuts it in the middle, so it gets a near half and a far half. The admin sets a “near chance” for each player, and M1 uses it to choose the half. Two players never get the same point at the same time. A far point gives more points. Every delivery gets a base value, and the longer the expected travel time is, the bigger the bonus on top of it. The admin sets both the base value and the bonus. The points are fixed when the point is chosen, so a new obstacle later does not change them.
+A player gets a package automatically when the motorcycle is inside the area of the own team's store. M1 then picks a delivery point for this player. M4 gives a table with the travel time from the store to every possible point. The times count the obstacles that are on the roads at that moment. The admin sets for each player whether the new delivery point appears near the store or far from it, and M1 picks the point with this setting. Two players never get the same point at the same time. A far point gives more points. Every delivery gets a base value, and the longer the expected travel time is, the bigger the bonus on top of it. The admin sets both the base value and the bonus. The points are fixed when the point is chosen, so a new obstacle later does not change them.
 
-To deliver, the player presses “Deliver”. The button is always active. M1 accepts it only inside the delivery radius and below the speed limit. Both are admin parameters. If M1 says no, it sends the reason, for example “too fast” or “too far”. A fall does not lose the package. The player only waits for the penalty time.
+There is no delivery button. When the player comes to the delivery point and stops inside its area, M1 delivers the package automatically and adds the points. The size of the area is an admin parameter. A fall does not lose the package. The player only waits for the penalty time.
 
 **Earthquakes:**
 
-An earthquake can come from a hand hit on the board, from the vibration motors or from the admin button. All of them take the same path in M1. The board sends a strength from 0 to 10 and one of 9 zones. M1 uses the centre of that zone as the centre of the earthquake. A stronger hit makes a bigger earthquake, so the radius grows with the strength. The strongest hit reaches the largest radius, which the admin sets. Roads inside the radius get road work, and motorcycles inside the radius may fall. Events with a low confidence value are ignored. If the board is not connected, M1 makes the event itself when the admin presses the button, so the admin earthquake always works.
+An earthquake can come from a hand hit on the board, from the vibration motors or from the admin button. All of them take the same path in M1. The board sends a strength from 0 to 10 and one of 9 zones. M1 uses the centre of that zone as the centre of the earthquake. A stronger hit makes a bigger earthquake. Motorcycles near the centre fall, and the roads near the centre close with road work.
 
-**Obstacles and admin parameters:**
+**Obstacles:**
 
-M1 keeps one list of obstacles. Each obstacle has a type, a road segment, a lane and a position. The list has a version number, and the number goes up on every change. So M4 can see when it must compute routes again, and M5 and M8 can see when they must draw again. Every parameter has a name, a group, a minimum, a maximum and an owner module. When the admin changes a value, M1 checks the limits first. Then it saves the value, sends it to the owner (for example grip to M3) and sends “ok” back to the panel. A wrong value gets an error and the old value stays.
+M1 keeps one list of obstacles. Each obstacle has a type, a road segment, a lane and a position. When the list changes, M4 computes the routes again, and M5 and M8 draw the new obstacles.
+
+**Admin parameters:**
+
+Every parameter has a name, a group, a minimum, a maximum and an owner module. When the admin changes a value, M1 checks the limits first. Then it saves the value, sends it to the owner (for example grip to M3) and sends “ok” back to the panel. A wrong value gets an error and the old value stays.
 
 ## 6. Testing
 
-M1 is tested alone, without the network and without the real M2, M3 and M4. Small fake parts take their place inside the test and give fixed test data: scripted controls and joins, fixed poses and fall events, a fixed travel time table and recorded admin commands and board events. With this data we check every rule: the game phases with pause and end, the lobby and the bots, a lost player who comes back, the delivery cycle and the fair choice of points, two “Deliver” presses in one tick, every admin command with good and wrong values, and the earthquake radius. Because all random numbers come from one seed, the same test data must always give exactly the same game state.
+M1 is tested alone, without the network and without the real M2, M3 and M4. Small fake parts take their place inside the test and give fixed test data: scripted controls and joins, fixed poses and fall events, a fixed travel time table and recorded admin commands and board events. With this data we check every rule: the game phases with pause and end, the lobby and the bots, a lost player who comes back, the delivery cycle and the fair choice of points, two “Find me” presses in one tick, every admin command with good and wrong values, and the earthquake radius. Because all random numbers come from one seed, the same test data must always give exactly the same game state.

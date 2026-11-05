@@ -1,0 +1,556 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+\documentclass[
+  english,
+  10pt,
+  a4paper,
+]{article}
+\usepackage{xcolor}
+\usepackage[top=22mm,bottom=20mm,left=18mm,right=18mm]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{longtable,booktabs,array}
+\usepackage{caption}
+\captionsetup[table]{skip=6pt}
+\newcounter{none} % for unnumbered tables
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+\ifLuaTeX
+\usepackage[bidi=basic,shorthands=off]{babel}
+\else
+\usepackage[bidi=default,shorthands=off]{babel}
+\fi
+\ifLuaTeX
+  \usepackage{selnolig} % disable illegal ligatures
+\fi
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+% ---- Çılgın Kurye document theme: same look as the CSE 396 project proposal ----
+% Compile with XeLaTeX (also works on Overleaf). Fonts: TeX Gyre Termes (Times), DejaVu Sans Mono.
+\usepackage{fontspec}
+\setmainfont{texgyretermes}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold, ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
+\setsansfont{texgyreheros}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold, ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
+\setmonofont{DejaVuSansMono}[Extension=.ttf, UprightFont=*, BoldFont=*-Bold, ItalicFont=*-Oblique, BoldItalicFont=*-BoldOblique, Scale=0.80]
+\setmathfont{texgyretermes-math.otf}
+
+\usepackage{xcolor}
+\definecolor{ckblue}{HTML}{1F3A5F}
+\definecolor{cklight}{HTML}{E8EEF5}
+\definecolor{ckgrey}{HTML}{F2F2F2}
+\definecolor{ckline}{HTML}{555555}
+\definecolor{shadecolor}{HTML}{F4F5F7}
+
+% Headings as in the proposal: serif, bold; subsections bold italic. Numbers are part of the heading text.
+\setcounter{secnumdepth}{0}
+\usepackage{titlesec}
+\titleformat{\section}{\rmfamily\Large\bfseries}{}{0pt}{}
+\titleformat{\subsection}{\rmfamily\large\bfseries\itshape}{}{0pt}{}
+\titleformat{\subsubsection}{\rmfamily\normalsize\bfseries}{}{0pt}{}
+\titlespacing*{\section}{0pt}{12pt}{4pt}
+\titlespacing*{\subsection}{0pt}{8pt}{3pt}
+
+% Header and footer (the first page has only the footer, like the proposal)
+\usepackage{fancyhdr,lastpage}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\itshape CSE 396 · Group 8 · Çılgın Kurye}
+\fancyhead[R]{\footnotesize\itshape\ckmodule}
+\fancyfoot[C]{\footnotesize Page \thepage\ of \pageref*{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\setlength{\headheight}{14pt}
+\fancypagestyle{ckfirst}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}\fancyfoot[C]{\footnotesize Page \thepage\ of \pageref*{LastPage}}}
+
+% Inline code: breaks only after . : ( , / _ and spaces, never inside a name
+\usepackage[obeyspaces,spaces]{url}
+\AtBeginDocument{%
+  \renewcommand{\UrlBreaks}{\do\.\do\:\do\(\do\,\do\/\do\_\do\|}%
+  \renewcommand{\UrlBigBreaks}{}%
+  \renewcommand{\UrlNoBreaks}{}%
+  \urlstyle{tt}}
+
+% Tables: boxed grid as in the proposal, smaller text
+\usepackage{etoolbox}
+\AtBeginEnvironment{longtable}{\footnotesize\renewcommand{\arraystretch}{1.2}}
+\setlength{\LTpre}{6pt}
+\setlength{\LTpost}{8pt}
+\setlength{\arrayrulewidth}{0.4pt}
+
+% Code blocks: long lines wrap; diagrams stay in one piece
+\usepackage{framed}
+\usepackage{fvextra}
+\RecustomVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\footnotesize, breaklines}
+\makeatletter
+\@ifundefined{Shaded}{}{\renewenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}}
+\@ifundefined{Highlighting}{}{\RecustomVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}, fontsize=\footnotesize, breaklines, breakanywhere}}
+\makeatother
+
+% Figures drawn with TikZ
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,calc,backgrounds,shapes.geometric}
+\tikzset{
+  ck/.style={font=\footnotesize, >={Stealth[length=5pt]}, line width=0.6pt},
+  box/.style={draw=ckline, fill=white, rounded corners=2pt, align=center, inner sep=4pt, minimum height=7mm},
+  mod/.style={box, fill=ckgrey},
+  this/.style={box, fill=cklight, draw=ckblue, line width=0.9pt},
+  group/.style={draw=ckline, dashed, rounded corners=3pt, inner sep=6pt},
+  lbl/.style={font=\scriptsize, align=center, inner sep=1.5pt},
+  msg/.style={->, draw=ckline},
+}
+\usepackage{caption}
+\captionsetup[figure]{font=small, labelfont=bf, skip=4pt}
+\newcommand{\ckfigure}[2]{\begin{figure}[htbp]\centering #1\caption{#2}\end{figure}}
+
+\usepackage{enumitem}
+\setlist{itemsep=1pt, topsep=3pt}
+\setlength{\parskip}{4pt}
+\setlength{\parindent}{0pt}
+\raggedbottom
+% ---- end of theme ----
+\newcommand{\ckmodule}{M7 ESP32 Software and Communication}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+% fallback for those not using the hyperref driver hyperxmp:
+\makeatletter
+\@ifundefined{xmpquote}{\newcommand{\xmpquote}[1]{#1}}{}
+\makeatother
+\hypersetup{
+  pdftitle={M7 ESP32 Software and Communication},
+  pdflang={en},
+  colorlinks=true,
+  linkcolor={black},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={black},
+  pdfcreator={LaTeX}}
+
+\title{M7 ESP32 Software and Communication --- Module Documentation}
+\author{}
+\date{}
+
+
+% ---- colours and drawings ----
+% ---- colours ----
+\definecolor{srv}{HTML}{2E6FB7}\colorlet{srvL}{srv!15}
+\definecolor{cli}{HTML}{2E9E5B}\colorlet{cliL}{cli!15}
+\definecolor{adm}{HTML}{E08A1E}\colorlet{admL}{adm!18}
+\definecolor{brd}{HTML}{7B4FB3}\colorlet{brdL}{brd!15}
+\definecolor{tcpc}{HTML}{1F5FA8}
+\definecolor{udpc}{HTML}{D9531E}
+\definecolor{obs}{HTML}{D7263D}
+\definecolor{tA}{HTML}{00A6D6}
+\definecolor{tB}{HTML}{3BB273}
+\definecolor{tC}{HTML}{F2C14E}
+\definecolor{tD}{HTML}{9B5DE5}
+
+% ---- styles ----
+\tikzset{
+  nb/.style={rounded corners=3pt, line width=0.9pt, align=center, inner sep=4pt, minimum height=9mm, font=\footnotesize},
+  sv/.style={nb, draw=srv, fill=srvL},
+  cl/.style={nb, draw=cli, fill=cliL},
+  ad/.style={nb, draw=adm, fill=admL},
+  bd/.style={nb, draw=brd, fill=brdL},
+  hwb/.style={nb, draw=black!50, fill=black!5},
+  tcpa/.style={draw=tcpc, line width=1.5pt},
+  udpa/.style={draw=udpc, line width=1.5pt, dash pattern=on 5pt off 2.5pt},
+  inna/.style={draw=black!55, line width=1pt},
+  al/.style={font=\scriptsize, fill=white, inner sep=1.2pt, rounded corners=1pt},
+  grp/.style={draw=black!35, dashed, rounded corners=5pt, inner sep=7pt},
+  glbl/.style={font=\scriptsize\bfseries, text=black!65},
+  hl/.style={line width=2.6pt},
+  st/.style={nb, rounded corners=8pt, minimum width=24mm},
+  co/.style={draw=black!60, line width=0.5pt},
+  cot/.style={font=\scriptsize, align=left, text=black!80},
+}
+
+% ---- system map; argument = module to highlight (M1 ... M8, or none) ----
+\newcommand{\systemmap}[1]{%
+\tikzset{M1/.style={},M2/.style={},M3/.style={},M4/.style={},M5/.style={},M6/.style={},M7/.style={},M8/.style={},none/.style={}}%
+\tikzset{#1/.style={hl}}%
+\begin{tikzpicture}[ck]
+\node[cl, M5, minimum width=27mm] (m5) at (0,3) {\textbf{M5}\\Player phones};
+\node[ad, M6, minimum width=27mm] (m6) at (0,0.4) {\textbf{M6}\\Admin panel};
+\node[sv, M2, minimum width=27mm, minimum height=38mm] (m2) at (4.6,1.7) {\textbf{M2}\\Network\\and sync};
+\node[sv, M1, minimum width=27mm, minimum height=38mm] (m1) at (8.4,1.7) {\textbf{M1}\\Game server\\and rules};
+\node[sv, M3, minimum width=25mm] (m3) at (12,2.8) {\textbf{M3}\\Physics};
+\node[sv, M4, minimum width=25mm] (m4) at (12,0.6) {\textbf{M4}\\Traffic and AI};
+\node[grp, fit=(m2)(m1)(m3)(m4)] (pc) {};
+\node[glbl, anchor=south west] at (pc.north west) {MAIN COMPUTER};
+\node[bd, M7, minimum width=27mm] (m7) at (4.6,-2.7) {\textbf{M7}\\ESP32 software};
+\node[bd, M8, minimum width=27mm] (m8) at (8.4,-2.7) {\textbf{M8}\\LED engine};
+\node[hwb, minimum width=25mm] (led) at (12,-2.7) {344 LEDs};
+\node[hwb, minimum width=27mm] (sm) at (4.6,-4.4) {Sensor and\\4 motors};
+\node[grp, fit=(m7)(m8)(led)(sm)] (bb) {};
+\node[glbl, anchor=north east] at (bb.south east) {LED CITY BOARD};
+\draw[tcpa, <->] (m5.east) -- node[al]{WebSocket} (m5.east -| m2.west);
+\draw[tcpa, <->] (m6.east) -- node[al]{WebSocket} (m6.east -| m2.west);
+\draw[tcpa, <->] ([xshift=-6mm]m7.north) -- node[al]{TCP} ([xshift=-6mm]m2.south);
+\draw[udpa, <->] ([xshift=6mm]m7.north) -- node[al]{UDP} ([xshift=6mm]m2.south);
+\draw[inna, <->] (m2) -- (m1);
+\draw[inna, <->] (m1.east |- m3) -- (m3);
+\draw[inna, <->] (m1.east |- m4) -- (m4);
+\draw[inna, ->] (m7) -- node[al]{state} (m8);
+\draw[inna, ->] (m8) -- (led);
+\draw[inna, <->] (m7) -- (sm);
+\draw[tcpa] (-1.3,-6.0) -- ++(0.9,0) node[right, font=\scriptsize]{TCP: every message arrives, in order};
+\draw[udpa] (4.0,-6.0) -- ++(0.9,0) node[right, font=\scriptsize]{UDP: fast, the newest message wins};
+\draw[inna] (9.3,-6.0) -- ++(0.9,0) node[right, font=\scriptsize]{inside one program or chip};
+\end{tikzpicture}}
+
+% ---- LED board seen from above (6 x 6 roads, 1 unit = 10 cm) ----
+\newcommand{\boardbase}{%
+\fill[black!88, rounded corners=3pt] (-0.5,-0.5) rectangle (5.5,5.5);
+\foreach \i in {0,...,4}{\foreach \j in {0,...,4}{%
+  \fill[black!60] (\i+0.13,\j+0.13) rectangle (\i+0.87,\j+0.87);
+  \fill[black!22] (\i+0.24,\j+0.24) rectangle (\i+0.52,\j+0.52);
+  \fill[black!30] (\i+0.56,\j+0.30) rectangle (\i+0.78,\j+0.62);
+  \fill[black!38] (\i+0.28,\j+0.58) rectangle (\i+0.66,\j+0.78);}}
+\foreach \i in {0,...,5}{%
+  \draw[black, line width=4.5pt] (\i,-0.05) -- (\i,5.05);
+  \draw[black, line width=4.5pt] (-0.05,\i) -- (5.05,\i);}
+\foreach \i in {0,...,5}{\foreach \k in {0,...,30}{%
+  \fill[black!55] (\i,\k/6) circle (0.025);
+  \fill[black!55] (\k/6,\i) circle (0.025);}}
+\foreach \x/\y/\c in {0/4/tA, 4/4/tB, 0/0/tC, 4/0/tD}{%
+  \fill[\c!30!black!60] (\x+0.13,\y+0.13) rectangle (\x+0.87,\y+0.87);
+  \fill[\c] (\x+0.3,\y+0.3) rectangle (\x+0.7,\y+0.7);
+  \fill[white] (\x+0.4,\y+0.5) circle (0.05); \fill[white] (\x+0.6,\y+0.5) circle (0.05);}}
+\newcommand{\nmark}[3]{\node[circle, fill=yellow!85!orange, draw=black, line width=0.4pt, inner sep=0.6pt, minimum size=3.6mm, font=\tiny\bfseries] at (#1,#2) {#3};}
+\newcommand{\bike}[4]{%
+\fill[#3!35] ($(#1,#2)+(#4:0.40)$) circle (0.05);
+\fill[#3!65] ($(#1,#2)+(#4:0.21)$) circle (0.075);
+\fill[#3, draw=white, line width=0.4pt] (#1,#2) circle (0.12);}
+\newcommand{\dpoint}[3]{\draw[#3!50, line width=0.8pt] (#1,#2) circle (0.26); \draw[#3, line width=1.4pt] (#1,#2) circle (0.16); \fill[#3] (#1,#2) circle (0.07);}
+\newcommand{\heavy}[2]{\draw[obs!60!black, line width=4pt] (#1) -- (#2); \draw[obs, line width=4pt, dash pattern=on 3pt off 5pt] (#1) -- (#2);}
+\newcommand{\roadwork}[2]{\draw[obs, line width=4pt] (#1) -- (#2);}
+\newcommand{\accident}[2]{\draw[obs, line width=4pt] (#1) -- (#2); \draw[white, line width=4pt, dash pattern=on 2.5pt off 3.5pt] (#1) -- (#2);}
+\newcommand{\puddle}[2]{\draw[cyan!35, line width=4pt] (#1) -- (#2); \draw[white, line width=1.6pt, dash pattern=on 1pt off 2.5pt] (#1) -- (#2);}
+\newcommand{\findme}[2]{\fill[white, opacity=0.25] (#1,#2) circle (0.36); \fill[white, opacity=0.5] (#1,#2) circle (0.24); \fill[white] (#1,#2) circle (0.13);}
+
+% ---- phone game screen (7 x 3.4 units) ----
+\newcommand{\phonemock}{%
+\fill[black!85, rounded corners=9pt] (-0.3,-0.3) rectangle (7.3,3.7);
+\fill[cyan!20] (0,1.7) rectangle (7,3.4);
+\fill[cli!14] (0,0) rectangle (7,1.7);
+\filldraw[fill=srv!30, draw=srv!70!black] (0.2,1.5) rectangle (1.0,3.0);
+\filldraw[fill=adm!35, draw=adm!70!black] (1.1,1.6) rectangle (1.8,2.4);
+\filldraw[fill=brd!30, draw=brd!70!black] (1.9,1.65) -- (2.6,1.65) -- (2.6,2.2) -- (2.25,2.5) -- (1.9,2.2) -- cycle;
+\filldraw[fill=adm!35, draw=adm!70!black] (4.5,1.65) rectangle (5.1,2.3);
+\filldraw[fill=srv!30, draw=srv!70!black] (5.2,1.55) rectangle (6.0,3.1);
+\filldraw[fill=cli!35, draw=cli!70!black] (6.1,1.6) rectangle (6.85,2.6);
+\fill[brown!60!black] (4.17,1.6) rectangle (4.23,1.8); \fill[cli!70!black] (4.2,1.95) circle (0.18);
+\fill[black!55] (1.8,0) -- (5.2,0) -- (3.75,1.7) -- (3.25,1.7) -- cycle;
+\draw[white, line width=0.8pt, dash pattern=on 4pt off 4pt] (3.5,0) -- (3.5,1.7);
+\filldraw[fill=black!15, draw=black!70] (3.62,1.12) rectangle (3.88,1.32);
+\fill[obs] (3.05,1.22) -- (3.15,1.48) -- (3.25,1.22) -- cycle;
+\fill[black!85] (3.43,0.08) rectangle (3.57,0.3);
+\fill[tA] (3.3,0.28) rectangle (3.7,0.6);
+\fill[brown!65] (3.34,0.6) rectangle (3.66,0.82);
+\fill[tA!60!black] (3.5,0.95) circle (0.13);
+\node[fill=black!70, text=white, rounded corners=2pt, font=\scriptsize\bfseries, inner sep=2pt] at (3.5,3.15) {2:41};
+\foreach \c/\s/\x in {tA/120/0.35,tB/95/0.95,tC/140/1.55,tD/80/2.15}
+  \node[fill=\c, text=white, font=\tiny\bfseries, rounded corners=1pt, inner sep=1.5pt, minimum width=5mm] at (\x,3.15) {\s};
+\fill[white, opacity=0.9] (6.45,2.85) circle (0.38); \draw[black!60] (6.45,2.85) circle (0.38);
+\draw[-{Stealth[length=5pt]}, line width=1.8pt, obs] (6.45,2.85) ++(230:0.2) -- ++(50:0.5);
+\fill[white, opacity=0.85] (0.55,0.5) circle (0.32); \fill[black!70] (0.43,0.5) -- (0.65,0.63) -- (0.65,0.37) -- cycle;
+\fill[white, opacity=0.85] (1.4,0.5) circle (0.32); \fill[black!70] (1.52,0.5) -- (1.3,0.63) -- (1.3,0.37) -- cycle;
+\node[fill=obs!80, text=white, rounded corners=3pt, font=\tiny\bfseries, minimum width=8mm, minimum height=6mm] at (5.6,0.5) {Brake};
+\node[fill=cli, text=white, rounded corners=3pt, font=\tiny\bfseries, minimum width=8mm, minimum height=8mm] at (6.5,0.6) {Gas};
+\node[fill=tC, text=black, rounded corners=3pt, font=\tiny\bfseries, minimum width=9mm, minimum height=5mm] at (6.15,1.45) {Deliver};
+\node[fill=white, text=black, rounded corners=3pt, font=\tiny\bfseries, minimum width=9mm, minimum height=5mm] at (0.9,1.45) {Find me};}
+
+% ---- side cut of the board (14 units wide) ----
+\newcommand{\boardside}{%
+\fill[brown!20] (-0.6,-0.35) rectangle (14.6,0);
+\foreach \x/\h/\c in {1.0/0.7/black!18, 2.2/1.1/black!22, 4.6/1.9/black!25, 5.8/2.6/black!28, 7.4/2.2/black!25, 8.6/1.6/black!22, 10.9/1.0/black!18}
+  \filldraw[fill=\c, draw=black!45] (\x,1.5) rectangle (\x+0.9,1.5+\h);
+\filldraw[fill=tB!35, draw=tB!70!black] (12.4,1.5) rectangle (13.4,2.3);
+\fill[black!70, rounded corners=1pt] (0.5,0) rectangle (1.1,0.9);
+\fill[black!70, rounded corners=1pt] (12.9,0) rectangle (13.5,0.9);
+\filldraw[fill=brown!45, draw=brown!70!black] (0,0.9) rectangle (14,1.3);
+\fill[black!80] (0,1.3) rectangle (14,1.38);
+\foreach \x in {0.3,0.9,...,13.8} \fill[black!35] (\x,1.42) circle (0.06);
+\foreach \x/\c in {3.3/tA, 3.9/tA, 6.9/obs, 7.5/obs, 10.5/tC} \fill[\c] (\x,1.42) circle (0.07);
+\fill[white, opacity=0.55] (0,1.38) rectangle (14,1.52);
+\filldraw[fill=brd!40, draw=brd] (2.3,0.35) rectangle (4.3,0.85);
+\node[font=\tiny] at (3.3,0.6) {ESP32};
+\filldraw[fill=brd, draw=brd!60!black] (6.75,0.62) rectangle (7.25,0.88);
+\filldraw[fill=adm!60, draw=adm!70!black] (1.8,0.6) circle (0.24);
+\filldraw[fill=adm!60, draw=adm!70!black] (12.2,0.6) circle (0.24);
+\filldraw[fill=black!15, draw=black!50] (9.3,0.35) rectangle (10.9,0.85);
+\node[font=\tiny] at (10.1,0.6) {Power};}
+
+\begin{document}
+
+\thispagestyle{ckfirst}
+\begin{center}
+{\bfseries GEBZE TECHNICAL UNIVERSITY\par}
+{Computer Engineering Department\par}
+{CSE 396 Module Documentation\par}
+\vspace{8pt}
+{\LARGE\bfseries Çılgın Kurye\par}
+\vspace{3pt}
+{\large\itshape Module M7: ESP32 Software and Communication\par}
+\vspace{6pt}
+\textbf{Instructor:} Erkan Zergeroğlu\hspace{1.4em}\textbf{Company:} Board\&Byte\hspace{1.4em}\textbf{Group:} Group-8\hspace{1.4em}\textbf{Date:} 6 November 2026
+\end{center}
+\begin{center}\footnotesize\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{0.27\linewidth}|p{0.15\linewidth}|p{0.27\linewidth}|p{0.15\linewidth}|}\hline
+\textbf{Name} & \textbf{Student No.} & \textbf{Name} & \textbf{Student No.} \\ \hline
+Tuğberk Akbulut & 230104004070 & Hasan Alperen Elmas & 1801042604 \\ \hline
+Hasan Hüseyin Özdemir & 230104004048 & Muhib Taha Boy & 230104004165 \\ \hline
+\end{tabular}
+\end{center}
+\vspace{2pt}
+
+
+
+
+
+% ---- table and list helpers ----
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{\dimexpr#1\linewidth-2\tabcolsep-\arrayrulewidth\relax}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{\dimexpr#1\linewidth-2\tabcolsep-\arrayrulewidth\relax}}
+\newcommand{\ckdone}{\item[$\boxtimes$]}
+\newcommand{\ckopen}{\item[$\square$]}
+\newcommand{\mdot}{$\bullet$}
+\newcounter{msec}
+\newcounter{chap}
+% ---- end of helpers ----
+\newcommand{\msection}[1]{\stepcounter{msec}\section{\arabic{msec}. #1}}
+
+\msection{Purpose}
+
+M7 is the software of the ESP32 inside the LED board, and the link between the board and the main
+computer. It gets the game state over Wi-Fi and gives it to the LED engine (M8). It reads the motion
+sensor and finds the strength and the place of a hit on the board. It drives the vibration motors.
+It also reports the health of the board and the sensor signal to the admin.
+
+\begin{longtable}[]{|L{0.18}|L{0.82}|}
+\hline Runs on & ESP32 in the LED board: core 0 (the LED engine M8 runs on core 1) \\ \hline
+Technology & C++ with the Arduino framework for ESP32 and FreeRTOS tasks; TCP and UDP over Wi-Fi with MessagePack; 6-axis motion sensor (accelerometer and gyroscope); 4 vibration motors with transistor drivers \\ \hline
+Requirements & R7 R8 R10 R11 \\ \hline
+\end{longtable}
+
+\begin{figure}[htbp]\centering
+\systemmap{M7}
+\caption{Where M7 sits in the system. M7 talks to the server on two channels: TCP and UDP.}
+\end{figure}
+
+\msection{Requirements covered}
+
+\begin{longtable}[]{|L{0.07}|L{0.25}|L{0.68}|}
+\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M7 does for it} \\ \hline \endhead
+R7 & Earthquake & Finds hand hits and motor shaking with the sensor; strength 0--10 and a 3 × 3 zone; drives the motors for the admin button \\ \hline
+R8 & Physical LED board & Brings the game state to the board over Wi-Fi; one ESP32 for the LEDs, the sensor and the motors \\ \hline
+R10 & Network and measurement & Board delay measurement; sensor samples for the seismic graph; comes back after a lost link \\ \hline
+R11 & Independent development & PC emulators for both sides of the link \\ \hline
+\end{longtable}
+
+\msection{Inputs and outputs}
+
+\begin{longtable}[]{|L{0.08}|L{0.20}|L{0.18}|L{0.54}|}
+\hline \textbf{Dir.} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline \endhead
+In & Board state & M2, UDP & 10 to 30 per second: phase, players (team, tone, position, flags), delivery points, obstacles, earthquake \\ \hline
+In & Config & M2, TCP & Player colours, brightness 0.1--1, LED current limit \\ \hline
+In & Vibrate & M2, TCP & Motors to use, strength 0--1, duration of at most 5 s \\ \hline
+In & Sensor & Hardware & 1000 samples per second \\ \hline
+Out & Newest state & M8 & Latest board state, config and link state, on the same chip \\ \hline
+Out & Earthquake event & M2, TCP, to M1 and M6 & Source (hand or motors), strength 0--10, centre, zone 0--8, confidence \\ \hline
+Out & Sensor samples & M2, UDP, to M6 & 100 per second for the seismic graph, sent in groups of 10 \\ \hline
+Out & Status & M2, TCP, to M6 & Once per second: frame rate, Wi-Fi signal, LED current, errors \\ \hline
+\end{longtable}
+
+\msection{Main components}
+
+\begin{longtable}[]{|L{0.20}|L{0.52}|L{0.28}|}
+\hline \textbf{Component} & \textbf{What it does} & \textbf{Related modules} \\ \hline \endhead
+Network link & Joins Wi-Fi, finds the server, keeps the TCP channel and the UDP stream, connects again after a loss & M2 \\ \hline
+Message codec & MessagePack encode and decode; checks the version and the order numbers; drops old or broken messages & M2 \\ \hline
+State hand-over & Two-slot buffer: the LED engine always takes the newest full state and never waits & M8 \\ \hline
+Hit detector & Finds hits in the sensor signal; computes the strength and the zone & M1, M6 \\ \hline
+Motor controller & Runs vibrate commands with a soft start and safety limits & M1, M6 \\ \hline
+Status and settings & Status reports and delay replies; Wi-Fi and calibration settings in flash, changed over USB & M6 \\ \hline
+\end{longtable}
+
+\msection{How it works}
+
+\textbf{Two channels.} The board keeps one TCP channel and one UDP stream to the server. Messages that
+must arrive go on TCP: the config, the vibrate commands, the earthquake events and the status
+report. Data that comes again and again goes on UDP: the board state, the sensor samples and the
+delay probes. If one UDP packet is lost, the next one replaces it, so the LEDs never wait. Every
+message has an order number, so the board can drop a UDP packet that comes late and out of order.
+
+\textbf{Two cores.} The ESP32 has two cores. Core 0 runs all M7 work: Wi-Fi, the network tasks, the
+sensor, the hit detector and the motors. Core 1 runs only the LED engine of M8, 60 frames per
+second. So Wi-Fi work never breaks the LED timing. The two sides share the state through a
+two-slot buffer. M7 always writes into the free slot. When the slot is full, M7 switches one index
+in one step. The LED engine reads the slot that the index shows, so it always gets a complete state
+and it never waits for a lock.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[ck]
+\draw[brd, line width=1.2pt, rounded corners=6pt, fill=brd!4] (-0.4,-3.3) rectangle (13.2,1.5);
+\node[font=\scriptsize\bfseries, text=brd, anchor=north west] at (-0.3,1.45) {ESP32};
+\node[font=\scriptsize\bfseries, text=brd] at (3.3,1.1) {Core 0: M7};
+\node[font=\scriptsize\bfseries, text=brd] at (10.6,1.1) {Core 1: M8};
+\node[bd, minimum width=22mm] (wifi) at (1.2,0.2) {Wi-Fi and\\network};
+\node[bd, minimum width=22mm] (cod) at (4.4,0.2) {Message\\codec};
+\node[bd, minimum width=22mm] (sen) at (1.2,-2.0) {Sensor\\1000 per s};
+\node[bd, minimum width=22mm] (hit) at (4.4,-2.0) {Hit\\detector};
+\node[bd, minimum width=16mm] (mot) at (7.0,-2.0) {Motor\\control};
+\node[nb, draw=adm, fill=admL, minimum width=18mm, minimum height=14mm] (buf) at (7.4,0.2) {Two-slot\\buffer};
+\node[nb, draw=brd, fill=brd!25, minimum width=22mm, minimum height=24mm, line width=1.4pt] (led) at (10.6,-0.7) {LED engine\\60 frames\\per second};
+\draw[inna,->] (wifi) -- (cod);
+\draw[inna,->] (cod) -- node[al]{state} (buf);
+\draw[inna,->] (buf) -- (led.west |- buf);
+\draw[inna,->] (sen) -- (hit);
+\draw[inna,->] (hit.north) -- node[al]{event} (cod.south);
+\draw[inna,->] (cod.south east) -- node[al, pos=0.55]{vibrate} (mot.north);
+\draw[tcpa,<->] (wifi.west) -- ++(-1.1,0) node[left, font=\scriptsize, text=tcpc, align=right]{TCP\\and};
+\draw[udpa,<->] ([yshift=-3mm]wifi.west) -- ++(-1.1,0) node[left, font=\scriptsize, text=udpc]{UDP};
+\end{tikzpicture}
+\caption{Work on the two cores of the ESP32. The buffer is the only shared part.}
+\end{figure}
+
+\textbf{What is inside the board.} The figure below is a side cut of the board. The motion sensor is
+fixed at the centre, under the plywood, so it feels a hit from every side. The four vibration
+motors are under the four corners. They have their own power line, so they do not make the LED
+voltage drop. The ESP32, the level shifter and the power supply sit under the board too.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[x=0.9cm, y=0.9cm]
+\boardside
+\nmark{3.3}{-0.15}{1}\nmark{7.0}{0.3}{2}\nmark{1.8}{0.05}{3}\nmark{12.2}{0.05}{3}\nmark{10.1}{-0.15}{4}
+\nmark{6.25}{1.7}{5}\nmark{6.25}{4.4}{6}\nmark{12.9}{2.55}{7}
+\node[anchor=north, font=\scriptsize] at (7,-0.6) {\begin{tabular}{@{}c@{\ \ }l@{\qquad}c@{\ \ }l@{\qquad}c@{\ \ }l@{}}
+\textbf{1} & ESP32 and level shifter & \textbf{4} & 5 V power supply & \textbf{6} & 3D-printed buildings \\
+\textbf{2} & Motion sensor at the centre & \textbf{5} & LED strips on the roads & \textbf{7} & Team store with two LEDs \\
+\textbf{3} & Vibration motors at the corners & & & & \end{tabular}};
+\end{tikzpicture}
+\caption{Side cut of the board with the parts that M7 uses.}
+\end{figure}
+
+\textbf{Finding a hit.} The sensor measures the motion 1000 times per second. First a filter takes
+away gravity and slow tilting, so only the shaking is left. The detector also learns the normal
+noise of the room. The start threshold is the mean noise plus six times its spread, so it goes up
+on a noisy table. When the signal passes the threshold, a hit starts. The detector takes a 150 ms
+window from this moment. The energy E in the window gives the strength with a log scale, like a real
+earthquake scale: strength = k × log10(E / E0). Here E0 is the energy of the weakest hit we accept,
+and k is set in calibration with a standard hit. The result is cut to 0--10. The first push of the
+board shows the direction of the hit, and its size shows how far the hit is from the centre. From
+this the detector picks one of 9 zones in a 3 × 3 grid and gives a confidence value. After a hit the
+detector waits 1 second, so one hit makes only one event. The event goes to the server within
+200 ms.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[ck]
+\begin{scope}
+\fill[adm!15] (3.0,-1.7) rectangle (4.5,1.9);
+\draw[black!40] (-0.2,0) -- (8.2,0);
+\draw[black!40,->] (0,-1.7) -- (0,2.0);
+\draw[obs, line width=0.9pt, dash pattern=on 4pt off 2pt] (0,0.45) -- (8,0.45);
+\draw[obs, line width=0.9pt, dash pattern=on 4pt off 2pt] (0,-0.45) -- (8,-0.45);
+\draw[srv, line width=0.8pt, smooth, samples=400, domain=0:8] plot (\x, {0.12*sin(1500*\x) + 0.06*sin(1900*\x) + (\x>3 ? 1.6*exp(-1.6*max(\x-3,0))*sin(2200*(\x-3)) : 0)});
+\node[font=\scriptsize, text=adm!80!black] at (3.75,2.15) {150 ms window};
+\node[font=\scriptsize, text=obs, anchor=west] at (5.6,0.7) {threshold};
+\node[font=\scriptsize, anchor=west] at (0.3,-1.1) {room noise};
+\node[font=\scriptsize] at (4.2,-2.0) {time};
+\node[al, draw=cli, text=cli!70!black, line width=0.8pt] at (6.9,1.5) {event sent};
+\draw[cli, ->, line width=1pt] (4.5,1.5) -- (6.25,1.5);
+\end{scope}
+\begin{scope}[shift={(9.4,-1.5)}]
+\foreach \i in {0,1,2}{\foreach \j in {0,1,2}{%
+  \pgfmathtruncatemacro{\z}{(2-\j)*3+\i}
+  \filldraw[fill=black!6, draw=black!40] (\i,\j) rectangle ++(1,1);
+  \node[font=\tiny, text=black!50] at (\i+0.18,\j+0.82) {\z};}}
+\fill[obs!45] (2,1) rectangle ++(1,1);
+\node[font=\tiny, text=black!70] at (2.18,1.82) {5};
+\fill[brd] (1.5,1.5) circle (0.09);
+\draw[obs, line width=1pt, ->] (1.5,1.5) -- (2.5,1.45);
+\fill[obs] (2.55,1.45) circle (0.1);
+\node[font=\scriptsize] at (1.5,-0.3) {zone 5, confidence 0.8};
+\node[font=\scriptsize] at (1.5,3.3) {board from above};
+\end{scope}
+\end{tikzpicture}
+\caption{Left: the sensor signal of one hand hit. Right: the 3 × 3 zones; the purple dot is the sensor.}
+\end{figure}
+
+\textbf{Motors.} When the admin presses the earthquake button, M1 sends a vibrate command on TCP.
+The command says which motors to use, the strength and the time, at most 5 seconds. M7 drives the
+motors with PWM through transistors. It starts slowly over 100 ms, so the current does not jump.
+The shaking is then measured by the same detector as a hand hit, and the event is marked with
+``motors'' as its source. So the earthquake in the game follows the real shaking of the table.
+
+\textbf{When the link is lost.} If no state comes for 2 seconds, M7 stops the motors at once and
+tells M8 to show a ``searching'' animation. Then it tries to connect again. The goal is to be back
+within 5 seconds after the router is up. The Wi-Fi name, the password and the calibration values
+are stored in the ESP32 flash. We can change them over the USB cable, so we do not need to build
+the code again at a new place.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[ck]
+\node[st, draw=black!50, fill=black!6] (b) at (0,0) {Start};
+\node[st, draw=adm, fill=admL] (w) at (3.4,0) {Join Wi-Fi};
+\node[st, draw=adm, fill=admL] (f) at (6.8,0) {Find server};
+\node[st, draw=cli, fill=cliL, line width=1.4pt] (c) at (10.2,0) {Connected};
+\node[st, draw=obs, fill=obs!10] (s) at (6.8,-1.8) {Searching};
+\draw[inna,->] (b) -- (w);
+\draw[inna,->] (w) -- node[al]{ok} (f);
+\draw[inna,->] (f) -- node[al]{found} (c);
+\draw[inna,->] (c) |- node[al, pos=0.3]{no state 2 s} (s);
+\draw[inna,->] (s) -- node[al]{retry} (f);
+\draw[inna,->] (s) -| node[al, pos=0.75]{no Wi-Fi} (w);
+\end{tikzpicture}
+\caption{Link states of the board. In ``Searching'' the motors stop and the LEDs show a waiting animation.}
+\end{figure}
+
+\msection{Testing and demonstration}
+
+Two PC programs take the place of the neighbours. The server emulator sends test scenarios with
+delay and loss that we can change. It also shows the earthquake events and the seismic signal. The
+board emulator draws the board on the screen, so M1 and M2 can test before the real board is ready.
+The tests use the shared example messages, broken packets, a 2-hour run, added delay, 20\% loss and
+a router restart. For the sensor we test hit finding and false alarms. Our targets are: at least
+95\% of calibrated hits are found; at most one false earthquake in 30 minutes of normal play; the
+correct quarter of the board in at least 95\% of hits and the correct zone in 80\%; and at most
+200 ms from the hit to the event. In the demonstration we hit the board by hand and press the admin
+button, and we watch the seismic graph and the shock wave on the LEDs.
+
+\end{document}

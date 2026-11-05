@@ -167,6 +167,8 @@
 
 
 % ---- colours and drawings ----
+\usepackage{colortbl}
+\usepackage{float}
 % ---- colours ----
 \definecolor{srv}{HTML}{2E6FB7}\colorlet{srvL}{srv!15}
 \definecolor{cli}{HTML}{2E9E5B}\colorlet{cliL}{cli!15}
@@ -215,7 +217,7 @@
 \node[glbl, anchor=south west] at (pc.north west) {MAIN COMPUTER};
 \node[bd, M7, minimum width=27mm] (m7) at (4.6,-2.7) {\textbf{M7}\\ESP32 software};
 \node[bd, M8, minimum width=27mm] (m8) at (8.4,-2.7) {\textbf{M8}\\LED engine};
-\node[hwb, minimum width=25mm] (led) at (12,-2.7) {344 LEDs};
+\node[hwb, minimum width=25mm] (led) at (12,-2.7) {RGB LED\\strips};
 \node[hwb, minimum width=27mm] (sm) at (4.6,-4.4) {Sensor and\\4 motors};
 \node[grp, fit=(m7)(m8)(led)(sm)] (bb) {};
 \node[glbl, anchor=north east] at (bb.south east) {LED CITY BOARD};
@@ -229,9 +231,7 @@
 \draw[inna, ->] (m7) -- node[al]{state} (m8);
 \draw[inna, ->] (m8) -- (led);
 \draw[inna, <->] (m7) -- (sm);
-\draw[tcpa] (-1.3,-6.0) -- ++(0.9,0) node[right, font=\scriptsize]{TCP: every message arrives, in order};
-\draw[udpa] (4.0,-6.0) -- ++(0.9,0) node[right, font=\scriptsize]{UDP: fast, the newest message wins};
-\draw[inna] (9.3,-6.0) -- ++(0.9,0) node[right, font=\scriptsize]{inside one program or chip};
+\ckleg{-1.3,-6.0}{tcpa/TCP or WebSocket: every message arrives in order, udpa/UDP: fast and the newest message wins, inna/inside one program or chip}
 \end{tikzpicture}}
 
 % ---- LED board seen from above (6 x 6 roads, 1 unit = 10 cm) ----
@@ -248,7 +248,7 @@
 \foreach \i in {0,...,5}{\foreach \k in {0,...,30}{%
   \fill[black!55] (\i,\k/6) circle (0.025);
   \fill[black!55] (\k/6,\i) circle (0.025);}}
-\foreach \x/\y/\c in {0/4/tA, 4/4/tB, 0/0/tC, 4/0/tD}{%
+\foreach \x/\y/\c in {0/4/tA, 4/4/tB, 0/0/tD, 4/0/tC}{%
   \fill[\c!30!black!60] (\x+0.13,\y+0.13) rectangle (\x+0.87,\y+0.87);
   \fill[\c] (\x+0.3,\y+0.3) rectangle (\x+0.7,\y+0.7);
   \fill[white] (\x+0.4,\y+0.5) circle (0.05); \fill[white] (\x+0.6,\y+0.5) circle (0.05);}}
@@ -260,8 +260,8 @@
 \newcommand{\dpoint}[3]{\draw[#3!50, line width=0.8pt] (#1,#2) circle (0.26); \draw[#3, line width=1.4pt] (#1,#2) circle (0.16); \fill[#3] (#1,#2) circle (0.07);}
 \newcommand{\heavy}[2]{\draw[obs!60!black, line width=4pt] (#1) -- (#2); \draw[obs, line width=4pt, dash pattern=on 3pt off 5pt] (#1) -- (#2);}
 \newcommand{\roadwork}[2]{\draw[obs, line width=4pt] (#1) -- (#2);}
-\newcommand{\accident}[2]{\draw[obs, line width=4pt] (#1) -- (#2); \draw[white, line width=4pt, dash pattern=on 2.5pt off 3.5pt] (#1) -- (#2);}
-\newcommand{\puddle}[2]{\draw[cyan!35, line width=4pt] (#1) -- (#2); \draw[white, line width=1.6pt, dash pattern=on 1pt off 2.5pt] (#1) -- (#2);}
+\newcommand{\accident}[2]{\draw[obs, line width=4pt, dash pattern=on 3pt off 3pt] (#1) -- (#2);}
+\newcommand{\puddle}[2]{\draw[cyan!55, line width=4pt] (#1) -- (#2); \draw[cyan!15, line width=1.6pt, dash pattern=on 1pt off 2.5pt] (#1) -- (#2);}
 \newcommand{\findme}[2]{\fill[white, opacity=0.25] (#1,#2) circle (0.36); \fill[white, opacity=0.5] (#1,#2) circle (0.24); \fill[white] (#1,#2) circle (0.13);}
 
 % ---- phone game screen (7 x 3.4 units) ----
@@ -317,6 +317,42 @@
 \filldraw[fill=black!15, draw=black!50] (9.3,0.35) rectangle (10.9,0.85);
 \node[font=\tiny] at (10.1,0.6) {Power};}
 
+% ---- layout helpers ----
+\newenvironment{ckfig}{\begin{figure}[H]\centering}{\end{figure}}
+\newcommand{\msub}[1]{\par\smallskip\noindent{\bfseries #1:}\par\nobreak\vspace{-2pt}}
+\tikzset{msga/.style={draw=cli!70!black, line width=0.8pt}, cmda/.style={draw=obs, line width=1pt}, loopa/.style={draw=srv, line width=1pt}, hwa/.style={draw=black!60, line width=1.2pt, dash pattern=on 1.5pt off 1.5pt}, wanta/.style={draw=cli, line width=1.6pt}, reala/.style={draw=obs, line width=1.6pt}, siga/.style={draw=srv, line width=0.8pt}, thra/.style={draw=obs, line width=0.9pt, dash pattern=on 4pt off 2pt}, evta/.style={draw=cli, line width=1pt}}
+\tikzset{iol/.style={font=\scriptsize, fill=white, inner sep=1.2pt, rounded corners=1pt, align=center}}
+% legend row: start point, list of style/text
+\newcommand{\ckleg}[2]{%
+\coordinate (lgp) at (#1);
+\foreach \ls/\lt in {#2}{%
+  \draw[\ls,->] (lgp) -- ++(0.8,0) node[right, font=\scriptsize, text=black] (lgt) {\lt};
+  \coordinate (lgp) at ([xshift=5mm]lgt.east);}}
+% purpose table: colour (unused), runs on, technology, requirements
+\newcommand{\ckinfo}[4]{\par\smallskip\noindent{\renewcommand{\arraystretch}{1.25}%
+\begin{tabular}{|L{0.30}|L{0.50}|L{0.20}|}\hline
+\textbf{Runs on} & \textbf{Technology} & \textbf{Requirements} \\ \hline
+#2 & #3 & #4 \\ \hline
+\end{tabular}}\par\smallskip}
+% module data map: n in, n out, centre text, centre style, inputs, outputs, legend list
+% inputs and outputs: {name}/style/{data}/arrow style
+\newcommand{\iomap}[7]{%
+\begin{tikzpicture}[ck]
+\pgfmathsetmacro{\nmax}{max(#1,#2)}
+\node[#4, line width=2pt, minimum width=30mm, minimum height=\nmax*10.5mm+2mm, font=\normalsize] (c) at (0,0) {#3};
+\foreach \nm/\st/\dd/\ar [count=\ii] in {#5}{%
+  \pgfmathsetmacro{\yy}{((#1+1)/2-\ii)*1.05}
+  \node[\st, minimum width=25mm, minimum height=8.5mm, font=\scriptsize] (in\ii) at (-6.6,\yy) {\nm};
+  \draw[\ar,->] (in\ii.east) -- node[iol]{\dd} (c.west |- in\ii);}
+\foreach \nm/\st/\dd/\ar [count=\ii] in {#6}{%
+  \pgfmathsetmacro{\yy}{((#2+1)/2-\ii)*1.05}
+  \node[\st, minimum width=25mm, minimum height=8.5mm, font=\scriptsize] (out\ii) at (6.6,\yy) {\nm};
+  \draw[\ar,->] (c.east |- out\ii) -- node[iol]{\dd} (out\ii.west);}
+\node[font=\scriptsize\bfseries, text=black!60] at (-6.6,\nmax*0.525+0.4) {Inputs come from};
+\node[font=\scriptsize\bfseries, text=black!60] at (6.6,\nmax*0.525+0.4) {Outputs go to};
+\ckleg{-7.6,-\nmax*0.525-0.5}{#7}
+\end{tikzpicture}}
+
 \begin{document}
 
 \thispagestyle{ckfirst}
@@ -358,37 +394,41 @@ Muhib Taha Boy & 230104004165 &  &  \\ \hline
 
 M4 brings the city to life. It finds routes and travel times on the road network. It moves the NPC
 cars that make the traffic. It also drives the AI bots that fill the empty places in a game. A bot
-makes the same control message that a phone sends, so for M1 a bot and a human player look the
-same.
+makes the same control message that a phone sends, so for M1 a bot and a human player look the same.
 
-\begin{longtable}[]{|L{0.18}|L{0.82}|}
-\hline Runs on & Main computer inside the game server; M1 runs it once in every tick \\ \hline
-Technology & TypeScript; our own shortest-path search (Dijkstra); a car-following model for NPC cars; a state machine and path following for bots; seeded random numbers \\ \hline
-Requirements & R1 R2 R4 R6 R11 \\ \hline
-\end{longtable}
+\ckinfo{srv}{Main computer inside the game server. M1 runs it once in every tick}{TypeScript, our own shortest path search (Dijkstra), a car following model for NPC cars, a state machine and path following for bots, seeded random numbers}{R1 R2 R4 R6 R11}
 
-\begin{figure}[htbp]\centering
-\systemmap{M4}
-\caption{Where M4 sits in the system. M4 talks only to M1, inside the same program.}
-\end{figure}
+M4 talks only to M1, inside the same program. The figure shows what M4 gets from M1 in every tick and
+what it gives back.
+
+\begin{ckfig}
+\iomap{3}{4}{\textbf{M4}\\Traffic and AI}{sv}
+{{City plan file}/hwb/{intersections, roads,\\lanes, stores}/inna, {M1 Game server}/sv/{players, obstacles,\\car hits}/inna, {M1 Game server}/sv/{traffic and\\bot parameters}/inna}
+{{M1 Game server}/sv/{NPC cars}/inna, {M1 Game server}/sv/{bot controls}/inna, {M1 Game server}/sv/{travel time table}/inna, {M1 Game server}/sv/{traffic metrics}/inna}
+{inna/function calls inside the server program}
+\end{ckfig}
 
 \msection{Requirements covered}
 
-\begin{longtable}[]{|L{0.07}|L{0.25}|L{0.68}|}
-\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M4 does for it} \\ \hline \endhead
-R1 & Multiplayer game & Bots take the empty places and play like players \\ \hline
-R2 & Delivery cycle & Travel-time table from each store, which M1 uses for fair near and far points \\ \hline
-R4 & Traffic & NPC cars make real traffic on the roads \\ \hline
-R6 & Obstacles & Heavy traffic adds slow cars; an accident closes a lane; road work closes the road for routes and cars \\ \hline
-R11 & Independent development & Talks only to M1 with plain data; tested with its own test program \\ \hline
+M4 takes part in five requirements. The last column says what will work when M4 is finished.
+
+\begin{longtable}[]{|L{0.06}|L{0.15}|L{0.40}|L{0.39}|}
+\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M4 does for it} & \textbf{When M4 is done} \\ \hline \endhead
+R1 & Multiplayer game & Bots take the empty places and play like players & A game can start with only one human player \\ \hline
+R2 & Delivery cycle & Travel time table from each store, which M1 uses for fair near and far points & No team gets easier delivery points than another \\ \hline
+R4 & Traffic & NPC cars make real traffic on the roads & The city is full of cars that never lock up \\ \hline
+R6 & Obstacles & Heavy traffic adds slow cars. An accident closes a lane. Road work closes the road for routes and cars & Cars and bots go around every obstacle \\ \hline
+R11 & Engineering requirements & Talks only to M1 with plain data, tested with its own test program & M4 can be built and tested without the other modules \\ \hline
 \end{longtable}
 
 \msection{Inputs and outputs}
 
-\begin{longtable}[]{|L{0.08}|L{0.20}|L{0.18}|L{0.54}|}
-\hline \textbf{Dir.} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline \endhead
+M1 gives the inputs at the start of each tick and takes the outputs before M3 moves the motorcycles.
+
+\begin{longtable}[]{|L{0.11}|L{0.17}|L{0.18}|L{0.54}|}
+\hline \textbf{Direction} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline \endhead
 In & City plan & Shared file & Intersections, roads, lanes, stores, possible delivery points \\ \hline
-In & Game data & M1 & Every tick: players, obstacles with a version number, car-hit events \\ \hline
+In & Game data & M1 & Every tick: players, obstacles with a version number, car hit events \\ \hline
 In & Parameters & M6, through M1 & Number of NPC cars, traffic effects, bot skill \\ \hline
 Out & NPC cars & M1, then M3, M5, M6 & Position, direction, speed, lane, size \\ \hline
 Out & Bot controls & M1, then M3 & The same record as a phone: throttle, brake, steer, deliver \\ \hline
@@ -398,29 +438,32 @@ Out & Traffic metrics & M1, then M6 & Number of NPC cars, mean NPC speed, bot ro
 
 \msection{Main components}
 
-\begin{longtable}[]{|L{0.20}|L{0.52}|L{0.28}|}
-\hline \textbf{Component} & \textbf{What it does} & \textbf{Related modules} \\ \hline \endhead
-Road graph & 36 intersections and 60 two-way roads with lanes and turn costs & --- \\ \hline
-Route planner & Fastest routes and the travel-time table; computed again only when the obstacles change & M1 \\ \hline
-NPC traffic & Moves, adds and removes NPC cars & M1, M3 \\ \hline
-Bot drivers & One state machine for each bot & M1, M3 \\ \hline
-Traffic metrics & Values for the admin graphs & M6 \\ \hline
+M4 has five parts. The route planner is used by both the NPC cars and the bots.
+
+\begin{longtable}[]{|L{0.21}|L{0.39}|L{0.40}|}
+\hline \textbf{Component} & \textbf{Takes} & \textbf{Gives} \\ \hline \endhead
+Road graph & City plan & 36 intersections and 60 roads in both directions, with lanes and turn costs \\ \hline
+Route planner & Road graph, obstacles, traffic, parameters & Fastest routes and the travel time table, computed again when a cost changes \\ \hline
+NPC traffic & Routes, players, car hits, number of cars & Moved, added and removed NPC cars \\ \hline
+Bot drivers & Routes, the bot's motorcycle, game data & One control record for each bot in every tick \\ \hline
+Traffic metrics & Cars and bots & Values for the admin graphs \\ \hline
 \end{longtable}
 
 \msection{How it works}
 
-\textbf{The road graph and routes.} The city has 6 roads in each direction. Where two roads cross,
+\msub{The road graph and routes}
+The city has 6 roads in each direction. Where two roads cross,
 there is an intersection, so the graph has 36 intersections. Between them there are 60 road
 segments, and cars can drive both ways. Each segment has a cost: the expected time to drive it.
-Turning left or making a U-turn adds a small extra cost. Obstacles change the costs. Heavy traffic
-and an accident make a segment slower, and road work closes it. M4 uses Dijkstra's shortest-path
-search to find the fastest routes. The graph is small, so one search takes much less than a
-millisecond. M4 computes the routes again only when the version number of the obstacle list
-changes. From the results it makes the travel-time table: the time from each of the four stores to
+Turning left or making a U turn adds a small extra cost. Obstacles change the costs. Heavy traffic
+and an accident make a segment slower, and road work closes it. M4 uses Dijkstra's shortest path
+search to find the fastest routes. The graph is small, so one search is very fast. M4 computes the
+routes again whenever a cost changes: when the version number of the obstacle list goes up, when the
+traffic on a road gets much heavier or lighter, or when the admin changes a route parameter. From the results it makes the travel time table: the time from each of the four stores to
 every possible delivery point. M1 uses this table to choose fair near and far points.
 
-\begin{figure}[htbp]\centering
-\begin{tikzpicture}[x=0.85cm, y=0.85cm]
+\begin{ckfig}
+\begin{tikzpicture}[x=1.1cm, y=1.1cm]
 \boardbase
 \draw[tA, line width=2.4pt, rounded corners=3pt] (1,4) -- (1,2) -- (3,2) -- (3,1) -- (3.5,1);
 \draw[tA!50, line width=1.4pt, dashed, rounded corners=3pt] (1,4) -- (3,4) -- (3,2.6);
@@ -429,27 +472,27 @@ every possible delivery point. M1 uses this table to choose fair near and far po
 \dpoint{3.5}{1}{tA}
 \foreach \x in {0,...,5}{\foreach \y in {0,...,5}{\fill[white] (\x,\y) circle (0.06);}}
 \nmark{0.55}{5.15}{1}\nmark{0.6}{2.6}{2}\nmark{3.35}{3.4}{3}\nmark{3.4}{2.5}{4}\nmark{1.5}{0.65}{5}\nmark{3.95}{1.4}{6}
-\node[anchor=west, font=\scriptsize, align=left] at (6.0,2.5) {\begin{tabular}{@{}c@{\ \ }l@{}}
-\textbf{1} & Start: the team store\\[2pt]
-\textbf{2} & Fastest route, found by Dijkstra\\[2pt]
-\textbf{3} & Shorter road, but closed\\[2pt]
-\textbf{4} & Road work: cost is infinite\\[2pt]
-\textbf{5} & Heavy traffic: cost is higher\\[2pt]
-\textbf{6} & Delivery point\\[2pt]
+\node[anchor=west, font=\small, align=left] at (6.0,2.5) {\begin{tabular}{@{}c@{\ \ }l@{}}
+\textbf{1} & Start: the team store\\[3pt]
+\textbf{2} & Fastest route, found by Dijkstra\\[3pt]
+\textbf{3} & Shorter road, but closed\\[3pt]
+\textbf{4} & Road work: cost is infinite\\[3pt]
+\textbf{5} & Heavy traffic: cost is higher\\[3pt]
+\textbf{6} & Delivery point\\[3pt]
 $\circ$ & Intersection, a node of the graph\end{tabular}};
 \end{tikzpicture}
-\caption{A route on the road graph, drawn on the board. Obstacles change the cost of the roads.}
-\end{figure}
+\end{ckfig}
 
-\textbf{NPC traffic.} Each NPC car follows a lane and picks a new turn at each intersection. A car
+\msub{NPC traffic}
+Each NPC car follows a lane and picks a new turn at each intersection. A car
 keeps a safe gap behind the car or the motorcycle in front of it. If the gap gets small, it slows
 down smoothly, and it speeds up again when the road is free. A car enters an intersection only when
 the intersection is free, so cars do not drive through each other. New cars never appear close to a
-player. If a car is stuck for 10 seconds, M4 removes it and adds it again somewhere else, so the
-traffic never locks up. The admin sets the number of cars, and heavy-traffic obstacles add extra slow
+player. If a car is stuck for too long, M4 removes it and adds it again somewhere else, so the
+traffic never locks up. The admin sets the number of cars, and heavy traffic obstacles add extra slow
 cars on their road.
 
-\begin{figure}[htbp]\centering
+\begin{ckfig}
 \begin{tikzpicture}[ck]
 \fill[black!65] (0,0) rectangle (13,1.4);
 \draw[white, dash pattern=on 6pt off 6pt] (0,0.7) -- (13,0.7);
@@ -466,42 +509,45 @@ cars on their road.
 \node[font=\scriptsize, anchor=west] at (12.7,2.4) {waits until the};
 \node[font=\scriptsize, anchor=west] at (12.7,2.05) {crossing is free};
 \end{tikzpicture}
-\caption{How NPC cars drive: a safe gap behind the next vehicle, and a free crossing before they enter.}
-\end{figure}
+\end{ckfig}
 
-\textbf{Bots.} Every bot has a small state machine that follows the delivery cycle, as the figure
-below shows. The bot drives to the store, gets the package, drives to the delivery point, slows down
-and presses ``Deliver'', and then goes back. On the way it follows the route from the planner. It
-steers toward a point a little ahead on the path, so the motion looks smooth. If it falls, it waits
-for the penalty time. If it is stuck, it asks for a new route. One ``bot skill'' value sets the top
-speed, the reaction time and some steering noise, so the admin can make bots weaker or stronger.
+\msub{Bots}
+Every bot has a small state machine that follows the delivery cycle, as the figure below shows. The
+bot drives to the store, gets the package, drives to the delivery point, slows down and presses
+``Deliver'', and then goes back. On the way it follows the route from the planner. It steers toward a
+point a little ahead on the path, so the motion looks smooth. A bot can fall or get stuck in any of
+these four states. If it falls, it waits for the penalty time and then goes on in the same state. If
+it is stuck, it asks for a new route and goes on in the same state. One ``bot skill'' value sets the
+top speed, the reaction time and some steering noise, so the admin can make bots weaker or stronger.
 
-\begin{figure}[htbp]\centering
+\begin{ckfig}
 \begin{tikzpicture}[ck]
 \node[st, draw=tA, fill=tA!15] (s) at (0,0) {Go to store};
 \node[st, draw=tC!80!black, fill=tC!20] (p) at (3.8,0) {Get package};
 \node[st, draw=srv, fill=srvL] (d) at (7.6,0) {Drive to point};
 \node[st, draw=cli, fill=cliL] (v) at (11.4,0) {Deliver};
-\node[st, draw=obs, fill=obs!10] (f) at (5.7,-1.9) {Fallen: wait};
-\node[st, draw=adm, fill=admL] (r) at (9.5,-1.9) {Stuck: new route};
+\node[grp, fit=(s)(p)(d)(v), inner sep=9pt] (g) {};
+\node[glbl, anchor=south west] at (g.north west) {ANY OF THESE STATES};
+\node[st, draw=obs, fill=obs!10] (f) at (3.2,-2.6) {Fallen: wait};
+\node[st, draw=adm, fill=admL] (r) at (8.2,-2.6) {Stuck: new route};
 \draw[inna,->] (s) -- node[al]{arrived} (p);
 \draw[inna,->] (p) -- node[al]{got it} (d);
 \draw[inna,->] (d) -- node[al]{slow, near} (v);
-\draw[inna,->] (v.north) -- ++(0,0.6) -| node[al, pos=0.25]{delivered, go back} (s.north);
-\draw[inna,->] ([xshift=-9mm]d.south) -- node[al]{fall} ([xshift=-2mm]f.north);
-\draw[inna,->] ([xshift=8mm]f.north) -- node[al]{up} ([xshift=-2mm]d.south);
-\draw[inna,->] ([xshift=5mm]d.south) -- node[al]{stuck} ([xshift=-6mm]r.north);
-\draw[inna,->] ([xshift=6mm]r.north) -- node[al]{ok} ([xshift=12mm]d.south);
+\draw[inna,->] (v.north) -- ++(0,0.75) -| node[al, pos=0.25]{delivered, go back} (s.north);
+\draw[cmda,->] ([xshift=-8mm]f.north |- g.south) -- node[al]{fall} ([xshift=-8mm]f.north);
+\draw[loopa,->] ([xshift=8mm]f.north) -- node[al]{back to the same state} ([xshift=8mm]f.north |- g.south);
+\draw[cmda,->] ([xshift=-8mm]r.north |- g.south) -- node[al]{stuck} ([xshift=-8mm]r.north);
+\draw[loopa,->] ([xshift=8mm]r.north) -- node[al]{route ok} ([xshift=8mm]r.north |- g.south);
+\ckleg{-1,-3.6}{inna/delivery cycle, cmda/problem while driving, loopa/go on in the same state}
 \end{tikzpicture}
-\caption{The state machine of one bot.}
-\end{figure}
+\end{ckfig}
 
-\msection{Testing and demonstration}
+\msection{Testing}
 
-A small test program plays the role of M1 and draws the city from above. We test routes with and
-without closed roads, equal travel times for all teams in a city that is the same on all sides, 80
-cars for 30 minutes without a traffic lock, obstacles that change during play, 8 bots that finish
-deliveries, and the same result with the same seed. In the demonstration the admin adds obstacles
-and more traffic, and the cars and bots change their way at once.
+M4 is tested alone with a small test program that plays the role of M1. It gives the city plan, fixed
+player positions and a list of test obstacles, and it draws the city from above. We check routes with
+and without closed roads, equal travel times for all teams in a city that is the same on all sides,
+new routes when the traffic changes, many cars in a long run without a traffic lock, bots that finish
+their deliveries, and the same result with the same seed.
 
 \end{document}

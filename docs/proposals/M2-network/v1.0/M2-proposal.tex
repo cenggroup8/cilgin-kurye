@@ -1,0 +1,618 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+\documentclass[
+  english,
+  10pt,
+  a4paper,
+]{article}
+\usepackage{xcolor}
+\usepackage[top=22mm,bottom=20mm,left=18mm,right=18mm]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{longtable,booktabs,array}
+\usepackage{caption}
+\captionsetup[table]{skip=6pt}
+\newcounter{none} % for unnumbered tables
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+\ifLuaTeX
+\usepackage[bidi=basic,shorthands=off]{babel}
+\else
+\usepackage[bidi=default,shorthands=off]{babel}
+\fi
+\ifLuaTeX
+  \usepackage{selnolig} % disable illegal ligatures
+\fi
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+% ---- Çılgın Kurye document theme: same look as the CSE 396 project proposal ----
+% Compile with XeLaTeX (also works on Overleaf). Fonts: TeX Gyre Termes (Times), DejaVu Sans Mono.
+\usepackage{fontspec}
+\setmainfont{texgyretermes}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold, ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
+\setsansfont{texgyreheros}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold, ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
+\setmonofont{DejaVuSansMono}[Extension=.ttf, UprightFont=*, BoldFont=*-Bold, ItalicFont=*-Oblique, BoldItalicFont=*-BoldOblique, Scale=0.80]
+\setmathfont{texgyretermes-math.otf}
+
+\usepackage{xcolor}
+\definecolor{ckblue}{HTML}{1F3A5F}
+\definecolor{cklight}{HTML}{E8EEF5}
+\definecolor{ckgrey}{HTML}{F2F2F2}
+\definecolor{ckline}{HTML}{555555}
+\definecolor{shadecolor}{HTML}{F4F5F7}
+
+% Headings as in the proposal: serif, bold; subsections bold italic. Numbers are part of the heading text.
+\setcounter{secnumdepth}{0}
+\usepackage{titlesec}
+\titleformat{\section}{\rmfamily\Large\bfseries}{}{0pt}{}
+\titleformat{\subsection}{\rmfamily\large\bfseries\itshape}{}{0pt}{}
+\titleformat{\subsubsection}{\rmfamily\normalsize\bfseries}{}{0pt}{}
+\titlespacing*{\section}{0pt}{12pt}{4pt}
+\titlespacing*{\subsection}{0pt}{8pt}{3pt}
+
+% Header and footer (the first page has only the footer, like the proposal)
+\usepackage{fancyhdr,lastpage}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\itshape CSE 396 · Group 8 · Çılgın Kurye}
+\fancyhead[R]{\footnotesize\itshape\ckmodule}
+\fancyfoot[C]{\footnotesize Page \thepage\ of \pageref*{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\setlength{\headheight}{14pt}
+\fancypagestyle{ckfirst}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}\fancyfoot[C]{\footnotesize Page \thepage\ of \pageref*{LastPage}}}
+
+% Inline code: breaks only after . : ( , / _ and spaces, never inside a name
+\usepackage[obeyspaces,spaces]{url}
+\AtBeginDocument{%
+  \renewcommand{\UrlBreaks}{\do\.\do\:\do\(\do\,\do\/\do\_\do\|}%
+  \renewcommand{\UrlBigBreaks}{}%
+  \renewcommand{\UrlNoBreaks}{}%
+  \urlstyle{tt}}
+
+% Tables: boxed grid as in the proposal, smaller text
+\usepackage{etoolbox}
+\AtBeginEnvironment{longtable}{\footnotesize\renewcommand{\arraystretch}{1.2}}
+\setlength{\LTpre}{6pt}
+\setlength{\LTpost}{8pt}
+\setlength{\arrayrulewidth}{0.4pt}
+
+% Code blocks: long lines wrap; diagrams stay in one piece
+\usepackage{framed}
+\usepackage{fvextra}
+\RecustomVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\footnotesize, breaklines}
+\makeatletter
+\@ifundefined{Shaded}{}{\renewenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}}
+\@ifundefined{Highlighting}{}{\RecustomVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}, fontsize=\footnotesize, breaklines, breakanywhere}}
+\makeatother
+
+% Figures drawn with TikZ
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,calc,backgrounds,shapes.geometric}
+\tikzset{
+  ck/.style={font=\footnotesize, >={Stealth[length=5pt]}, line width=0.6pt},
+  box/.style={draw=ckline, fill=white, rounded corners=2pt, align=center, inner sep=4pt, minimum height=7mm},
+  mod/.style={box, fill=ckgrey},
+  this/.style={box, fill=cklight, draw=ckblue, line width=0.9pt},
+  group/.style={draw=ckline, dashed, rounded corners=3pt, inner sep=6pt},
+  lbl/.style={font=\scriptsize, align=center, inner sep=1.5pt},
+  msg/.style={->, draw=ckline},
+}
+\usepackage{caption}
+\captionsetup[figure]{font=small, labelfont=bf, skip=4pt}
+\newcommand{\ckfigure}[2]{\begin{figure}[htbp]\centering #1\caption{#2}\end{figure}}
+
+\usepackage{enumitem}
+\setlist{itemsep=1pt, topsep=3pt}
+\setlength{\parskip}{4pt}
+\setlength{\parindent}{0pt}
+\raggedbottom
+% ---- end of theme ----
+\newcommand{\ckmodule}{M2 Network and Synchronization}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+% fallback for those not using the hyperref driver hyperxmp:
+\makeatletter
+\@ifundefined{xmpquote}{\newcommand{\xmpquote}[1]{#1}}{}
+\makeatother
+\hypersetup{
+  pdftitle={M2 Network and Synchronization},
+  pdflang={en},
+  colorlinks=true,
+  linkcolor={black},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={black},
+  pdfcreator={LaTeX}}
+
+\title{M2 Network and Synchronization --- Module Documentation}
+\author{}
+\date{}
+
+
+% ---- colours and drawings ----
+\usepackage{colortbl}
+\usepackage{float}
+\makeatletter
+\newcommand{\needspace}[1]{\begingroup\setlength{\dimen@}{#1}\vskip\z@\@plus\dimen@\penalty -100\vskip\z@\@plus -\dimen@\vskip\dimen@\penalty 9999\vskip -\dimen@\vskip\z@skip\endgroup}
+\makeatother
+% ---- colours ----
+\definecolor{srv}{HTML}{2E6FB7}\colorlet{srvL}{srv!15}
+\definecolor{cli}{HTML}{2E9E5B}\colorlet{cliL}{cli!15}
+\definecolor{adm}{HTML}{E08A1E}\colorlet{admL}{adm!18}
+\definecolor{brd}{HTML}{7B4FB3}\colorlet{brdL}{brd!15}
+\definecolor{tcpc}{HTML}{1F5FA8}
+\definecolor{udpc}{HTML}{D9531E}
+\definecolor{obs}{HTML}{D7263D}
+\definecolor{tA}{HTML}{00A6D6}
+\definecolor{tB}{HTML}{3BB273}
+\definecolor{tC}{HTML}{F2C14E}
+\definecolor{tD}{HTML}{9B5DE5}
+
+% ---- styles ----
+\tikzset{
+  nb/.style={rounded corners=3pt, line width=0.9pt, align=center, inner sep=4pt, minimum height=9mm, font=\footnotesize},
+  sv/.style={nb, draw=srv, fill=srvL},
+  cl/.style={nb, draw=cli, fill=cliL},
+  ad/.style={nb, draw=adm, fill=admL},
+  bd/.style={nb, draw=brd, fill=brdL},
+  hwb/.style={nb, draw=black!50, fill=black!5},
+  tcpa/.style={draw=tcpc, line width=1.5pt},
+  udpa/.style={draw=udpc, line width=1.5pt, dash pattern=on 5pt off 2.5pt},
+  inna/.style={draw=black!55, line width=1pt},
+  al/.style={font=\scriptsize, fill=white, inner sep=1.2pt, rounded corners=1pt},
+  grp/.style={draw=black!35, dashed, rounded corners=5pt, inner sep=7pt},
+  glbl/.style={font=\scriptsize\bfseries, text=black!65},
+  hl/.style={line width=2.6pt},
+  st/.style={nb, rounded corners=8pt, minimum width=24mm},
+  co/.style={draw=black!60, line width=0.5pt},
+  cot/.style={font=\scriptsize, align=left, text=black!80},
+}
+
+% ---- system map; argument = module to highlight (M1 ... M8, or none) ----
+\newcommand{\systemmap}[1]{%
+\tikzset{M1/.style={},M2/.style={},M3/.style={},M4/.style={},M5/.style={},M6/.style={},M7/.style={},M8/.style={},none/.style={}}%
+\tikzset{#1/.style={hl}}%
+\begin{tikzpicture}[ck]
+\node[cl, M5, minimum width=27mm] (m5) at (0,3) {\textbf{M5}\\Player phones};
+\node[ad, M6, minimum width=27mm] (m6) at (0,0.4) {\textbf{M6}\\Admin panel};
+\node[sv, M2, minimum width=27mm, minimum height=38mm] (m2) at (4.6,1.7) {\textbf{M2}\\Network\\and sync};
+\node[sv, M1, minimum width=27mm, minimum height=38mm] (m1) at (8.4,1.7) {\textbf{M1}\\Game server\\and rules};
+\node[sv, M3, minimum width=25mm] (m3) at (12,2.8) {\textbf{M3}\\Physics};
+\node[sv, M4, minimum width=25mm] (m4) at (12,0.6) {\textbf{M4}\\Traffic and AI};
+\node[grp, fit=(m2)(m1)(m3)(m4)] (pc) {};
+\node[glbl, anchor=south west] at (pc.north west) {MAIN COMPUTER};
+\node[bd, M7, minimum width=27mm] (m7) at (4.6,-2.7) {\textbf{M7}\\ESP32 software};
+\node[bd, M8, minimum width=27mm] (m8) at (8.4,-2.7) {\textbf{M8}\\LED engine};
+\node[hwb, minimum width=25mm] (led) at (12,-2.7) {RGB LED\\strips};
+\node[hwb, minimum width=27mm] (sm) at (4.6,-4.4) {Sensor and\\4 motors};
+\node[grp, fit=(m7)(m8)(led)(sm)] (bb) {};
+\node[glbl, anchor=north east] at (bb.south east) {LED CITY BOARD};
+\draw[tcpa, <->] (m5.east) -- node[al]{WebSocket} (m5.east -| m2.west);
+\draw[tcpa, <->] (m6.east) -- node[al]{WebSocket} (m6.east -| m2.west);
+\draw[tcpa, <->] ([xshift=-6mm]m7.north) -- node[al]{TCP} ([xshift=-6mm]m2.south);
+\draw[udpa, <->] ([xshift=6mm]m7.north) -- node[al]{UDP} ([xshift=6mm]m2.south);
+\draw[inna, <->] (m2) -- (m1);
+\draw[inna, <->] (m1.east |- m3) -- (m3);
+\draw[inna, <->] (m1.east |- m4) -- (m4);
+\draw[inna, ->] (m7) -- node[al]{state} (m8);
+\draw[inna, ->] (m8) -- (led);
+\draw[inna, <->] (m7) -- (sm);
+\ckleg{-1.3,-6.0}{tcpa/TCP or WebSocket: every message arrives in order, udpa/UDP: fast and the newest message wins, inna/inside one program or chip}
+\end{tikzpicture}}
+
+% ---- LED board seen from above (6 x 6 roads, 1 unit = 10 cm) ----
+\newcommand{\boardbase}{%
+\fill[black!88, rounded corners=3pt] (-0.5,-0.5) rectangle (5.5,5.5);
+\foreach \i in {0,...,4}{\foreach \j in {0,...,4}{%
+  \fill[black!60] (\i+0.13,\j+0.13) rectangle (\i+0.87,\j+0.87);
+  \fill[black!22] (\i+0.24,\j+0.24) rectangle (\i+0.52,\j+0.52);
+  \fill[black!30] (\i+0.56,\j+0.30) rectangle (\i+0.78,\j+0.62);
+  \fill[black!38] (\i+0.28,\j+0.58) rectangle (\i+0.66,\j+0.78);}}
+\foreach \i in {0,...,5}{%
+  \draw[black, line width=4.5pt] (\i,-0.05) -- (\i,5.05);
+  \draw[black, line width=4.5pt] (-0.05,\i) -- (5.05,\i);}
+\foreach \i in {0,...,5}{\foreach \k in {0,...,30}{%
+  \fill[black!55] (\i,\k/6) circle (0.025);
+  \fill[black!55] (\k/6,\i) circle (0.025);}}
+\foreach \x/\y/\c in {0/4/tA, 4/4/tB, 0/0/tD, 4/0/tC}{%
+  \fill[\c!30!black!60] (\x+0.13,\y+0.13) rectangle (\x+0.87,\y+0.87);
+  \fill[\c] (\x+0.3,\y+0.3) rectangle (\x+0.7,\y+0.7);
+  \fill[white] (\x+0.4,\y+0.5) circle (0.05); \fill[white] (\x+0.6,\y+0.5) circle (0.05);}}
+\newcommand{\nmark}[3]{\node[circle, fill=yellow!85!orange, draw=black, line width=0.4pt, inner sep=0.6pt, minimum size=3.6mm, font=\tiny\bfseries] at (#1,#2) {#3};}
+\newcommand{\bike}[4]{%
+\fill[#3!35] ($(#1,#2)+(#4:0.40)$) circle (0.05);
+\fill[#3!65] ($(#1,#2)+(#4:0.21)$) circle (0.075);
+\fill[#3, draw=white, line width=0.4pt] (#1,#2) circle (0.12);}
+\newcommand{\dpoint}[3]{\draw[#3!50, line width=0.8pt] (#1,#2) circle (0.26); \draw[#3, line width=1.4pt] (#1,#2) circle (0.16); \fill[#3] (#1,#2) circle (0.07);}
+\newcommand{\heavy}[2]{\draw[obs!60!black, line width=4pt] (#1) -- (#2); \draw[obs, line width=4pt, dash pattern=on 3pt off 5pt] (#1) -- (#2);}
+\newcommand{\roadwork}[2]{\draw[obs, line width=4pt] (#1) -- (#2);}
+\newcommand{\accident}[2]{\draw[obs, line width=4pt, dash pattern=on 3pt off 3pt] (#1) -- (#2);}
+\newcommand{\puddle}[2]{\draw[cyan!55, line width=4pt] (#1) -- (#2); \draw[cyan!15, line width=1.6pt, dash pattern=on 1pt off 2.5pt] (#1) -- (#2);}
+\newcommand{\findme}[2]{\fill[white, opacity=0.25] (#1,#2) circle (0.36); \fill[white, opacity=0.5] (#1,#2) circle (0.24); \fill[white] (#1,#2) circle (0.13);}
+
+% ---- phone game screen (7 x 3.4 units) ----
+\newcommand{\phonemock}{%
+\fill[black!85, rounded corners=9pt] (-0.3,-0.3) rectangle (7.3,3.7);
+\fill[cyan!20] (0,1.7) rectangle (7,3.4);
+\fill[cli!14] (0,0) rectangle (7,1.7);
+\filldraw[fill=srv!30, draw=srv!70!black] (0.2,1.5) rectangle (1.0,3.0);
+\filldraw[fill=adm!35, draw=adm!70!black] (1.1,1.6) rectangle (1.8,2.4);
+\filldraw[fill=brd!30, draw=brd!70!black] (1.9,1.65) -- (2.6,1.65) -- (2.6,2.2) -- (2.25,2.5) -- (1.9,2.2) -- cycle;
+\filldraw[fill=adm!35, draw=adm!70!black] (4.5,1.65) rectangle (5.1,2.3);
+\filldraw[fill=srv!30, draw=srv!70!black] (5.2,1.55) rectangle (6.0,3.1);
+\filldraw[fill=cli!35, draw=cli!70!black] (6.1,1.6) rectangle (6.85,2.6);
+\fill[brown!60!black] (4.17,1.6) rectangle (4.23,1.8); \fill[cli!70!black] (4.2,1.95) circle (0.18);
+\fill[black!55] (1.8,0) -- (5.2,0) -- (3.75,1.7) -- (3.25,1.7) -- cycle;
+\draw[white, line width=0.8pt, dash pattern=on 4pt off 4pt] (3.5,0) -- (3.5,1.7);
+\filldraw[fill=black!15, draw=black!70] (3.62,1.12) rectangle (3.88,1.32);
+\fill[obs] (3.05,1.22) -- (3.15,1.48) -- (3.25,1.22) -- cycle;
+\fill[black!85] (3.43,0.08) rectangle (3.57,0.3);
+\fill[tA] (3.3,0.28) rectangle (3.7,0.6);
+\fill[brown!65] (3.34,0.6) rectangle (3.66,0.82);
+\fill[tA!60!black] (3.5,0.95) circle (0.13);
+\node[fill=black!70, text=white, rounded corners=2pt, font=\scriptsize\bfseries, inner sep=2pt] at (3.5,3.15) {2:41};
+\foreach \c/\s/\x in {tA/120/0.35,tB/95/0.95,tC/140/1.55,tD/80/2.15}
+  \node[fill=\c, text=white, font=\tiny\bfseries, rounded corners=1pt, inner sep=1.5pt, minimum width=5mm] at (\x,3.15) {\s};
+\fill[white, opacity=0.9] (6.45,2.85) circle (0.38); \draw[black!60] (6.45,2.85) circle (0.38);
+\draw[-{Stealth[length=5pt]}, line width=1.8pt, obs] (6.45,2.85) ++(230:0.2) -- ++(50:0.5);
+\fill[white, opacity=0.85] (0.55,0.5) circle (0.32); \fill[black!70] (0.43,0.5) -- (0.65,0.63) -- (0.65,0.37) -- cycle;
+\fill[white, opacity=0.85] (1.4,0.5) circle (0.32); \fill[black!70] (1.52,0.5) -- (1.3,0.63) -- (1.3,0.37) -- cycle;
+\node[fill=obs!80, text=white, rounded corners=3pt, font=\tiny\bfseries, minimum width=8mm, minimum height=6mm] at (5.6,0.5) {Brake};
+\node[fill=cli, text=white, rounded corners=3pt, font=\tiny\bfseries, minimum width=8mm, minimum height=8mm] at (6.5,0.6) {Gas};
+\node[fill=white, text=black, rounded corners=3pt, font=\tiny\bfseries, minimum width=9mm, minimum height=5mm] at (0.9,1.45) {Find me};}
+
+% ---- side cut of the board (14 units wide) ----
+\newcommand{\boardside}{%
+\fill[brown!20] (-0.6,-0.35) rectangle (14.6,0);
+\foreach \x/\h/\c in {1.0/0.7/black!18, 2.2/1.1/black!22, 4.6/1.9/black!25, 5.8/2.6/black!28, 7.4/2.2/black!25, 8.6/1.6/black!22, 10.9/1.0/black!18}
+  \filldraw[fill=\c, draw=black!45] (\x,1.5) rectangle (\x+0.9,1.5+\h);
+\filldraw[fill=tB!35, draw=tB!70!black] (12.4,1.5) rectangle (13.4,2.3);
+\fill[black!70, rounded corners=1pt] (0.5,0) rectangle (1.1,0.9);
+\fill[black!70, rounded corners=1pt] (12.9,0) rectangle (13.5,0.9);
+\filldraw[fill=brown!45, draw=brown!70!black] (0,0.9) rectangle (14,1.3);
+\fill[black!80] (0,1.3) rectangle (14,1.38);
+\foreach \x in {0.3,0.9,...,13.8} \fill[black!35] (\x,1.42) circle (0.06);
+\foreach \x/\c in {3.3/tA, 3.9/tA, 6.9/obs, 7.5/obs, 10.5/tC} \fill[\c] (\x,1.42) circle (0.07);
+\fill[white, opacity=0.55] (0,1.38) rectangle (14,1.52);
+\filldraw[fill=brd!40, draw=brd] (2.3,0.35) rectangle (4.3,0.85);
+\node[font=\tiny] at (3.3,0.6) {ESP32};
+\filldraw[fill=brd, draw=brd!60!black] (6.75,0.62) rectangle (7.25,0.88);
+\filldraw[fill=adm!60, draw=adm!70!black] (1.8,0.6) circle (0.24);
+\filldraw[fill=adm!60, draw=adm!70!black] (12.2,0.6) circle (0.24);
+\filldraw[fill=black!15, draw=black!50] (9.3,0.35) rectangle (10.9,0.85);
+\node[font=\tiny] at (10.1,0.6) {Power};}
+
+% ---- layout helpers ----
+\newenvironment{ckfig}{\begin{figure}[!htb]\centering}{\end{figure}}
+\renewcommand{\topfraction}{0.9}\renewcommand{\bottomfraction}{0.8}\renewcommand{\textfraction}{0.07}\renewcommand{\floatpagefraction}{0.85}
+\setcounter{topnumber}{3}\setcounter{bottomnumber}{2}\setcounter{totalnumber}{4}
+\newcommand{\msub}[1]{\par\needspace{5\baselineskip}\smallskip\noindent{\bfseries #1:}\par\nobreak\vspace{-2pt}}
+\tikzset{msga/.style={draw=cli!70!black, line width=0.8pt}, cmda/.style={draw=obs, line width=1pt}, loopa/.style={draw=srv, line width=1pt}, hwa/.style={draw=black!60, line width=1.2pt, dash pattern=on 1.5pt off 1.5pt}, wanta/.style={draw=cli, line width=1.6pt}, reala/.style={draw=obs, line width=1.6pt}, siga/.style={draw=srv, line width=0.8pt}, thra/.style={draw=obs, line width=0.9pt, dash pattern=on 4pt off 2pt}, evta/.style={draw=cli, line width=1pt}}
+\tikzset{iol/.style={font=\scriptsize, fill=white, inner sep=1.2pt, rounded corners=1pt, align=center}}
+% legend row: start point, list of style/text
+\newcommand{\ckleg}[2]{%
+\coordinate (lgp) at (#1);
+\foreach \ls/\lt in {#2}{%
+  \draw[\ls,->] (lgp) -- ++(0.8,0) node[right, font=\scriptsize, text=black] (lgt) {\lt};
+  \coordinate (lgp) at ([xshift=5mm]lgt.east);}}
+% purpose table: colour (unused), runs on, technology, requirements
+\newcommand{\ckinfo}[4]{\par\smallskip\noindent{\renewcommand{\arraystretch}{1.25}%
+\begin{tabular}{|L{0.30}|L{0.50}|L{0.20}|}\hline
+\textbf{Runs on} & \textbf{Technology} & \textbf{Requirements} \\ \hline
+#2 & #3 & #4 \\ \hline
+\end{tabular}}\par\smallskip}
+% module data map: n in, n out, centre text, centre style, inputs, outputs, legend list
+% inputs and outputs: {name}/style/{data}/arrow style
+\newcommand{\iomap}[7]{%
+\begin{tikzpicture}[ck]
+\pgfmathsetmacro{\nmax}{max(#1,#2)}
+\node[#4, line width=2pt, minimum width=30mm, minimum height=\nmax*10.5mm+2mm, font=\normalsize] (c) at (0,0) {#3};
+\foreach \nm/\st/\dd/\ar [count=\ii] in {#5}{%
+  \pgfmathsetmacro{\yy}{((#1+1)/2-\ii)*1.05}
+  \node[\st, minimum width=25mm, minimum height=8.5mm, font=\scriptsize] (in\ii) at (-6.6,\yy) {\nm};
+  \draw[\ar,->] (in\ii.east) -- node[iol]{\dd} (c.west |- in\ii);}
+\foreach \nm/\st/\dd/\ar [count=\ii] in {#6}{%
+  \pgfmathsetmacro{\yy}{((#2+1)/2-\ii)*1.05}
+  \node[\st, minimum width=25mm, minimum height=8.5mm, font=\scriptsize] (out\ii) at (6.6,\yy) {\nm};
+  \draw[\ar,->] (c.east |- out\ii) -- node[iol]{\dd} (out\ii.west);}
+\node[font=\scriptsize\bfseries, text=black!60] at (-6.6,\nmax*0.525+0.4) {Inputs come from};
+\node[font=\scriptsize\bfseries, text=black!60] at (6.6,\nmax*0.525+0.4) {Outputs go to};
+\ckleg{-7.6,-\nmax*0.525-0.5}{#7}
+\end{tikzpicture}}
+
+% keep an intro sentence and its table together on one page
+\newcommand{\ckkeep}[1]{\par\noindent\begin{minipage}{\linewidth}\setlength{\parskip}{4pt}#1\end{minipage}\par\smallskip}
+
+\begin{document}
+
+\thispagestyle{ckfirst}
+\begin{center}
+{\bfseries GEBZE TECHNICAL UNIVERSITY\par}
+{Computer Engineering Department\par}
+{CSE 396 Module Documentation\par}
+\vspace{8pt}
+{\LARGE\bfseries Çılgın Kurye\par}
+\vspace{3pt}
+{\large\itshape Module M2: Network and Synchronization\par}
+\vspace{6pt}
+\textbf{Company:} Board\&Byte\hspace{1.4em}\textbf{Group:} Group-8\hspace{1.4em}\textbf{Date:} 6 November 2026
+\end{center}
+\begin{center}\footnotesize\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{0.27\linewidth}|p{0.15\linewidth}|p{0.27\linewidth}|p{0.15\linewidth}|}\hline
+\textbf{Name} & \textbf{Student No.} & \textbf{Name} & \textbf{Student No.} \\ \hline
+Tuğberk Akbulut & 230104004070 & Ayşe Poyraz & 230104004085 \\ \hline
+Hasan Hüseyin Özdemir & 230104004048 & Umutcan Ocak & 220104004903 \\ \hline
+\end{tabular}
+\end{center}
+\vspace{2pt}
+
+
+
+% ---- table and list helpers ----
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{\dimexpr#1\linewidth-2\tabcolsep-\arrayrulewidth\relax}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{\dimexpr#1\linewidth-2\tabcolsep-\arrayrulewidth\relax}}
+\newcommand{\ckdone}{\item[$\boxtimes$]}
+\newcommand{\ckopen}{\item[$\square$]}
+\newcommand{\mdot}{$\bullet$}
+\newcounter{msec}
+\newcounter{chap}
+% ---- end of helpers ----
+\newcommand{\msection}[1]{\needspace{8\baselineskip}\stepcounter{msec}\section{\arabic{msec}. #1}}
+
+\msection{Purpose}
+
+M2 connects the phones, the admin page and the LED board to the game server. It does not make game
+decisions. It takes messages from outside, checks them and gives them to M1. After each tick it takes
+the state from M1 and sends it to everybody. M2 also makes sure that nothing from outside can change
+the game state directly. For the admin, it measures the network and it can make the network worse on
+purpose for tests.
+
+\ckinfo{srv}{Main computer, in the same server program as M1}{TypeScript on Node.js, WebSocket for phones and admin, TCP and UDP for the LED board, MessagePack binary messages, QR code for joining}{R1 R9 R10 R11}
+
+M2 is the only module with links to the outside. The figure shows every neighbour and the kind of link
+that each message uses.
+
+\begin{ckfig}
+\iomap{5}{5}{\textbf{M2}\\Network\\and sync}{sv}
+{{M5 Phones}/cl/{hello, join, controls,\\``Find me'', ping replies}/tcpa, {M6 Admin page}/ad/{login, commands,\\parameters}/tcpa, {M7 Board (TCP)}/bd/{earthquake events,\\status}/tcpa, {M7 Board (UDP)}/bd/{sensor samples,\\delay replies}/udpa, {M1 Game server}/sv/{frozen state,\\metrics}/inna}
+{{M1 Game server}/sv/{checked inputs,\\lost players}/inna, {M5 Phones}/cl/{game state, join reply,\\ping, frame rate limit}/tcpa, {M6 Admin page}/ad/{state, metrics,\\replies, board data}/tcpa, {M7 Board (TCP)}/bd/{config, vibrate}/tcpa, {M7 Board (UDP)}/bd/{board state,\\delay probe}/udpa}
+{tcpa/WebSocket or TCP, udpa/UDP, inna/inside the server program}
+\end{ckfig}
+
+\msection{Requirements covered}
+
+\ckkeep{%
+M2 takes part in four requirements. The last column says what will work when M2 is finished.
+
+\begin{tabular}{|L{0.06}|L{0.15}|L{0.40}|L{0.39}|}
+\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M2 does for it} & \textbf{When M2 is done} \\ \hline 
+R1 & Multiplayer game & Up to 8 phones join with a QR code or a six digit game code, only with the browser & Players join in seconds without installing anything \\ \hline
+R9 & Live admin panel & Admin channel for commands, parameters, state, metrics and board data & The admin page controls the game from any computer on the game Wi-Fi \\ \hline
+R10 & Network and measurement & Ping and jitter for each phone, real loss on the board link. Added delay, jitter and loss for each player and for the board & The admin can make the network worse and see the effect live \\ \hline
+R11 & Engineering requirements & Inputs are checked and queued. Every phone gets the same frozen state of each tick & No phone can change the game by itself, and all players see the same game \\ \hline
+\end{tabular}}
+
+\msection{Inputs and outputs}
+
+\ckkeep{%
+The table lists every message group with its link. All messages are MessagePack, a compact binary
+form of JSON.
+
+\begin{tabular}{|L{0.11}|L{0.17}|L{0.18}|L{0.54}|}
+\hline \textbf{Direction} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline 
+In & Phone messages & M5, WebSocket & Hello with player key, name and game code, join with team, controls, ``Find me'', ping replies \\ \hline
+In & Admin messages & M6, WebSocket & Commands, parameter changes, requests for parameters and the game log \\ \hline
+In & Board messages & M7, TCP and UDP & Earthquake events and status on TCP. Sensor samples and delay replies on UDP \\ \hline
+In & State and metrics & M1 & Frozen game state and board state every tick, metrics twice per second \\ \hline
+Out & To M1 & M1 & Checked controls, joins, ``Find me'', admin commands, board events, lost and returning players, network metrics \\ \hline
+Out & To phones & M5, WebSocket & Game state 30 times per second, join replies, ping, frame rate limit \\ \hline
+Out & To admin & M6, WebSocket & State 10 times per second, metrics, replies, board data \\ \hline
+Out & To board & M7, TCP and UDP & Config and vibrate commands on TCP. Board state and delay probes on UDP \\ \hline
+\end{tabular}}
+
+\msection{Main components}
+
+\ckkeep{%
+M2 is made of eight parts. Each one takes some data and gives a result to the next part.
+
+\begin{tabular}{|L{0.21}|L{0.39}|L{0.40}|}
+\hline \textbf{Component} & \textbf{Takes} & \textbf{Gives} \\ \hline 
+Web server and join & Page requests from phones and the admin & The phone and admin pages, the 3D models, the city plan, the QR code and the game code \\ \hline
+Sessions and access & New links, player keys & One session for each phone and one admin. A player key keeps the same motorcycle after a reload \\ \hline
+Codec and checker & Raw messages & Checked messages. A bad message gets an error reply. Too many or too large messages are dropped \\ \hline
+Input queue & Checked inputs & The inputs of one tick for M1 \\ \hline
+State broadcaster & Frozen state from M1 & The same encoded bytes for every phone, a smaller state for the admin and the board \\ \hline
+Network emulator & Admin network settings & Added delay, jitter and loss for each player and for the board \\ \hline
+Ping and metrics & Ping replies, order numbers & Ping, jitter, loss, clock offset and frame rate for the admin graphs \\ \hline
+Board link & Board messages & One TCP channel and one UDP stream to the board \\ \hline
+\end{tabular}}
+
+\msection{How it works}
+
+\msub{Which link uses which protocol}
+A web browser can only open a WebSocket for talk in both directions, so phones and the admin page use
+WebSocket. WebSocket runs on TCP, so every message arrives and the order is kept. The LED board is not
+a browser, so it can use both TCP and UDP. On TCP it gets the messages that must never be lost: the
+config (player colours, brightness, power limit) and the vibrate commands. The board also sends
+earthquake events and its status report on TCP. The fast and repeated data goes on UDP: the board
+state, the sensor samples and the small delay probes. Here only the newest message is useful. If one
+UDP packet is lost, the next one replaces it. TCP would wait for the lost packet and the LEDs would
+stop for a moment, so UDP is the better choice for this data.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck]
+\fill[tcpc!8, rounded corners=4pt] (2.0,0.95) rectangle (11.0,-0.95);
+\fill[tcpc!8, rounded corners=4pt] (2.0,-1.35) rectangle (11.0,-3.25);
+\fill[tcpc!14, rounded corners=4pt] (2.0,-3.65) rectangle (11.0,-5.55);
+\fill[udpc!12, rounded corners=4pt] (2.0,-5.95) rectangle (11.0,-8.25);
+\node[font=\scriptsize\bfseries, text=tcpc] at (6.5,0.72) {WebSocket on TCP};
+\node[font=\scriptsize\bfseries, text=tcpc] at (6.5,-1.58) {WebSocket on TCP};
+\node[font=\scriptsize\bfseries, text=tcpc] at (6.5,-3.88) {TCP: must arrive};
+\node[font=\scriptsize\bfseries, text=udpc] at (6.5,-6.18) {UDP: newest wins};
+\node[sv, minimum width=24mm, minimum height=91mm, line width=2pt] (m2) at (0.6,-3.65) {\textbf{M2}\\on the main\\computer};
+\node[cl, minimum width=22mm, minimum height=16mm] (ph) at (12.4,0) {\textbf{M5}\\Phones};
+\node[ad, minimum width=22mm, minimum height=16mm] (ad) at (12.4,-2.3) {\textbf{M6}\\Admin page};
+\node[bd, minimum width=22mm, minimum height=39mm] (bo) at (12.4,-5.9) {\textbf{M7}\\LED board};
+\draw[tcpa,->] (2.0,0.2) -- node[al]{game state, 30 per second} (11.0,0.2);
+\draw[tcpa,<-] (2.0,-0.4) -- node[al]{controls, ``Find me''} (11.0,-0.4);
+\draw[tcpa,->] (2.0,-2.1) -- node[al]{state, metrics, board data} (11.0,-2.1);
+\draw[tcpa,<-] (2.0,-2.7) -- node[al]{commands, parameters} (11.0,-2.7);
+\draw[tcpa,->] (2.0,-4.4) -- node[al]{config, vibrate} (11.0,-4.4);
+\draw[tcpa,<-] (2.0,-5.0) -- node[al]{earthquake event, status} (11.0,-5.0);
+\draw[udpa,->] (2.0,-6.7) -- node[al]{board state} (11.0,-6.7);
+\draw[udpa,<-] (2.0,-7.25) -- node[al]{sensor samples} (11.0,-7.25);
+\draw[udpa,<->] (2.0,-7.8) -- node[al]{delay probe} (11.0,-7.8);
+\ckleg{-0.4,-8.8}{tcpa/TCP or WebSocket: every message arrives in order, udpa/UDP: fast and the newest message wins}
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Messages on the board TCP channel}
+WebSocket cuts the data into messages by itself, but plain TCP is only a stream of bytes. So each
+message on the board TCP channel starts with its length, and the other side reads exactly that many
+bytes. Small messages like a vibrate command are sent at once, without waiting to fill a bigger
+packet. Every message on both board channels has an order number, so old UDP packets can be dropped.
+Each start of the server makes a new session number. When the board sees a new session number, it
+starts its order numbers again, so new messages are not dropped as old ones.
+
+\msub{Joining}
+At the start the admin screen shows a QR code and a six digit game code. The QR code holds the IP
+address of the main computer and the game code. A player scans it, and
+the phone opens the game page from the main computer. A player without a camera types the address and
+the code. The first time, the browser saves a random player key. If the page reloads or Wi-Fi drops,
+the phone sends the same key and gets the same motorcycle back. The LED board first looks for the
+server on the local network. If it finds nothing, it uses a backup server address saved in the ESP32's flash memory.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck]
+\fill[black!80, rounded corners=4pt] (-0.2,-0.2) rectangle (6.2,4.2);
+\fill[white] (0,0) rectangle (6,4);
+\fill[srv] (0,3.55) rectangle (6,4);
+\node[text=white, font=\scriptsize\bfseries, anchor=west] at (0.15,3.78) {Çılgın Kurye, admin};
+\node[font=\scriptsize\bfseries] at (1.75,3.25) {Scan to join};
+\begin{scope}[shift={(0.55,0.55)}]
+\pgfmathsetseed{7}
+\foreach \x in {0,...,20}{\foreach \y in {0,...,20}{%
+  \pgfmathparse{rnd>0.52?1:0}\ifnum\pgfmathresult=1 \fill[black] (\x*0.11,\y*0.11) rectangle ++(0.11,0.11);\fi}}
+\foreach \x/\y in {0/0,0/14,14/14}{\fill[white] (\x*0.11-0.02,\y*0.11-0.02) rectangle ++(0.81,0.81);
+  \fill[black] (\x*0.11,\y*0.11) rectangle ++(0.77,0.77); \fill[white] (\x*0.11+0.11,\y*0.11+0.11) rectangle ++(0.55,0.55); \fill[black] (\x*0.11+0.22,\y*0.11+0.22) rectangle ++(0.33,0.33);}
+\end{scope}
+\node[font=\scriptsize, anchor=west] at (3.3,2.9) {or open};
+\node[font=\scriptsize\ttfamily, anchor=west] at (3.3,2.5) {192.168.1.20};
+\node[font=\scriptsize, anchor=west] at (3.3,1.9) {Game code};
+\node[draw=srv, fill=srvL, font=\large\bfseries, rounded corners=2pt, anchor=west] at (3.3,1.3) {482 913};
+\node[font=\tiny, anchor=west, text=black!60] at (3.3,0.45) {Players: 3 of 8};
+\begin{scope}[shift={(8.0,-0.3)}]
+\fill[black!85, rounded corners=7pt] (-0.15,-0.15) rectangle (2.55,4.75);
+\fill[white] (0,0) rectangle (2.4,4.6);
+\node[font=\scriptsize\bfseries] at (1.2,4.25) {Join the game};
+\node[draw=black!40, minimum width=20mm, font=\tiny, anchor=west, text=black!55] at (0.2,3.7) {Name: Deniz};
+\node[draw=black!40, minimum width=20mm, font=\tiny, anchor=west, text=black!55] at (0.2,3.2) {Code: 482 913};
+\node[font=\tiny\bfseries] at (1.2,2.75) {Choose a team};
+\node[fill=tA, text=white, font=\tiny\bfseries, minimum width=9mm, minimum height=6mm, rounded corners=2pt] at (0.65,2.25) {Blue};
+\node[fill=tB, text=white, font=\tiny\bfseries, minimum width=9mm, minimum height=6mm, rounded corners=2pt] at (1.75,2.25) {Green};
+\node[fill=tC, text=black, font=\tiny\bfseries, minimum width=9mm, minimum height=6mm, rounded corners=2pt] at (0.65,1.55) {Yellow};
+\node[fill=tD, text=white, font=\tiny\bfseries, minimum width=9mm, minimum height=6mm, rounded corners=2pt] at (1.75,1.55) {Purple};
+\node[fill=cli, text=white, font=\tiny\bfseries, minimum width=20mm, minimum height=6mm, rounded corners=2pt] at (1.2,0.6) {Ready};
+\end{scope}
+\draw[inna,->, line width=1.2pt] (6.3,1.9) -- node[al]{scan} (7.75,1.9);
+\node[font=\scriptsize\bfseries, text=black!60] at (3,-0.6) {Admin screen};
+\node[font=\scriptsize\bfseries, text=black!60] at (9.2,-0.8) {Phone};
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Keeping the game state safe}
+Many phones send messages at the same time, but only M1 may change the game state, and only inside a
+tick. So M2 never writes to the state. A phone can only send controls. It can never send a position or
+a score. M2 decodes each message, checks its type and fields, and keeps every value in its range (for
+example steer stays between −1 and 1). Each session can only control its own player. A message with
+an old or repeated order number is dropped. Each session also has a limit on the number and size of
+its messages, so one phone cannot flood the server. Good inputs wait in a queue, and M1 reads the queue at the
+start of the next tick. At the end of the tick M2 encodes the frozen state once and sends the same
+bytes to all phones.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck, node distance=4mm]
+\node[cl, minimum width=16mm] (p) {Phone\\message};
+\node[sv, minimum width=16mm, right=of p] (c) {Decode\\and check};
+\node[sv, minimum width=16mm, right=of c] (q) {Input\\queue};
+\node[sv, minimum width=16mm, right=of q, fill=srv!35, line width=1.6pt] (t) {M1 tick};
+\node[sv, minimum width=16mm, right=of t] (f) {Frozen\\state};
+\node[sv, minimum width=16mm, right=of f] (e) {Encode\\once};
+\node[cl, minimum width=16mm, right=of e] (a) {All\\phones};
+\node[nb, draw=obs, fill=obs!10, below=8mm of c] (x) {Dropped,\\error reply};
+\draw[tcpa,->] (p) -- (c);
+\foreach \u/\v in {c/q,q/t,t/f,f/e} \draw[inna,->] (\u) -- (\v);
+\draw[tcpa,->] (e) -- (a);
+\draw[cmda,->] (c) -- node[al]{bad} (x);
+\ckleg{4.2,-1.75}{tcpa/WebSocket, inna/inside the server, cmda/refused message}
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Network settings from the admin}
+For tests the admin can make the network worse by hand. Each player has an up queue and a down queue,
+and the board link has the same pair. The admin sets three values for each queue: an added delay, a
+jitter that makes the delay change randomly, and a loss chance. The loss is used only on the state and
+control messages. Join, ``Find me'' and admin replies are never dropped, because the game
+would break without them. The admin can also set a frame rate limit for a phone and the board state
+rate, from 10 to 30 per second.
+
+\msub{Measuring the network}
+Twice per second M2 sends a ping with the server time. The phone answers with its own time, its frame
+rate and the number of the last state it got. From this M2 finds the round trip time, the jitter and
+the clock offset of the phone. On WebSocket a real Wi-Fi loss is not seen as a missing message,
+because TCP sends it again. It shows as a jump in the delay. So for phones M2 reports ping and jitter.
+On the board UDP stream a lost packet is really missing, so gaps in the order numbers give the real
+packet loss.
+
+\msub{How much data}
+We expect the full game state to be a few kilobytes. Sent 30 times per second to 8 phones, this is
+only a few megabits per second in total, which
+a normal 2.4 GHz Wi-Fi router can carry.
+
+\msection{Testing}
+
+M2 is tested alone with test data instead of the real neighbours. A fake M1 sends a moving test state,
+scripted bot phones play the role of up to 8 real phones, and a small test program plays the board.
+With this setup we send good, broken and too large messages and check that no bad value reaches M1.
+We also check the load with 8 phones, how exact the added delay, jitter and loss are, that join and
+``Find me'' are never dropped, reconnecting with the player key, and a server restart with the test
+board.
+
+\end{document}

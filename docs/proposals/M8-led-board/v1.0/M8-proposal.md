@@ -12,7 +12,7 @@ M8 builds the physical city board and writes the animation engine that turns the
 
 | Runs on | Technology | Requirements |
 |---|---|---|
-| ESP32 in the LED board, in one Arduino program together with M7, and the board itself for the hardware | C++ animation engine that also runs on a PC for tests, programmable addressable RGB LED strips, an external power supply, 3D printing, a plywood base | R2 R5 R6 R7 R8 R11 |
+| ESP32 in the LED board, in one Arduino program together with M7, and the board itself for the hardware | C++ animation engine on the ESP32, programmable addressable RGB LED strips, an external power supply, 3D printing, a plywood base | R2 R5 R6 R7 R8 R11 |
 
 M8 gets all its data from M7 in the same program and gives light to the LED strips. The figure shows the data on both sides.
 
@@ -27,7 +27,7 @@ M8 takes part in six requirements. The last column says what will work when M8 i
 | R6 | Obstacles | A red pattern for each type on the whole road segment, light blue for a puddle | Every obstacle type is clear from a distance |
 | R7 | Earthquake | A shock wave from the earthquake centre | The earthquake is seen on the table |
 | R8 | Physical LED board | 60 × 60 cm, 6 roads in each direction, LEDs on all roads, printed buildings, four stores | The finished board stands on the table and shows the game |
-| R11 | Engineering requirements | Demo mode without a server, animations checked as images on a PC | M8 can be built and tested without the server |
+| R11 | Engineering requirements | Demo mode without a server, tested directly on the board with the ESP32 | M8 can be built and tested without the server |
 
 ## 3. Inputs and outputs
 
@@ -76,7 +76,7 @@ The board state comes less often than the frames, so the motion smoother moves e
 
 Every game phase has its own look, so the people around the table always know what happens.
 
-In the lobby the roads are dark and the four stores glow in the team colours. In the countdown the light moves from the edge to the centre in three steps, one for each number. During the game the board shows the live state. In a pause everything stays where it is, but all LEDs dim and breathe slowly. At the end all roads turn to the colour of the winner team, and in a draw the colours of the winners take turns. If M7 says that the link is lost, the roads go dark and the stores breathe slowly in a dim white, so everybody can see that the board is waiting.
+In the lobby the roads are dark and the four stores glow in the team colours. In the countdown the light moves from the edge to the centre in three steps, one for each number. During the game the board shows the live state. In a pause everything stays where it is, but all LEDs dim and breathe slowly. At the end all roads turn to the colour of the winner team, and in a draw the colours of the winners take turns. If M7 says that the link state is “searching”, the roads go dark and the stores breathe slowly in a dim white, so everybody can see that the board is waiting.
 
 **Earthquake:**
 
@@ -84,4 +84,4 @@ When an earthquake starts, a ring of light grows from the centre of the earthqua
 
 ## 6. Testing
 
-M8 is tested alone, without M7 and without the server. The engine is plain C++, so it also runs on a PC with recorded board states as test data. There every animation and every game phase is drawn as an image and compared with a saved reference image. On the real board a built in demo scenario plays a full game without a server, and test patterns check the order and place of the LEDs, the 8 player colours (three people must name each colour correctly), the power limit at full white and the heat in a long run.
+M8 is tested alone on the real board with the ESP32, without M7 and without the server. A built in demo scenario gives recorded board states as test data and plays a full game with every animation and every game phase. Test patterns check the order and place of the LEDs, the 8 player colours (three people must name each colour correctly), the power limit at full white and the heat in a long run.

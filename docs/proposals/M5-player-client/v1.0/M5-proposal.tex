@@ -167,6 +167,8 @@
 
 
 % ---- colours and drawings ----
+\usepackage{colortbl}
+\usepackage{float}
 % ---- colours ----
 \definecolor{srv}{HTML}{2E6FB7}\colorlet{srvL}{srv!15}
 \definecolor{cli}{HTML}{2E9E5B}\colorlet{cliL}{cli!15}
@@ -215,7 +217,7 @@
 \node[glbl, anchor=south west] at (pc.north west) {MAIN COMPUTER};
 \node[bd, M7, minimum width=27mm] (m7) at (4.6,-2.7) {\textbf{M7}\\ESP32 software};
 \node[bd, M8, minimum width=27mm] (m8) at (8.4,-2.7) {\textbf{M8}\\LED engine};
-\node[hwb, minimum width=25mm] (led) at (12,-2.7) {344 LEDs};
+\node[hwb, minimum width=25mm] (led) at (12,-2.7) {RGB LED\\strips};
 \node[hwb, minimum width=27mm] (sm) at (4.6,-4.4) {Sensor and\\4 motors};
 \node[grp, fit=(m7)(m8)(led)(sm)] (bb) {};
 \node[glbl, anchor=north east] at (bb.south east) {LED CITY BOARD};
@@ -229,9 +231,7 @@
 \draw[inna, ->] (m7) -- node[al]{state} (m8);
 \draw[inna, ->] (m8) -- (led);
 \draw[inna, <->] (m7) -- (sm);
-\draw[tcpa] (-1.3,-6.0) -- ++(0.9,0) node[right, font=\scriptsize]{TCP: every message arrives, in order};
-\draw[udpa] (4.0,-6.0) -- ++(0.9,0) node[right, font=\scriptsize]{UDP: fast, the newest message wins};
-\draw[inna] (9.3,-6.0) -- ++(0.9,0) node[right, font=\scriptsize]{inside one program or chip};
+\ckleg{-1.3,-6.0}{tcpa/TCP or WebSocket: every message arrives in order, udpa/UDP: fast and the newest message wins, inna/inside one program or chip}
 \end{tikzpicture}}
 
 % ---- LED board seen from above (6 x 6 roads, 1 unit = 10 cm) ----
@@ -248,7 +248,7 @@
 \foreach \i in {0,...,5}{\foreach \k in {0,...,30}{%
   \fill[black!55] (\i,\k/6) circle (0.025);
   \fill[black!55] (\k/6,\i) circle (0.025);}}
-\foreach \x/\y/\c in {0/4/tA, 4/4/tB, 0/0/tC, 4/0/tD}{%
+\foreach \x/\y/\c in {0/4/tA, 4/4/tB, 0/0/tD, 4/0/tC}{%
   \fill[\c!30!black!60] (\x+0.13,\y+0.13) rectangle (\x+0.87,\y+0.87);
   \fill[\c] (\x+0.3,\y+0.3) rectangle (\x+0.7,\y+0.7);
   \fill[white] (\x+0.4,\y+0.5) circle (0.05); \fill[white] (\x+0.6,\y+0.5) circle (0.05);}}
@@ -260,8 +260,8 @@
 \newcommand{\dpoint}[3]{\draw[#3!50, line width=0.8pt] (#1,#2) circle (0.26); \draw[#3, line width=1.4pt] (#1,#2) circle (0.16); \fill[#3] (#1,#2) circle (0.07);}
 \newcommand{\heavy}[2]{\draw[obs!60!black, line width=4pt] (#1) -- (#2); \draw[obs, line width=4pt, dash pattern=on 3pt off 5pt] (#1) -- (#2);}
 \newcommand{\roadwork}[2]{\draw[obs, line width=4pt] (#1) -- (#2);}
-\newcommand{\accident}[2]{\draw[obs, line width=4pt] (#1) -- (#2); \draw[white, line width=4pt, dash pattern=on 2.5pt off 3.5pt] (#1) -- (#2);}
-\newcommand{\puddle}[2]{\draw[cyan!35, line width=4pt] (#1) -- (#2); \draw[white, line width=1.6pt, dash pattern=on 1pt off 2.5pt] (#1) -- (#2);}
+\newcommand{\accident}[2]{\draw[obs, line width=4pt, dash pattern=on 3pt off 3pt] (#1) -- (#2);}
+\newcommand{\puddle}[2]{\draw[cyan!55, line width=4pt] (#1) -- (#2); \draw[cyan!15, line width=1.6pt, dash pattern=on 1pt off 2.5pt] (#1) -- (#2);}
 \newcommand{\findme}[2]{\fill[white, opacity=0.25] (#1,#2) circle (0.36); \fill[white, opacity=0.5] (#1,#2) circle (0.24); \fill[white] (#1,#2) circle (0.13);}
 
 % ---- phone game screen (7 x 3.4 units) ----
@@ -317,6 +317,42 @@
 \filldraw[fill=black!15, draw=black!50] (9.3,0.35) rectangle (10.9,0.85);
 \node[font=\tiny] at (10.1,0.6) {Power};}
 
+% ---- layout helpers ----
+\newenvironment{ckfig}{\begin{figure}[H]\centering}{\end{figure}}
+\newcommand{\msub}[1]{\par\smallskip\noindent{\bfseries #1:}\par\nobreak\vspace{-2pt}}
+\tikzset{msga/.style={draw=cli!70!black, line width=0.8pt}, cmda/.style={draw=obs, line width=1pt}, loopa/.style={draw=srv, line width=1pt}, hwa/.style={draw=black!60, line width=1.2pt, dash pattern=on 1.5pt off 1.5pt}, wanta/.style={draw=cli, line width=1.6pt}, reala/.style={draw=obs, line width=1.6pt}, siga/.style={draw=srv, line width=0.8pt}, thra/.style={draw=obs, line width=0.9pt, dash pattern=on 4pt off 2pt}, evta/.style={draw=cli, line width=1pt}}
+\tikzset{iol/.style={font=\scriptsize, fill=white, inner sep=1.2pt, rounded corners=1pt, align=center}}
+% legend row: start point, list of style/text
+\newcommand{\ckleg}[2]{%
+\coordinate (lgp) at (#1);
+\foreach \ls/\lt in {#2}{%
+  \draw[\ls,->] (lgp) -- ++(0.8,0) node[right, font=\scriptsize, text=black] (lgt) {\lt};
+  \coordinate (lgp) at ([xshift=5mm]lgt.east);}}
+% purpose table: colour (unused), runs on, technology, requirements
+\newcommand{\ckinfo}[4]{\par\smallskip\noindent{\renewcommand{\arraystretch}{1.25}%
+\begin{tabular}{|L{0.30}|L{0.50}|L{0.20}|}\hline
+\textbf{Runs on} & \textbf{Technology} & \textbf{Requirements} \\ \hline
+#2 & #3 & #4 \\ \hline
+\end{tabular}}\par\smallskip}
+% module data map: n in, n out, centre text, centre style, inputs, outputs, legend list
+% inputs and outputs: {name}/style/{data}/arrow style
+\newcommand{\iomap}[7]{%
+\begin{tikzpicture}[ck]
+\pgfmathsetmacro{\nmax}{max(#1,#2)}
+\node[#4, line width=2pt, minimum width=30mm, minimum height=\nmax*10.5mm+2mm, font=\normalsize] (c) at (0,0) {#3};
+\foreach \nm/\st/\dd/\ar [count=\ii] in {#5}{%
+  \pgfmathsetmacro{\yy}{((#1+1)/2-\ii)*1.05}
+  \node[\st, minimum width=25mm, minimum height=8.5mm, font=\scriptsize] (in\ii) at (-6.6,\yy) {\nm};
+  \draw[\ar,->] (in\ii.east) -- node[iol]{\dd} (c.west |- in\ii);}
+\foreach \nm/\st/\dd/\ar [count=\ii] in {#6}{%
+  \pgfmathsetmacro{\yy}{((#2+1)/2-\ii)*1.05}
+  \node[\st, minimum width=25mm, minimum height=8.5mm, font=\scriptsize] (out\ii) at (6.6,\yy) {\nm};
+  \draw[\ar,->] (c.east |- out\ii) -- node[iol]{\dd} (out\ii.west);}
+\node[font=\scriptsize\bfseries, text=black!60] at (-6.6,\nmax*0.525+0.4) {Inputs come from};
+\node[font=\scriptsize\bfseries, text=black!60] at (6.6,\nmax*0.525+0.4) {Outputs go to};
+\ckleg{-7.6,-\nmax*0.525-0.5}{#7}
+\end{tikzpicture}}
+
 \begin{document}
 
 \thispagestyle{ckfirst}
@@ -356,88 +392,99 @@ Selim Barut & 220104004046 &  &  \\ \hline
 
 \msection{Purpose}
 
-M5 is the web page on each player's phone. The player scans a QR code or types the game code,
-chooses a team, and drives a motorcycle in a low-poly 3D city with buttons on the screen. There is
-no map on the phone. Only a compass arrow shows the direction of the delivery point or of the store.
-So players must look at the LED board on the table to find their way.
+M5 is the web page on each player's phone. The player scans a QR code or types the game code, chooses
+a team, and drives a motorcycle in a low poly 3D city with buttons on the screen. There is no map on
+the phone. Only a compass arrow shows the direction of the delivery point or of the store. So players
+must look at the LED board on the table to find their way.
 
-\begin{longtable}[]{|L{0.18}|L{0.82}|}
-\hline Runs on & Player phone, only the web browser, nothing to install; the page comes from M2 \\ \hline
-Technology & TypeScript web page built with Vite; Three.js for 3D; low-poly glTF models from one Blender file, shared with the board buildings; MessagePack; the M3 physics code for prediction \\ \hline
-Requirements & R1 R2 R3 R5 R7 R8 R10 R11 \\ \hline
-\end{longtable}
+\ckinfo{cli}{Player phone, only the web browser, nothing to install. The page comes from M2}{TypeScript web page with Three.js for 3D, low poly models from one Blender file shared with the board buildings, MessagePack messages, the M3 physics code for prediction}{R1 R2 R3 R5 R7 R8 R10 R11}
 
-\begin{figure}[htbp]\centering
-\systemmap{M5}
-\caption{Where M5 sits in the system. Each phone talks to M2 over one WebSocket.}
-\end{figure}
+The phone talks only to M2. It gets the page once over HTTP and then keeps one WebSocket open. The
+figure shows the data in both directions.
+
+\begin{ckfig}
+\iomap{4}{3}{\textbf{M5}\\Player phone\\and 3D city}{cl}
+{{M2, HTTP}/sv/{page, 3D models,\\city plan}/tcpa, {M2, WebSocket}/sv/{game state, join reply,\\ping, frame rate limit}/tcpa, {Player}/hwb/{touch on\\the buttons}/inna, {M3 code}/sv/{predicted own\\motorcycle}/inna}
+{{M2, WebSocket}/sv/{controls, ``Deliver'',\\``Find me''}/tcpa, {M2, WebSocket}/sv/{join, ping replies}/tcpa, {Player}/hwb/{3D view, compass,\\scores}/inna}
+{tcpa/HTTP or WebSocket on TCP, inna/inside the phone}
+\end{ckfig}
 
 \msection{Requirements covered}
 
-\begin{longtable}[]{|L{0.07}|L{0.25}|L{0.68}|}
-\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M5 does for it} \\ \hline \endhead
-R1, R2 & Game and deliveries & Join, team choice, timer, scores, package icon, ``Deliver'' button \\ \hline
-R3 & Driving and controls & Gas, brake, left and right buttons \\ \hline
-R5 & No map on the phone & Only a compass arrow; ``Find me'' button \\ \hline
-R7 & Earthquake & The camera shakes \\ \hline
-R8 & Same city as the board & The 3D city is built from the shared city plan and the same models \\ \hline
-R10 & Network and measurement & Frame-rate limit from the admin; frame-rate report \\ \hline
-R11 & Single authority & Own motorcycle is predicted at once and corrected by the server \\ \hline
+M5 takes part in eight requirements. The last column says what will work when M5 is finished.
+
+\begin{longtable}[]{|L{0.06}|L{0.15}|L{0.40}|L{0.39}|}
+\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M5 does for it} & \textbf{When M5 is done} \\ \hline \endhead
+R1 & Multiplayer game & Join, team choice, timer and the scores of all teams & A player joins and plays from the browser only \\ \hline
+R2 & Delivery cycle & Package icon and the ``Deliver'' button with the reason when it is refused & The player always knows if a package is on board \\ \hline
+R3 & Driving and controls & Gas, brake, left and right buttons & The motorcycle can be driven with two thumbs \\ \hline
+R5 & No map on the phone & Only a compass arrow, and the ``Find me'' button with its waiting time & The player must use the LED board to find the way \\ \hline
+R7 & Earthquake & The camera shakes, more near the centre & An earthquake is felt on every phone \\ \hline
+R8 & Same city as the board & The 3D city is built from the shared city plan and the same models & The same building is found on the phone and on the board \\ \hline
+R10 & Network and measurement & Frame rate limit from the admin, frame rate report & The admin sees how each phone runs \\ \hline
+R11 & Engineering requirements & Own motorcycle is predicted at once and corrected by the server & Driving feels direct even on a slow network \\ \hline
 \end{longtable}
 
 \msection{Inputs and outputs}
 
-\begin{longtable}[]{|L{0.08}|L{0.20}|L{0.18}|L{0.54}|}
-\hline \textbf{Dir.} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline \endhead
-In & Game state & M2 & 30 times per second: players, NPC cars, obstacles, scores, compass target, ``Find me'' waiting time \\ \hline
-In & Join reply, ping, net config & M2 & Player, team, colour tone; server time; frame-rate limit \\ \hline
+The page sends its controls on every change and at least 10 times per second, and it gets a new state
+30 times per second.
+
+\begin{longtable}[]{|L{0.11}|L{0.17}|L{0.18}|L{0.54}|}
+\hline \textbf{Direction} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline \endhead
+In & Page, models, city plan & M2, HTTP & When the page loads: the program, the 3D models and the city plan \\ \hline
+In & Game state & M2, from M1 & Players, NPC cars, obstacles, scores, compass target, ``Find me'' waiting time, number of the last control that the server used \\ \hline
+In & Join reply, ping, net config & M2 & Player, team, colour, server time, frame rate limit \\ \hline
 In & Touch & Player & Buttons \\ \hline
-Out & Controls & M2, then M1 & On every change and at least 10 times per second: throttle, brake, steer, deliver \\ \hline
-Out & Join, ``Find me'' & M2, then M1 & Player key, name, game code, team; ``Find me'' request \\ \hline
+Out & Controls & M2, then M1 & Throttle, brake, steer, a control number, and ``Deliver'' as an event \\ \hline
+Out & Join, ``Find me'' & M2, then M1 & Player key, name, game code, team, ``Find me'' request \\ \hline
 Out & Ping reply & M2 & Phone time, frame rate, last state received \\ \hline
 \end{longtable}
 
 \msection{Main components}
 
-\begin{longtable}[]{|L{0.20}|L{0.52}|L{0.28}|}
-\hline \textbf{Component} & \textbf{What it does} & \textbf{Related modules} \\ \hline \endhead
-Screens and HUD & Join, lobby, countdown, game and end screens; timer, scores, compass & M1 \\ \hline
-Controls & Turns button presses into the control record & M1, M2 \\ \hline
-Network client & WebSocket link, MessagePack, reconnect with the saved player key & M2 \\ \hline
-Prediction & Own motorcycle with the M3 code; correction on each state & M3 \\ \hline
-3D city and scene & City from the city plan; motorcycles, cars, obstacles, markers; camera & M4, M8 \\ \hline
+The page has five parts. The network client is the only part that talks to M2.
+
+\begin{longtable}[]{|L{0.21}|L{0.39}|L{0.40}|}
+\hline \textbf{Component} & \textbf{Takes} & \textbf{Gives} \\ \hline \endhead
+Screens and HUD & Game state, join reply & Join, lobby, countdown, game and end screens, timer, scores, compass \\ \hline
+Controls & Touch on the buttons & The control record and the button events \\ \hline
+Network client & Messages from M2, the saved player key & Decoded state for the other parts, reconnect after a lost link \\ \hline
+Prediction & Own controls, server state & Own motorcycle at once, with a smooth correction \\ \hline
+3D city and scene & City plan, models, game state & The 3D picture with motorcycles, cars, obstacles and the camera \\ \hline
 \end{longtable}
 
 \msection{How it works}
 
-\textbf{The game screen.} The phone is held sideways. The 3D view fills the screen, and the camera
+\msub{The game screen}
+The phone is held sideways. The 3D view fills the screen, and the camera
 follows the motorcycle from behind. At the top the player sees the time left and the score of each
 team. In the top corner there is the compass. The arrow points to the delivery point, or to the
 store when the player has no package. It never shows the distance or the roads. The buttons are
 large so that the thumbs can find them without looking: left and right on one side, gas and brake
 on the other side. The ``Deliver'' button is always active. If the server says no, a short message
 shows the reason, for example ``too fast''. The ``Find me'' button asks the server to flash the
-player's LED on the board in white for 1 second. After a press, the button waits for the time that
-the server sends.
+player's LED on the board in white for 1 second. After a press, the button is grey and shows the
+waiting time that M1 puts into the game state.
 
-\begin{figure}[htbp]\centering
-\begin{tikzpicture}[x=1.25cm, y=1.25cm]
+\begin{ckfig}
+\begin{tikzpicture}[x=1.35cm, y=1.35cm]
 \phonemock
 \nmark{3.5}{3.62}{1}\nmark{0.05}{3.42}{2}\nmark{6.95}{3.42}{3}\nmark{3.05}{0.55}{4}\nmark{3.55}{1.55}{5}\nmark{0.95}{0.05}{6}\nmark{6.05}{0.05}{7}\nmark{6.9}{1.45}{8}\nmark{0.3}{1.45}{9}
-\node[anchor=north, font=\scriptsize] at (3.5,-0.45) {\begin{tabular}{@{}c@{\ \ }l@{\qquad}c@{\ \ }l@{\qquad}c@{\ \ }l@{}}
+\node[anchor=north, font=\small] at (3.5,-0.45) {\begin{tabular}{@{}c@{\ \ }l@{\qquad}c@{\ \ }l@{\qquad}c@{\ \ }l@{}}
 \textbf{1} & Time left & \textbf{4} & Own motorcycle, team colour & \textbf{7} & Gas and brake \\
 \textbf{2} & Team scores & \textbf{5} & NPC car and an obstacle & \textbf{8} & Deliver button \\
 \textbf{3} & Compass arrow, no map & \textbf{6} & Left and right & \textbf{9} & ``Find me'' button \end{tabular}};
 \end{tikzpicture}
-\caption{Planned game screen on a phone held sideways.}
-\end{figure}
+\end{ckfig}
 
-\textbf{Screens.} The page has five screens. On the join screen the player types a name and, if
+\msub{Screens}
+The page has five screens. On the join screen the player types a name and, if
 there was no QR code, the game code. In the lobby the player chooses one of the four teams and waits.
 A 3 second countdown starts the game. The game screen is shown above. At the end, the page shows the
 winner and the scores of all teams.
 
-\begin{figure}[htbp]\centering
+\begin{ckfig}
 \begin{tikzpicture}[ck]
 \foreach \x/\t/\c in {0/Join/cli, 2.9/Lobby/tA, 5.8/Countdown/adm, 8.7/Game/srv, 11.6/End/brd}{%
   \fill[black!85, rounded corners=4pt] (\x-0.1,-0.1) rectangle (\x+2.0,1.2);
@@ -449,31 +496,43 @@ winner and the scores of all teams.
 \node[font=\tiny] at (6.75,-0.35) {3, 2, 1};
 \node[font=\tiny] at (9.65,-0.35) {at most 5 minutes};
 \node[font=\tiny] at (12.55,-0.35) {winner and scores};
+\ckleg{0,-0.95}{inna/next screen}
 \end{tikzpicture}
-\caption{The five screens of the phone page.}
-\end{figure}
+\end{ckfig}
 
-\textbf{Smooth play on a real network.} The server sends a state 30 times per second, but Wi-Fi adds
+\msub{Smooth play on a real network}
+The server sends a state 30 times per second, but Wi-Fi adds
 delay. If the phone waited for the server, the motorcycle would react late to a button. So the phone
 moves its own motorcycle at once with the M3 code, and corrects it when the real state arrives. For
-the other players and the NPC cars, the phone keeps the last few states and draws them 100 ms in
+the other players and the NPC cars, the phone keeps the last few states and draws them a little in
 the past. Then it can always move them smoothly between two real states, and they do not jump.
 
-\textbf{The 3D city.} The city is built from the same city plan as the LED board: 6 roads in each
+\msub{The 3D city}
+The city is built from the same city plan as the LED board: 6 roads in each
 direction, 60 road segments and 25 blocks. Tall buildings stand in the centre, houses and trees are
-outside, and the four team stores in the corners have the team colours. The models are low-poly and
+outside, and the four team stores in the corners have the team colours. The models are low poly and
 come from one Blender file. The board uses the same models for 3D printing (1 m in the game is 1 mm
 on the board), so a player can find the same building on the board and on the phone. Objects that
-repeat, like trees and houses, are drawn as instances, so a mid-range phone can draw at least 30
-frames per second. During an earthquake the camera shakes, and the shaking is stronger near the
-centre of the earthquake.
+repeat, like trees and houses, are drawn as instances, so a mid range phone can draw a smooth picture. During an earthquake the camera shakes, and the
+shaking is stronger near the centre of the earthquake.
 
-\msection{Testing and demonstration}
+\msub{Obstacles and falls in the 3D city}
+Obstacles from the game state are drawn on their road: cones and a barrier for road work, crashed
+cars for an accident, slow cars for heavy traffic and a wet patch for a water puddle. So a change by
+the admin is seen in the 3D city in the same tick as on the board. A fallen motorcycle lies on the
+road, and the page shows a penalty countdown until M1 lets it stand up again.
 
-Tests run against a fake server. We test joining on Android and iPhone, every button, prediction with
-150 ms delay and 10\% loss, at least 30 frames per second on a mid-range phone, and reconnecting
-after a page reload. In the demonstration two phones drive in the 3D city. The players use the
-compass and the board to find the delivery point, and the admin changes the frame-rate limit of one
-phone.
+\msub{Keeping the screen on}
+The page comes from the main computer over plain HTTP. Some browser functions that keep the screen
+on need a secure HTTPS page, so the screen may go dark during a game. We will test this on Android
+and iPhone and, if needed, ask players to turn off the screen timeout before the game.
+
+\msection{Testing}
+
+M5 is tested alone against a fake server that sends recorded game states and answers the join and
+the controls. We check joining on Android and iPhone, every button and every screen, the compass
+target, the ``Find me'' waiting time, reconnecting after a page reload with the same player key, and
+the prediction with added delay and loss. We also check that a mid range phone draws the full city
+smoothly.
 
 \end{document}

@@ -44,11 +44,11 @@ The table lists the requirements of the whole system. The last column shows the 
 | R8 | Physical LED board | 60 × 60 cm, 6 roads in each direction (5 × 5 blocks), programmable addressable RGB LED strips on all roads, 3D printed buildings, four team stores in the corners with LEDs in the team colour. The ESP32 connects over Wi-Fi. The 3D city and the board are built from the same city plan. | M5 M7 M8 |
 | R9 | Live admin panel | All parameters are changed during the game. The admin sees the change in three places: 3D simulation, LED board and live graphs. | M1 M2 M6 |
 | R10 | Network and measurement | Computer, phones and board talk over Wi-Fi. The admin can add delay, packet loss and a frame rate limit per player, and delay and loss on the board link. Ping, packet loss and frame rate are measured live. | M2 M5 M6 M7 |
-| R11 | Engineering requirements | The main computer makes all game decisions (single authority). The phone only sends controls and sees its own motorcycle at once (prediction). Inputs and outputs of every module are defined, and each module can be developed and tested with mock data. | M1 to M8 |
+| R11 | Engineering requirements | The main computer makes all game decisions (single authority). The phone only sends controls and sees its own motorcycle at once. Inputs and outputs of every module are defined, and each module can be developed and tested with mock data. | M1 to M8 |
 
 ## 4. Modules
 
-The project has eight modules on three sides: the server (M1 to M4), the phone and admin pages (M5, M6) and the physical board (M7, M8). Every module has at least 3 members, and every member works in 3 modules. So a module can go on even if one member leaves. An X in the second table means that the member works in that module.
+The project has eight modules on three sides: the server (M1 to M4), the phone and admin pages (M5, M6) and the physical board (M7, M8). Every module has at least 3 members, and every member works in 3 modules. So a module can go on even if one member leaves.
 
 | **Module** | **Name** | **Task** | **People** |
 |---|---|---|---|
@@ -110,7 +110,7 @@ The table gives the content of each input and output. Value ranges are shown onl
 
 | **Direction** | **Data** | **From / to** | **Content** |
 |---|---|---|---|
-| In | Controls | M2, from phones | Throttle and brake from 0 to 1, steer from −1 to 1, a control number. “Deliver” and “Find me” come as events |
+| In | Controls | M2, from phones | Throttle and brake from 0 to 1, steer from −1 to 1, a control number. “Find me” comes as an event |
 | In | Join | M2, from phones | Player key, name, team. M2 also reports when a player is lost or comes back |
 | In | Admin commands | M2, from admin | Parameter changes, start, pause, resume, end, reset, new game code, obstacles, earthquake |
 | In | Board events | M2, from board | Source (hand or motors), strength from 0 to 10, zone, confidence |
@@ -129,9 +129,9 @@ M1 is made of seven parts. Each part takes some data and gives a result to the n
 |---|---|---|
 | Game loop | The clock | Runs the steps of a tick in a fixed order, 30 times per second |
 | Match and lobby | Joins, lost players, admin start and pause | Game phase, teams, bots in empty places |
-| Delivery and scoring | Poses, “Deliver” events, travel times | Packages, delivery points, points, a reason when a delivery is refused |
+| Delivery and scoring | Poses, travel times | Packages, delivery points, automatic deliveries, points |
 | Penalties | Fall events from M3 | Penalty time, then a stand up request to M3 |
-| Obstacles and earthquake | Admin obstacles, board events | Obstacle list with a version number, earthquake centre and radius |
+| Obstacles and earthquake | Admin obstacles, board events | The obstacle list, earthquake centre and radius |
 | Admin and parameters | Admin commands | Checked values sent to the owner module, ok or error replies |
 | State builder and recorder | The world after the tick | Frozen game state, board state, metrics with a short history, the game log |
 
@@ -147,7 +147,7 @@ A tick always runs the same eight steps in the same order. First M1 takes the in
 
 **Controls inside a tick:**
 
-A phone sends its controls on every change and at least 10 times per second, but there are 30 ticks per second. So in some ticks a new control comes and in some ticks nothing comes. If nothing comes, M1 keeps the last control of that player. If more than one control comes, M1 uses the newest one for throttle, brake and steer. “Deliver” and “Find me” are different. They are events, not values. If any message in the tick has a “Deliver” press, the press counts, even when a newer message has no press. So a button press is never lost.
+A phone sends its controls on every change and at least 10 times per second, but there are 30 ticks per second. So in some ticks a new control comes and in some ticks nothing comes. If nothing comes, M1 keeps the last control of that player. If more than one control comes, M1 uses the newest one for throttle, brake and steer. “Find me” is different. It is an event, not a value. If any message in the tick has a “Find me” press, the press counts, even when a newer message has no press. So a button press is never lost.
 
 **Game flow:**
 
@@ -159,21 +159,25 @@ M2 sees when the link of a phone is lost and tells M1. M1 keeps the place of thi
 
 **Deliveries and points:**
 
-A player gets a package automatically when the motorcycle is inside the area of the own team's store. M1 then picks a delivery point for this player. M4 gives a table with the travel time from the store to every possible point. The times count the obstacles that are on the roads at that moment. M1 sorts this list and cuts it in the middle, so it gets a near half and a far half. The admin sets a “near chance” for each player, and M1 uses it to choose the half. Two players never get the same point at the same time. A far point gives more points. Every delivery gets a base value, and the longer the expected travel time is, the bigger the bonus on top of it. The admin sets both the base value and the bonus. The points are fixed when the point is chosen, so a new obstacle later does not change them.
+A player gets a package automatically when the motorcycle is inside the area of the own team's store. M1 then picks a delivery point for this player. M4 gives a table with the travel time from the store to every possible point. The times count the obstacles that are on the roads at that moment. The admin sets for each player whether the new delivery point appears near the store or far from it, and M1 picks the point with this setting. Two players never get the same point at the same time. A far point gives more points. Every delivery gets a base value, and the longer the expected travel time is, the bigger the bonus on top of it. The admin sets both the base value and the bonus. The points are fixed when the point is chosen, so a new obstacle later does not change them.
 
-To deliver, the player presses “Deliver”. The button is always active. M1 accepts it only inside the delivery radius and below the speed limit. Both are admin parameters. If M1 says no, it sends the reason, for example “too fast” or “too far”. A fall does not lose the package. The player only waits for the penalty time.
+There is no delivery button. When the player comes to the delivery point and stops inside its area, M1 delivers the package automatically and adds the points. The size of the area is an admin parameter. A fall does not lose the package. The player only waits for the penalty time.
 
 **Earthquakes:**
 
-An earthquake can come from a hand hit on the board, from the vibration motors or from the admin button. All of them take the same path in M1. The board sends a strength from 0 to 10 and one of 9 zones. M1 uses the centre of that zone as the centre of the earthquake. A stronger hit makes a bigger earthquake, so the radius grows with the strength. The strongest hit reaches the largest radius, which the admin sets. Roads inside the radius get road work, and motorcycles inside the radius may fall. Events with a low confidence value are ignored. If the board is not connected, M1 makes the event itself when the admin presses the button, so the admin earthquake always works.
+An earthquake can come from a hand hit on the board, from the vibration motors or from the admin button. All of them take the same path in M1. The board sends a strength from 0 to 10 and one of 9 zones. M1 uses the centre of that zone as the centre of the earthquake. A stronger hit makes a bigger earthquake. Motorcycles near the centre fall, and the roads near the centre close with road work.
 
-**Obstacles and admin parameters:**
+**Obstacles:**
 
-M1 keeps one list of obstacles. Each obstacle has a type, a road segment, a lane and a position. The list has a version number, and the number goes up on every change. So M4 can see when it must compute routes again, and M5 and M8 can see when they must draw again. Every parameter has a name, a group, a minimum, a maximum and an owner module. When the admin changes a value, M1 checks the limits first. Then it saves the value, sends it to the owner (for example grip to M3) and sends “ok” back to the panel. A wrong value gets an error and the old value stays.
+M1 keeps one list of obstacles. Each obstacle has a type, a road segment, a lane and a position. When the list changes, M4 computes the routes again, and M5 and M8 draw the new obstacles.
+
+**Admin parameters:**
+
+Every parameter has a name, a group, a minimum, a maximum and an owner module. When the admin changes a value, M1 checks the limits first. Then it saves the value, sends it to the owner (for example grip to M3) and sends “ok” back to the panel. A wrong value gets an error and the old value stays.
 
 ### 5.6. Testing
 
-M1 is tested alone, without the network and without the real M2, M3 and M4. Small fake parts take their place inside the test and give fixed test data: scripted controls and joins, fixed poses and fall events, a fixed travel time table and recorded admin commands and board events. With this data we check every rule: the game phases with pause and end, the lobby and the bots, a lost player who comes back, the delivery cycle and the fair choice of points, two “Deliver” presses in one tick, every admin command with good and wrong values, and the earthquake radius. Because all random numbers come from one seed, the same test data must always give exactly the same game state.
+M1 is tested alone, without the network and without the real M2, M3 and M4. Small fake parts take their place inside the test and give fixed test data: scripted controls and joins, fixed poses and fall events, a fixed travel time table and recorded admin commands and board events. With this data we check every rule: the game phases with pause and end, the lobby and the bots, a lost player who comes back, the delivery cycle and the fair choice of points, two “Find me” presses in one tick, every admin command with good and wrong values, and the earthquake radius. Because all random numbers come from one seed, the same test data must always give exactly the same game state.
 
 ## 6. M2 Network and Synchronization
 
@@ -196,7 +200,7 @@ M2 takes part in four requirements. The last column says what will work when M2 
 | **ID** | **Requirement** | **What M2 does for it** | **When M2 is done** |
 |---|---|---|---|
 | R1 | Multiplayer game | Up to 8 phones join with a QR code or a six digit game code, only with the browser | Players join in seconds without installing anything |
-| R9 | Live admin panel | Admin channel with a password for commands, parameters, state, metrics and board data | The admin page controls the game from any computer on the game Wi-Fi |
+| R9 | Live admin panel | Admin channel for commands, parameters, state, metrics and board data | The admin page controls the game from any computer on the game Wi-Fi |
 | R10 | Network and measurement | Ping and jitter for each phone, real loss on the board link. Added delay, jitter and loss for each player and for the board | The admin can make the network worse and see the effect live |
 | R11 | Engineering requirements | Inputs are checked and queued. Every phone gets the same frozen state of each tick | No phone can change the game by itself, and all players see the same game |
 
@@ -207,7 +211,7 @@ The table lists every message group with its link. All messages are MessagePack,
 | **Direction** | **Data** | **From / to** | **Content** |
 |---|---|---|---|
 | In | Phone messages | M5, WebSocket | Hello with player key, name and game code, join with team, controls, “Find me”, ping replies |
-| In | Admin messages | M6, WebSocket | Login with the password, commands, parameter changes, requests for parameters and the game log |
+| In | Admin messages | M6, WebSocket | Commands, parameter changes, requests for parameters and the game log |
 | In | Board messages | M7, TCP and UDP | Earthquake events and status on TCP. Sensor samples and delay replies on UDP |
 | In | State and metrics | M1 | Frozen game state and board state every tick, metrics twice per second |
 | Out | To M1 | M1 | Checked controls, joins, “Find me”, admin commands, board events, lost and returning players, network metrics |
@@ -222,7 +226,7 @@ M2 is made of eight parts. Each one takes some data and gives a result to the ne
 | **Component** | **Takes** | **Gives** |
 |---|---|---|
 | Web server and join | Page requests from phones and the admin | The phone and admin pages, the 3D models, the city plan, the QR code and the game code |
-| Sessions and access | New links, player keys, the admin password | One session for each phone and one admin. A player key keeps the same motorcycle after a reload |
+| Sessions and access | New links, player keys | One session for each phone and one admin. A player key keeps the same motorcycle after a reload |
 | Codec and checker | Raw messages | Checked messages. A bad message gets an error reply. Too many or too large messages are dropped |
 | Input queue | Checked inputs | The inputs of one tick for M1 |
 | State broadcaster | Frozen state from M1 | The same encoded bytes for every phone, a smaller state for the admin and the board |
@@ -242,15 +246,15 @@ WebSocket cuts the data into messages by itself, but plain TCP is only a stream 
 
 **Joining:**
 
-At the start the admin screen shows a QR code and a six digit game code. The QR code holds the IP address of the main computer and the game code, so it works on every network. A player scans it, and the phone opens the game page from the main computer. A player without a camera types the address and the code. The first time, the browser saves a random player key. If the page reloads or Wi-Fi drops, the phone sends the same key and gets the same motorcycle back. The LED board first looks for the server on the local network. If it finds nothing, it uses a backup server address saved in its flash.
+At the start the admin screen shows a QR code and a six digit game code. The QR code holds the IP address of the main computer and the game code. A player scans it, and the phone opens the game page from the main computer. A player without a camera types the address and the code. The first time, the browser saves a random player key. If the page reloads or Wi-Fi drops, the phone sends the same key and gets the same motorcycle back. The LED board first looks for the server on the local network. If it finds nothing, it uses a backup server address saved in the ESP32's flash memory.
 
 **Keeping the game state safe:**
 
-Many phones send messages at the same time, but only M1 may change the game state, and only inside a tick. So M2 never writes to the state. A phone can only send controls. It can never send a position or a score. M2 decodes each message, checks its type and fields, and keeps every value in its range (for example steer stays between −1 and 1). Each session can only control its own player. A message with an old or repeated order number is dropped. Each session also has a limit on the number and size of its messages, so one phone cannot flood the server. The admin page needs a password, which the server shows on the main computer at the start. Good inputs wait in a queue, and M1 reads the queue at the start of the next tick. At the end of the tick M2 encodes the frozen state once and sends the same bytes to all phones.
+Many phones send messages at the same time, but only M1 may change the game state, and only inside a tick. So M2 never writes to the state. A phone can only send controls. It can never send a position or a score. M2 decodes each message, checks its type and fields, and keeps every value in its range (for example steer stays between −1 and 1). Each session can only control its own player. A message with an old or repeated order number is dropped. Each session also has a limit on the number and size of its messages, so one phone cannot flood the server. Good inputs wait in a queue, and M1 reads the queue at the start of the next tick. At the end of the tick M2 encodes the frozen state once and sends the same bytes to all phones.
 
 **Network settings from the admin:**
 
-For tests the admin can make the network worse by hand. Each player has an up queue and a down queue, and the board link has the same pair. The admin sets three values for each queue: an added delay, a jitter that makes the delay change randomly, and a loss chance. The loss is used only on the state and control messages. Join, “Deliver”, “Find me” and admin replies are never dropped, because the game would break without them. The admin can also set a frame rate limit for a phone and the board state rate, from 10 to 30 per second.
+For tests the admin can make the network worse by hand. Each player has an up queue and a down queue, and the board link has the same pair. The admin sets three values for each queue: an added delay, a jitter that makes the delay change randomly, and a loss chance. The loss is used only on the state and control messages. Join, “Find me” and admin replies are never dropped, because the game would break without them. The admin can also set a frame rate limit for a phone and the board state rate, from 10 to 30 per second.
 
 **Measuring the network:**
 
@@ -258,11 +262,11 @@ Twice per second M2 sends a ping with the server time. The phone answers with it
 
 **How much data:**
 
-We expect the full game state to be a few kilobytes. Sent 30 times per second to 8 phones, this is only a few megabits per second in total, which a normal 2.4 GHz Wi-Fi router can carry. The board state is much smaller and fits in one UDP packet. To keep it small, the admin can place only a limited number of obstacles.
+We expect the full game state to be a few kilobytes. Sent 30 times per second to 8 phones, this is only a few megabits per second in total, which a normal 2.4 GHz Wi-Fi router can carry.
 
 ### 6.6. Testing
 
-M2 is tested alone with test data instead of the real neighbours. A fake M1 sends a moving test state, scripted bot phones play the role of up to 8 real phones, and a small test program plays the board. With this setup we send good, broken and too large messages and check that no bad value reaches M1. We also check the load with 8 phones, how exact the added delay, jitter and loss are, that join and “Deliver” are never dropped, reconnecting with the player key, and a server restart with the test board.
+M2 is tested alone with test data instead of the real neighbours. A fake M1 sends a moving test state, scripted bot phones play the role of up to 8 real phones, and a small test program plays the board. With this setup we send good, broken and too large messages and check that no bad value reaches M1. We also check the load with 8 phones, how exact the added delay, jitter and loss are, that join and “Find me” are never dropped, reconnecting with the player key, and a server restart with the test board.
 
 ## 7. M3 Physics and Collision
 
@@ -274,7 +278,7 @@ M3 moves the motorcycles. It turns throttle, brake and steering into speed, dire
 
 | Runs on | Technology | Requirements |
 |---|---|---|
-| Main computer inside the game server, and the phone browser for prediction only | TypeScript library, our own simple 2D arcade physics without a ready physics engine, circle and box collisions on a uniform grid, seeded random numbers | R3 R4 R6 R7 R11 |
+| Main computer inside the game server, and the phone browser for prediction only | TypeScript library with a 3D physics engine that runs on the web, on the server and in the phone browser | R3 R4 R6 R7 R11 |
 
 M3 has no network code. On the server it talks only to M1, and on the phone only to M5. The figure shows both uses.
 
@@ -287,7 +291,7 @@ M3 takes part in five requirements. The last column says what will work when M3 
 | R3 | Driving and controls | Throttle, brake, left and right. No reverse. A U turn by steering in a small circle at low speed | The motorcycle drives, brakes and turns like an arcade game |
 | R4 | Collisions and falls | Collisions with buildings, barriers, NPC cars and motorcycles. A fast hit makes the motorcycle fall | Nothing drives through a wall, and fast crashes end in a fall |
 | R6 | Obstacles | Road work and accidents are solid. An accident has a slow zone. A puddle makes the motorcycle slide | Each obstacle type feels different when you drive |
-| R7 | Earthquake | Side push and less grip inside the earthquake radius that M1 sends | Riding in an earthquake is harder |
+| R7 | Earthquake | Less grip inside the earthquake area that M1 sends | Riding in an earthquake is harder |
 | R11 | Engineering requirements | The same input always gives the same result. The server result wins, the phone only predicts | The own motorcycle reacts at once and still matches the server |
 
 ### 7.3. Inputs and outputs
@@ -299,8 +303,8 @@ M1 calls M3 two times in every tick with the inputs below. M5 uses the same code
 | In | City plan | Shared file | Roads, lanes, blocks and buildings as fixed colliders |
 | In | Controls | M1 | Every tick: throttle and brake from 0 to 1, steer from −1 to 1, for humans and bots, and a speed factor for each player |
 | In | Obstacles, NPC cars | M1 | Obstacle type, road, lane, position, and the boxes of the NPC cars that M1 gets from M4 |
-| In | Earthquake | M1 | Centre, strength, radius, and the players that fall |
-| In | Parameters | M6, through M1 | Top speed, grip, fall speed, puddle and earthquake effects |
+| In | Earthquake | M1 | The earthquake area and the motorcycles that fall |
+| In | Parameters | M6, through M1 | Top speed, grip, fall speed, grip in a puddle and in an earthquake |
 | Out | Poses | M1 | Position, direction, speed, lean, sliding, fallen |
 | Out | Events | M1 | Collisions (with what and how fast) and falls. M1 gives the car hits to M4 |
 | Out | Predicted pose | M5 | The player's own motorcycle before the server answers |
@@ -312,16 +316,16 @@ M3 has five parts. The first four run on the server, the last one runs on the ph
 | **Component** | **Takes** | **Gives** |
 |---|---|---|
 | Motorcycle model | Controls, parameters | New speed, direction, lean and sliding |
-| Colliders | City plan, obstacle list, NPC cars | Boxes, slow zones and slippery areas in a uniform grid |
+| Colliders | City plan, obstacle list, NPC cars | Solid shapes, slow zones and slippery areas |
 | Collision solver and fall judge | Moved objects, colliders | Pushed apart objects, collision and fall events |
-| Earthquake effect | Earthquake centre, strength, radius | Side push and lower grip inside the radius |
+| Earthquake effect | Earthquake area | Lower grip inside the area |
 | Predictor | Own controls, server state | Predicted own motorcycle with a smooth correction |
 
 ### 7.5. How it works
 
 **One physics step:**
 
-The server runs 30 ticks per second, and M3 runs 2 substeps in each tick. Small steps keep fast motorcycles from passing through thin walls. Each substep does five things in a fixed order, as the figure shows. A fixed order and seeded random numbers mean that the same inputs always give the same result on the server and on the phone.
+The server runs 30 ticks per second, and M3 runs 2 substeps in each tick. Small steps keep fast motorcycles from passing through thin walls. Each substep does five things in a fixed order, as the figure shows. Because the order is fixed, the same inputs always give the same result on the server and on the phone.
 
 **Driving:**
 
@@ -329,11 +333,11 @@ The throttle adds speed up to the top speed, and the brake and air drag take spe
 
 **Grip and sliding:**
 
-In a turn the motorcycle needs a side force. M3 compares the size of this force with the grip limit. If the force is below the limit, the motorcycle follows the turn. If it is above the limit, the motorcycle slides out of the turn. We compare only the size, so a left turn and a right turn act the same. On a water puddle the grip limit is very low, so the motorcycle slides but does not slow down. Inside an earthquake radius the grip is lower too, and there is a small push to the side.
+In a turn the motorcycle needs a side force. M3 compares the size of this force with the grip limit. If the force is below the limit, the motorcycle follows the turn. If it is above the limit, the motorcycle slides out of the turn. We compare only the size, so a left turn and a right turn act the same. On a water puddle the grip limit is very low, so the motorcycle slides but does not slow down. Inside the earthquake area the grip is lower too.
 
 **Collisions and falls:**
 
-Buildings, the outer wall and the road work barriers come from the city plan and the obstacle list as boxes. NPC cars are boxes, and motorcycles are circles. To find collisions fast, M3 puts every object into a uniform grid, so it checks only objects in the same or next cell. A contact pushes the objects apart. If the hit speed is above the fall speed that the admin set, the motorcycle falls. When two motorcycles hit each other and their relative speed is above the limit, both of them fall. A fallen motorcycle is not solid, so it does not block the road for others. M1 gives the penalty time and later asks M3 to stand the motorcycle up again. An accident is solid in one lane and has a slow zone around it.
+Buildings, the outer wall and the road work barriers come from the city plan and the obstacle list as solid shapes. NPC cars and motorcycles have simple shapes too. A contact pushes the objects apart. If the hit speed is above the fall speed that the admin set, the motorcycle falls. When two motorcycles hit each other and their relative speed is above the limit, both of them fall. A fallen motorcycle is not solid, so it does not block the road for others. M1 gives the penalty time and later asks M3 to stand the motorcycle up again. An accident is solid in one lane and has a slow zone around it.
 
 **Prediction on the phone:**
 
@@ -341,7 +345,7 @@ On the phone, the player must see the own motorcycle move at once, not after the
 
 ### 7.6. Testing
 
-M3 needs no other module. A test makes a world from the city plan and gives scripted controls, fixed obstacles and fixed NPC car boxes as test data. We check a straight run and braking, a U turn, slides to the left and to the right, wall and car crashes, the earthquake radius, and that the same inputs give exactly the same result two times. The predictor is tested with recorded server states and added delay and loss. A small test page shows a simple 2D view of the city, so one motorcycle can also be driven with the keyboard and the parameters can be changed with keys.
+M3 needs no other module. A test makes a world from the city plan and gives scripted controls, fixed obstacles and fixed NPC car boxes as test data. We check a straight run and braking, a U turn, slides to the left and to the right, wall and car crashes, the earthquake radius, and that the same inputs give exactly the same result two times. The predictor is tested with recorded server states and added delay and loss. A small test page shows a simple 3D view of the city, so one motorcycle can also be driven with the keyboard and the parameters can be changed with keys.
 
 ## 8. M4 Traffic and AI
 
@@ -376,10 +380,10 @@ M1 gives the inputs at the start of each tick and takes the outputs before M3 mo
 | **Direction** | **Data** | **From / to** | **Content** |
 |---|---|---|---|
 | In | City plan | Shared file | Intersections, roads, lanes, stores, possible delivery points |
-| In | Game data | M1 | Every tick: players, obstacles with a version number, car hit events |
+| In | Game data | M1 | Every tick: players, obstacles, car hit events |
 | In | Parameters | M6, through M1 | Number of NPC cars, traffic effects, bot skill |
 | Out | NPC cars | M1, then M3, M5, M6 | Position, direction, speed, lane, size |
-| Out | Bot controls | M1, then M3 | The same record as a phone: throttle, brake, steer, deliver |
+| Out | Bot controls | M1, then M3 | The same record as a phone: throttle, brake, steer |
 | Out | Travel times | M1 | Seconds from each team store to every possible delivery point |
 | Out | Traffic metrics | M1, then M6 | Number of NPC cars, mean NPC speed, bot route changes |
 
@@ -399,7 +403,7 @@ M4 has five parts. The route planner is used by both the NPC cars and the bots.
 
 **The road graph and routes:**
 
-The city has 6 roads in each direction. Where two roads cross, there is an intersection, so the graph has 36 intersections. Between them there are 60 road segments, and cars can drive both ways. Each segment has a cost: the expected time to drive it. Turning left or making a U turn adds a small extra cost. Obstacles change the costs. Heavy traffic and an accident make a segment slower, and road work closes it. M4 uses Dijkstra's shortest path search to find the fastest routes. The graph is small, so one search is very fast. M4 computes the routes again whenever a cost changes: when the version number of the obstacle list goes up, when the traffic on a road gets much heavier or lighter, or when the admin changes a route parameter. From the results it makes the travel time table: the time from each of the four stores to every possible delivery point. M1 uses this table to choose fair near and far points.
+The city has 6 roads in each direction. Where two roads cross, there is an intersection, so the graph has 36 intersections. Between them there are 60 road segments, and cars can drive both ways. Each segment has a cost: the expected time to drive it. Turning left or making a U turn adds a small extra cost. Obstacles change the costs. Heavy traffic and an accident make a segment slower, and road work closes it. M4 uses Dijkstra's shortest path search to find the fastest routes. The graph is small, so one search is very fast. M4 computes the routes again whenever a cost changes: when the obstacle list changes, when the traffic on a road gets much heavier or lighter, or when the admin changes a route parameter. From the results it makes the travel time table: the time from each of the four stores to every possible delivery point. M1 uses this table to choose fair near and far points.
 
 **NPC traffic:**
 
@@ -407,7 +411,7 @@ Each NPC car follows a lane and picks a new turn at each intersection. A car kee
 
 **Bots:**
 
-Every bot has a small state machine that follows the delivery cycle, as the figure below shows. The bot drives to the store, gets the package, drives to the delivery point, slows down and presses “Deliver”, and then goes back. On the way it follows the route from the planner. It steers toward a point a little ahead on the path, so the motion looks smooth. A bot can fall or get stuck in any of these four states. If it falls, it waits for the penalty time and then goes on in the same state. If it is stuck, it asks for a new route and goes on in the same state. One “bot skill” value sets the top speed, the reaction time and some steering noise, so the admin can make bots weaker or stronger.
+Every bot has a small state machine that follows the delivery cycle, as the figure below shows. The bot drives to the store, gets the package, drives to the delivery point, stops there so the package is delivered, and then goes back. On the way it follows the route from the planner. It steers toward a point a little ahead on the path, so the motion looks smooth. A bot can fall or get stuck in any of these four states. If it falls, it waits for the penalty time and then goes on in the same state. If it is stuck, it asks for a new route and goes on in the same state. One “bot skill” value sets the top speed, the reaction time and some steering noise, so the admin can make bots weaker or stronger.
 
 ### 8.6. Testing
 
@@ -434,9 +438,9 @@ M5 takes part in eight requirements. The last column says what will work when M5
 | **ID** | **Requirement** | **What M5 does for it** | **When M5 is done** |
 |---|---|---|---|
 | R1 | Multiplayer game | Join, team choice, timer and the scores of all teams | A player joins and plays from the browser only |
-| R2 | Delivery cycle | Package icon and the “Deliver” button with the reason when it is refused | The player always knows if a package is on board |
+| R2 | Delivery cycle | Package icon and a short message when the package is delivered | The player always knows if a package is on board |
 | R3 | Driving and controls | Gas, brake, left and right buttons | The motorcycle can be driven with two thumbs |
-| R5 | No map on the phone | Only a compass arrow, and the “Find me” button with its waiting time | The player must use the LED board to find the way |
+| R5 | No map on the phone | Only a compass arrow, and the “Find me” button | The player must use the LED board to find the way |
 | R7 | Earthquake | The camera shakes, more near the centre | An earthquake is felt on every phone |
 | R8 | Same city as the board | The 3D city is built from the shared city plan and the same models | The same building is found on the phone and on the board |
 | R10 | Network and measurement | Frame rate limit from the admin, frame rate report | The admin sees how each phone runs |
@@ -452,7 +456,7 @@ The page sends its controls on every change and at least 10 times per second, an
 | In | Game state | M2, from M1 | Players, NPC cars, obstacles, scores, compass target, “Find me” waiting time, number of the last control that the server used |
 | In | Join reply, ping, net config | M2 | Player, team, colour, server time, frame rate limit |
 | In | Touch | Player | Buttons |
-| Out | Controls | M2, then M1 | Throttle, brake, steer, a control number, and “Deliver” as an event |
+| Out | Controls | M2, then M1 | Throttle, brake, steer, a control number |
 | Out | Join, “Find me” | M2, then M1 | Player key, name, game code, team, “Find me” request |
 | Out | Ping reply | M2 | Phone time, frame rate, last state received |
 
@@ -466,17 +470,17 @@ The page has five parts. The network client is the only part that talks to M2.
 | Controls | Touch on the buttons | The control record and the button events |
 | Network client | Messages from M2, the saved player key | Decoded state for the other parts, reconnect after a lost link |
 | Prediction | Own controls, server state | Own motorcycle at once, with a smooth correction |
-| 3D city and scene | City plan, models, game state | The 3D picture with motorcycles, cars, obstacles and the camera |
+| 3D city and scene | City plan, models, game state | The 3D picture with motorcycles, cars and obstacles |
 
 ### 9.5. How it works
 
 **The game screen:**
 
-The phone is held sideways. The 3D view fills the screen, and the camera follows the motorcycle from behind. At the top the player sees the time left and the score of each team. In the top corner there is the compass. The arrow points to the delivery point, or to the store when the player has no package. It never shows the distance or the roads. The buttons are large so that the thumbs can find them without looking: left and right on one side, gas and brake on the other side. The “Deliver” button is always active. If the server says no, a short message shows the reason, for example “too fast”. The “Find me” button asks the server to flash the player's LED on the board in white for 1 second. After a press, the button is grey and shows the waiting time that M1 puts into the game state.
+The phone is held sideways. The 3D view fills the screen, and the camera follows the motorcycle from behind. At the top the player sees the time left and the score of each team. In the top corner there is the compass. The arrow points to the delivery point, or to the store when the player has no package. It never shows the distance or the roads. The buttons are large so that the thumbs can find them without looking: left and right on one side, gas and brake on the other side. There is no delivery button: when the player stops at the delivery point, the package is delivered automatically. The “Find me” button asks the server to flash the player's LED on the board in white for 1 second. After a press, the button is grey and shows the waiting time that M1 puts into the game state.
 
 **Screens:**
 
-The page has five screens. On the join screen the player types a name and, if there was no QR code, the game code. In the lobby the player chooses one of the four teams and waits. A 3 second countdown starts the game. The game screen is shown above. At the end, the page shows the winner and the scores of all teams.
+The page has five screens. On the join screen the player types a name and joins the game. In the lobby the player chooses one of the four teams and waits. A 3 second countdown starts the game. The game screen is shown above. At the end, the page shows the winner and the scores of all teams.
 
 **Smooth play on a real network:**
 
@@ -484,15 +488,11 @@ The server sends a state 30 times per second, but Wi-Fi adds delay. If the phone
 
 **The 3D city:**
 
-The city is built from the same city plan as the LED board: 6 roads in each direction, 60 road segments and 25 blocks. Tall buildings stand in the centre, houses and trees are outside, and the four team stores in the corners have the team colours. The models are low poly and come from one Blender file. The board uses the same models for 3D printing (1 m in the game is 1 mm on the board), so a player can find the same building on the board and on the phone. Objects that repeat, like trees and houses, are drawn as instances, so a mid range phone can draw a smooth picture. During an earthquake the camera shakes, and the shaking is stronger near the centre of the earthquake.
+The city is built from the same city plan as the LED board: 6 roads in each direction, 60 road segments and 25 blocks. Tall buildings stand in the centre, houses and trees are outside, and the four team stores in the corners have the team colours. The models are low poly and come from one Blender file. The board uses the same models for 3D printing, so a player can find the same building on the board and on the phone. Objects that repeat, like trees and houses, are drawn as instances, so a mid range phone can draw a smooth picture. During an earthquake the camera shakes, and the shaking is stronger near the centre of the earthquake.
 
 **Obstacles and falls in the 3D city:**
 
 Obstacles from the game state are drawn on their road: cones and a barrier for road work, crashed cars for an accident, slow cars for heavy traffic and a wet patch for a water puddle. So a change by the admin is seen in the 3D city in the same tick as on the board. A fallen motorcycle lies on the road, and the page shows a penalty countdown until M1 lets it stand up again.
-
-**Keeping the screen on:**
-
-The page comes from the main computer over plain HTTP. Some browser functions that keep the screen on need a secure HTTPS page, so the screen may go dark during a game. We will test this on Android and iPhone and, if needed, ask players to turn off the screen timeout before the game.
 
 ### 9.6. Testing
 
@@ -510,7 +510,7 @@ M6 is the admin screen. On one page the admin starts and controls the game, chan
 |---|---|---|
 | Browser on the main computer, or a laptop on the game Wi-Fi. The page comes from M2 | TypeScript web page, a light chart library for the live graphs, a 2D drawing of the city for the live map, MessagePack messages over one WebSocket | R6 R7 R9 R10 R11 |
 
-The admin page talks only to M2, over one WebSocket that needs the admin password. The figure shows what the page gets and what it sends.
+The admin page talks only to M2, over one WebSocket. The figure shows what the page gets and what it sends.
 
 ### 10.2. Requirements covered
 
@@ -533,7 +533,7 @@ All data comes through M2. The game state for the map comes less often than to t
 | In | Game state | M1, through M2 | 10 times per second, for the live map |
 | In | Metrics | M1, through M2 | Twice per second: scores, delivery times and distances, speeds, falls, traffic, ping, jitter, loss, frame rate, board delay. After a reconnect also the recent history |
 | In | Parameters, replies | M1, through M2 | Every parameter with its value and limits, ok or error for each command |
-| In | Board data | M7, through M2 | Sensor samples (100 per second), board status, earthquake events |
+| In | Board data | M7, through M2 | Sensor data, board status, earthquake events |
 | Out | Commands | M2, then M1 | Parameter changes, start, pause, resume, end, reset, obstacles, earthquake, new game code |
 | Out | Files | Admin | Graph data as CSV, game log |
 
@@ -544,7 +544,7 @@ The page is made of five parts. The communication manager is the only part that 
 | **Component** | **Takes** | **Gives** |
 |---|---|---|
 | Communication manager | Messages from M2, commands from the other parts | Decoded data for each part, reconnect and full update after a lost link |
-| Parameter manager | Parameter list with limits, admin input | Forms built from the list, changes with a “pending” mark until the reply |
+| Parameter manager | Parameter list with limits, admin input | Forms built from the list, changes sent to M1 |
 | Map manager | Game state, clicks on the map | The live map, and obstacle commands with road, lane and position |
 | Graph engine | Metrics, board samples, change marks | Live graphs, the seismic graph, CSV files |
 | Top bar and earthquake panel | Phase, time, board status, button presses | Game commands, earthquake command, the event log |
@@ -557,7 +557,7 @@ The figure below shows the planned layout. The top bar shows the game phase, the
 
 **Parameters:**
 
-The parameters are in groups: game, obstacles, players, physics, earthquake, network (one set for each player) and board link. When the page opens, it asks M1 for all parameters with their limits and builds the forms from this list, so a new parameter needs no new page code. A slider sends its value only when it stops moving, so one drag does not send many messages. Until the server answers, the value is marked “pending”. If the answer is “ok”, the mark goes away. If the answer is an error, the slider goes back to the old value and the log shows the reason.
+The parameters are in groups: game, obstacles, players, physics, earthquake, network (one set for each player) and board link. When the page opens, it asks M1 for all parameters with their limits and builds the forms from this list, so a new parameter needs no new page code.
 
 **Network settings:**
 
@@ -569,19 +569,19 @@ The main goal of the panel is to show the effect of a change. So every change pu
 
 **Adding an obstacle:**
 
-The admin first chooses a tool, for example the road work brush. Then the admin clicks on a road on the live map. The map manager finds the nearest road segment, the lane and the position on it with the numbering of the city plan. The communication manager sends an “add obstacle” command with the type, road, lane and position. M1 checks that the road exists and that the obstacle limit is not reached. Then it adds the obstacle to the list and raises the version number. In the next tick the obstacle is in the game state, so the map, the phones and the board show it at the same time. The eraser sends a “remove obstacle” command in the same way. “Close road” puts road work on a whole segment, and “in front of a player” puts the chosen obstacle a little ahead of that player's motorcycle.
+The admin first chooses a tool, for example the road work brush. Then the admin clicks on a road on the live map. The map manager finds the nearest road segment, the lane and the position on it with the numbering of the city plan. The communication manager sends an “add obstacle” command with the type, road, lane and position. M1 checks that the road exists. Then it adds the obstacle to the list. In the next tick the obstacle is in the game state, so the map, the phones and the board show it at the same time. The eraser sends a “remove obstacle” command in the same way. “Close road” puts road work on a whole segment, and “in front of a player” puts the chosen obstacle a little ahead of that player's motorcycle.
 
 **Earthquake:**
 
-The start button sends a command to M1, and M1 asks the board to run its motors. If the board is not connected, M1 makes the earthquake by itself. The seismic graph shows the sensor signal of the board live, 100 samples per second. Each earthquake event puts a mark on the graph with its strength and zone. A hand hit on the board shows on the same graph, so the admin can compare the two.
+The start button sends a command to M1, and M1 asks the board to run its motors. The seismic graph shows the sensor signal of the board live. Each earthquake event puts a mark on the graph with its strength and zone. A hand hit on the board shows on the same graph, so the admin can compare the two.
 
 **After a lost link:**
 
-If the WebSocket breaks, the page shows a grey bar and tries to connect again. After the new login, M2 sends the full parameter list, the current game state and the recent history of all graphs that M1 keeps. So the page fills the forms, the map and the graphs again and the admin can go on at once.
+If the WebSocket breaks, the page shows a grey bar and tries to connect again. After the new connection, M2 sends the full parameter list, the current game state and the recent history of all graphs that M1 keeps. So the page fills the forms, the map and the graphs again and the admin can go on at once.
 
 ### 10.6. Testing
 
-M6 is tested alone against a fake server that plays back a recorded game with its metrics, parameter list and board data. We check every parameter form with good and wrong values, every map tool, all graphs and the CSV export, a wrong password, a second admin login, and that after a lost link the forms, the map and the graphs are complete again.
+M6 is tested alone against a fake server that plays back a recorded game with its metrics, parameter list and board data. We check every parameter form with good and wrong values, every map tool, all graphs and the CSV export, a second admin login, and that after a lost link the forms, the map and the graphs are complete again.
 
 ## 11. M7 ESP32 Software and Communication
 
@@ -618,12 +618,12 @@ The table shows every input and output with its link. Messages that must arrive 
 | In | Config | M2, TCP | Player colours, brightness from 0.1 to 1, power limit |
 | In | Vibrate | M2, TCP | Motors to use, strength from 0 to 1, duration |
 | In | Delay probe | M2, UDP | A small message with the server time, answered at once |
-| In | Sensor | Hardware | 1000 samples per second |
+| In | Sensor | Hardware | Motion data from the accelerometer and the gyroscope |
 | In | Settings | USB cable | Wi-Fi name and password, backup server address, calibration values |
 | In | Frame report | M8 | Frame rate and the power estimate of the last frames |
 | Out | Newest state | M8 | Latest board state, config and link state, in the same program |
 | Out | Earthquake event | M2, TCP, to M1 and M6 | Source (hand or motors), strength from 0 to 10, centre, zone from 0 to 8, confidence |
-| Out | Sensor samples | M2, UDP, to M6 | 100 per second for the seismic graph, sent in groups of 10 |
+| Out | Sensor samples | M2, UDP, to M6 | Sensor data for the seismic graph, sent in small groups |
 | Out | Status, delay reply | M2 | Status on TCP once per second: frame rate, Wi-Fi signal, power, errors. Delay replies on UDP |
 
 ### 11.4. Main components
@@ -655,7 +655,7 @@ The figure below is a side cut of the board. The motion sensor is fixed at the c
 
 **Finding a hit:**
 
-The sensor measures the motion 1000 times per second. First a filter takes away gravity and slow tilting, so only the shaking is left. The detector also learns the normal noise of the room and puts the start threshold well above it. So the threshold goes up on a noisy table, and normal play does not start an earthquake. When the signal passes the threshold, a hit starts, and the detector takes a short window from this moment. The stronger the shaking in this window, the higher the strength. Like a real earthquake scale, the strength grows slowly for very strong hits, so a light tap and a hard hit both get a useful value. The scale is set once in calibration with a standard hit, and the result is kept between 0 and 10.
+The sensor measures the motion all the time. First a filter takes away gravity and slow tilting, so only the shaking is left. The detector also learns the normal noise of the room and puts the start threshold well above it. So the threshold goes up on a noisy table, and normal play does not start an earthquake. When the signal passes the threshold, a hit starts, and the detector takes a short window from this moment. The stronger the shaking in this window, the higher the strength. Like a real earthquake scale, the strength grows slowly for very strong hits, so a light tap and a hard hit both get a useful value. The scale is set once in calibration with a standard hit, and the result is kept between 0 and 10.
 
 **Finding the zone:**
 
@@ -667,7 +667,7 @@ The four motors are under the corners, at zones 0, 2, 6 and 8. When the admin pr
 
 **When the link is lost:**
 
-If no state comes for a short time, M7 stops the motors at once and tells M8 to show the “searching” animation. Then it tries to connect again: first to the server it finds on the local network, then to the backup address. The Wi-Fi name, the password, the backup address and the calibration values are stored in the ESP32 flash. We can change them over the USB cable, so we do not need to build the code again at a new place. M8 uses the same link state names.
+If no state comes for a short time, M7 stops the motors at once and tells M8 to show the “searching” animation. Then it tries to connect again: first to the server it finds on the local network, then to the backup address. The Wi-Fi name, the password, the backup address and the calibration values are stored in the ESP32's flash memory. We can change them over the USB cable, so we do not need to build the code again at a new place. M8 uses the same link state names.
 
 ### 11.6. Testing
 
@@ -683,7 +683,7 @@ M8 builds the physical city board and writes the animation engine that turns the
 
 | Runs on | Technology | Requirements |
 |---|---|---|
-| ESP32 in the LED board, in one Arduino program together with M7, and the board itself for the hardware | C++ animation engine that also runs on a PC for tests, programmable addressable RGB LED strips, an external power supply, 3D printing, a plywood base | R2 R5 R6 R7 R8 R11 |
+| ESP32 in the LED board, in one Arduino program together with M7, and the board itself for the hardware | C++ animation engine on the ESP32, programmable addressable RGB LED strips, an external power supply, 3D printing, a plywood base | R2 R5 R6 R7 R8 R11 |
 
 M8 gets all its data from M7 in the same program and gives light to the LED strips. The figure shows the data on both sides.
 
@@ -698,7 +698,7 @@ M8 takes part in six requirements. The last column says what will work when M8 i
 | R6 | Obstacles | A red pattern for each type on the whole road segment, light blue for a puddle | Every obstacle type is clear from a distance |
 | R7 | Earthquake | A shock wave from the earthquake centre | The earthquake is seen on the table |
 | R8 | Physical LED board | 60 × 60 cm, 6 roads in each direction, LEDs on all roads, printed buildings, four stores | The finished board stands on the table and shows the game |
-| R11 | Engineering requirements | Demo mode without a server, animations checked as images on a PC | M8 can be built and tested without the server |
+| R11 | Engineering requirements | Demo mode without a server, tested directly on the board with the ESP32 | M8 can be built and tested without the server |
 
 ### 12.3. Inputs and outputs
 
@@ -747,7 +747,7 @@ The board state comes less often than the frames, so the motion smoother moves e
 
 Every game phase has its own look, so the people around the table always know what happens.
 
-In the lobby the roads are dark and the four stores glow in the team colours. In the countdown the light moves from the edge to the centre in three steps, one for each number. During the game the board shows the live state. In a pause everything stays where it is, but all LEDs dim and breathe slowly. At the end all roads turn to the colour of the winner team, and in a draw the colours of the winners take turns. If M7 says that the link is lost, the roads go dark and the stores breathe slowly in a dim white, so everybody can see that the board is waiting.
+In the lobby the roads are dark and the four stores glow in the team colours. In the countdown the light moves from the edge to the centre in three steps, one for each number. During the game the board shows the live state. In a pause everything stays where it is, but all LEDs dim and breathe slowly. At the end all roads turn to the colour of the winner team, and in a draw the colours of the winners take turns. If M7 says that the link state is “searching”, the roads go dark and the stores breathe slowly in a dim white, so everybody can see that the board is waiting.
 
 **Earthquake:**
 
@@ -755,4 +755,4 @@ When an earthquake starts, a ring of light grows from the centre of the earthqua
 
 ### 12.6. Testing
 
-M8 is tested alone, without M7 and without the server. The engine is plain C++, so it also runs on a PC with recorded board states as test data. There every animation and every game phase is drawn as an image and compared with a saved reference image. On the real board a built in demo scenario plays a full game without a server, and test patterns check the order and place of the LEDs, the 8 player colours (three people must name each colour correctly), the power limit at full white and the heat in a long run.
+M8 is tested alone on the real board with the ESP32, without M7 and without the server. A built in demo scenario gives recorded board states as test data and plays a full game with every animation and every game phase. Test patterns check the order and place of the LEDs, the 8 player colours (three people must name each colour correctly), the power limit at full white and the heat in a long run.

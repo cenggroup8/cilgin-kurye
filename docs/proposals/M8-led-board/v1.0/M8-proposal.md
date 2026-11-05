@@ -8,65 +8,80 @@ The PDF next to this file has the same text with all figures.
 
 ## 1. Purpose
 
-M8 builds the physical city board and writes the animation engine that turns the game state into light. The board is 60 × 60 cm. It has 344 addressable LEDs on the roads and in the stores, 3D-printed buildings, and places for the motion sensor and the vibration motors. In the game the board is the only map, so it must be clear to read from every side of the table.
+M8 builds the physical city board and writes the animation engine that turns the game state into light. The board is 60 × 60 cm. Programmable addressable RGB LED strips lie in all roads and in the four stores, and there are 3D printed buildings and places for the motion sensor and the vibration motors. In the game the board is the only map, so it must be clear to read from every side of the table.
 
-| Runs on | Core 1 of the ESP32 for the software; the board itself for the hardware |
-|---|---|
-| Technology | Portable C++ animation engine that runs on the ESP32 and on a PC for tests; 344 addressable RGB LEDs; level shifter; 3D printing; plywood base |
-| Requirements | R2 R5 R6 R7 R8 R11 |
+| Runs on | Technology | Requirements |
+|---|---|---|
+| ESP32 in the LED board, in one Arduino program together with M7, and the board itself for the hardware | C++ animation engine that also runs on a PC for tests, programmable addressable RGB LED strips, an external power supply, 3D printing, a plywood base | R2 R5 R6 R7 R8 R11 |
 
-*Figure: Where M8 sits in the system. M8 gets the state from M7 on the same chip.*
+M8 gets all its data from M7 in the same program and gives light to the LED strips. The figure shows the data on both sides.
 
 ## 2. Requirements covered
 
-| **ID** | **Requirement** | **What M8 does for it** |
-|---|---|---|
-| R2 | Delivery cycle | Delivery points blink in the player's tone; a flash when the package is delivered |
-| R5 | No map on the phone | The board is the map: all motorcycles; “Find me” white flash for 1 s |
-| R6 | Obstacles | Red patterns by type on the whole road segment |
-| R7 | Earthquake | A shock wave from the earthquake centre |
-| R8 | Physical LED board | 60 × 60 cm, 6 roads in each direction, LEDs on all roads, printed buildings, four stores |
-| R11 | Independent development | Demo mode without a server; animations checked as images on a PC |
+M8 takes part in six requirements. The last column says what will work when M8 is finished.
+
+| **ID** | **Requirement** | **What M8 does for it** | **When M8 is done** |
+|---|---|---|---|
+| R2 | Delivery cycle | Delivery points blink in the player's colour, a flash when the package is delivered | Each player finds the own delivery point on the board |
+| R5 | No map on the phone | The board is the map with all motorcycles. “Find me” makes the player's dot white for 1 s | A player can always find the own motorcycle |
+| R6 | Obstacles | A red pattern for each type on the whole road segment, light blue for a puddle | Every obstacle type is clear from a distance |
+| R7 | Earthquake | A shock wave from the earthquake centre | The earthquake is seen on the table |
+| R8 | Physical LED board | 60 × 60 cm, 6 roads in each direction, LEDs on all roads, printed buildings, four stores | The finished board stands on the table and shows the game |
+| R11 | Engineering requirements | Demo mode without a server, animations checked as images on a PC | M8 can be built and tested without the server |
 
 ## 3. Inputs and outputs
 
-| **Dir.** | **Data** | **From / to** | **Content** |
+The board state comes 10 to 30 times per second, but M8 draws 60 frames per second, so it fills the time between two states by itself.
+
+| **Direction** | **Data** | **From / to** | **Content** |
 |---|---|---|---|
-| In | Board state | M7 | At most 30 per second: phase, players, delivery points, obstacles, earthquake |
-| In | Config | M7 | Player colours, brightness 0.1–1, current limit |
-| In | Link state | M7 | Connected, searching or lost |
+| In | Board state | M7 | Phase, players, delivery points, obstacles, earthquake |
+| In | Config | M7 | Player colours, brightness from 0.1 to 1, power limit |
+| In | Link state | M7 | Connected or searching |
 | In | City plan | Shared file | Road grid and store places, turned into the LED map when the code is built |
-| Out | Light | Board | 60 frames per second |
-| Out | Frame report | M7 | Frame time and current estimate, shown to the admin |
+| Out | Light | LED strips | The colour of every LED, 60 frames per second |
+| Out | Frame report | M7 | Frame rate and power estimate, shown to the admin |
 
 ## 4. Main components
 
-| **Component** | **What it does** | **Related modules** |
+The engine has five parts. They run one after the other for every frame.
+
+| **Component** | **Takes** | **Gives** |
 |---|---|---|
-| Motion smoother | Moves the motorcycle dots smoothly between two states | M7 |
-| LED map | The place of every LED; made from the city plan by a script | M1, city plan |
-| Layers and effects | Five layers and the patterns for obstacles, earthquakes and game phases | — |
-| Post-processing and output | Colour correction, brightness, current limit; drives 5 LED lines at the same time | M7 |
-| Demo mode | A built-in scenario that runs without a server | — |
+| LED map | City plan | The place of every LED on the roads and in the stores, made by a script |
+| Motion smoother | The last two board states | Smooth motorcycle positions along the roads for every frame |
+| Layers and effects | Board state, phase, link state | Five layers and the patterns for obstacles, earthquakes and game phases |
+| Post processing and output | The mixed frame, config | Corrected colours inside the brightness and power limit, sent to the strips |
+| Demo mode | A built in scenario | A full game look without a server |
 
 ## 5. How it works
 
-**The board.** The base is plywood. On it there are 6 roads in each direction, so the city has 5 × 5 blocks. LED strips with 60 LEDs per metre lie in the roads. A road segment between two crossings is 10 cm long, so it has exactly 6 LED steps. With 336 LEDs on the roads and 2 LEDs in each of the 4 stores, the board has 344 LEDs. The buildings are 3D-printed from the same models as the 3D city on the phone, at a scale of 1 m in the game to 1 mm on the board. Thin printed covers over the roads soften the light. The LEDs need 5 V. The software limits the current to 4 A, so the power supply never gets too hot. A level shifter turns the 3.3 V signal of the ESP32 into a clean 5 V signal.
+**The board:**
 
-*Figure: The planned LED board from above, during a game with 8 players.*
+The base is plywood. On it there are 6 roads in each direction, so the city has 5 × 5 blocks. The LED strips lie in the roads between the crossings. There are no LEDs at the crossings, because two strips cannot lie on top of each other. The buildings are 3D printed from the same models as the 3D city on the phone, so a player finds the same building on the board and on the phone. The LEDs need an external power supply, and the software keeps the power under the limit in the config.
 
-**Colours.** There are four teams and each team has one colour: blue, green, yellow and purple. The two players of a team have two tones of the team colour, a light one and a dark one. Red is used only for obstacles, so red always means “this road slows you down”. The team colours are far from red, so nobody mixes them up. The pattern of the red tells the type of the obstacle, as the figure below shows.
+**Colours:**
 
-*Figure: Left: the six LEDs of one road segment for each obstacle type. Right: the team colours.*
+There are four teams and each team has one colour: blue, green, yellow and purple. The two players of a team have a light and a dark tone of the team colour. Red is used only for obstacles, so red always means “this road slows you down”. The pattern of the red tells the type of the obstacle. A water puddle is light blue, because it makes the road slippery, not slow. White is used only for “Find me”, so a player always knows that the white dot is the own motorcycle.
 
-**Layers.** The engine draws 60 frames per second on core 1. Each frame is made from five layers, from the bottom to the top: the roads, the obstacles, the delivery points, the motorcycles and a top layer for short effects. A higher layer covers a lower one. The board state comes only 10 to 30 times per second, so the motion smoother moves each motorcycle dot between the last two states. The dot has a short tail, so the direction of motion is easy to see. The top layer draws the “Find me” flash and the earthquake shock wave. After the layers, the engine corrects the colours for the eye, sets the brightness from the config, checks the current and lowers all LEDs a little if the current would be over the limit. Then it sends the frame to the LEDs on 5 lines at the same time, so one frame takes only about 2 ms to send.
+**Layers:**
 
-*Figure: The five layers of one frame and the steps before the LEDs.*
+The engine draws 60 frames per second. Each frame is made from five layers, from the bottom to the top: the roads, the obstacles, the delivery points, the motorcycles and a top layer for short effects. A higher layer covers a lower one, so when two things fall on the same LED, the higher one is shown. When two motorcycles are on the same LED, their colours take turns. After the layers, the engine corrects the colours for the eye, sets the brightness from the config, and lowers all LEDs a little if the frame would need more power than the limit.
 
-**Earthquake and link loss.** When an earthquake starts, a ring of light grows from the centre of the earthquake over the whole board, like a wave on water, and slowly fades. The roads inside the earthquake radius then turn red for road work. If M7 says that the link is lost, the roads go dark and the store LEDs breathe slowly in amber, so everybody can see that the board is waiting.
+**Smooth motion on the roads:**
 
-*Figure: The earthquake shock wave grows from the centre of the hit.*
+The board state comes less often than the frames, so the motion smoother moves each motorcycle dot between the last two states. It moves the dot along the roads, through the crossing, and never in a straight line over a block. The dot is drawn one state behind the newest one, so it adds a small delay. If a state is lost, the dot keeps moving along its road with its last speed until the next state comes. The dot has a short tail, so the direction of motion is easy to see.
 
-## 6. Testing and demonstration
+**Game phases and the link:**
 
-The engine is plain C++, so it also runs on a PC. There, every animation is drawn as an image and compared with a saved reference image. On the real board, built-in test patterns check the LED order and place, the 8 player colours (three people must name each colour correctly), the current limit, the voltage at the farthest LED, and 30 minutes of heat. In the demonstration the board runs its demo scenario without a server, with all obstacle types and an earthquake.
+Every game phase has its own look, so the people around the table always know what happens.
+
+In the lobby the roads are dark and the four stores glow in the team colours. In the countdown the light moves from the edge to the centre in three steps, one for each number. During the game the board shows the live state. In a pause everything stays where it is, but all LEDs dim and breathe slowly. At the end all roads turn to the colour of the winner team, and in a draw the colours of the winners take turns. If M7 says that the link is lost, the roads go dark and the stores breathe slowly in a dim white, so everybody can see that the board is waiting.
+
+**Earthquake:**
+
+When an earthquake starts, a ring of light grows from the centre of the earthquake over the whole board, like a wave on water, and slowly fades. The road work after an earthquake is not a decision of M8. M1 puts it into the obstacle list, and M8 only draws it like any other obstacle.
+
+## 6. Testing
+
+M8 is tested alone, without M7 and without the server. The engine is plain C++, so it also runs on a PC with recorded board states as test data. There every animation and every game phase is drawn as an image and compared with a saved reference image. On the real board a built in demo scenario plays a full game without a server, and test patterns check the order and place of the LEDs, the 8 player colours (three people must name each colour correctly), the power limit at full white and the heat in a long run.

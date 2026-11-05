@@ -169,6 +169,9 @@
 % ---- colours and drawings ----
 \usepackage{colortbl}
 \usepackage{float}
+\makeatletter
+\newcommand{\needspace}[1]{\begingroup\setlength{\dimen@}{#1}\vskip\z@\@plus\dimen@\penalty -100\vskip\z@\@plus -\dimen@\vskip\dimen@\penalty 9999\vskip -\dimen@\vskip\z@skip\endgroup}
+\makeatother
 % ---- colours ----
 \definecolor{srv}{HTML}{2E6FB7}\colorlet{srvL}{srv!15}
 \definecolor{cli}{HTML}{2E9E5B}\colorlet{cliL}{cli!15}
@@ -293,7 +296,6 @@
 \fill[white, opacity=0.85] (1.4,0.5) circle (0.32); \fill[black!70] (1.52,0.5) -- (1.3,0.63) -- (1.3,0.37) -- cycle;
 \node[fill=obs!80, text=white, rounded corners=3pt, font=\tiny\bfseries, minimum width=8mm, minimum height=6mm] at (5.6,0.5) {Brake};
 \node[fill=cli, text=white, rounded corners=3pt, font=\tiny\bfseries, minimum width=8mm, minimum height=8mm] at (6.5,0.6) {Gas};
-\node[fill=tC, text=black, rounded corners=3pt, font=\tiny\bfseries, minimum width=9mm, minimum height=5mm] at (6.15,1.45) {Deliver};
 \node[fill=white, text=black, rounded corners=3pt, font=\tiny\bfseries, minimum width=9mm, minimum height=5mm] at (0.9,1.45) {Find me};}
 
 % ---- side cut of the board (14 units wide) ----
@@ -318,8 +320,10 @@
 \node[font=\tiny] at (10.1,0.6) {Power};}
 
 % ---- layout helpers ----
-\newenvironment{ckfig}{\begin{figure}[H]\centering}{\end{figure}}
-\newcommand{\msub}[1]{\par\smallskip\noindent{\bfseries #1:}\par\nobreak\vspace{-2pt}}
+\newenvironment{ckfig}{\begin{figure}[!htb]\centering}{\end{figure}}
+\renewcommand{\topfraction}{0.9}\renewcommand{\bottomfraction}{0.8}\renewcommand{\textfraction}{0.07}\renewcommand{\floatpagefraction}{0.85}
+\setcounter{topnumber}{3}\setcounter{bottomnumber}{2}\setcounter{totalnumber}{4}
+\newcommand{\msub}[1]{\par\needspace{5\baselineskip}\smallskip\noindent{\bfseries #1:}\par\nobreak\vspace{-2pt}}
 \tikzset{msga/.style={draw=cli!70!black, line width=0.8pt}, cmda/.style={draw=obs, line width=1pt}, loopa/.style={draw=srv, line width=1pt}, hwa/.style={draw=black!60, line width=1.2pt, dash pattern=on 1.5pt off 1.5pt}, wanta/.style={draw=cli, line width=1.6pt}, reala/.style={draw=obs, line width=1.6pt}, siga/.style={draw=srv, line width=0.8pt}, thra/.style={draw=obs, line width=0.9pt, dash pattern=on 4pt off 2pt}, evta/.style={draw=cli, line width=1pt}}
 \tikzset{iol/.style={font=\scriptsize, fill=white, inner sep=1.2pt, rounded corners=1pt, align=center}}
 % legend row: start point, list of style/text
@@ -353,6 +357,9 @@
 \ckleg{-7.6,-\nmax*0.525-0.5}{#7}
 \end{tikzpicture}}
 
+% keep an intro sentence and its table together on one page
+\newcommand{\ckkeep}[1]{\par\noindent\begin{minipage}{\linewidth}\setlength{\parskip}{4pt}#1\end{minipage}\par\smallskip}
+
 \begin{document}
 
 \thispagestyle{ckfirst}
@@ -365,7 +372,7 @@
 \vspace{3pt}
 {\large\itshape Module M3: Physics and Collision\par}
 \vspace{6pt}
-\textbf{Instructor:} Erkan Zergeroğlu\hspace{1.4em}\textbf{Company:} Board\&Byte\hspace{1.4em}\textbf{Group:} Group-8\hspace{1.4em}\textbf{Date:} 6 November 2026
+\textbf{Company:} Board\&Byte\hspace{1.4em}\textbf{Group:} Group-8\hspace{1.4em}\textbf{Date:} 6 November 2026
 \end{center}
 \begin{center}\footnotesize\renewcommand{\arraystretch}{1.15}
 \begin{tabular}{|p{0.27\linewidth}|p{0.15\linewidth}|p{0.27\linewidth}|p{0.15\linewidth}|}\hline
@@ -387,7 +394,7 @@ Batuhan Yanar & 220104004059 & Selim Barut & 220104004046 \\ \hline
 \newcounter{msec}
 \newcounter{chap}
 % ---- end of helpers ----
-\newcommand{\msection}[1]{\stepcounter{msec}\section{\arabic{msec}. #1}}
+\newcommand{\msection}[1]{\needspace{8\baselineskip}\stepcounter{msec}\section{\arabic{msec}. #1}}
 
 \msection{Purpose}
 
@@ -396,7 +403,7 @@ It finds collisions, decides when a motorcycle falls, and adds the effect of obs
 to the motion. The same code runs in two places: on the server, where its result is the real one, and
 on the phone, where it guesses the player's own motorcycle before the server answers.
 
-\ckinfo{srv}{Main computer inside the game server, and the phone browser for prediction only}{TypeScript library, our own simple 2D arcade physics without a ready physics engine, circle and box collisions on a uniform grid, seeded random numbers}{R3 R4 R6 R7 R11}
+\ckinfo{srv}{Main computer inside the game server, and the phone browser for prediction only}{TypeScript library with a 3D physics engine that runs on the web, on the server and in the phone browser}{R3 R4 R6 R7 R11}
 
 M3 has no network code. On the server it talks only to M1, and on the phone only to M5. The figure
 shows both uses.
@@ -410,53 +417,55 @@ shows both uses.
 
 \msection{Requirements covered}
 
+\ckkeep{%
 M3 takes part in five requirements. The last column says what will work when M3 is finished.
 
-\begin{longtable}[]{|L{0.06}|L{0.15}|L{0.40}|L{0.39}|}
-\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M3 does for it} & \textbf{When M3 is done} \\ \hline \endhead
+\begin{tabular}{|L{0.06}|L{0.15}|L{0.40}|L{0.39}|}
+\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M3 does for it} & \textbf{When M3 is done} \\ \hline 
 R3 & Driving and controls & Throttle, brake, left and right. No reverse. A U turn by steering in a small circle at low speed & The motorcycle drives, brakes and turns like an arcade game \\ \hline
 R4 & Collisions and falls & Collisions with buildings, barriers, NPC cars and motorcycles. A fast hit makes the motorcycle fall & Nothing drives through a wall, and fast crashes end in a fall \\ \hline
 R6 & Obstacles & Road work and accidents are solid. An accident has a slow zone. A puddle makes the motorcycle slide & Each obstacle type feels different when you drive \\ \hline
-R7 & Earthquake & Side push and less grip inside the earthquake radius that M1 sends & Riding in an earthquake is harder \\ \hline
+R7 & Earthquake & Less grip inside the earthquake area that M1 sends & Riding in an earthquake is harder \\ \hline
 R11 & Engineering requirements & The same input always gives the same result. The server result wins, the phone only predicts & The own motorcycle reacts at once and still matches the server \\ \hline
-\end{longtable}
+\end{tabular}}
 
 \msection{Inputs and outputs}
 
+\ckkeep{%
 M1 calls M3 two times in every tick with the inputs below. M5 uses the same code for one motorcycle.
 
-\begin{longtable}[]{|L{0.11}|L{0.17}|L{0.18}|L{0.54}|}
-\hline \textbf{Direction} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline \endhead
+\begin{tabular}{|L{0.11}|L{0.17}|L{0.18}|L{0.54}|}
+\hline \textbf{Direction} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline 
 In & City plan & Shared file & Roads, lanes, blocks and buildings as fixed colliders \\ \hline
 In & Controls & M1 & Every tick: throttle and brake from 0 to 1, steer from −1 to 1, for humans and bots, and a speed factor for each player \\ \hline
 In & Obstacles, NPC cars & M1 & Obstacle type, road, lane, position, and the boxes of the NPC cars that M1 gets from M4 \\ \hline
-In & Earthquake & M1 & Centre, strength, radius, and the players that fall \\ \hline
-In & Parameters & M6, through M1 & Top speed, grip, fall speed, puddle and earthquake effects \\ \hline
+In & Earthquake & M1 & The earthquake area and the motorcycles that fall \\ \hline
+In & Parameters & M6, through M1 & Top speed, grip, fall speed, grip in a puddle and in an earthquake \\ \hline
 Out & Poses & M1 & Position, direction, speed, lean, sliding, fallen \\ \hline
 Out & Events & M1 & Collisions (with what and how fast) and falls. M1 gives the car hits to M4 \\ \hline
 Out & Predicted pose & M5 & The player's own motorcycle before the server answers \\ \hline
-\end{longtable}
+\end{tabular}}
 
 \msection{Main components}
 
+\ckkeep{%
 M3 has five parts. The first four run on the server, the last one runs on the phone.
 
-\begin{longtable}[]{|L{0.21}|L{0.39}|L{0.40}|}
-\hline \textbf{Component} & \textbf{Takes} & \textbf{Gives} \\ \hline \endhead
+\begin{tabular}{|L{0.21}|L{0.39}|L{0.40}|}
+\hline \textbf{Component} & \textbf{Takes} & \textbf{Gives} \\ \hline 
 Motorcycle model & Controls, parameters & New speed, direction, lean and sliding \\ \hline
-Colliders & City plan, obstacle list, NPC cars & Boxes, slow zones and slippery areas in a uniform grid \\ \hline
+Colliders & City plan, obstacle list, NPC cars & Solid shapes, slow zones and slippery areas \\ \hline
 Collision solver and fall judge & Moved objects, colliders & Pushed apart objects, collision and fall events \\ \hline
-Earthquake effect & Earthquake centre, strength, radius & Side push and lower grip inside the radius \\ \hline
+Earthquake effect & Earthquake area & Lower grip inside the area \\ \hline
 Predictor & Own controls, server state & Predicted own motorcycle with a smooth correction \\ \hline
-\end{longtable}
+\end{tabular}}
 
 \msection{How it works}
 
 \msub{One physics step}
 The server runs 30 ticks per second, and M3 runs 2 substeps in each tick. Small steps keep fast
-motorcycles from passing through thin walls. Each substep does five things in a fixed order, as the figure shows. A fixed order and
-seeded random numbers mean that the same inputs always give the same result on the server and on
-the phone.
+motorcycles from passing through thin walls. Each substep does five things in a fixed order, as the figure shows. Because the order is fixed, the same inputs always give the same result on the
+server and on the phone.
 
 \begin{ckfig}
 \begin{tikzpicture}[ck, node distance=4mm]
@@ -482,8 +491,7 @@ In a turn the motorcycle needs a side force. M3 compares the size of this
 force with the grip limit. If the force is below the limit, the motorcycle follows the turn. If it
 is above the limit, the motorcycle slides out of the turn. We compare only the size, so a left turn
 and a right turn act the same. On a water puddle the grip limit is very low, so the motorcycle
-slides but does not slow down. Inside an earthquake radius the grip is lower too, and there is a
-small push to the side.
+slides but does not slow down. Inside the earthquake area the grip is lower too.
 
 \begin{ckfig}
 \begin{tikzpicture}[ck]
@@ -520,9 +528,7 @@ small push to the side.
 
 \msub{Collisions and falls}
 Buildings, the outer wall and the road work barriers come from the city
-plan and the obstacle list as boxes. NPC cars are boxes, and motorcycles are circles. To find
-collisions fast, M3 puts every object into a uniform grid, so it checks only objects in the same or
-next cell. A contact pushes the objects apart. If the hit speed is above the fall speed that the
+plan and the obstacle list as solid shapes. NPC cars and motorcycles have simple shapes too. A contact pushes the objects apart. If the hit speed is above the fall speed that the
 admin set, the motorcycle falls. When two motorcycles hit each other and their relative speed is
 above the limit, both of them fall. A fallen motorcycle is not solid, so it does not block the road
 for others. M1 gives the penalty time and later asks M3 to stand the motorcycle up again. An
@@ -559,7 +565,7 @@ M3 needs no other module. A test makes a world from the city plan and gives scri
 obstacles and fixed NPC car boxes as test data. We check a straight run and braking, a U turn, slides
 to the left and to the right, wall and car crashes, the earthquake radius, and that the same inputs
 give exactly the same result two times. The predictor is tested with recorded server states and added
-delay and loss. A small test page shows a simple 2D view of the city, so one motorcycle can also be
+delay and loss. A small test page shows a simple 3D view of the city, so one motorcycle can also be
 driven with the keyboard and the parameters can be changed with keys.
 
 \end{document}

@@ -35,10 +35,10 @@ M1 gives the inputs at the start of each tick and takes the outputs before M3 mo
 | **Direction** | **Data** | **From / to** | **Content** |
 |---|---|---|---|
 | In | City plan | Shared file | Intersections, roads, lanes, stores, possible delivery points |
-| In | Game data | M1 | Every tick: players, obstacles with a version number, car hit events |
+| In | Game data | M1 | Every tick: players, obstacles, car hit events |
 | In | Parameters | M6, through M1 | Number of NPC cars, traffic effects, bot skill |
 | Out | NPC cars | M1, then M3, M5, M6 | Position, direction, speed, lane, size |
-| Out | Bot controls | M1, then M3 | The same record as a phone: throttle, brake, steer, deliver |
+| Out | Bot controls | M1, then M3 | The same record as a phone: throttle, brake, steer |
 | Out | Travel times | M1 | Seconds from each team store to every possible delivery point |
 | Out | Traffic metrics | M1, then M6 | Number of NPC cars, mean NPC speed, bot route changes |
 
@@ -58,7 +58,7 @@ M4 has five parts. The route planner is used by both the NPC cars and the bots.
 
 **The road graph and routes:**
 
-The city has 6 roads in each direction. Where two roads cross, there is an intersection, so the graph has 36 intersections. Between them there are 60 road segments, and cars can drive both ways. Each segment has a cost: the expected time to drive it. Turning left or making a U turn adds a small extra cost. Obstacles change the costs. Heavy traffic and an accident make a segment slower, and road work closes it. M4 uses Dijkstra's shortest path search to find the fastest routes. The graph is small, so one search is very fast. M4 computes the routes again whenever a cost changes: when the version number of the obstacle list goes up, when the traffic on a road gets much heavier or lighter, or when the admin changes a route parameter. From the results it makes the travel time table: the time from each of the four stores to every possible delivery point. M1 uses this table to choose fair near and far points.
+The city has 6 roads in each direction. Where two roads cross, there is an intersection, so the graph has 36 intersections. Between them there are 60 road segments, and cars can drive both ways. Each segment has a cost: the expected time to drive it. Turning left or making a U turn adds a small extra cost. Obstacles change the costs. Heavy traffic and an accident make a segment slower, and road work closes it. M4 uses Dijkstra's shortest path search to find the fastest routes. The graph is small, so one search is very fast. M4 computes the routes again whenever a cost changes: when the obstacle list changes, when the traffic on a road gets much heavier or lighter, or when the admin changes a route parameter. From the results it makes the travel time table: the time from each of the four stores to every possible delivery point. M1 uses this table to choose fair near and far points.
 
 **NPC traffic:**
 
@@ -66,7 +66,7 @@ Each NPC car follows a lane and picks a new turn at each intersection. A car kee
 
 **Bots:**
 
-Every bot has a small state machine that follows the delivery cycle, as the figure below shows. The bot drives to the store, gets the package, drives to the delivery point, slows down and presses “Deliver”, and then goes back. On the way it follows the route from the planner. It steers toward a point a little ahead on the path, so the motion looks smooth. A bot can fall or get stuck in any of these four states. If it falls, it waits for the penalty time and then goes on in the same state. If it is stuck, it asks for a new route and goes on in the same state. One “bot skill” value sets the top speed, the reaction time and some steering noise, so the admin can make bots weaker or stronger.
+Every bot has a small state machine that follows the delivery cycle, as the figure below shows. The bot drives to the store, gets the package, drives to the delivery point, stops there so the package is delivered, and then goes back. On the way it follows the route from the planner. It steers toward a point a little ahead on the path, so the motion looks smooth. A bot can fall or get stuck in any of these four states. If it falls, it waits for the penalty time and then goes on in the same state. If it is stuck, it asks for a new route and goes on in the same state. One “bot skill” value sets the top speed, the reaction time and some steering noise, so the admin can make bots weaker or stronger.
 
 ## 6. Testing
 

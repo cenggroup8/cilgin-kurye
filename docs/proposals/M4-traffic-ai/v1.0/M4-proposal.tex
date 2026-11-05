@@ -169,6 +169,9 @@
 % ---- colours and drawings ----
 \usepackage{colortbl}
 \usepackage{float}
+\makeatletter
+\newcommand{\needspace}[1]{\begingroup\setlength{\dimen@}{#1}\vskip\z@\@plus\dimen@\penalty -100\vskip\z@\@plus -\dimen@\vskip\dimen@\penalty 9999\vskip -\dimen@\vskip\z@skip\endgroup}
+\makeatother
 % ---- colours ----
 \definecolor{srv}{HTML}{2E6FB7}\colorlet{srvL}{srv!15}
 \definecolor{cli}{HTML}{2E9E5B}\colorlet{cliL}{cli!15}
@@ -293,7 +296,6 @@
 \fill[white, opacity=0.85] (1.4,0.5) circle (0.32); \fill[black!70] (1.52,0.5) -- (1.3,0.63) -- (1.3,0.37) -- cycle;
 \node[fill=obs!80, text=white, rounded corners=3pt, font=\tiny\bfseries, minimum width=8mm, minimum height=6mm] at (5.6,0.5) {Brake};
 \node[fill=cli, text=white, rounded corners=3pt, font=\tiny\bfseries, minimum width=8mm, minimum height=8mm] at (6.5,0.6) {Gas};
-\node[fill=tC, text=black, rounded corners=3pt, font=\tiny\bfseries, minimum width=9mm, minimum height=5mm] at (6.15,1.45) {Deliver};
 \node[fill=white, text=black, rounded corners=3pt, font=\tiny\bfseries, minimum width=9mm, minimum height=5mm] at (0.9,1.45) {Find me};}
 
 % ---- side cut of the board (14 units wide) ----
@@ -318,8 +320,10 @@
 \node[font=\tiny] at (10.1,0.6) {Power};}
 
 % ---- layout helpers ----
-\newenvironment{ckfig}{\begin{figure}[H]\centering}{\end{figure}}
-\newcommand{\msub}[1]{\par\smallskip\noindent{\bfseries #1:}\par\nobreak\vspace{-2pt}}
+\newenvironment{ckfig}{\begin{figure}[!htb]\centering}{\end{figure}}
+\renewcommand{\topfraction}{0.9}\renewcommand{\bottomfraction}{0.8}\renewcommand{\textfraction}{0.07}\renewcommand{\floatpagefraction}{0.85}
+\setcounter{topnumber}{3}\setcounter{bottomnumber}{2}\setcounter{totalnumber}{4}
+\newcommand{\msub}[1]{\par\needspace{5\baselineskip}\smallskip\noindent{\bfseries #1:}\par\nobreak\vspace{-2pt}}
 \tikzset{msga/.style={draw=cli!70!black, line width=0.8pt}, cmda/.style={draw=obs, line width=1pt}, loopa/.style={draw=srv, line width=1pt}, hwa/.style={draw=black!60, line width=1.2pt, dash pattern=on 1.5pt off 1.5pt}, wanta/.style={draw=cli, line width=1.6pt}, reala/.style={draw=obs, line width=1.6pt}, siga/.style={draw=srv, line width=0.8pt}, thra/.style={draw=obs, line width=0.9pt, dash pattern=on 4pt off 2pt}, evta/.style={draw=cli, line width=1pt}}
 \tikzset{iol/.style={font=\scriptsize, fill=white, inner sep=1.2pt, rounded corners=1pt, align=center}}
 % legend row: start point, list of style/text
@@ -353,6 +357,9 @@
 \ckleg{-7.6,-\nmax*0.525-0.5}{#7}
 \end{tikzpicture}}
 
+% keep an intro sentence and its table together on one page
+\newcommand{\ckkeep}[1]{\par\noindent\begin{minipage}{\linewidth}\setlength{\parskip}{4pt}#1\end{minipage}\par\smallskip}
+
 \begin{document}
 
 \thispagestyle{ckfirst}
@@ -365,7 +372,7 @@
 \vspace{3pt}
 {\large\itshape Module M4: Traffic and AI\par}
 \vspace{6pt}
-\textbf{Instructor:} Erkan Zergeroğlu\hspace{1.4em}\textbf{Company:} Board\&Byte\hspace{1.4em}\textbf{Group:} Group-8\hspace{1.4em}\textbf{Date:} 6 November 2026
+\textbf{Company:} Board\&Byte\hspace{1.4em}\textbf{Group:} Group-8\hspace{1.4em}\textbf{Date:} 6 November 2026
 \end{center}
 \begin{center}\footnotesize\renewcommand{\arraystretch}{1.15}
 \begin{tabular}{|p{0.27\linewidth}|p{0.15\linewidth}|p{0.27\linewidth}|p{0.15\linewidth}|}\hline
@@ -388,7 +395,7 @@ Muhib Taha Boy & 230104004165 &  &  \\ \hline
 \newcounter{msec}
 \newcounter{chap}
 % ---- end of helpers ----
-\newcommand{\msection}[1]{\stepcounter{msec}\section{\arabic{msec}. #1}}
+\newcommand{\msection}[1]{\needspace{8\baselineskip}\stepcounter{msec}\section{\arabic{msec}. #1}}
 
 \msection{Purpose}
 
@@ -410,44 +417,47 @@ what it gives back.
 
 \msection{Requirements covered}
 
+\ckkeep{%
 M4 takes part in five requirements. The last column says what will work when M4 is finished.
 
-\begin{longtable}[]{|L{0.06}|L{0.15}|L{0.40}|L{0.39}|}
-\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M4 does for it} & \textbf{When M4 is done} \\ \hline \endhead
+\begin{tabular}{|L{0.06}|L{0.15}|L{0.40}|L{0.39}|}
+\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M4 does for it} & \textbf{When M4 is done} \\ \hline 
 R1 & Multiplayer game & Bots take the empty places and play like players & A game can start with only one human player \\ \hline
 R2 & Delivery cycle & Travel time table from each store, which M1 uses for fair near and far points & No team gets easier delivery points than another \\ \hline
 R4 & Traffic & NPC cars make real traffic on the roads & The city is full of cars that never lock up \\ \hline
 R6 & Obstacles & Heavy traffic adds slow cars. An accident closes a lane. Road work closes the road for routes and cars & Cars and bots go around every obstacle \\ \hline
 R11 & Engineering requirements & Talks only to M1 with plain data, tested with its own test program & M4 can be built and tested without the other modules \\ \hline
-\end{longtable}
+\end{tabular}}
 
 \msection{Inputs and outputs}
 
+\ckkeep{%
 M1 gives the inputs at the start of each tick and takes the outputs before M3 moves the motorcycles.
 
-\begin{longtable}[]{|L{0.11}|L{0.17}|L{0.18}|L{0.54}|}
-\hline \textbf{Direction} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline \endhead
+\begin{tabular}{|L{0.11}|L{0.17}|L{0.18}|L{0.54}|}
+\hline \textbf{Direction} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline 
 In & City plan & Shared file & Intersections, roads, lanes, stores, possible delivery points \\ \hline
-In & Game data & M1 & Every tick: players, obstacles with a version number, car hit events \\ \hline
+In & Game data & M1 & Every tick: players, obstacles, car hit events \\ \hline
 In & Parameters & M6, through M1 & Number of NPC cars, traffic effects, bot skill \\ \hline
 Out & NPC cars & M1, then M3, M5, M6 & Position, direction, speed, lane, size \\ \hline
-Out & Bot controls & M1, then M3 & The same record as a phone: throttle, brake, steer, deliver \\ \hline
+Out & Bot controls & M1, then M3 & The same record as a phone: throttle, brake, steer \\ \hline
 Out & Travel times & M1 & Seconds from each team store to every possible delivery point \\ \hline
 Out & Traffic metrics & M1, then M6 & Number of NPC cars, mean NPC speed, bot route changes \\ \hline
-\end{longtable}
+\end{tabular}}
 
 \msection{Main components}
 
+\ckkeep{%
 M4 has five parts. The route planner is used by both the NPC cars and the bots.
 
-\begin{longtable}[]{|L{0.21}|L{0.39}|L{0.40}|}
-\hline \textbf{Component} & \textbf{Takes} & \textbf{Gives} \\ \hline \endhead
+\begin{tabular}{|L{0.21}|L{0.39}|L{0.40}|}
+\hline \textbf{Component} & \textbf{Takes} & \textbf{Gives} \\ \hline 
 Road graph & City plan & 36 intersections and 60 roads in both directions, with lanes and turn costs \\ \hline
 Route planner & Road graph, obstacles, traffic, parameters & Fastest routes and the travel time table, computed again when a cost changes \\ \hline
 NPC traffic & Routes, players, car hits, number of cars & Moved, added and removed NPC cars \\ \hline
 Bot drivers & Routes, the bot's motorcycle, game data & One control record for each bot in every tick \\ \hline
 Traffic metrics & Cars and bots & Values for the admin graphs \\ \hline
-\end{longtable}
+\end{tabular}}
 
 \msection{How it works}
 
@@ -458,7 +468,7 @@ segments, and cars can drive both ways. Each segment has a cost: the expected ti
 Turning left or making a U turn adds a small extra cost. Obstacles change the costs. Heavy traffic
 and an accident make a segment slower, and road work closes it. M4 uses Dijkstra's shortest path
 search to find the fastest routes. The graph is small, so one search is very fast. M4 computes the
-routes again whenever a cost changes: when the version number of the obstacle list goes up, when the
+routes again whenever a cost changes: when the obstacle list changes, when the
 traffic on a road gets much heavier or lighter, or when the admin changes a route parameter. From the results it makes the travel time table: the time from each of the four stores to
 every possible delivery point. M1 uses this table to choose fair near and far points.
 
@@ -513,8 +523,8 @@ cars on their road.
 
 \msub{Bots}
 Every bot has a small state machine that follows the delivery cycle, as the figure below shows. The
-bot drives to the store, gets the package, drives to the delivery point, slows down and presses
-``Deliver'', and then goes back. On the way it follows the route from the planner. It steers toward a
+bot drives to the store, gets the package, drives to the delivery point, stops there so the package
+is delivered, and then goes back. On the way it follows the route from the planner. It steers toward a
 point a little ahead on the path, so the motion looks smooth. A bot can fall or get stuck in any of
 these four states. If it falls, it waits for the penalty time and then goes on in the same state. If
 it is stuck, it asks for a new route and goes on in the same state. One ``bot skill'' value sets the
@@ -532,7 +542,7 @@ top speed, the reaction time and some steering noise, so the admin can make bots
 \node[st, draw=adm, fill=admL] (r) at (8.2,-2.6) {Stuck: new route};
 \draw[inna,->] (s) -- node[al]{arrived} (p);
 \draw[inna,->] (p) -- node[al]{got it} (d);
-\draw[inna,->] (d) -- node[al]{slow, near} (v);
+\draw[inna,->] (d) -- node[al]{stops at point} (v);
 \draw[inna,->] (v.north) -- ++(0,0.75) -| node[al, pos=0.25]{delivered, go back} (s.north);
 \draw[cmda,->] ([xshift=-8mm]f.north |- g.south) -- node[al]{fall} ([xshift=-8mm]f.north);
 \draw[loopa,->] ([xshift=8mm]f.north) -- node[al]{back to the same state} ([xshift=8mm]f.north |- g.south);

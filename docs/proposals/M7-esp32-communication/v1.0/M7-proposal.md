@@ -37,12 +37,12 @@ The table shows every input and output with its link. Messages that must arrive 
 | In | Config | M2, TCP | Player colours, brightness from 0.1 to 1, power limit |
 | In | Vibrate | M2, TCP | Motors to use, strength from 0 to 1, duration |
 | In | Delay probe | M2, UDP | A small message with the server time, answered at once |
-| In | Sensor | Hardware | 1000 samples per second |
+| In | Sensor | Hardware | Motion data from the accelerometer and the gyroscope |
 | In | Settings | USB cable | Wi-Fi name and password, backup server address, calibration values |
 | In | Frame report | M8 | Frame rate and the power estimate of the last frames |
 | Out | Newest state | M8 | Latest board state, config and link state, in the same program |
 | Out | Earthquake event | M2, TCP, to M1 and M6 | Source (hand or motors), strength from 0 to 10, centre, zone from 0 to 8, confidence |
-| Out | Sensor samples | M2, UDP, to M6 | 100 per second for the seismic graph, sent in groups of 10 |
+| Out | Sensor samples | M2, UDP, to M6 | Sensor data for the seismic graph, sent in small groups |
 | Out | Status, delay reply | M2 | Status on TCP once per second: frame rate, Wi-Fi signal, power, errors. Delay replies on UDP |
 
 ## 4. Main components
@@ -74,7 +74,7 @@ The figure below is a side cut of the board. The motion sensor is fixed at the c
 
 **Finding a hit:**
 
-The sensor measures the motion 1000 times per second. First a filter takes away gravity and slow tilting, so only the shaking is left. The detector also learns the normal noise of the room and puts the start threshold well above it. So the threshold goes up on a noisy table, and normal play does not start an earthquake. When the signal passes the threshold, a hit starts, and the detector takes a short window from this moment. The stronger the shaking in this window, the higher the strength. Like a real earthquake scale, the strength grows slowly for very strong hits, so a light tap and a hard hit both get a useful value. The scale is set once in calibration with a standard hit, and the result is kept between 0 and 10.
+The sensor measures the motion all the time. First a filter takes away gravity and slow tilting, so only the shaking is left. The detector also learns the normal noise of the room and puts the start threshold well above it. So the threshold goes up on a noisy table, and normal play does not start an earthquake. When the signal passes the threshold, a hit starts, and the detector takes a short window from this moment. The stronger the shaking in this window, the higher the strength. Like a real earthquake scale, the strength grows slowly for very strong hits, so a light tap and a hard hit both get a useful value. The scale is set once in calibration with a standard hit, and the result is kept between 0 and 10.
 
 **Finding the zone:**
 
@@ -86,7 +86,7 @@ The four motors are under the corners, at zones 0, 2, 6 and 8. When the admin pr
 
 **When the link is lost:**
 
-If no state comes for a short time, M7 stops the motors at once and tells M8 to show the “searching” animation. Then it tries to connect again: first to the server it finds on the local network, then to the backup address. The Wi-Fi name, the password, the backup address and the calibration values are stored in the ESP32 flash. We can change them over the USB cable, so we do not need to build the code again at a new place. M8 uses the same link state names.
+If no state comes for a short time, M7 stops the motors at once and tells M8 to show the “searching” animation. Then it tries to connect again: first to the server it finds on the local network, then to the backup address. The Wi-Fi name, the password, the backup address and the calibration values are stored in the ESP32's flash memory. We can change them over the USB cable, so we do not need to build the code again at a new place. M8 uses the same link state names.
 
 ## 6. Testing
 

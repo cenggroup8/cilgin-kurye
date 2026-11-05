@@ -167,6 +167,8 @@
 
 
 % ---- colours and drawings ----
+\usepackage{colortbl}
+\usepackage{float}
 % ---- colours ----
 \definecolor{srv}{HTML}{2E6FB7}\colorlet{srvL}{srv!15}
 \definecolor{cli}{HTML}{2E9E5B}\colorlet{cliL}{cli!15}
@@ -215,7 +217,7 @@
 \node[glbl, anchor=south west] at (pc.north west) {MAIN COMPUTER};
 \node[bd, M7, minimum width=27mm] (m7) at (4.6,-2.7) {\textbf{M7}\\ESP32 software};
 \node[bd, M8, minimum width=27mm] (m8) at (8.4,-2.7) {\textbf{M8}\\LED engine};
-\node[hwb, minimum width=25mm] (led) at (12,-2.7) {344 LEDs};
+\node[hwb, minimum width=25mm] (led) at (12,-2.7) {RGB LED\\strips};
 \node[hwb, minimum width=27mm] (sm) at (4.6,-4.4) {Sensor and\\4 motors};
 \node[grp, fit=(m7)(m8)(led)(sm)] (bb) {};
 \node[glbl, anchor=north east] at (bb.south east) {LED CITY BOARD};
@@ -229,9 +231,7 @@
 \draw[inna, ->] (m7) -- node[al]{state} (m8);
 \draw[inna, ->] (m8) -- (led);
 \draw[inna, <->] (m7) -- (sm);
-\draw[tcpa] (-1.3,-6.0) -- ++(0.9,0) node[right, font=\scriptsize]{TCP: every message arrives, in order};
-\draw[udpa] (4.0,-6.0) -- ++(0.9,0) node[right, font=\scriptsize]{UDP: fast, the newest message wins};
-\draw[inna] (9.3,-6.0) -- ++(0.9,0) node[right, font=\scriptsize]{inside one program or chip};
+\ckleg{-1.3,-6.0}{tcpa/TCP or WebSocket: every message arrives in order, udpa/UDP: fast and the newest message wins, inna/inside one program or chip}
 \end{tikzpicture}}
 
 % ---- LED board seen from above (6 x 6 roads, 1 unit = 10 cm) ----
@@ -248,7 +248,7 @@
 \foreach \i in {0,...,5}{\foreach \k in {0,...,30}{%
   \fill[black!55] (\i,\k/6) circle (0.025);
   \fill[black!55] (\k/6,\i) circle (0.025);}}
-\foreach \x/\y/\c in {0/4/tA, 4/4/tB, 0/0/tC, 4/0/tD}{%
+\foreach \x/\y/\c in {0/4/tA, 4/4/tB, 0/0/tD, 4/0/tC}{%
   \fill[\c!30!black!60] (\x+0.13,\y+0.13) rectangle (\x+0.87,\y+0.87);
   \fill[\c] (\x+0.3,\y+0.3) rectangle (\x+0.7,\y+0.7);
   \fill[white] (\x+0.4,\y+0.5) circle (0.05); \fill[white] (\x+0.6,\y+0.5) circle (0.05);}}
@@ -260,8 +260,8 @@
 \newcommand{\dpoint}[3]{\draw[#3!50, line width=0.8pt] (#1,#2) circle (0.26); \draw[#3, line width=1.4pt] (#1,#2) circle (0.16); \fill[#3] (#1,#2) circle (0.07);}
 \newcommand{\heavy}[2]{\draw[obs!60!black, line width=4pt] (#1) -- (#2); \draw[obs, line width=4pt, dash pattern=on 3pt off 5pt] (#1) -- (#2);}
 \newcommand{\roadwork}[2]{\draw[obs, line width=4pt] (#1) -- (#2);}
-\newcommand{\accident}[2]{\draw[obs, line width=4pt] (#1) -- (#2); \draw[white, line width=4pt, dash pattern=on 2.5pt off 3.5pt] (#1) -- (#2);}
-\newcommand{\puddle}[2]{\draw[cyan!35, line width=4pt] (#1) -- (#2); \draw[white, line width=1.6pt, dash pattern=on 1pt off 2.5pt] (#1) -- (#2);}
+\newcommand{\accident}[2]{\draw[obs, line width=4pt, dash pattern=on 3pt off 3pt] (#1) -- (#2);}
+\newcommand{\puddle}[2]{\draw[cyan!55, line width=4pt] (#1) -- (#2); \draw[cyan!15, line width=1.6pt, dash pattern=on 1pt off 2.5pt] (#1) -- (#2);}
 \newcommand{\findme}[2]{\fill[white, opacity=0.25] (#1,#2) circle (0.36); \fill[white, opacity=0.5] (#1,#2) circle (0.24); \fill[white] (#1,#2) circle (0.13);}
 
 % ---- phone game screen (7 x 3.4 units) ----
@@ -317,6 +317,42 @@
 \filldraw[fill=black!15, draw=black!50] (9.3,0.35) rectangle (10.9,0.85);
 \node[font=\tiny] at (10.1,0.6) {Power};}
 
+% ---- layout helpers ----
+\newenvironment{ckfig}{\begin{figure}[H]\centering}{\end{figure}}
+\newcommand{\msub}[1]{\par\smallskip\noindent{\bfseries #1:}\par\nobreak\vspace{-2pt}}
+\tikzset{msga/.style={draw=cli!70!black, line width=0.8pt}, cmda/.style={draw=obs, line width=1pt}, loopa/.style={draw=srv, line width=1pt}, hwa/.style={draw=black!60, line width=1.2pt, dash pattern=on 1.5pt off 1.5pt}, wanta/.style={draw=cli, line width=1.6pt}, reala/.style={draw=obs, line width=1.6pt}, siga/.style={draw=srv, line width=0.8pt}, thra/.style={draw=obs, line width=0.9pt, dash pattern=on 4pt off 2pt}, evta/.style={draw=cli, line width=1pt}}
+\tikzset{iol/.style={font=\scriptsize, fill=white, inner sep=1.2pt, rounded corners=1pt, align=center}}
+% legend row: start point, list of style/text
+\newcommand{\ckleg}[2]{%
+\coordinate (lgp) at (#1);
+\foreach \ls/\lt in {#2}{%
+  \draw[\ls,->] (lgp) -- ++(0.8,0) node[right, font=\scriptsize, text=black] (lgt) {\lt};
+  \coordinate (lgp) at ([xshift=5mm]lgt.east);}}
+% purpose table: colour (unused), runs on, technology, requirements
+\newcommand{\ckinfo}[4]{\par\smallskip\noindent{\renewcommand{\arraystretch}{1.25}%
+\begin{tabular}{|L{0.30}|L{0.50}|L{0.20}|}\hline
+\textbf{Runs on} & \textbf{Technology} & \textbf{Requirements} \\ \hline
+#2 & #3 & #4 \\ \hline
+\end{tabular}}\par\smallskip}
+% module data map: n in, n out, centre text, centre style, inputs, outputs, legend list
+% inputs and outputs: {name}/style/{data}/arrow style
+\newcommand{\iomap}[7]{%
+\begin{tikzpicture}[ck]
+\pgfmathsetmacro{\nmax}{max(#1,#2)}
+\node[#4, line width=2pt, minimum width=30mm, minimum height=\nmax*10.5mm+2mm, font=\normalsize] (c) at (0,0) {#3};
+\foreach \nm/\st/\dd/\ar [count=\ii] in {#5}{%
+  \pgfmathsetmacro{\yy}{((#1+1)/2-\ii)*1.05}
+  \node[\st, minimum width=25mm, minimum height=8.5mm, font=\scriptsize] (in\ii) at (-6.6,\yy) {\nm};
+  \draw[\ar,->] (in\ii.east) -- node[iol]{\dd} (c.west |- in\ii);}
+\foreach \nm/\st/\dd/\ar [count=\ii] in {#6}{%
+  \pgfmathsetmacro{\yy}{((#2+1)/2-\ii)*1.05}
+  \node[\st, minimum width=25mm, minimum height=8.5mm, font=\scriptsize] (out\ii) at (6.6,\yy) {\nm};
+  \draw[\ar,->] (c.east |- out\ii) -- node[iol]{\dd} (out\ii.west);}
+\node[font=\scriptsize\bfseries, text=black!60] at (-6.6,\nmax*0.525+0.4) {Inputs come from};
+\node[font=\scriptsize\bfseries, text=black!60] at (6.6,\nmax*0.525+0.4) {Outputs go to};
+\ckleg{-7.6,-\nmax*0.525-0.5}{#7}
+\end{tikzpicture}}
+
 \begin{document}
 
 \thispagestyle{ckfirst}
@@ -357,129 +393,144 @@ Hasan Hüseyin Özdemir & 230104004048 & Muhib Taha Boy & 230104004165 \\ \hline
 
 \msection{Purpose}
 
-M7 is the software of the ESP32 inside the LED board, and the link between the board and the main
-computer. It gets the game state over Wi-Fi and gives it to the LED engine (M8). It reads the motion
-sensor and finds the strength and the place of a hit on the board. It drives the vibration motors.
-It also reports the health of the board and the sensor signal to the admin.
+M7 is the part of the ESP32 program that talks to the outside world. It gets the game state from the
+main computer over Wi-Fi and gives it to the LED part (M8). It reads the motion sensor and finds the
+strength and the place of a hit on the board. It drives the vibration motors. It also reports the
+health of the board and the sensor signal to the admin.
 
-\begin{longtable}[]{|L{0.18}|L{0.82}|}
-\hline Runs on & ESP32 in the LED board: core 0 (the LED engine M8 runs on core 1) \\ \hline
-Technology & C++ with the Arduino framework for ESP32 and FreeRTOS tasks; TCP and UDP over Wi-Fi with MessagePack; 6-axis motion sensor (accelerometer and gyroscope); 4 vibration motors with transistor drivers \\ \hline
-Requirements & R7 R8 R10 R11 \\ \hline
-\end{longtable}
+\ckinfo{brd}{ESP32 in the LED board, in one Arduino program together with M8}{C++ with Arduino for ESP32, TCP and UDP over Wi-Fi with MessagePack messages, a motion sensor with accelerometer and gyroscope, 4 vibration motors}{R7 R8 R10 R11}
 
-\begin{figure}[htbp]\centering
-\systemmap{M7}
-\caption{Where M7 sits in the system. M7 talks to the server on two channels: TCP and UDP.}
-\end{figure}
+M7 has links on three sides: the server over Wi-Fi, the M8 part in the same program, and the hardware
+under the board. The figure shows each of them.
+
+\begin{ckfig}
+\iomap{5}{4}{\textbf{M7}\\ESP32 software\\and link}{bd}
+{{M2, TCP}/sv/{config, vibrate}/tcpa, {M2, UDP}/sv/{board state,\\delay probe}/udpa, {Motion sensor}/hwb/{1000 samples\\per second}/hwa, {USB cable}/hwb/{Wi-Fi and\\calibration settings}/hwa, {M8 LED part}/bd/{frame report}/inna}
+{{M8 LED part}/bd/{newest state,\\config, link state}/inna, {M2, TCP}/sv/{earthquake event,\\status}/tcpa, {M2, UDP}/sv/{sensor samples,\\delay replies}/udpa, {4 motors}/hwb/{vibration power}/hwa}
+{tcpa/TCP, udpa/UDP, inna/inside the ESP32 program, hwa/wire to the hardware}
+\end{ckfig}
 
 \msection{Requirements covered}
 
-\begin{longtable}[]{|L{0.07}|L{0.25}|L{0.68}|}
-\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M7 does for it} \\ \hline \endhead
-R7 & Earthquake & Finds hand hits and motor shaking with the sensor; strength 0--10 and a 3 × 3 zone; drives the motors for the admin button \\ \hline
-R8 & Physical LED board & Brings the game state to the board over Wi-Fi; one ESP32 for the LEDs, the sensor and the motors \\ \hline
-R10 & Network and measurement & Board delay measurement; sensor samples for the seismic graph; comes back after a lost link \\ \hline
-R11 & Independent development & PC emulators for both sides of the link \\ \hline
+M7 takes part in four requirements. The last column says what will work when M7 is finished.
+
+\begin{longtable}[]{|L{0.06}|L{0.15}|L{0.40}|L{0.39}|}
+\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M7 does for it} & \textbf{When M7 is done} \\ \hline \endhead
+R7 & Earthquake & Finds hand hits and motor shaking with the sensor, with a strength from 0 to 10 and a zone in a 3 × 3 grid. Drives the motors for the admin button & A hit on the table starts an earthquake in the game \\ \hline
+R8 & Physical LED board & Brings the game state to the board over Wi-Fi. One ESP32 for the LEDs, the sensor and the motors & The board shows the live game without a cable to the computer \\ \hline
+R10 & Network and measurement & Delay replies, sensor samples for the seismic graph, comes back after a lost link & The admin sees the board delay and the sensor signal live \\ \hline
+R11 & Engineering requirements & PC emulators for both sides of the link & The server and the board can be tested without each other \\ \hline
 \end{longtable}
 
 \msection{Inputs and outputs}
 
-\begin{longtable}[]{|L{0.08}|L{0.20}|L{0.18}|L{0.54}|}
-\hline \textbf{Dir.} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline \endhead
-In & Board state & M2, UDP & 10 to 30 per second: phase, players (team, tone, position, flags), delivery points, obstacles, earthquake \\ \hline
-In & Config & M2, TCP & Player colours, brightness 0.1--1, LED current limit \\ \hline
-In & Vibrate & M2, TCP & Motors to use, strength 0--1, duration of at most 5 s \\ \hline
+The table shows every input and output with its link. Messages that must arrive use TCP, fast and
+repeated data uses UDP.
+
+\begin{longtable}[]{|L{0.11}|L{0.17}|L{0.18}|L{0.54}|}
+\hline \textbf{Direction} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline \endhead
+In & Board state & M2, UDP & 10 to 30 per second: phase, players (team, colour, position, flags), delivery points, obstacles, earthquake \\ \hline
+In & Config & M2, TCP & Player colours, brightness from 0.1 to 1, power limit \\ \hline
+In & Vibrate & M2, TCP & Motors to use, strength from 0 to 1, duration \\ \hline
+In & Delay probe & M2, UDP & A small message with the server time, answered at once \\ \hline
 In & Sensor & Hardware & 1000 samples per second \\ \hline
-Out & Newest state & M8 & Latest board state, config and link state, on the same chip \\ \hline
-Out & Earthquake event & M2, TCP, to M1 and M6 & Source (hand or motors), strength 0--10, centre, zone 0--8, confidence \\ \hline
+In & Settings & USB cable & Wi-Fi name and password, backup server address, calibration values \\ \hline
+In & Frame report & M8 & Frame rate and the power estimate of the last frames \\ \hline
+Out & Newest state & M8 & Latest board state, config and link state, in the same program \\ \hline
+Out & Earthquake event & M2, TCP, to M1 and M6 & Source (hand or motors), strength from 0 to 10, centre, zone from 0 to 8, confidence \\ \hline
 Out & Sensor samples & M2, UDP, to M6 & 100 per second for the seismic graph, sent in groups of 10 \\ \hline
-Out & Status & M2, TCP, to M6 & Once per second: frame rate, Wi-Fi signal, LED current, errors \\ \hline
+Out & Status, delay reply & M2 & Status on TCP once per second: frame rate, Wi-Fi signal, power, errors. Delay replies on UDP \\ \hline
 \end{longtable}
 
 \msection{Main components}
 
-\begin{longtable}[]{|L{0.20}|L{0.52}|L{0.28}|}
-\hline \textbf{Component} & \textbf{What it does} & \textbf{Related modules} \\ \hline \endhead
-Network link & Joins Wi-Fi, finds the server, keeps the TCP channel and the UDP stream, connects again after a loss & M2 \\ \hline
-Message codec & MessagePack encode and decode; checks the version and the order numbers; drops old or broken messages & M2 \\ \hline
-State hand-over & Two-slot buffer: the LED engine always takes the newest full state and never waits & M8 \\ \hline
-Hit detector & Finds hits in the sensor signal; computes the strength and the zone & M1, M6 \\ \hline
-Motor controller & Runs vibrate commands with a soft start and safety limits & M1, M6 \\ \hline
-Status and settings & Status reports and delay replies; Wi-Fi and calibration settings in flash, changed over USB & M6 \\ \hline
+M7 has six parts. All of them run in the main loop of the Arduino program.
+
+\begin{longtable}[]{|L{0.21}|L{0.39}|L{0.40}|}
+\hline \textbf{Component} & \textbf{Takes} & \textbf{Gives} \\ \hline \endhead
+Network link & Wi-Fi, server address & One TCP channel and one UDP stream, a new link after a loss \\ \hline
+Message codec & Raw messages & Checked messages. Old, broken or wrong version messages are dropped \\ \hline
+State hand over & Checked board state and config & The newest full state for M8 \\ \hline
+Hit detector & Sensor samples & Earthquake events with strength, zone and confidence \\ \hline
+Motor controller & Vibrate commands & Motor power with a soft start and safety limits \\ \hline
+Status and settings & Frame report, USB settings & Status reports, delay replies, settings saved in flash \\ \hline
 \end{longtable}
 
 \msection{How it works}
 
-\textbf{Two channels.} The board keeps one TCP channel and one UDP stream to the server. Messages that
-must arrive go on TCP: the config, the vibrate commands, the earthquake events and the status
-report. Data that comes again and again goes on UDP: the board state, the sensor samples and the
-delay probes. If one UDP packet is lost, the next one replaces it, so the LEDs never wait. Every
-message has an order number, so the board can drop a UDP packet that comes late and out of order.
+\msub{One program with a main loop}
+The ESP32 runs one Arduino program. M7 and M8 are two parts of it. The main loop repeats the same
+steps again and again: it reads the new network messages, reads the sensor, drives the motors, lets
+M8 draw one LED frame and sends the reports. M7 keeps the newest full board state in memory. At the
+start of each frame M8 reads this state, so it always draws the latest game.
 
-\textbf{Two cores.} The ESP32 has two cores. Core 0 runs all M7 work: Wi-Fi, the network tasks, the
-sensor, the hit detector and the motors. Core 1 runs only the LED engine of M8, 60 frames per
-second. So Wi-Fi work never breaks the LED timing. The two sides share the state through a
-two-slot buffer. M7 always writes into the free slot. When the slot is full, M7 switches one index
-in one step. The LED engine reads the slot that the index shows, so it always gets a complete state
-and it never waits for a lock.
-
-\begin{figure}[htbp]\centering
+\begin{ckfig}
 \begin{tikzpicture}[ck]
-\draw[brd, line width=1.2pt, rounded corners=6pt, fill=brd!4] (-0.4,-3.3) rectangle (13.2,1.5);
-\node[font=\scriptsize\bfseries, text=brd, anchor=north west] at (-0.3,1.45) {ESP32};
-\node[font=\scriptsize\bfseries, text=brd] at (3.3,1.1) {Core 0: M7};
-\node[font=\scriptsize\bfseries, text=brd] at (10.6,1.1) {Core 1: M8};
-\node[bd, minimum width=22mm] (wifi) at (1.2,0.2) {Wi-Fi and\\network};
-\node[bd, minimum width=22mm] (cod) at (4.4,0.2) {Message\\codec};
-\node[bd, minimum width=22mm] (sen) at (1.2,-2.0) {Sensor\\1000 per s};
-\node[bd, minimum width=22mm] (hit) at (4.4,-2.0) {Hit\\detector};
-\node[bd, minimum width=16mm] (mot) at (7.0,-2.0) {Motor\\control};
-\node[nb, draw=adm, fill=admL, minimum width=18mm, minimum height=14mm] (buf) at (7.4,0.2) {Two-slot\\buffer};
-\node[nb, draw=brd, fill=brd!25, minimum width=22mm, minimum height=24mm, line width=1.4pt] (led) at (10.6,-0.7) {LED engine\\60 frames\\per second};
-\draw[inna,->] (wifi) -- (cod);
-\draw[inna,->] (cod) -- node[al]{state} (buf);
-\draw[inna,->] (buf) -- (led.west |- buf);
-\draw[inna,->] (sen) -- (hit);
-\draw[inna,->] (hit.north) -- node[al]{event} (cod.south);
-\draw[inna,->] (cod.south east) -- node[al, pos=0.55]{vibrate} (mot.north);
-\draw[tcpa,<->] (wifi.west) -- ++(-1.1,0) node[left, font=\scriptsize, text=tcpc, align=right]{TCP\\and};
-\draw[udpa,<->] ([yshift=-3mm]wifi.west) -- ++(-1.1,0) node[left, font=\scriptsize, text=udpc]{UDP};
+\draw[brd, line width=1.2pt, rounded corners=6pt, fill=brd!4] (2.6,-1.2) rectangle (16.0,1.55);
+\node[font=\scriptsize\bfseries, text=brd, anchor=north west] at (2.7,1.5) {ESP32: one Arduino program};
+\node[bd, minimum width=19mm] (n) at (4.1,0.2) {Read network\\messages};
+\node[bd, minimum width=19mm] (s) at (6.75,0.2) {Read sensor,\\find hits};
+\node[bd, minimum width=19mm] (m) at (9.4,0.2) {Drive\\motors};
+\node[nb, draw=brd, fill=brd!25, line width=1.3pt, minimum width=19mm] (l) at (12.05,0.2) {M8: draw\\LED frame};
+\node[bd, minimum width=19mm] (r) at (14.7,0.2) {Send\\reports};
+\foreach \u/\v in {n/s,s/m,m/l,l/r} \draw[inna,->] (\u) -- (\v);
+\draw[loopa,->] (r.south) -- ++(0,-0.55) -| node[al, pos=0.25]{next round of the loop} (n.south);
+\node[sv, minimum width=20mm, minimum height=22mm] (pc) at (0,0.2) {Main\\computer\\(M2)};
+\draw[tcpa,<->] ([yshift=5mm]pc.east) -- node[iol]{TCP} ([yshift=5mm]pc.east -| n.west);
+\draw[udpa,<->] ([yshift=-5mm]pc.east) -- node[iol]{UDP} ([yshift=-5mm]pc.east -| n.west);
+\node[hwb, minimum width=19mm] (hs) at (6.75,-2.4) {Motion sensor};
+\node[hwb, minimum width=19mm] (hm) at (9.4,-2.4) {4 motors};
+\node[hwb, minimum width=19mm] (hl) at (12.05,-2.4) {RGB LED strips};
+\draw[hwa,->] (hs.north) -- (hs.north |- 0,-1.2);
+\draw[hwa,->] (hm.north |- 0,-1.2) -- (hm.north);
+\draw[hwa,->] (hl.north |- 0,-1.2) -- (hl.north);
+\ckleg{0,-3.3}{tcpa/TCP, udpa/UDP, inna/steps of the loop, loopa/next round, hwa/wire to the hardware}
 \end{tikzpicture}
-\caption{Work on the two cores of the ESP32. The buffer is the only shared part.}
-\end{figure}
+\end{ckfig}
 
-\textbf{What is inside the board.} The figure below is a side cut of the board. The motion sensor is
-fixed at the centre, under the plywood, so it feels a hit from every side. The four vibration
-motors are under the four corners. They have their own power line, so they do not make the LED
-voltage drop. The ESP32, the level shifter and the power supply sit under the board too.
+\msub{Two channels}
+The board keeps one TCP channel and one UDP stream to the server. Messages that must arrive go on TCP:
+the config, the vibrate commands, the earthquake events and the status report. Each TCP message starts
+with its length, because TCP is only a stream of bytes. Data that comes again and again goes on UDP:
+the board state, the sensor samples and the delay probes. If one UDP packet is lost, the next one
+replaces it, so the LEDs never wait. Every message has an order number, so the board drops a UDP
+packet that comes late. Each start of the server makes a new session number. When the board sees a
+new session number, it starts its order numbers again, so it does not drop new messages as old ones.
 
-\begin{figure}[htbp]\centering
+\msub{What is inside the board}
+The figure below is a side cut of the board. The motion sensor is fixed at the centre, under the
+plywood, so it feels a hit from every side. The four vibration motors are under the four corners. The
+ESP32 and a power supply for the LEDs and the motors sit under the board too.
+
+\begin{ckfig}
 \begin{tikzpicture}[x=0.9cm, y=0.9cm]
 \boardside
 \nmark{3.3}{-0.15}{1}\nmark{7.0}{0.3}{2}\nmark{1.8}{0.05}{3}\nmark{12.2}{0.05}{3}\nmark{10.1}{-0.15}{4}
 \nmark{6.25}{1.7}{5}\nmark{6.25}{4.4}{6}\nmark{12.9}{2.55}{7}
-\node[anchor=north, font=\scriptsize] at (7,-0.6) {\begin{tabular}{@{}c@{\ \ }l@{\qquad}c@{\ \ }l@{\qquad}c@{\ \ }l@{}}
-\textbf{1} & ESP32 and level shifter & \textbf{4} & 5 V power supply & \textbf{6} & 3D-printed buildings \\
-\textbf{2} & Motion sensor at the centre & \textbf{5} & LED strips on the roads & \textbf{7} & Team store with two LEDs \\
+\node[anchor=north, font=\small] at (7,-0.6) {\begin{tabular}{@{}c@{\ \ }l@{\qquad}c@{\ \ }l@{\qquad}c@{\ \ }l@{}}
+\textbf{1} & ESP32 & \textbf{4} & Power supply & \textbf{6} & 3D printed buildings \\
+\textbf{2} & Motion sensor at the centre & \textbf{5} & RGB LED strips on the roads & \textbf{7} & Team store with LEDs \\
 \textbf{3} & Vibration motors at the corners & & & & \end{tabular}};
 \end{tikzpicture}
-\caption{Side cut of the board with the parts that M7 uses.}
-\end{figure}
+\end{ckfig}
 
-\textbf{Finding a hit.} The sensor measures the motion 1000 times per second. First a filter takes
-away gravity and slow tilting, so only the shaking is left. The detector also learns the normal
-noise of the room. The start threshold is the mean noise plus six times its spread, so it goes up
-on a noisy table. When the signal passes the threshold, a hit starts. The detector takes a 150 ms
-window from this moment. The energy E in the window gives the strength with a log scale, like a real
-earthquake scale: strength = k × log10(E / E0). Here E0 is the energy of the weakest hit we accept,
-and k is set in calibration with a standard hit. The result is cut to 0--10. The first push of the
-board shows the direction of the hit, and its size shows how far the hit is from the centre. From
-this the detector picks one of 9 zones in a 3 × 3 grid and gives a confidence value. After a hit the
-detector waits 1 second, so one hit makes only one event. The event goes to the server within
-200 ms.
+\msub{Finding a hit}
+The sensor measures the motion 1000 times per second. First a filter takes away gravity and slow
+tilting, so only the shaking is left. The detector also learns the normal noise of the room and puts the
+start threshold well above it. So the threshold goes up on a noisy table, and normal play does not
+start an earthquake. When the signal passes the threshold, a hit starts, and the detector takes a
+short window from this moment. The stronger the shaking in this window, the higher the strength. Like
+a real earthquake scale, the strength grows slowly for very strong hits, so a light tap and a hard
+hit both get a useful value. The scale is set once in calibration with a standard hit, and the result
+is kept between 0 and 10.
 
-\begin{figure}[htbp]\centering
+\msub{Finding the zone}
+The accelerometer shows the direction of the first push of the board, and the gyroscope shows how the
+board tilts. Together they show the side of the hit, and the size of the push shows how far the hit is
+from the centre. From this the detector picks one of 9 zones in a 3 × 3 grid and gives a confidence
+value. After a hit the detector waits a short time, so one hit makes only one event.
+
+\begin{ckfig}
 \begin{tikzpicture}[ck]
 \begin{scope}
 \fill[adm!15] (3.0,-1.7) rectangle (4.5,1.9);
@@ -488,12 +539,12 @@ detector waits 1 second, so one hit makes only one event. The event goes to the 
 \draw[obs, line width=0.9pt, dash pattern=on 4pt off 2pt] (0,0.45) -- (8,0.45);
 \draw[obs, line width=0.9pt, dash pattern=on 4pt off 2pt] (0,-0.45) -- (8,-0.45);
 \draw[srv, line width=0.8pt, smooth, samples=400, domain=0:8] plot (\x, {0.12*sin(1500*\x) + 0.06*sin(1900*\x) + (\x>3 ? 1.6*exp(-1.6*max(\x-3,0))*sin(2200*(\x-3)) : 0)});
-\node[font=\scriptsize, text=adm!80!black] at (3.75,2.15) {150 ms window};
+\node[font=\scriptsize, text=adm!80!black] at (3.75,2.15) {short window};
 \node[font=\scriptsize, text=obs, anchor=west] at (5.6,0.7) {threshold};
 \node[font=\scriptsize, anchor=west] at (0.3,-1.1) {room noise};
 \node[font=\scriptsize] at (4.2,-2.0) {time};
 \node[al, draw=cli, text=cli!70!black, line width=0.8pt] at (6.9,1.5) {event sent};
-\draw[cli, ->, line width=1pt] (4.5,1.5) -- (6.25,1.5);
+\draw[evta, ->] (4.5,1.5) -- (6.25,1.5);
 \end{scope}
 \begin{scope}[shift={(9.4,-1.5)}]
 \foreach \i in {0,1,2}{\foreach \j in {0,1,2}{%
@@ -508,23 +559,27 @@ detector waits 1 second, so one hit makes only one event. The event goes to the 
 \node[font=\scriptsize] at (1.5,-0.3) {zone 5, confidence 0.8};
 \node[font=\scriptsize] at (1.5,3.3) {board from above};
 \end{scope}
+\ckleg{0,-2.6}{siga/sensor signal, thra/start threshold, evta/event to the server}
 \end{tikzpicture}
-\caption{Left: the sensor signal of one hand hit. Right: the 3 × 3 zones; the purple dot is the sensor.}
-\end{figure}
+\end{ckfig}
 
-\textbf{Motors.} When the admin presses the earthquake button, M1 sends a vibrate command on TCP.
-The command says which motors to use, the strength and the time, at most 5 seconds. M7 drives the
-motors with PWM through transistors. It starts slowly over 100 ms, so the current does not jump.
-The shaking is then measured by the same detector as a hand hit, and the event is marked with
-``motors'' as its source. So the earthquake in the game follows the real shaking of the table.
+\msub{Motors}
+The four motors are under the corners, at zones 0, 2, 6 and 8. When the admin presses the earthquake
+button, M1 sends a vibrate command on TCP. The command says which motors to use, the strength and the
+time. When the admin chooses one zone, M1 uses the motors nearest to it. For the whole board it uses all
+four. M7 starts the motors slowly, so the power does not jump. While the motors run, the detector stops
+learning the room noise, and the whole shaking gives only one event with ``motors'' as its source. So
+the earthquake in the game follows the real shaking of the table, and the motors do not start a second
+earthquake.
 
-\textbf{When the link is lost.} If no state comes for 2 seconds, M7 stops the motors at once and
-tells M8 to show a ``searching'' animation. Then it tries to connect again. The goal is to be back
-within 5 seconds after the router is up. The Wi-Fi name, the password and the calibration values
-are stored in the ESP32 flash. We can change them over the USB cable, so we do not need to build
-the code again at a new place.
+\msub{When the link is lost}
+If no state comes for a short time, M7 stops the motors at once and tells M8 to show the
+``searching'' animation. Then it tries to connect again: first to the server it finds on the local
+network, then to the backup address. The Wi-Fi name, the password, the backup address and the
+calibration values are stored in the ESP32 flash. We can change them over the USB cable, so we do not
+need to build the code again at a new place. M8 uses the same link state names.
 
-\begin{figure}[htbp]\centering
+\begin{ckfig}
 \begin{tikzpicture}[ck]
 \node[st, draw=black!50, fill=black!6] (b) at (0,0) {Start};
 \node[st, draw=adm, fill=admL] (w) at (3.4,0) {Join Wi-Fi};
@@ -534,23 +589,21 @@ the code again at a new place.
 \draw[inna,->] (b) -- (w);
 \draw[inna,->] (w) -- node[al]{ok} (f);
 \draw[inna,->] (f) -- node[al]{found} (c);
-\draw[inna,->] (c) |- node[al, pos=0.3]{no state 2 s} (s);
+\draw[inna,->] (c) |- node[al, pos=0.3]{no state} (s);
 \draw[inna,->] (s) -- node[al]{retry} (f);
 \draw[inna,->] (s) -| node[al, pos=0.75]{no Wi-Fi} (w);
+\ckleg{0,-2.7}{inna/change of the link state}
 \end{tikzpicture}
-\caption{Link states of the board. In ``Searching'' the motors stop and the LEDs show a waiting animation.}
-\end{figure}
+\end{ckfig}
 
-\msection{Testing and demonstration}
+\msection{Testing}
 
-Two PC programs take the place of the neighbours. The server emulator sends test scenarios with
-delay and loss that we can change. It also shows the earthquake events and the seismic signal. The
-board emulator draws the board on the screen, so M1 and M2 can test before the real board is ready.
-The tests use the shared example messages, broken packets, a 2-hour run, added delay, 20\% loss and
-a router restart. For the sensor we test hit finding and false alarms. Our targets are: at least
-95\% of calibrated hits are found; at most one false earthquake in 30 minutes of normal play; the
-correct quarter of the board in at least 95\% of hits and the correct zone in 80\%; and at most
-200 ms from the hit to the event. In the demonstration we hit the board by hand and press the admin
-button, and we watch the seismic graph and the shock wave on the LEDs.
+M7 is tested alone with two PC programs. A server emulator takes the place of M2. It sends test
+board states, config and vibrate commands with delay and loss that we can change, and it shows the
+earthquake events and the seismic signal. A board emulator takes the place of the real board, so the
+server side can also be tested without it. We check the shared example messages, broken packets, a
+long run, heavy loss, a router restart and a server restart. For the sensor we hit each of the 9 zones
+many times and check that hits are found, that the zone is right or a neighbour zone, and that the
+motors do not start a false earthquake.
 
 \end{document}

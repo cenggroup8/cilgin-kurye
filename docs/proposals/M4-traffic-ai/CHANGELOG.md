@@ -2,6 +2,13 @@
 
 Members: Hasan Alperen Elmas, Batuhan Yanar, Muhib Taha Boy
 
+## v1.0 — 5 November 2026
+
+Version for submission: purpose, requirements covered, inputs and outputs, main components,
+how it works, testing and demonstration, with drawings of the planned board and screens.
+
+Approved by: — (in review in issue #10)
+
 ## v0.1 — 1 November 2026
 
 First draft. Interface contract (six calls, tick input/output, travel-time table),

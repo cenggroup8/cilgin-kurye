@@ -1,0 +1,627 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+\documentclass[
+  english,
+  10pt,
+  a4paper,
+]{article}
+\usepackage{xcolor}
+\usepackage[top=22mm,bottom=20mm,left=18mm,right=18mm]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{longtable,booktabs,array}
+\usepackage{caption}
+\captionsetup[table]{skip=6pt}
+\newcounter{none} % for unnumbered tables
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+\ifLuaTeX
+\usepackage[bidi=basic,shorthands=off]{babel}
+\else
+\usepackage[bidi=default,shorthands=off]{babel}
+\fi
+\ifLuaTeX
+  \usepackage{selnolig} % disable illegal ligatures
+\fi
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+% ---- Çılgın Kurye document theme: same look as the CSE 396 project proposal ----
+% Compile with XeLaTeX (also works on Overleaf). Fonts: TeX Gyre Termes (Times), DejaVu Sans Mono.
+\usepackage{fontspec}
+\setmainfont{texgyretermes}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold, ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
+\setsansfont{texgyreheros}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold, ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
+\setmonofont{DejaVuSansMono}[Extension=.ttf, UprightFont=*, BoldFont=*-Bold, ItalicFont=*-Oblique, BoldItalicFont=*-BoldOblique, Scale=0.80]
+\setmathfont{texgyretermes-math.otf}
+
+\usepackage{xcolor}
+\definecolor{ckblue}{HTML}{1F3A5F}
+\definecolor{cklight}{HTML}{E8EEF5}
+\definecolor{ckgrey}{HTML}{F2F2F2}
+\definecolor{ckline}{HTML}{555555}
+\definecolor{shadecolor}{HTML}{F4F5F7}
+
+% Headings as in the proposal: serif, bold; subsections bold italic. Numbers are part of the heading text.
+\setcounter{secnumdepth}{0}
+\usepackage{titlesec}
+\titleformat{\section}{\rmfamily\Large\bfseries}{}{0pt}{}
+\titleformat{\subsection}{\rmfamily\large\bfseries\itshape}{}{0pt}{}
+\titleformat{\subsubsection}{\rmfamily\normalsize\bfseries}{}{0pt}{}
+\titlespacing*{\section}{0pt}{12pt}{4pt}
+\titlespacing*{\subsection}{0pt}{8pt}{3pt}
+
+% Header and footer (the first page has only the footer, like the proposal)
+\usepackage{fancyhdr,lastpage}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\itshape CSE 396 · Group 8 · Çılgın Kurye}
+\fancyhead[R]{\footnotesize\itshape\ckmodule}
+\fancyfoot[C]{\footnotesize Page \thepage\ of \pageref*{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\setlength{\headheight}{14pt}
+\fancypagestyle{ckfirst}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}\fancyfoot[C]{\footnotesize Page \thepage\ of \pageref*{LastPage}}}
+
+% Inline code: breaks only after . : ( , / _ and spaces, never inside a name
+\usepackage[obeyspaces,spaces]{url}
+\AtBeginDocument{%
+  \renewcommand{\UrlBreaks}{\do\.\do\:\do\(\do\,\do\/\do\_\do\|}%
+  \renewcommand{\UrlBigBreaks}{}%
+  \renewcommand{\UrlNoBreaks}{}%
+  \urlstyle{tt}}
+
+% Tables: boxed grid as in the proposal, smaller text
+\usepackage{etoolbox}
+\AtBeginEnvironment{longtable}{\footnotesize\renewcommand{\arraystretch}{1.2}}
+\setlength{\LTpre}{6pt}
+\setlength{\LTpost}{8pt}
+\setlength{\arrayrulewidth}{0.4pt}
+
+% Code blocks: long lines wrap; diagrams stay in one piece
+\usepackage{framed}
+\usepackage{fvextra}
+\RecustomVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\footnotesize, breaklines}
+\makeatletter
+\@ifundefined{Shaded}{}{\renewenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}}
+\@ifundefined{Highlighting}{}{\RecustomVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}, fontsize=\footnotesize, breaklines, breakanywhere}}
+\makeatother
+
+% Figures drawn with TikZ
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,calc,backgrounds,shapes.geometric}
+\tikzset{
+  ck/.style={font=\footnotesize, >={Stealth[length=5pt]}, line width=0.6pt},
+  box/.style={draw=ckline, fill=white, rounded corners=2pt, align=center, inner sep=4pt, minimum height=7mm},
+  mod/.style={box, fill=ckgrey},
+  this/.style={box, fill=cklight, draw=ckblue, line width=0.9pt},
+  group/.style={draw=ckline, dashed, rounded corners=3pt, inner sep=6pt},
+  lbl/.style={font=\scriptsize, align=center, inner sep=1.5pt},
+  msg/.style={->, draw=ckline},
+}
+\usepackage{caption}
+\captionsetup[figure]{font=small, labelfont=bf, skip=4pt}
+\newcommand{\ckfigure}[2]{\begin{figure}[htbp]\centering #1\caption{#2}\end{figure}}
+
+\usepackage{enumitem}
+\setlist{itemsep=1pt, topsep=3pt}
+\setlength{\parskip}{4pt}
+\setlength{\parindent}{0pt}
+\raggedbottom
+% ---- end of theme ----
+\newcommand{\ckmodule}{M8 LED Animation and Physical Board}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+% fallback for those not using the hyperref driver hyperxmp:
+\makeatletter
+\@ifundefined{xmpquote}{\newcommand{\xmpquote}[1]{#1}}{}
+\makeatother
+\hypersetup{
+  pdftitle={M8 LED Animation and Physical Board},
+  pdflang={en},
+  colorlinks=true,
+  linkcolor={black},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={black},
+  pdfcreator={LaTeX}}
+
+\title{M8 LED Animation and Physical Board --- Module Documentation}
+\author{}
+\date{}
+
+
+% ---- colours and drawings ----
+\usepackage{colortbl}
+\usepackage{float}
+\makeatletter
+\newcommand{\needspace}[1]{\begingroup\setlength{\dimen@}{#1}\vskip\z@\@plus\dimen@\penalty -100\vskip\z@\@plus -\dimen@\vskip\dimen@\penalty 9999\vskip -\dimen@\vskip\z@skip\endgroup}
+\makeatother
+% ---- colours ----
+\definecolor{srv}{HTML}{2E6FB7}\colorlet{srvL}{srv!15}
+\definecolor{cli}{HTML}{2E9E5B}\colorlet{cliL}{cli!15}
+\definecolor{adm}{HTML}{E08A1E}\colorlet{admL}{adm!18}
+\definecolor{brd}{HTML}{7B4FB3}\colorlet{brdL}{brd!15}
+\definecolor{tcpc}{HTML}{1F5FA8}
+\definecolor{udpc}{HTML}{D9531E}
+\definecolor{obs}{HTML}{D7263D}
+\definecolor{tA}{HTML}{00A6D6}
+\definecolor{tB}{HTML}{3BB273}
+\definecolor{tC}{HTML}{F2C14E}
+\definecolor{tD}{HTML}{9B5DE5}
+
+% ---- styles ----
+\tikzset{
+  nb/.style={rounded corners=3pt, line width=0.9pt, align=center, inner sep=4pt, minimum height=9mm, font=\footnotesize},
+  sv/.style={nb, draw=srv, fill=srvL},
+  cl/.style={nb, draw=cli, fill=cliL},
+  ad/.style={nb, draw=adm, fill=admL},
+  bd/.style={nb, draw=brd, fill=brdL},
+  hwb/.style={nb, draw=black!50, fill=black!5},
+  tcpa/.style={draw=tcpc, line width=1.5pt},
+  udpa/.style={draw=udpc, line width=1.5pt, dash pattern=on 5pt off 2.5pt},
+  inna/.style={draw=black!55, line width=1pt},
+  al/.style={font=\scriptsize, fill=white, inner sep=1.2pt, rounded corners=1pt},
+  grp/.style={draw=black!35, dashed, rounded corners=5pt, inner sep=7pt},
+  glbl/.style={font=\scriptsize\bfseries, text=black!65},
+  hl/.style={line width=2.6pt},
+  st/.style={nb, rounded corners=8pt, minimum width=24mm},
+  co/.style={draw=black!60, line width=0.5pt},
+  cot/.style={font=\scriptsize, align=left, text=black!80},
+}
+
+% ---- system map; argument = module to highlight (M1 ... M8, or none) ----
+\newcommand{\systemmap}[1]{%
+\tikzset{M1/.style={},M2/.style={},M3/.style={},M4/.style={},M5/.style={},M6/.style={},M7/.style={},M8/.style={},none/.style={}}%
+\tikzset{#1/.style={hl}}%
+\begin{tikzpicture}[ck]
+\node[cl, M5, minimum width=27mm] (m5) at (0,3) {\textbf{M5}\\Player phones};
+\node[ad, M6, minimum width=27mm] (m6) at (0,0.4) {\textbf{M6}\\Admin panel};
+\node[sv, M2, minimum width=27mm, minimum height=38mm] (m2) at (4.6,1.7) {\textbf{M2}\\Network\\and sync};
+\node[sv, M1, minimum width=27mm, minimum height=38mm] (m1) at (8.4,1.7) {\textbf{M1}\\Game server\\and rules};
+\node[sv, M3, minimum width=25mm] (m3) at (12,2.8) {\textbf{M3}\\Physics};
+\node[sv, M4, minimum width=25mm] (m4) at (12,0.6) {\textbf{M4}\\Traffic and AI};
+\node[grp, fit=(m2)(m1)(m3)(m4)] (pc) {};
+\node[glbl, anchor=south west] at (pc.north west) {MAIN COMPUTER};
+\node[bd, M7, minimum width=27mm] (m7) at (4.6,-2.7) {\textbf{M7}\\ESP32 software};
+\node[bd, M8, minimum width=27mm] (m8) at (8.4,-2.7) {\textbf{M8}\\LED engine};
+\node[hwb, minimum width=25mm] (led) at (12,-2.7) {RGB LED\\strips};
+\node[hwb, minimum width=27mm] (sm) at (4.6,-4.4) {Sensor and\\4 motors};
+\node[grp, fit=(m7)(m8)(led)(sm)] (bb) {};
+\node[glbl, anchor=north east] at (bb.south east) {LED CITY BOARD};
+\draw[tcpa, <->] (m5.east) -- node[al]{WebSocket} (m5.east -| m2.west);
+\draw[tcpa, <->] (m6.east) -- node[al]{WebSocket} (m6.east -| m2.west);
+\draw[tcpa, <->] ([xshift=-6mm]m7.north) -- node[al]{TCP} ([xshift=-6mm]m2.south);
+\draw[udpa, <->] ([xshift=6mm]m7.north) -- node[al]{UDP} ([xshift=6mm]m2.south);
+\draw[inna, <->] (m2) -- (m1);
+\draw[inna, <->] (m1.east |- m3) -- (m3);
+\draw[inna, <->] (m1.east |- m4) -- (m4);
+\draw[inna, ->] (m7) -- node[al]{state} (m8);
+\draw[inna, ->] (m8) -- (led);
+\draw[inna, <->] (m7) -- (sm);
+\ckleg{-1.3,-6.0}{tcpa/TCP or WebSocket: every message arrives in order, udpa/UDP: fast and the newest message wins, inna/inside one program or chip}
+\end{tikzpicture}}
+
+% ---- LED board seen from above (6 x 6 roads, 1 unit = 10 cm) ----
+\newcommand{\boardbase}{%
+\fill[black!88, rounded corners=3pt] (-0.5,-0.5) rectangle (5.5,5.5);
+\foreach \i in {0,...,4}{\foreach \j in {0,...,4}{%
+  \fill[black!60] (\i+0.13,\j+0.13) rectangle (\i+0.87,\j+0.87);
+  \fill[black!22] (\i+0.24,\j+0.24) rectangle (\i+0.52,\j+0.52);
+  \fill[black!30] (\i+0.56,\j+0.30) rectangle (\i+0.78,\j+0.62);
+  \fill[black!38] (\i+0.28,\j+0.58) rectangle (\i+0.66,\j+0.78);}}
+\foreach \i in {0,...,5}{%
+  \draw[black, line width=4.5pt] (\i,-0.05) -- (\i,5.05);
+  \draw[black, line width=4.5pt] (-0.05,\i) -- (5.05,\i);}
+\foreach \i in {0,...,5}{\foreach \k in {0,...,30}{%
+  \fill[black!55] (\i,\k/6) circle (0.025);
+  \fill[black!55] (\k/6,\i) circle (0.025);}}
+\foreach \x/\y/\c in {0/4/tA, 4/4/tB, 0/0/tD, 4/0/tC}{%
+  \fill[\c!30!black!60] (\x+0.13,\y+0.13) rectangle (\x+0.87,\y+0.87);
+  \fill[\c] (\x+0.3,\y+0.3) rectangle (\x+0.7,\y+0.7);
+  \fill[white] (\x+0.4,\y+0.5) circle (0.05); \fill[white] (\x+0.6,\y+0.5) circle (0.05);}}
+\newcommand{\nmark}[3]{\node[circle, fill=yellow!85!orange, draw=black, line width=0.4pt, inner sep=0.6pt, minimum size=3.6mm, font=\tiny\bfseries] at (#1,#2) {#3};}
+\newcommand{\bike}[4]{%
+\fill[#3!35] ($(#1,#2)+(#4:0.40)$) circle (0.05);
+\fill[#3!65] ($(#1,#2)+(#4:0.21)$) circle (0.075);
+\fill[#3, draw=white, line width=0.4pt] (#1,#2) circle (0.12);}
+\newcommand{\dpoint}[3]{\draw[#3!50, line width=0.8pt] (#1,#2) circle (0.26); \draw[#3, line width=1.4pt] (#1,#2) circle (0.16); \fill[#3] (#1,#2) circle (0.07);}
+\newcommand{\heavy}[2]{\draw[obs!60!black, line width=4pt] (#1) -- (#2); \draw[obs, line width=4pt, dash pattern=on 3pt off 5pt] (#1) -- (#2);}
+\newcommand{\roadwork}[2]{\draw[obs, line width=4pt] (#1) -- (#2);}
+\newcommand{\accident}[2]{\draw[obs, line width=4pt, dash pattern=on 3pt off 3pt] (#1) -- (#2);}
+\newcommand{\puddle}[2]{\draw[cyan!55, line width=4pt] (#1) -- (#2); \draw[cyan!15, line width=1.6pt, dash pattern=on 1pt off 2.5pt] (#1) -- (#2);}
+\newcommand{\findme}[2]{\fill[white, opacity=0.25] (#1,#2) circle (0.36); \fill[white, opacity=0.5] (#1,#2) circle (0.24); \fill[white] (#1,#2) circle (0.13);}
+
+% ---- phone game screen (7 x 3.4 units) ----
+\newcommand{\phonemock}{%
+\fill[black!85, rounded corners=9pt] (-0.3,-0.3) rectangle (7.3,3.7);
+\fill[cyan!20] (0,1.7) rectangle (7,3.4);
+\fill[cli!14] (0,0) rectangle (7,1.7);
+\filldraw[fill=srv!30, draw=srv!70!black] (0.2,1.5) rectangle (1.0,3.0);
+\filldraw[fill=adm!35, draw=adm!70!black] (1.1,1.6) rectangle (1.8,2.4);
+\filldraw[fill=brd!30, draw=brd!70!black] (1.9,1.65) -- (2.6,1.65) -- (2.6,2.2) -- (2.25,2.5) -- (1.9,2.2) -- cycle;
+\filldraw[fill=adm!35, draw=adm!70!black] (4.5,1.65) rectangle (5.1,2.3);
+\filldraw[fill=srv!30, draw=srv!70!black] (5.2,1.55) rectangle (6.0,3.1);
+\filldraw[fill=cli!35, draw=cli!70!black] (6.1,1.6) rectangle (6.85,2.6);
+\fill[brown!60!black] (4.17,1.6) rectangle (4.23,1.8); \fill[cli!70!black] (4.2,1.95) circle (0.18);
+\fill[black!55] (1.8,0) -- (5.2,0) -- (3.75,1.7) -- (3.25,1.7) -- cycle;
+\draw[white, line width=0.8pt, dash pattern=on 4pt off 4pt] (3.5,0) -- (3.5,1.7);
+\filldraw[fill=black!15, draw=black!70] (3.62,1.12) rectangle (3.88,1.32);
+\fill[obs] (3.05,1.22) -- (3.15,1.48) -- (3.25,1.22) -- cycle;
+\fill[black!85] (3.43,0.08) rectangle (3.57,0.3);
+\fill[tA] (3.3,0.28) rectangle (3.7,0.6);
+\fill[brown!65] (3.34,0.6) rectangle (3.66,0.82);
+\fill[tA!60!black] (3.5,0.95) circle (0.13);
+\node[fill=black!70, text=white, rounded corners=2pt, font=\scriptsize\bfseries, inner sep=2pt] at (3.5,3.15) {2:41};
+\foreach \c/\s/\x in {tA/120/0.35,tB/95/0.95,tC/140/1.55,tD/80/2.15}
+  \node[fill=\c, text=white, font=\tiny\bfseries, rounded corners=1pt, inner sep=1.5pt, minimum width=5mm] at (\x,3.15) {\s};
+\fill[white, opacity=0.9] (6.45,2.85) circle (0.38); \draw[black!60] (6.45,2.85) circle (0.38);
+\draw[-{Stealth[length=5pt]}, line width=1.8pt, obs] (6.45,2.85) ++(230:0.2) -- ++(50:0.5);
+\fill[white, opacity=0.85] (0.55,0.5) circle (0.32); \fill[black!70] (0.43,0.5) -- (0.65,0.63) -- (0.65,0.37) -- cycle;
+\fill[white, opacity=0.85] (1.4,0.5) circle (0.32); \fill[black!70] (1.52,0.5) -- (1.3,0.63) -- (1.3,0.37) -- cycle;
+\node[fill=obs!80, text=white, rounded corners=3pt, font=\tiny\bfseries, minimum width=8mm, minimum height=6mm] at (5.6,0.5) {Brake};
+\node[fill=cli, text=white, rounded corners=3pt, font=\tiny\bfseries, minimum width=8mm, minimum height=8mm] at (6.5,0.6) {Gas};
+\node[fill=white, text=black, rounded corners=3pt, font=\tiny\bfseries, minimum width=9mm, minimum height=5mm] at (0.9,1.45) {Find me};}
+
+% ---- side cut of the board (14 units wide) ----
+\newcommand{\boardside}{%
+\fill[brown!20] (-0.6,-0.35) rectangle (14.6,0);
+\foreach \x/\h/\c in {1.0/0.7/black!18, 2.2/1.1/black!22, 4.6/1.9/black!25, 5.8/2.6/black!28, 7.4/2.2/black!25, 8.6/1.6/black!22, 10.9/1.0/black!18}
+  \filldraw[fill=\c, draw=black!45] (\x,1.5) rectangle (\x+0.9,1.5+\h);
+\filldraw[fill=tB!35, draw=tB!70!black] (12.4,1.5) rectangle (13.4,2.3);
+\fill[black!70, rounded corners=1pt] (0.5,0) rectangle (1.1,0.9);
+\fill[black!70, rounded corners=1pt] (12.9,0) rectangle (13.5,0.9);
+\filldraw[fill=brown!45, draw=brown!70!black] (0,0.9) rectangle (14,1.3);
+\fill[black!80] (0,1.3) rectangle (14,1.38);
+\foreach \x in {0.3,0.9,...,13.8} \fill[black!35] (\x,1.42) circle (0.06);
+\foreach \x/\c in {3.3/tA, 3.9/tA, 6.9/obs, 7.5/obs, 10.5/tC} \fill[\c] (\x,1.42) circle (0.07);
+\fill[white, opacity=0.55] (0,1.38) rectangle (14,1.52);
+\filldraw[fill=brd!40, draw=brd] (2.3,0.35) rectangle (4.3,0.85);
+\node[font=\tiny] at (3.3,0.6) {ESP32};
+\filldraw[fill=brd, draw=brd!60!black] (6.75,0.62) rectangle (7.25,0.88);
+\filldraw[fill=adm!60, draw=adm!70!black] (1.8,0.6) circle (0.24);
+\filldraw[fill=adm!60, draw=adm!70!black] (12.2,0.6) circle (0.24);
+\filldraw[fill=black!15, draw=black!50] (9.3,0.35) rectangle (10.9,0.85);
+\node[font=\tiny] at (10.1,0.6) {Power};}
+
+% ---- layout helpers ----
+\newenvironment{ckfig}{\begin{figure}[!htb]\centering}{\end{figure}}
+\renewcommand{\topfraction}{0.9}\renewcommand{\bottomfraction}{0.8}\renewcommand{\textfraction}{0.07}\renewcommand{\floatpagefraction}{0.85}
+\setcounter{topnumber}{3}\setcounter{bottomnumber}{2}\setcounter{totalnumber}{4}
+\newcommand{\msub}[1]{\par\needspace{5\baselineskip}\smallskip\noindent{\bfseries #1:}\par\nobreak\vspace{-2pt}}
+\tikzset{msga/.style={draw=cli!70!black, line width=0.8pt}, cmda/.style={draw=obs, line width=1pt}, loopa/.style={draw=srv, line width=1pt}, hwa/.style={draw=black!60, line width=1.2pt, dash pattern=on 1.5pt off 1.5pt}, wanta/.style={draw=cli, line width=1.6pt}, reala/.style={draw=obs, line width=1.6pt}, siga/.style={draw=srv, line width=0.8pt}, thra/.style={draw=obs, line width=0.9pt, dash pattern=on 4pt off 2pt}, evta/.style={draw=cli, line width=1pt}}
+\tikzset{iol/.style={font=\scriptsize, fill=white, inner sep=1.2pt, rounded corners=1pt, align=center}}
+% legend row: start point, list of style/text
+\newcommand{\ckleg}[2]{%
+\coordinate (lgp) at (#1);
+\foreach \ls/\lt in {#2}{%
+  \draw[\ls,->] (lgp) -- ++(0.8,0) node[right, font=\scriptsize, text=black] (lgt) {\lt};
+  \coordinate (lgp) at ([xshift=5mm]lgt.east);}}
+% purpose table: colour (unused), runs on, technology, requirements
+\newcommand{\ckinfo}[4]{\par\smallskip\noindent{\renewcommand{\arraystretch}{1.25}%
+\begin{tabular}{|L{0.30}|L{0.50}|L{0.20}|}\hline
+\textbf{Runs on} & \textbf{Technology} & \textbf{Requirements} \\ \hline
+#2 & #3 & #4 \\ \hline
+\end{tabular}}\par\smallskip}
+% module data map: n in, n out, centre text, centre style, inputs, outputs, legend list
+% inputs and outputs: {name}/style/{data}/arrow style
+\newcommand{\iomap}[7]{%
+\begin{tikzpicture}[ck]
+\pgfmathsetmacro{\nmax}{max(#1,#2)}
+\node[#4, line width=2pt, minimum width=30mm, minimum height=\nmax*10.5mm+2mm, font=\normalsize] (c) at (0,0) {#3};
+\foreach \nm/\st/\dd/\ar [count=\ii] in {#5}{%
+  \pgfmathsetmacro{\yy}{((#1+1)/2-\ii)*1.05}
+  \node[\st, minimum width=25mm, minimum height=8.5mm, font=\scriptsize] (in\ii) at (-6.6,\yy) {\nm};
+  \draw[\ar,->] (in\ii.east) -- node[iol]{\dd} (c.west |- in\ii);}
+\foreach \nm/\st/\dd/\ar [count=\ii] in {#6}{%
+  \pgfmathsetmacro{\yy}{((#2+1)/2-\ii)*1.05}
+  \node[\st, minimum width=25mm, minimum height=8.5mm, font=\scriptsize] (out\ii) at (6.6,\yy) {\nm};
+  \draw[\ar,->] (c.east |- out\ii) -- node[iol]{\dd} (out\ii.west);}
+\node[font=\scriptsize\bfseries, text=black!60] at (-6.6,\nmax*0.525+0.4) {Inputs come from};
+\node[font=\scriptsize\bfseries, text=black!60] at (6.6,\nmax*0.525+0.4) {Outputs go to};
+\ckleg{-7.6,-\nmax*0.525-0.5}{#7}
+\end{tikzpicture}}
+
+% keep an intro sentence and its table together on one page
+\newcommand{\ckkeep}[1]{\par\noindent\begin{minipage}{\linewidth}\setlength{\parskip}{4pt}#1\end{minipage}\par\smallskip}
+
+\begin{document}
+
+\thispagestyle{ckfirst}
+\begin{center}
+{\bfseries GEBZE TECHNICAL UNIVERSITY\par}
+{Computer Engineering Department\par}
+{CSE 396 Module Documentation\par}
+\vspace{8pt}
+{\LARGE\bfseries Çılgın Kurye\par}
+\vspace{3pt}
+{\large\itshape Module M8: LED Animation and Physical Board\par}
+\vspace{6pt}
+\textbf{Company:} Board\&Byte\hspace{1.4em}\textbf{Group:} Group-8\hspace{1.4em}\textbf{Date:} 6 November 2026
+\end{center}
+\begin{center}\footnotesize\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{0.27\linewidth}|p{0.15\linewidth}|p{0.27\linewidth}|p{0.15\linewidth}|}\hline
+\textbf{Name} & \textbf{Student No.} & \textbf{Name} & \textbf{Student No.} \\ \hline
+Ayşe Poyraz & 230104004085 & Hasan Hüseyin Özdemir & 230104004048 \\ \hline
+Muhib Taha Boy & 230104004165 & Umutcan Ocak & 220104004903 \\ \hline
+\end{tabular}
+\end{center}
+\vspace{2pt}
+
+
+
+% ---- table and list helpers ----
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{\dimexpr#1\linewidth-2\tabcolsep-\arrayrulewidth\relax}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{\dimexpr#1\linewidth-2\tabcolsep-\arrayrulewidth\relax}}
+\newcommand{\ckdone}{\item[$\boxtimes$]}
+\newcommand{\ckopen}{\item[$\square$]}
+\newcommand{\mdot}{$\bullet$}
+\newcounter{msec}
+\newcounter{chap}
+% ---- end of helpers ----
+\newcommand{\msection}[1]{\needspace{8\baselineskip}\stepcounter{msec}\section{\arabic{msec}. #1}}
+
+\msection{Purpose}
+
+M8 builds the physical city board and writes the animation engine that turns the game state into
+light. The board is 60 × 60 cm. Programmable addressable RGB LED strips lie in all roads and in the
+four stores, and there are 3D printed buildings and places for the motion sensor and the vibration
+motors. In the game the board is the only map, so it must be clear to read from every side of the
+table.
+
+\ckinfo{brd}{ESP32 in the LED board, in one Arduino program together with M7, and the board itself for the hardware}{C++ animation engine on the ESP32, programmable addressable RGB LED strips, an external power supply, 3D printing, a plywood base}{R2 R5 R6 R7 R8 R11}
+
+M8 gets all its data from M7 in the same program and gives light to the LED strips. The figure shows
+the data on both sides.
+
+\begin{ckfig}
+\iomap{4}{2}{\textbf{M8}\\LED engine\\and board}{bd}
+{{M7 link part}/bd/{newest board state}/inna, {M7 link part}/bd/{config: colours,\\brightness, power limit}/inna, {M7 link part}/bd/{link state}/inna, {City plan file}/hwb/{road grid,\\store places}/inna}
+{{RGB LED strips}/hwb/{colour of every LED,\\60 frames per second}/hwa, {M7 link part}/bd/{frame report}/inna}
+{inna/inside the ESP32 program, hwa/data wire to the LED strips}
+\end{ckfig}
+
+\msection{Requirements covered}
+
+\ckkeep{%
+M8 takes part in six requirements. The last column says what will work when M8 is finished.
+
+\begin{tabular}{|L{0.06}|L{0.15}|L{0.40}|L{0.39}|}
+\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M8 does for it} & \textbf{When M8 is done} \\ \hline 
+R2 & Delivery cycle & Delivery points blink in the player's colour, a flash when the package is delivered & Each player finds the own delivery point on the board \\ \hline
+R5 & No map on the phone & The board is the map with all motorcycles. ``Find me'' makes the player's dot white for 1 s & A player can always find the own motorcycle \\ \hline
+R6 & Obstacles & A red pattern for each type on the whole road segment, light blue for a puddle & Every obstacle type is clear from a distance \\ \hline
+R7 & Earthquake & A shock wave from the earthquake centre & The earthquake is seen on the table \\ \hline
+R8 & Physical LED board & 60 × 60 cm, 6 roads in each direction, LEDs on all roads, printed buildings, four stores & The finished board stands on the table and shows the game \\ \hline
+R11 & Engineering requirements & Demo mode without a server, tested directly on the board with the ESP32 & M8 can be built and tested without the server \\ \hline
+\end{tabular}}
+
+\msection{Inputs and outputs}
+
+\ckkeep{%
+The board state comes 10 to 30 times per second, but M8 draws 60 frames per second, so it fills the
+time between two states by itself.
+
+\begin{tabular}{|L{0.11}|L{0.17}|L{0.18}|L{0.54}|}
+\hline \textbf{Direction} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline 
+In & Board state & M7 & Phase, players, delivery points, obstacles, earthquake \\ \hline
+In & Config & M7 & Player colours, brightness from 0.1 to 1, power limit \\ \hline
+In & Link state & M7 & Connected or searching \\ \hline
+In & City plan & Shared file & Road grid and store places, turned into the LED map when the code is built \\ \hline
+Out & Light & LED strips & The colour of every LED, 60 frames per second \\ \hline
+Out & Frame report & M7 & Frame rate and power estimate, shown to the admin \\ \hline
+\end{tabular}}
+
+\msection{Main components}
+
+\ckkeep{%
+The engine has five parts. They run one after the other for every frame.
+
+\begin{tabular}{|L{0.21}|L{0.39}|L{0.40}|}
+\hline \textbf{Component} & \textbf{Takes} & \textbf{Gives} \\ \hline 
+LED map & City plan & The place of every LED on the roads and in the stores, made by a script \\ \hline
+Motion smoother & The last two board states & Smooth motorcycle positions along the roads for every frame \\ \hline
+Layers and effects & Board state, phase, link state & Five layers and the patterns for obstacles, earthquakes and game phases \\ \hline
+Post processing and output & The mixed frame, config & Corrected colours inside the brightness and power limit, sent to the strips \\ \hline
+Demo mode & A built in scenario & A full game look without a server \\ \hline
+\end{tabular}}
+
+\msection{How it works}
+
+\msub{The board}
+The base is plywood. On it there are 6 roads in each direction, so the city has 5 × 5 blocks. The LED
+strips lie in the roads between the crossings. There are no LEDs at the crossings, because two strips
+cannot lie on top of each other. The buildings are 3D printed from the same models as the 3D city on
+the phone, so a player finds the same building on the board and on the phone. The LEDs need an
+external power supply, and the software keeps the power under the limit in the config.
+
+\begin{ckfig}
+\begin{tikzpicture}[x=1.15cm, y=1.15cm]
+\boardbase
+\bike{1}{3.5}{tA}{90}\bike{2.5}{4}{tA}{180}
+\bike{3.5}{4}{tB}{0}\bike{5}{2.5}{tB}{90}
+\bike{1.5}{1}{tD}{180}\bike{0}{1.5}{tD}{-90}
+\bike{4}{2.5}{tC}{-90}\bike{4.5}{0}{tC}{180}
+\dpoint{2.5}{2}{tA}\dpoint{5}{3.5}{tB}\dpoint{0.5}{3}{tD}\dpoint{3}{0.5}{tC}
+\heavy{0,2}{1,2}
+\roadwork{3,2}{3,3}
+\accident{4,1}{5,1}
+\puddle{2,4}{2,5}
+\findme{3.5}{4}
+\nmark{0.5}{5.25}{1}\nmark{0.62}{3.5}{2}\nmark{2.5}{2.45}{3}\nmark{0.5}{2.3}{4}\nmark{3.35}{2.5}{5}\nmark{4.5}{1.35}{6}\nmark{1.65}{4.5}{7}\nmark{3.5}{4.5}{8}
+\node[anchor=west, font=\small, align=left] at (6.0,2.5) {\begin{tabular}{@{}c@{\ \ }l@{}}
+\textbf{1} & Team store in the team colour\\[3pt]
+\textbf{2} & Motorcycle: a bright dot with a short tail\\[3pt]
+\textbf{3} & Delivery point: blinks in the player's tone\\[3pt]
+\textbf{4} & Heavy traffic: a slow dim red wave\\[3pt]
+\textbf{5} & Road work: bright steady red\\[3pt]
+\textbf{6} & Accident: red blinking\\[3pt]
+\textbf{7} & Water puddle: light blue shimmer\\[3pt]
+\textbf{8} & ``Find me'': white flash for 1 second\end{tabular}};
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Colours}
+There are four teams and each team has one colour: blue, green, yellow and purple. The two players of a
+team have a light and a dark tone of the team colour. Red is used only for obstacles, so red always
+means ``this road slows you down''. The pattern of the red tells the type of the obstacle. A water
+puddle is light blue, because it makes the road slippery, not slow. White is used only for ``Find
+me'', so a player always knows that the white dot is the own motorcycle.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck]
+\foreach \r/\t in {0/Heavy traffic, 1/Road work, 2/Accident, 3/Water puddle}
+  \node[font=\scriptsize\bfseries, anchor=east] at (2.3,-\r*0.75) {\t};
+\foreach \k in {0,...,5}{%
+  \pgfmathsetmacro{\a}{40+40*sin(\k*60)}
+  \fill[obs!\a!black] (2.7+\k*0.32,0) circle (0.11);
+  \fill[obs] (2.7+\k*0.32,-0.75) circle (0.11);
+  \pgfmathtruncatemacro{\w}{mod(\k,2)}
+  \ifnum\w=0 \fill[obs] (2.7+\k*0.32,-1.5) circle (0.11); \else \fill[black!75] (2.7+\k*0.32,-1.5) circle (0.11); \fi
+  \pgfmathsetmacro{\b}{30+20*sin(\k*97)}
+  \pgfmathsetmacro{\b}{45+25*sin(\k*97)}\fill[cyan!\b!white] (2.7+\k*0.32,-2.25) circle (0.11);}
+\node[font=\scriptsize, anchor=west] at (4.75,0) {the light moves slowly along the road};
+\node[font=\scriptsize, anchor=west] at (4.75,-0.75) {the whole road is red, it does not move};
+\node[font=\scriptsize, anchor=west] at (4.75,-1.5) {red blinks on and off};
+\node[font=\scriptsize, anchor=west] at (4.75,-2.25) {light blue light that shimmers};
+\foreach \i/\c in {0/tA,1/tB,2/tC,3/tD}{%
+  \fill[\c] (11.0+\i*0.75,-0.55) circle (0.17); \fill[\c!55] (11.0+\i*0.75,-1.05) circle (0.17);}
+\node[font=\scriptsize\bfseries] at (12.12,0.0) {Team colours};
+\node[font=\scriptsize] at (12.12,-1.5) {light and dark tone};
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Layers}
+The engine draws 60 frames per second. Each frame is made from five layers, from the bottom to the
+top: the roads, the obstacles, the delivery points, the motorcycles and a top layer for short effects.
+A higher layer covers a lower one, so when two things fall on the same LED, the higher one is shown.
+When two motorcycles are on the same LED, their colours take turns. After the layers, the engine
+corrects the colours for the eye, sets the brightness from the config, and lowers all LEDs a little if
+the frame would need more power than the limit.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck]
+\foreach \i/\t/\c in {0/Roads/gray, 1/Obstacles/obs, 2/Delivery points/adm, 3/Motorcycles/tA, 4/Top effects/brd}{%
+  \fill[\c!25, draw=\c, line width=0.9pt] (\i*0.35,\i*0.62) -- ++(4.2,0) -- ++(0.9,0.45) -- ++(-4.2,0) -- cycle;
+  \node[font=\scriptsize, anchor=west] at (\i*0.35+5.3,\i*0.62+0.22) {\t};}
+\draw[inna,->] (8.5,1.9) -- node[al]{mix} (9.6,1.9);
+\node[nb, draw=srv, fill=srvL, minimum width=20mm] (pp) at (11.0,1.9) {Colour,\\brightness,\\power limit};
+\draw[hwa,->] (pp) -- (12.8,1.9);
+\ckleg{0,-0.6}{inna/inside the program, hwa/data wire to the strips}
+\node[nb, draw=black!50, fill=black!8, minimum width=14mm] at (13.6,1.9) {RGB LED\\strips};
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Smooth motion on the roads}
+The board state comes less often than the frames, so the motion smoother moves each motorcycle dot
+between the last two states. It moves the dot along the roads, through the crossing, and never in a
+straight line over a block. The dot is drawn one state behind the newest one, so it adds a small
+delay. If a state is lost, the dot keeps moving along its road with its last speed until the next
+state comes. The dot has a short tail, so the direction of motion is easy to see.
+
+\msub{Game phases and the link}
+Every game phase has its own look, so the people around the table always know what happens.
+
+\begin{ckfig}
+\begin{tikzpicture}[x=0.4cm, y=0.4cm]
+\foreach \sx/\t in {0/Lobby, 7.6/Countdown, 15.2/Running, 22.8/Paused, 30.4/Finished}{%
+  \begin{scope}[shift={(\sx,0)}]\boardbase\end{scope}
+  \node[font=\scriptsize\bfseries] at (\sx+2.5,-1.3) {\t};}
+\begin{scope}[shift={(7.6,0)}]
+  \draw[adm!70!yellow, line width=2.2pt] (0,0) rectangle (5,5);
+  \draw[adm!50!yellow, line width=2.2pt, opacity=0.6] (1,1) rectangle (4,4);
+  \node[font=\bfseries, text=white] at (2.5,2.5) {3};
+\end{scope}
+\begin{scope}[shift={(15.2,0)}]
+  \bike{1}{3.5}{tA}{90}\bike{3.5}{4}{tB}{0}\bike{4}{2.5}{tC}{-90}\bike{1.5}{1}{tD}{180}
+  \dpoint{2.5}{2}{tA}\roadwork{3,2}{3,3}
+\end{scope}
+\begin{scope}[shift={(22.8,0)}]
+  \bike{1}{3.5}{tA}{90}\bike{3.5}{4}{tB}{0}\bike{4}{2.5}{tC}{-90}\bike{1.5}{1}{tD}{180}
+  \fill[black, opacity=0.55, rounded corners=3pt] (-0.5,-0.5) rectangle (5.5,5.5);
+\end{scope}
+\begin{scope}[shift={(30.4,0)}]
+  \foreach \i in {0,...,5}{\draw[tB, line width=2pt] (\i,0) -- (\i,5); \draw[tB, line width=2pt] (0,\i) -- (5,\i);}
+\end{scope}
+\node[font=\scriptsize, align=center] at (2.5,-2.4) {stores glow,\\roads dark};
+\node[font=\scriptsize, align=center] at (10.1,-2.4) {light moves in,\\3, 2, 1};
+\node[font=\scriptsize, align=center] at (17.7,-2.4) {the live game};
+\node[font=\scriptsize, align=center] at (25.3,-2.4) {all dims and\\breathes slowly};
+\node[font=\scriptsize, align=center] at (32.9,-2.4) {roads in the\\winner colour};
+\end{tikzpicture}
+\end{ckfig}
+
+In the lobby the roads are dark and the four stores glow in the team colours. In the countdown the
+light moves from the edge to the centre in three steps, one for each number. During the game the board
+shows the live state. In a pause everything stays where it is, but all LEDs dim and breathe slowly. At
+the end all roads turn to the colour of the winner team, and in a draw the colours of the winners take
+turns. If M7 says that the link state is ``searching'', the roads go dark and the stores breathe slowly in a dim
+white, so everybody can see that the board is waiting.
+
+\msub{Earthquake}
+When an earthquake starts, a ring of light grows from the centre of the earthquake over the whole
+board, like a wave on water, and slowly fades. The road work after an earthquake is not a decision of
+M8. M1 puts it into the obstacle list, and M8 only draws it like any other obstacle.
+
+\begin{ckfig}
+\begin{tikzpicture}[x=0.62cm, y=0.62cm]
+\foreach \s/\r in {0/0.6, 7.2/1.6, 14.4/2.8}{%
+  \begin{scope}[shift={(\s,0)}]
+  \boardbase
+  \begin{scope}
+  \clip (-0.5,-0.5) rectangle (5.5,5.5);
+  \draw[white, line width=5pt, opacity=0.35] (3.4,2.6) circle (\r+0.25);
+  \draw[yellow!70!orange, line width=3pt] (3.4,2.6) circle (\r);
+  \end{scope}
+  \fill[obs] (3.4,2.6) circle (0.12);
+  \end{scope}}
+\node[font=\scriptsize] at (2.5,-1.1) {start};
+\node[font=\scriptsize] at (9.7,-1.1) {a moment later};
+\node[font=\scriptsize] at (16.9,-1.1) {later};
+\end{tikzpicture}
+\end{ckfig}
+
+\msection{Testing}
+
+M8 is tested alone on the real board with the ESP32, without M7 and without the server. A built in
+demo scenario gives recorded board states as test data and plays a full game with every animation and
+every game phase. Test patterns check the order and place of the LEDs, the 8 player
+colours (three people must name each colour correctly), the power limit at full white and the heat in
+a long run.
+
+\end{document}

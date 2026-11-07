@@ -1,0 +1,571 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+\documentclass[
+  english,
+  10pt,
+  a4paper,
+]{article}
+\usepackage{xcolor}
+\usepackage[top=22mm,bottom=20mm,left=18mm,right=18mm]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{longtable,booktabs,array}
+\usepackage{caption}
+\captionsetup[table]{skip=6pt}
+\newcounter{none} % for unnumbered tables
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+\ifLuaTeX
+\usepackage[bidi=basic,shorthands=off]{babel}
+\else
+\usepackage[bidi=default,shorthands=off]{babel}
+\fi
+\ifLuaTeX
+  \usepackage{selnolig} % disable illegal ligatures
+\fi
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+% ---- Çılgın Kurye document theme: same look as the CSE 396 project proposal ----
+% Compile with XeLaTeX (also works on Overleaf). Fonts: TeX Gyre Termes (Times), DejaVu Sans Mono.
+\usepackage{fontspec}
+\setmainfont{texgyretermes}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold, ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
+\setsansfont{texgyreheros}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold, ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
+\setmonofont{DejaVuSansMono}[Extension=.ttf, UprightFont=*, BoldFont=*-Bold, ItalicFont=*-Oblique, BoldItalicFont=*-BoldOblique, Scale=0.80]
+\setmathfont{texgyretermes-math.otf}
+
+\usepackage{xcolor}
+\definecolor{ckblue}{HTML}{1F3A5F}
+\definecolor{cklight}{HTML}{E8EEF5}
+\definecolor{ckgrey}{HTML}{F2F2F2}
+\definecolor{ckline}{HTML}{555555}
+\definecolor{shadecolor}{HTML}{F4F5F7}
+
+% Headings as in the proposal: serif, bold; subsections bold italic. Numbers are part of the heading text.
+\setcounter{secnumdepth}{0}
+\usepackage{titlesec}
+\titleformat{\section}{\rmfamily\Large\bfseries}{}{0pt}{}
+\titleformat{\subsection}{\rmfamily\large\bfseries\itshape}{}{0pt}{}
+\titleformat{\subsubsection}{\rmfamily\normalsize\bfseries}{}{0pt}{}
+\titlespacing*{\section}{0pt}{12pt}{4pt}
+\titlespacing*{\subsection}{0pt}{8pt}{3pt}
+
+% Header and footer (the first page has only the footer, like the proposal)
+\usepackage{fancyhdr,lastpage}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\itshape CSE 396 · Group 8 · Çılgın Kurye}
+\fancyhead[R]{\footnotesize\itshape\ckmodule}
+\fancyfoot[C]{\footnotesize Page \thepage\ of \pageref*{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\setlength{\headheight}{14pt}
+\fancypagestyle{ckfirst}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}\fancyfoot[C]{\footnotesize Page \thepage\ of \pageref*{LastPage}}}
+
+% Inline code: breaks only after . : ( , / _ and spaces, never inside a name
+\usepackage[obeyspaces,spaces]{url}
+\AtBeginDocument{%
+  \renewcommand{\UrlBreaks}{\do\.\do\:\do\(\do\,\do\/\do\_\do\|}%
+  \renewcommand{\UrlBigBreaks}{}%
+  \renewcommand{\UrlNoBreaks}{}%
+  \urlstyle{tt}}
+
+% Tables: boxed grid as in the proposal, smaller text
+\usepackage{etoolbox}
+\AtBeginEnvironment{longtable}{\footnotesize\renewcommand{\arraystretch}{1.2}}
+\setlength{\LTpre}{6pt}
+\setlength{\LTpost}{8pt}
+\setlength{\arrayrulewidth}{0.4pt}
+
+% Code blocks: long lines wrap; diagrams stay in one piece
+\usepackage{framed}
+\usepackage{fvextra}
+\RecustomVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\footnotesize, breaklines}
+\makeatletter
+\@ifundefined{Shaded}{}{\renewenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}}
+\@ifundefined{Highlighting}{}{\RecustomVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}, fontsize=\footnotesize, breaklines, breakanywhere}}
+\makeatother
+
+% Figures drawn with TikZ
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,calc,backgrounds,shapes.geometric}
+\tikzset{
+  ck/.style={font=\footnotesize, >={Stealth[length=5pt]}, line width=0.6pt},
+  box/.style={draw=ckline, fill=white, rounded corners=2pt, align=center, inner sep=4pt, minimum height=7mm},
+  mod/.style={box, fill=ckgrey},
+  this/.style={box, fill=cklight, draw=ckblue, line width=0.9pt},
+  group/.style={draw=ckline, dashed, rounded corners=3pt, inner sep=6pt},
+  lbl/.style={font=\scriptsize, align=center, inner sep=1.5pt},
+  msg/.style={->, draw=ckline},
+}
+\usepackage{caption}
+\captionsetup[figure]{font=small, labelfont=bf, skip=4pt}
+\newcommand{\ckfigure}[2]{\begin{figure}[htbp]\centering #1\caption{#2}\end{figure}}
+
+\usepackage{enumitem}
+\setlist{itemsep=1pt, topsep=3pt}
+\setlength{\parskip}{4pt}
+\setlength{\parindent}{0pt}
+\raggedbottom
+% ---- end of theme ----
+\newcommand{\ckmodule}{M3 Physics and Collision}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+% fallback for those not using the hyperref driver hyperxmp:
+\makeatletter
+\@ifundefined{xmpquote}{\newcommand{\xmpquote}[1]{#1}}{}
+\makeatother
+\hypersetup{
+  pdftitle={M3 Physics and Collision},
+  pdflang={en},
+  colorlinks=true,
+  linkcolor={black},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={black},
+  pdfcreator={LaTeX}}
+
+\title{M3 Physics and Collision --- Module Documentation}
+\author{}
+\date{}
+
+
+% ---- colours and drawings ----
+\usepackage{colortbl}
+\usepackage{float}
+\makeatletter
+\newcommand{\needspace}[1]{\begingroup\setlength{\dimen@}{#1}\vskip\z@\@plus\dimen@\penalty -100\vskip\z@\@plus -\dimen@\vskip\dimen@\penalty 9999\vskip -\dimen@\vskip\z@skip\endgroup}
+\makeatother
+% ---- colours ----
+\definecolor{srv}{HTML}{2E6FB7}\colorlet{srvL}{srv!15}
+\definecolor{cli}{HTML}{2E9E5B}\colorlet{cliL}{cli!15}
+\definecolor{adm}{HTML}{E08A1E}\colorlet{admL}{adm!18}
+\definecolor{brd}{HTML}{7B4FB3}\colorlet{brdL}{brd!15}
+\definecolor{tcpc}{HTML}{1F5FA8}
+\definecolor{udpc}{HTML}{D9531E}
+\definecolor{obs}{HTML}{D7263D}
+\definecolor{tA}{HTML}{00A6D6}
+\definecolor{tB}{HTML}{3BB273}
+\definecolor{tC}{HTML}{F2C14E}
+\definecolor{tD}{HTML}{9B5DE5}
+
+% ---- styles ----
+\tikzset{
+  nb/.style={rounded corners=3pt, line width=0.9pt, align=center, inner sep=4pt, minimum height=9mm, font=\footnotesize},
+  sv/.style={nb, draw=srv, fill=srvL},
+  cl/.style={nb, draw=cli, fill=cliL},
+  ad/.style={nb, draw=adm, fill=admL},
+  bd/.style={nb, draw=brd, fill=brdL},
+  hwb/.style={nb, draw=black!50, fill=black!5},
+  tcpa/.style={draw=tcpc, line width=1.5pt},
+  udpa/.style={draw=udpc, line width=1.5pt, dash pattern=on 5pt off 2.5pt},
+  inna/.style={draw=black!55, line width=1pt},
+  al/.style={font=\scriptsize, fill=white, inner sep=1.2pt, rounded corners=1pt},
+  grp/.style={draw=black!35, dashed, rounded corners=5pt, inner sep=7pt},
+  glbl/.style={font=\scriptsize\bfseries, text=black!65},
+  hl/.style={line width=2.6pt},
+  st/.style={nb, rounded corners=8pt, minimum width=24mm},
+  co/.style={draw=black!60, line width=0.5pt},
+  cot/.style={font=\scriptsize, align=left, text=black!80},
+}
+
+% ---- system map; argument = module to highlight (M1 ... M8, or none) ----
+\newcommand{\systemmap}[1]{%
+\tikzset{M1/.style={},M2/.style={},M3/.style={},M4/.style={},M5/.style={},M6/.style={},M7/.style={},M8/.style={},none/.style={}}%
+\tikzset{#1/.style={hl}}%
+\begin{tikzpicture}[ck]
+\node[cl, M5, minimum width=27mm] (m5) at (0,3) {\textbf{M5}\\Player phones};
+\node[ad, M6, minimum width=27mm] (m6) at (0,0.4) {\textbf{M6}\\Admin panel};
+\node[sv, M2, minimum width=27mm, minimum height=38mm] (m2) at (4.6,1.7) {\textbf{M2}\\Network\\and sync};
+\node[sv, M1, minimum width=27mm, minimum height=38mm] (m1) at (8.4,1.7) {\textbf{M1}\\Game server\\and rules};
+\node[sv, M3, minimum width=25mm] (m3) at (12,2.8) {\textbf{M3}\\Physics};
+\node[sv, M4, minimum width=25mm] (m4) at (12,0.6) {\textbf{M4}\\Traffic and AI};
+\node[grp, fit=(m2)(m1)(m3)(m4)] (pc) {};
+\node[glbl, anchor=south west] at (pc.north west) {MAIN COMPUTER};
+\node[bd, M7, minimum width=27mm] (m7) at (4.6,-2.7) {\textbf{M7}\\ESP32 software};
+\node[bd, M8, minimum width=27mm] (m8) at (8.4,-2.7) {\textbf{M8}\\LED engine};
+\node[hwb, minimum width=25mm] (led) at (12,-2.7) {RGB LED\\strips};
+\node[hwb, minimum width=27mm] (sm) at (4.6,-4.4) {Sensor and\\4 motors};
+\node[grp, fit=(m7)(m8)(led)(sm)] (bb) {};
+\node[glbl, anchor=north east] at (bb.south east) {LED CITY BOARD};
+\draw[tcpa, <->] (m5.east) -- node[al]{WebSocket} (m5.east -| m2.west);
+\draw[tcpa, <->] (m6.east) -- node[al]{WebSocket} (m6.east -| m2.west);
+\draw[tcpa, <->] ([xshift=-6mm]m7.north) -- node[al]{TCP} ([xshift=-6mm]m2.south);
+\draw[udpa, <->] ([xshift=6mm]m7.north) -- node[al]{UDP} ([xshift=6mm]m2.south);
+\draw[inna, <->] (m2) -- (m1);
+\draw[inna, <->] (m1.east |- m3) -- (m3);
+\draw[inna, <->] (m1.east |- m4) -- (m4);
+\draw[inna, ->] (m7) -- node[al]{state} (m8);
+\draw[inna, ->] (m8) -- (led);
+\draw[inna, <->] (m7) -- (sm);
+\ckleg{-1.3,-6.0}{tcpa/TCP or WebSocket: every message arrives in order, udpa/UDP: fast and the newest message wins, inna/inside one program or chip}
+\end{tikzpicture}}
+
+% ---- LED board seen from above (6 x 6 roads, 1 unit = 10 cm) ----
+\newcommand{\boardbase}{%
+\fill[black!88, rounded corners=3pt] (-0.5,-0.5) rectangle (5.5,5.5);
+\foreach \i in {0,...,4}{\foreach \j in {0,...,4}{%
+  \fill[black!60] (\i+0.13,\j+0.13) rectangle (\i+0.87,\j+0.87);
+  \fill[black!22] (\i+0.24,\j+0.24) rectangle (\i+0.52,\j+0.52);
+  \fill[black!30] (\i+0.56,\j+0.30) rectangle (\i+0.78,\j+0.62);
+  \fill[black!38] (\i+0.28,\j+0.58) rectangle (\i+0.66,\j+0.78);}}
+\foreach \i in {0,...,5}{%
+  \draw[black, line width=4.5pt] (\i,-0.05) -- (\i,5.05);
+  \draw[black, line width=4.5pt] (-0.05,\i) -- (5.05,\i);}
+\foreach \i in {0,...,5}{\foreach \k in {0,...,30}{%
+  \fill[black!55] (\i,\k/6) circle (0.025);
+  \fill[black!55] (\k/6,\i) circle (0.025);}}
+\foreach \x/\y/\c in {0/4/tA, 4/4/tB, 0/0/tD, 4/0/tC}{%
+  \fill[\c!30!black!60] (\x+0.13,\y+0.13) rectangle (\x+0.87,\y+0.87);
+  \fill[\c] (\x+0.3,\y+0.3) rectangle (\x+0.7,\y+0.7);
+  \fill[white] (\x+0.4,\y+0.5) circle (0.05); \fill[white] (\x+0.6,\y+0.5) circle (0.05);}}
+\newcommand{\nmark}[3]{\node[circle, fill=yellow!85!orange, draw=black, line width=0.4pt, inner sep=0.6pt, minimum size=3.6mm, font=\tiny\bfseries] at (#1,#2) {#3};}
+\newcommand{\bike}[4]{%
+\fill[#3!35] ($(#1,#2)+(#4:0.40)$) circle (0.05);
+\fill[#3!65] ($(#1,#2)+(#4:0.21)$) circle (0.075);
+\fill[#3, draw=white, line width=0.4pt] (#1,#2) circle (0.12);}
+\newcommand{\dpoint}[3]{\draw[#3!50, line width=0.8pt] (#1,#2) circle (0.26); \draw[#3, line width=1.4pt] (#1,#2) circle (0.16); \fill[#3] (#1,#2) circle (0.07);}
+\newcommand{\heavy}[2]{\draw[obs!60!black, line width=4pt] (#1) -- (#2); \draw[obs, line width=4pt, dash pattern=on 3pt off 5pt] (#1) -- (#2);}
+\newcommand{\roadwork}[2]{\draw[obs, line width=4pt] (#1) -- (#2);}
+\newcommand{\accident}[2]{\draw[obs, line width=4pt, dash pattern=on 3pt off 3pt] (#1) -- (#2);}
+\newcommand{\puddle}[2]{\draw[cyan!55, line width=4pt] (#1) -- (#2); \draw[cyan!15, line width=1.6pt, dash pattern=on 1pt off 2.5pt] (#1) -- (#2);}
+\newcommand{\findme}[2]{\fill[white, opacity=0.25] (#1,#2) circle (0.36); \fill[white, opacity=0.5] (#1,#2) circle (0.24); \fill[white] (#1,#2) circle (0.13);}
+
+% ---- phone game screen (7 x 3.4 units) ----
+\newcommand{\phonemock}{%
+\fill[black!85, rounded corners=9pt] (-0.3,-0.3) rectangle (7.3,3.7);
+\fill[cyan!20] (0,1.7) rectangle (7,3.4);
+\fill[cli!14] (0,0) rectangle (7,1.7);
+\filldraw[fill=srv!30, draw=srv!70!black] (0.2,1.5) rectangle (1.0,3.0);
+\filldraw[fill=adm!35, draw=adm!70!black] (1.1,1.6) rectangle (1.8,2.4);
+\filldraw[fill=brd!30, draw=brd!70!black] (1.9,1.65) -- (2.6,1.65) -- (2.6,2.2) -- (2.25,2.5) -- (1.9,2.2) -- cycle;
+\filldraw[fill=adm!35, draw=adm!70!black] (4.5,1.65) rectangle (5.1,2.3);
+\filldraw[fill=srv!30, draw=srv!70!black] (5.2,1.55) rectangle (6.0,3.1);
+\filldraw[fill=cli!35, draw=cli!70!black] (6.1,1.6) rectangle (6.85,2.6);
+\fill[brown!60!black] (4.17,1.6) rectangle (4.23,1.8); \fill[cli!70!black] (4.2,1.95) circle (0.18);
+\fill[black!55] (1.8,0) -- (5.2,0) -- (3.75,1.7) -- (3.25,1.7) -- cycle;
+\draw[white, line width=0.8pt, dash pattern=on 4pt off 4pt] (3.5,0) -- (3.5,1.7);
+\filldraw[fill=black!15, draw=black!70] (3.62,1.12) rectangle (3.88,1.32);
+\fill[obs] (3.05,1.22) -- (3.15,1.48) -- (3.25,1.22) -- cycle;
+\fill[black!85] (3.43,0.08) rectangle (3.57,0.3);
+\fill[tA] (3.3,0.28) rectangle (3.7,0.6);
+\fill[brown!65] (3.34,0.6) rectangle (3.66,0.82);
+\fill[tA!60!black] (3.5,0.95) circle (0.13);
+\node[fill=black!70, text=white, rounded corners=2pt, font=\scriptsize\bfseries, inner sep=2pt] at (3.5,3.15) {2:41};
+\foreach \c/\s/\x in {tA/120/0.35,tB/95/0.95,tC/140/1.55,tD/80/2.15}
+  \node[fill=\c, text=white, font=\tiny\bfseries, rounded corners=1pt, inner sep=1.5pt, minimum width=5mm] at (\x,3.15) {\s};
+\fill[white, opacity=0.9] (6.45,2.85) circle (0.38); \draw[black!60] (6.45,2.85) circle (0.38);
+\draw[-{Stealth[length=5pt]}, line width=1.8pt, obs] (6.45,2.85) ++(230:0.2) -- ++(50:0.5);
+\fill[white, opacity=0.85] (0.55,0.5) circle (0.32); \fill[black!70] (0.43,0.5) -- (0.65,0.63) -- (0.65,0.37) -- cycle;
+\fill[white, opacity=0.85] (1.4,0.5) circle (0.32); \fill[black!70] (1.52,0.5) -- (1.3,0.63) -- (1.3,0.37) -- cycle;
+\node[fill=obs!80, text=white, rounded corners=3pt, font=\tiny\bfseries, minimum width=8mm, minimum height=6mm] at (5.6,0.5) {Brake};
+\node[fill=cli, text=white, rounded corners=3pt, font=\tiny\bfseries, minimum width=8mm, minimum height=8mm] at (6.5,0.6) {Gas};
+\node[fill=white, text=black, rounded corners=3pt, font=\tiny\bfseries, minimum width=9mm, minimum height=5mm] at (0.9,1.45) {Find me};}
+
+% ---- side cut of the board (14 units wide) ----
+\newcommand{\boardside}{%
+\fill[brown!20] (-0.6,-0.35) rectangle (14.6,0);
+\foreach \x/\h/\c in {1.0/0.7/black!18, 2.2/1.1/black!22, 4.6/1.9/black!25, 5.8/2.6/black!28, 7.4/2.2/black!25, 8.6/1.6/black!22, 10.9/1.0/black!18}
+  \filldraw[fill=\c, draw=black!45] (\x,1.5) rectangle (\x+0.9,1.5+\h);
+\filldraw[fill=tB!35, draw=tB!70!black] (12.4,1.5) rectangle (13.4,2.3);
+\fill[black!70, rounded corners=1pt] (0.5,0) rectangle (1.1,0.9);
+\fill[black!70, rounded corners=1pt] (12.9,0) rectangle (13.5,0.9);
+\filldraw[fill=brown!45, draw=brown!70!black] (0,0.9) rectangle (14,1.3);
+\fill[black!80] (0,1.3) rectangle (14,1.38);
+\foreach \x in {0.3,0.9,...,13.8} \fill[black!35] (\x,1.42) circle (0.06);
+\foreach \x/\c in {3.3/tA, 3.9/tA, 6.9/obs, 7.5/obs, 10.5/tC} \fill[\c] (\x,1.42) circle (0.07);
+\fill[white, opacity=0.55] (0,1.38) rectangle (14,1.52);
+\filldraw[fill=brd!40, draw=brd] (2.3,0.35) rectangle (4.3,0.85);
+\node[font=\tiny] at (3.3,0.6) {ESP32};
+\filldraw[fill=brd, draw=brd!60!black] (6.75,0.62) rectangle (7.25,0.88);
+\filldraw[fill=adm!60, draw=adm!70!black] (1.8,0.6) circle (0.24);
+\filldraw[fill=adm!60, draw=adm!70!black] (12.2,0.6) circle (0.24);
+\filldraw[fill=black!15, draw=black!50] (9.3,0.35) rectangle (10.9,0.85);
+\node[font=\tiny] at (10.1,0.6) {Power};}
+
+% ---- layout helpers ----
+\newenvironment{ckfig}{\begin{figure}[!htb]\centering}{\end{figure}}
+\renewcommand{\topfraction}{0.9}\renewcommand{\bottomfraction}{0.8}\renewcommand{\textfraction}{0.07}\renewcommand{\floatpagefraction}{0.85}
+\setcounter{topnumber}{3}\setcounter{bottomnumber}{2}\setcounter{totalnumber}{4}
+\newcommand{\msub}[1]{\par\needspace{5\baselineskip}\smallskip\noindent{\bfseries #1:}\par\nobreak\vspace{-2pt}}
+\tikzset{msga/.style={draw=cli!70!black, line width=0.8pt}, cmda/.style={draw=obs, line width=1pt}, loopa/.style={draw=srv, line width=1pt}, hwa/.style={draw=black!60, line width=1.2pt, dash pattern=on 1.5pt off 1.5pt}, wanta/.style={draw=cli, line width=1.6pt}, reala/.style={draw=obs, line width=1.6pt}, siga/.style={draw=srv, line width=0.8pt}, thra/.style={draw=obs, line width=0.9pt, dash pattern=on 4pt off 2pt}, evta/.style={draw=cli, line width=1pt}}
+\tikzset{iol/.style={font=\scriptsize, fill=white, inner sep=1.2pt, rounded corners=1pt, align=center}}
+% legend row: start point, list of style/text
+\newcommand{\ckleg}[2]{%
+\coordinate (lgp) at (#1);
+\foreach \ls/\lt in {#2}{%
+  \draw[\ls,->] (lgp) -- ++(0.8,0) node[right, font=\scriptsize, text=black] (lgt) {\lt};
+  \coordinate (lgp) at ([xshift=5mm]lgt.east);}}
+% purpose table: colour (unused), runs on, technology, requirements
+\newcommand{\ckinfo}[4]{\par\smallskip\noindent{\renewcommand{\arraystretch}{1.25}%
+\begin{tabular}{|L{0.30}|L{0.50}|L{0.20}|}\hline
+\textbf{Runs on} & \textbf{Technology} & \textbf{Requirements} \\ \hline
+#2 & #3 & #4 \\ \hline
+\end{tabular}}\par\smallskip}
+% module data map: n in, n out, centre text, centre style, inputs, outputs, legend list
+% inputs and outputs: {name}/style/{data}/arrow style
+\newcommand{\iomap}[7]{%
+\begin{tikzpicture}[ck]
+\pgfmathsetmacro{\nmax}{max(#1,#2)}
+\node[#4, line width=2pt, minimum width=30mm, minimum height=\nmax*10.5mm+2mm, font=\normalsize] (c) at (0,0) {#3};
+\foreach \nm/\st/\dd/\ar [count=\ii] in {#5}{%
+  \pgfmathsetmacro{\yy}{((#1+1)/2-\ii)*1.05}
+  \node[\st, minimum width=25mm, minimum height=8.5mm, font=\scriptsize] (in\ii) at (-6.6,\yy) {\nm};
+  \draw[\ar,->] (in\ii.east) -- node[iol]{\dd} (c.west |- in\ii);}
+\foreach \nm/\st/\dd/\ar [count=\ii] in {#6}{%
+  \pgfmathsetmacro{\yy}{((#2+1)/2-\ii)*1.05}
+  \node[\st, minimum width=25mm, minimum height=8.5mm, font=\scriptsize] (out\ii) at (6.6,\yy) {\nm};
+  \draw[\ar,->] (c.east |- out\ii) -- node[iol]{\dd} (out\ii.west);}
+\node[font=\scriptsize\bfseries, text=black!60] at (-6.6,\nmax*0.525+0.4) {Inputs come from};
+\node[font=\scriptsize\bfseries, text=black!60] at (6.6,\nmax*0.525+0.4) {Outputs go to};
+\ckleg{-7.6,-\nmax*0.525-0.5}{#7}
+\end{tikzpicture}}
+
+% keep an intro sentence and its table together on one page
+\newcommand{\ckkeep}[1]{\par\noindent\begin{minipage}{\linewidth}\setlength{\parskip}{4pt}#1\end{minipage}\par\smallskip}
+
+\begin{document}
+
+\thispagestyle{ckfirst}
+\begin{center}
+{\bfseries GEBZE TECHNICAL UNIVERSITY\par}
+{Computer Engineering Department\par}
+{CSE 396 Module Documentation\par}
+\vspace{8pt}
+{\LARGE\bfseries Çılgın Kurye\par}
+\vspace{3pt}
+{\large\itshape Module M3: Physics and Collision\par}
+\vspace{6pt}
+\textbf{Company:} Board\&Byte\hspace{1.4em}\textbf{Group:} Group-8\hspace{1.4em}\textbf{Date:} 6 November 2026
+\end{center}
+\begin{center}\footnotesize\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{0.27\linewidth}|p{0.15\linewidth}|p{0.27\linewidth}|p{0.15\linewidth}|}\hline
+\textbf{Name} & \textbf{Student No.} & \textbf{Name} & \textbf{Student No.} \\ \hline
+Abdullatif Yılmaz & 230104004031 & Hasan Alperen Elmas & 1801042604 \\ \hline
+Batuhan Yanar & 220104004059 & Selim Barut & 220104004046 \\ \hline
+\end{tabular}
+\end{center}
+\vspace{2pt}
+
+
+
+% ---- table and list helpers ----
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{\dimexpr#1\linewidth-2\tabcolsep-\arrayrulewidth\relax}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{\dimexpr#1\linewidth-2\tabcolsep-\arrayrulewidth\relax}}
+\newcommand{\ckdone}{\item[$\boxtimes$]}
+\newcommand{\ckopen}{\item[$\square$]}
+\newcommand{\mdot}{$\bullet$}
+\newcounter{msec}
+\newcounter{chap}
+% ---- end of helpers ----
+\newcommand{\msection}[1]{\needspace{8\baselineskip}\stepcounter{msec}\section{\arabic{msec}. #1}}
+
+\msection{Purpose}
+
+M3 moves the motorcycles. It turns throttle, brake and steering into speed, direction and position.
+It finds collisions, decides when a motorcycle falls, and adds the effect of obstacles and earthquakes
+to the motion. The same code runs in two places: on the server, where its result is the real one, and
+on the phone, where it guesses the player's own motorcycle before the server answers.
+
+\ckinfo{srv}{Main computer inside the game server, and the phone browser for prediction only}{TypeScript library with a 3D physics engine that runs on the web, on the server and in the phone browser}{R3 R4 R6 R7 R11}
+
+M3 has no network code. On the server it talks only to M1, and on the phone only to M5. The figure
+shows both uses.
+
+\begin{ckfig}
+\iomap{5}{3}{\textbf{M3}\\Physics\\and collision}{sv}
+{{M1 Game server}/sv/{controls of humans\\and bots}/inna, {M1 Game server}/sv/{obstacles, NPC car\\boxes, earthquake}/inna, {M1 Game server}/sv/{physics\\parameters}/inna, {City plan file}/hwb/{buildings,\\outer wall}/inna, {M5 Phone}/cl/{own controls,\\server state}/inna}
+{{M1 Game server}/sv/{poses}/inna, {M1 Game server}/sv/{collisions, falls}/inna, {M5 Phone}/cl/{predicted own\\motorcycle}/inna}
+{inna/function calls inside the server or inside the phone page}
+\end{ckfig}
+
+\msection{Requirements covered}
+
+\ckkeep{%
+M3 takes part in five requirements. The last column says what will work when M3 is finished.
+
+\begin{tabular}{|L{0.06}|L{0.15}|L{0.40}|L{0.39}|}
+\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M3 does for it} & \textbf{When M3 is done} \\ \hline 
+R3 & Driving and controls & Throttle, brake, left and right. No reverse. A U turn by steering in a small circle at low speed & The motorcycle drives, brakes and turns like an arcade game \\ \hline
+R4 & Collisions and falls & Collisions with buildings, barriers, NPC cars and motorcycles. A fast hit makes the motorcycle fall & Nothing drives through a wall, and fast crashes end in a fall \\ \hline
+R6 & Obstacles & Road work and accidents are solid. An accident has a slow zone. A puddle makes the motorcycle slide & Each obstacle type feels different when you drive \\ \hline
+R7 & Earthquake & Less grip inside the earthquake area that M1 sends & Riding in an earthquake is harder \\ \hline
+R11 & Engineering requirements & The same input always gives the same result. The server result wins, the phone only predicts & The own motorcycle reacts at once and still matches the server \\ \hline
+\end{tabular}}
+
+\msection{Inputs and outputs}
+
+\ckkeep{%
+M1 calls M3 two times in every tick with the inputs below. M5 uses the same code for one motorcycle.
+
+\begin{tabular}{|L{0.11}|L{0.17}|L{0.18}|L{0.54}|}
+\hline \textbf{Direction} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline 
+In & City plan & Shared file & Roads, lanes, blocks and buildings as fixed colliders \\ \hline
+In & Controls & M1 & Every tick: throttle and brake from 0 to 1, steer from −1 to 1, for humans and bots, and a speed factor for each player \\ \hline
+In & Obstacles, NPC cars & M1 & Obstacle type, road, lane, position, and the boxes of the NPC cars that M1 gets from M4 \\ \hline
+In & Earthquake & M1 & The earthquake area and the motorcycles that fall \\ \hline
+In & Parameters & M6, through M1 & Top speed, grip, fall speed, grip in a puddle and in an earthquake \\ \hline
+Out & Poses & M1 & Position, direction, speed, lean, sliding, fallen \\ \hline
+Out & Events & M1 & Collisions (with what and how fast) and falls. M1 gives the car hits to M4 \\ \hline
+Out & Predicted pose & M5 & The player's own motorcycle before the server answers \\ \hline
+\end{tabular}}
+
+\msection{Main components}
+
+\ckkeep{%
+M3 has five parts. The first four run on the server, the last one runs on the phone.
+
+\begin{tabular}{|L{0.21}|L{0.39}|L{0.40}|}
+\hline \textbf{Component} & \textbf{Takes} & \textbf{Gives} \\ \hline 
+Motorcycle model & Controls, parameters & New speed, direction, lean and sliding \\ \hline
+Colliders & City plan, obstacle list, NPC cars & Solid shapes, slow zones and slippery areas \\ \hline
+Collision solver and fall judge & Moved objects, colliders & Pushed apart objects, collision and fall events \\ \hline
+Earthquake effect & Earthquake area & Lower grip inside the area \\ \hline
+Predictor & Own controls, server state & Predicted own motorcycle with a smooth correction \\ \hline
+\end{tabular}}
+
+\msection{How it works}
+
+\msub{One physics step}
+The server runs 30 ticks per second, and M3 runs 2 substeps in each tick. Small steps keep fast
+motorcycles from passing through thin walls. Each substep does five things in a fixed order, as the figure shows. Because the order is fixed, the same inputs always give the same result on the
+server and on the phone.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck, node distance=4mm]
+\node[cl, minimum width=19mm] (a) {Speed and\\steering};
+\node[sv, minimum width=19mm, right=of a, fill=tC!25, draw=tC!70!black] (b) {Grip and\\sliding};
+\node[sv, minimum width=19mm, right=of b] (c) {Walls and\\obstacles};
+\node[sv, minimum width=19mm, right=of c, fill=tD!18, draw=tD!80!black] (d) {Cars and\\motorcycles};
+\node[nb, draw=obs, fill=obs!10, minimum width=19mm, right=of d] (e) {Fall\\check};
+\foreach \u/\v in {a/b,b/c,c/d,d/e} \draw[inna,->] (\u) -- (\v);
+\draw[loopa,->] (e.south) -- ++(0,-0.55) -| node[al, pos=0.25]{2 substeps in each tick} (a.south);
+\ckleg{0,-1.5}{inna/order of the parts, loopa/next substep}
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Driving}
+The throttle adds speed up to the top speed, and the brake and air drag take speed
+away. There is no reverse. The steering changes the direction. At low speed the motorcycle can turn
+in a small circle, so a U turn is easy. At high speed the turn is wider. The model also
+gives a lean angle, which M5 uses to tilt the 3D motorcycle in a turn.
+
+\msub{Grip and sliding}
+In a turn the motorcycle needs a side force. M3 compares the size of this
+force with the grip limit. If the force is below the limit, the motorcycle follows the turn. If it
+is above the limit, the motorcycle slides out of the turn. We compare only the size, so a left turn
+and a right turn act the same. On a water puddle the grip limit is very low, so the motorcycle
+slides but does not slow down. Inside the earthquake area the grip is lower too.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck]
+\begin{scope}
+\fill[black!65] (-0.5,-0.5) rectangle (4.5,3.2);
+\draw[white, dash pattern=on 5pt off 5pt] (2,-0.5) -- (2,3.2);
+\draw[cli, line width=1.6pt, ->] (1,-0.2) .. controls (1,1.5) and (1.6,2.4) .. (3.6,2.6);
+\fill[tA] (1,0.6) circle (0.15);
+\node[font=\scriptsize, text=white, align=center] at (3.3,0.6) {grip is\\enough};
+\node[font=\scriptsize\bfseries] at (2,-0.85) {Normal turn};
+\end{scope}
+\begin{scope}[shift={(5.6,0)}]
+\fill[black!65] (-0.5,-0.5) rectangle (4.5,3.2);
+\draw[white, dash pattern=on 5pt off 5pt] (2,-0.5) -- (2,3.2);
+\draw[cli!60, line width=1.2pt, dashed] (1,-0.2) .. controls (1,1.5) and (1.6,2.4) .. (3.6,2.6);
+\draw[obs, line width=1.6pt, ->] (1,-0.2) .. controls (1,1.4) and (1.1,2.2) .. (1.2,3.1);
+\fill[tA] (1,0.6) circle (0.15);
+\node[font=\scriptsize, text=white, align=center] at (3.3,0.6) {too fast,\\slides out};
+\node[font=\scriptsize\bfseries] at (2,-0.85) {Too fast in a turn};
+\end{scope}
+\begin{scope}[shift={(11.2,0)}]
+\fill[black!65] (-0.5,-0.5) rectangle (4.5,3.2);
+\draw[white, dash pattern=on 5pt off 5pt] (2,-0.5) -- (2,3.2);
+\fill[cyan!35] (1.0,1.2) ellipse (0.9 and 0.5);
+\draw[white, line width=0.8pt, dash pattern=on 1pt off 2pt] (1.0,1.2) ellipse (0.6 and 0.3);
+\draw[obs, line width=1.6pt, ->] (1,-0.2) -- (1,0.9) .. controls (1.1,1.5) and (1.6,1.8) .. (2.6,2.9);
+\fill[tA] (1,0.4) circle (0.15);
+\node[font=\scriptsize, text=white, align=center] at (3.3,0.6) {puddle,\\low grip};
+\node[font=\scriptsize\bfseries] at (2,-0.85) {On a puddle};
+\end{scope}
+\ckleg{0,-1.45}{wanta/wanted path, reala/real path}
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Collisions and falls}
+Buildings, the outer wall and the road work barriers come from the city
+plan and the obstacle list as solid shapes. NPC cars and motorcycles have simple shapes too. A contact pushes the objects apart. If the hit speed is above the fall speed that the
+admin set, the motorcycle falls. When two motorcycles hit each other and their relative speed is
+above the limit, both of them fall. A fallen motorcycle is not solid, so it does not block the road
+for others. M1 gives the penalty time and later asks M3 to stand the motorcycle up again. An
+accident is solid in one lane and has a slow zone around it.
+
+\msub{Prediction on the phone}
+On the phone, the player must see the own motorcycle move at once,
+not after the delay of the network. So M5 runs a copy of M3 for this one motorcycle. Each control gets a number and is
+kept in a list. When a server state arrives, the phone takes the real position from the server,
+throws away the controls that the server has already used, and runs the remaining controls again.
+If the new result is close to what the player sees, the difference is blended away in a short
+time. If it is far, for example after a crash, the motorcycle jumps to the right place.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck]
+\draw[black!40, ->] (0,0) -- (13,0) node[right, font=\scriptsize]{time};
+\foreach \x/\l in {1/1,3/2,5/3,7/4,9/5} {\fill[cli] (\x,0.9) circle (0.09); \node[font=\tiny] at (\x,1.2) {control \l};}
+\node[font=\scriptsize\bfseries, text=cli, anchor=east] at (-0.1,0.9) {Phone};
+\node[font=\scriptsize\bfseries, text=srv, anchor=east] at (-0.1,-0.9) {Server};
+\draw[tcpa,->] (1,0.8) -- (4.0,-0.8);
+\draw[tcpa,->] (3,0.8) -- (6.0,-0.8);
+\node[sv, minimum height=6mm, font=\tiny] (s) at (6.6,-0.9) {state with control 2};
+\draw[tcpa,->] (6.6,-0.6) -- (9.6,0.75);
+\node[cl, minimum height=6mm, font=\tiny, align=center] at (11.6,0.9) {take server position,\\run controls 3 to 5 again};
+\fill[cli!25, rounded corners=2pt] (4.6,0.55) rectangle (9.4,0.65);
+\node[font=\tiny, text=cli!70!black] at (7,0.4) {controls 3 to 5 are not yet known by the server};
+\ckleg{0,-1.6}{tcpa/message over WebSocket}
+\end{tikzpicture}
+\end{ckfig}
+
+\msection{Testing}
+
+M3 needs no other module. A test makes a world from the city plan and gives scripted controls, fixed
+obstacles and fixed NPC car boxes as test data. We check a straight run and braking, a U turn, slides
+to the left and to the right, wall and car crashes, the earthquake radius, and that the same inputs
+give exactly the same result two times. The predictor is tested with recorded server states and added
+delay and loss. A small test page shows a simple 3D view of the city, so one motorcycle can also be
+driven with the keyboard and the parameters can be changed with keys.
+
+\end{document}

@@ -26,7 +26,7 @@ M1 takes part in eight of the eleven system requirements. The last column says w
 | R2 | Delivery cycle | Automatic pickup at the store. Picks a delivery point by travel time, with a near or far chance per player | Every player always has a package or a point to go to, and points are fair |
 | R4 | Collisions and falls | Gives a penalty time after every fall that M3 reports | A fallen player waits and then rides on with the package |
 | R5 | No map on the phone | Puts the compass target and the “Find me” waiting time into the game state | The phone can show the arrow and the button without a map |
-| R6 | Obstacles | Keeps the one obstacle list that M3, M4, M5 and M8 use | An obstacle from the admin is seen everywhere in the same tick |
+| R6 | Obstacles | Keeps the one obstacle list that M3, M4, M5 and M8 use. Adds random obstacles during the game and removes each obstacle when its time ends | A new or ended obstacle, automatic or from the admin, is seen everywhere in the same tick |
 | R7 | Earthquake | One path for a hand hit, the motors and the admin button. Road work and falls inside the radius | A hit on the board changes the game for everybody |
 | R9 | Live admin panel | Checks admin commands and sends each parameter to the module that uses it | Every parameter can be changed during the game |
 | R11 | Engineering requirements | Only M1 changes the game state. Every game can be played again from the log | The same log always gives the same game |
@@ -58,7 +58,7 @@ M1 is made of seven parts. Each part takes some data and gives a result to the n
 | Match and lobby | Joins, lost players, admin start and pause | Game phase, teams, bots in empty places |
 | Delivery and scoring | Poses, travel times | Packages, delivery points, automatic deliveries, points |
 | Penalties | Fall events from M3 | Penalty time, then a stand up request to M3 |
-| Obstacles and earthquake | Admin obstacles, board events | The obstacle list, earthquake centre and radius |
+| Obstacles and earthquake | Obstacle parameters, admin obstacles, board events | The obstacle list with end times, earthquake centre and radius |
 | Admin and parameters | Admin commands | Checked values sent to the owner module, ok or error replies |
 | State builder and recorder | The world after the tick | Frozen game state, board state, metrics with a short history, the game log |
 
@@ -92,11 +92,11 @@ There is no delivery button. When the player comes to the delivery point and sto
 
 **Earthquakes:**
 
-An earthquake can come from a hand hit on the board, from the vibration motors or from the admin button. All of them take the same path in M1. The board sends a strength from 0 to 10 and one of 9 zones. M1 uses the centre of that zone as the centre of the earthquake. A stronger hit makes a bigger earthquake. Motorcycles near the centre fall, and the roads near the centre close with road work.
+An earthquake can come from a hand hit on the board, from the vibration motors or from the admin button. All of them take the same path in M1. The board sends a strength from 0 to 10 and one of 9 zones. M1 uses the centre of that zone as the centre of the earthquake. A stronger hit makes a bigger earthquake. Motorcycles near the centre fall, and the roads near the centre close with road work for a limited time.
 
 **Obstacles:**
 
-M1 keeps one list of obstacles. Each obstacle has a type, a road segment, a lane and a position. When the list changes, M4 computes the routes again, and M5 and M8 draw the new obstacles.
+M1 keeps one list of obstacles. Each obstacle has a type, a road segment, a lane, a position and an end time. During the game M1 adds new obstacles by itself at random places. The admin sets for each of the four types how often it appears and how long it stays. A new obstacle never appears right next to a player or right in front of one, so nobody falls without a chance to react. Obstacles from the admin and the road work from an earthquake also have a duration. When the time of an obstacle ends, M1 removes it from the list. While the game is paused, no new obstacle appears and the times stop. When the list changes, M4 computes the routes again, and M5 and M8 show the change.
 
 **Admin parameters:**
 
@@ -104,4 +104,4 @@ Every parameter has a name, a group, a minimum, a maximum and an owner module. W
 
 ## 6. Testing
 
-M1 is tested alone, without the network and without the real M2, M3 and M4. Small fake parts take their place inside the test and give fixed test data: scripted controls and joins, fixed poses and fall events, a fixed travel time table and recorded admin commands and board events. With this data we check every rule: the game phases with pause and end, the lobby and the bots, a lost player who comes back, the delivery cycle and the fair choice of points, two “Find me” presses in one tick, every admin command with good and wrong values, and the earthquake radius. Because all random numbers come from one seed, the same test data must always give exactly the same game state.
+M1 is tested alone, without the network and without the real M2, M3 and M4. Small fake parts take their place inside the test and give fixed test data: scripted controls and joins, fixed poses and fall events, a fixed travel time table and recorded admin commands and board events. With this data we check every rule: the game phases with pause and end, the lobby and the bots, a lost player who comes back, the delivery cycle and the fair choice of points, two “Find me” presses in one tick, every admin command with good and wrong values, the earthquake radius, and the automatic obstacles with their rates, durations, distance to the players and the stop during a pause. Because all random numbers come from one seed, the same test data must always give exactly the same game state.

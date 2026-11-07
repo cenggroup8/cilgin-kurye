@@ -1,0 +1,633 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+\documentclass[
+  english,
+  10pt,
+  a4paper,
+]{article}
+\usepackage{xcolor}
+\usepackage[top=22mm,bottom=20mm,left=18mm,right=18mm]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{longtable,booktabs,array}
+\usepackage{caption}
+\captionsetup[table]{skip=6pt}
+\newcounter{none} % for unnumbered tables
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+\ifLuaTeX
+\usepackage[bidi=basic,shorthands=off]{babel}
+\else
+\usepackage[bidi=default,shorthands=off]{babel}
+\fi
+\ifLuaTeX
+  \usepackage{selnolig} % disable illegal ligatures
+\fi
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+% ---- Çılgın Kurye document theme: same look as the CSE 396 project proposal ----
+% Compile with XeLaTeX (also works on Overleaf). Fonts: TeX Gyre Termes (Times), DejaVu Sans Mono.
+\usepackage{fontspec}
+\setmainfont{texgyretermes}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold, ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
+\setsansfont{texgyreheros}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold, ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
+\setmonofont{DejaVuSansMono}[Extension=.ttf, UprightFont=*, BoldFont=*-Bold, ItalicFont=*-Oblique, BoldItalicFont=*-BoldOblique, Scale=0.80]
+\setmathfont{texgyretermes-math.otf}
+
+\usepackage{xcolor}
+\definecolor{ckblue}{HTML}{1F3A5F}
+\definecolor{cklight}{HTML}{E8EEF5}
+\definecolor{ckgrey}{HTML}{F2F2F2}
+\definecolor{ckline}{HTML}{555555}
+\definecolor{shadecolor}{HTML}{F4F5F7}
+
+% Headings as in the proposal: serif, bold; subsections bold italic. Numbers are part of the heading text.
+\setcounter{secnumdepth}{0}
+\usepackage{titlesec}
+\titleformat{\section}{\rmfamily\Large\bfseries}{}{0pt}{}
+\titleformat{\subsection}{\rmfamily\large\bfseries\itshape}{}{0pt}{}
+\titleformat{\subsubsection}{\rmfamily\normalsize\bfseries}{}{0pt}{}
+\titlespacing*{\section}{0pt}{12pt}{4pt}
+\titlespacing*{\subsection}{0pt}{8pt}{3pt}
+
+% Header and footer (the first page has only the footer, like the proposal)
+\usepackage{fancyhdr,lastpage}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\itshape CSE 396 · Group 8 · Çılgın Kurye}
+\fancyhead[R]{\footnotesize\itshape\ckmodule}
+\fancyfoot[C]{\footnotesize Page \thepage\ of \pageref*{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\setlength{\headheight}{14pt}
+\fancypagestyle{ckfirst}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}\fancyfoot[C]{\footnotesize Page \thepage\ of \pageref*{LastPage}}}
+
+% Inline code: breaks only after . : ( , / _ and spaces, never inside a name
+\usepackage[obeyspaces,spaces]{url}
+\AtBeginDocument{%
+  \renewcommand{\UrlBreaks}{\do\.\do\:\do\(\do\,\do\/\do\_\do\|}%
+  \renewcommand{\UrlBigBreaks}{}%
+  \renewcommand{\UrlNoBreaks}{}%
+  \urlstyle{tt}}
+
+% Tables: boxed grid as in the proposal, smaller text
+\usepackage{etoolbox}
+\AtBeginEnvironment{longtable}{\footnotesize\renewcommand{\arraystretch}{1.2}}
+\setlength{\LTpre}{6pt}
+\setlength{\LTpost}{8pt}
+\setlength{\arrayrulewidth}{0.4pt}
+
+% Code blocks: long lines wrap; diagrams stay in one piece
+\usepackage{framed}
+\usepackage{fvextra}
+\RecustomVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\footnotesize, breaklines}
+\makeatletter
+\@ifundefined{Shaded}{}{\renewenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}}
+\@ifundefined{Highlighting}{}{\RecustomVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}, fontsize=\footnotesize, breaklines, breakanywhere}}
+\makeatother
+
+% Figures drawn with TikZ
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,calc,backgrounds,shapes.geometric}
+\tikzset{
+  ck/.style={font=\footnotesize, >={Stealth[length=5pt]}, line width=0.6pt},
+  box/.style={draw=ckline, fill=white, rounded corners=2pt, align=center, inner sep=4pt, minimum height=7mm},
+  mod/.style={box, fill=ckgrey},
+  this/.style={box, fill=cklight, draw=ckblue, line width=0.9pt},
+  group/.style={draw=ckline, dashed, rounded corners=3pt, inner sep=6pt},
+  lbl/.style={font=\scriptsize, align=center, inner sep=1.5pt},
+  msg/.style={->, draw=ckline},
+}
+\usepackage{caption}
+\captionsetup[figure]{font=small, labelfont=bf, skip=4pt}
+\newcommand{\ckfigure}[2]{\begin{figure}[htbp]\centering #1\caption{#2}\end{figure}}
+
+\usepackage{enumitem}
+\setlist{itemsep=1pt, topsep=3pt}
+\setlength{\parskip}{4pt}
+\setlength{\parindent}{0pt}
+\raggedbottom
+% ---- end of theme ----
+\newcommand{\ckmodule}{M1 Game Server and Rules}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+% fallback for those not using the hyperref driver hyperxmp:
+\makeatletter
+\@ifundefined{xmpquote}{\newcommand{\xmpquote}[1]{#1}}{}
+\makeatother
+\hypersetup{
+  pdftitle={M1 Game Server and Rules},
+  pdflang={en},
+  colorlinks=true,
+  linkcolor={black},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={black},
+  pdfcreator={LaTeX}}
+
+\title{M1 Game Server and Rules --- Module Documentation}
+\author{}
+\date{}
+
+
+% ---- colours and drawings ----
+\usepackage{colortbl}
+\usepackage{float}
+\makeatletter
+\newcommand{\needspace}[1]{\begingroup\setlength{\dimen@}{#1}\vskip\z@\@plus\dimen@\penalty -100\vskip\z@\@plus -\dimen@\vskip\dimen@\penalty 9999\vskip -\dimen@\vskip\z@skip\endgroup}
+\makeatother
+% ---- colours ----
+\definecolor{srv}{HTML}{2E6FB7}\colorlet{srvL}{srv!15}
+\definecolor{cli}{HTML}{2E9E5B}\colorlet{cliL}{cli!15}
+\definecolor{adm}{HTML}{E08A1E}\colorlet{admL}{adm!18}
+\definecolor{brd}{HTML}{7B4FB3}\colorlet{brdL}{brd!15}
+\definecolor{tcpc}{HTML}{1F5FA8}
+\definecolor{udpc}{HTML}{D9531E}
+\definecolor{obs}{HTML}{D7263D}
+\definecolor{tA}{HTML}{00A6D6}
+\definecolor{tB}{HTML}{3BB273}
+\definecolor{tC}{HTML}{F2C14E}
+\definecolor{tD}{HTML}{9B5DE5}
+
+% ---- styles ----
+\tikzset{
+  nb/.style={rounded corners=3pt, line width=0.9pt, align=center, inner sep=4pt, minimum height=9mm, font=\footnotesize},
+  sv/.style={nb, draw=srv, fill=srvL},
+  cl/.style={nb, draw=cli, fill=cliL},
+  ad/.style={nb, draw=adm, fill=admL},
+  bd/.style={nb, draw=brd, fill=brdL},
+  hwb/.style={nb, draw=black!50, fill=black!5},
+  tcpa/.style={draw=tcpc, line width=1.5pt},
+  udpa/.style={draw=udpc, line width=1.5pt, dash pattern=on 5pt off 2.5pt},
+  inna/.style={draw=black!55, line width=1pt},
+  al/.style={font=\scriptsize, fill=white, inner sep=1.2pt, rounded corners=1pt},
+  grp/.style={draw=black!35, dashed, rounded corners=5pt, inner sep=7pt},
+  glbl/.style={font=\scriptsize\bfseries, text=black!65},
+  hl/.style={line width=2.6pt},
+  st/.style={nb, rounded corners=8pt, minimum width=24mm},
+  co/.style={draw=black!60, line width=0.5pt},
+  cot/.style={font=\scriptsize, align=left, text=black!80},
+}
+
+% ---- system map; argument = module to highlight (M1 ... M8, or none) ----
+\newcommand{\systemmap}[1]{%
+\tikzset{M1/.style={},M2/.style={},M3/.style={},M4/.style={},M5/.style={},M6/.style={},M7/.style={},M8/.style={},none/.style={}}%
+\tikzset{#1/.style={hl}}%
+\begin{tikzpicture}[ck]
+\node[cl, M5, minimum width=27mm] (m5) at (0,3) {\textbf{M5}\\Player phones};
+\node[ad, M6, minimum width=27mm] (m6) at (0,0.4) {\textbf{M6}\\Admin panel};
+\node[sv, M2, minimum width=27mm, minimum height=38mm] (m2) at (4.6,1.7) {\textbf{M2}\\Network\\and sync};
+\node[sv, M1, minimum width=27mm, minimum height=38mm] (m1) at (8.4,1.7) {\textbf{M1}\\Game server\\and rules};
+\node[sv, M3, minimum width=25mm] (m3) at (12,2.8) {\textbf{M3}\\Physics};
+\node[sv, M4, minimum width=25mm] (m4) at (12,0.6) {\textbf{M4}\\Traffic and AI};
+\node[grp, fit=(m2)(m1)(m3)(m4)] (pc) {};
+\node[glbl, anchor=south west] at (pc.north west) {MAIN COMPUTER};
+\node[bd, M7, minimum width=27mm] (m7) at (4.6,-2.7) {\textbf{M7}\\ESP32 software};
+\node[bd, M8, minimum width=27mm] (m8) at (8.4,-2.7) {\textbf{M8}\\LED engine};
+\node[hwb, minimum width=25mm] (led) at (12,-2.7) {RGB LED\\strips};
+\node[hwb, minimum width=27mm] (sm) at (4.6,-4.4) {Sensor and\\4 motors};
+\node[grp, fit=(m7)(m8)(led)(sm)] (bb) {};
+\node[glbl, anchor=north east] at (bb.south east) {LED CITY BOARD};
+\draw[tcpa, <->] (m5.east) -- node[al]{WebSocket} (m5.east -| m2.west);
+\draw[tcpa, <->] (m6.east) -- node[al]{WebSocket} (m6.east -| m2.west);
+\draw[tcpa, <->] ([xshift=-6mm]m7.north) -- node[al]{TCP} ([xshift=-6mm]m2.south);
+\draw[udpa, <->] ([xshift=6mm]m7.north) -- node[al]{UDP} ([xshift=6mm]m2.south);
+\draw[inna, <->] (m2) -- (m1);
+\draw[inna, <->] (m1.east |- m3) -- (m3);
+\draw[inna, <->] (m1.east |- m4) -- (m4);
+\draw[inna, ->] (m7) -- node[al]{state} (m8);
+\draw[inna, ->] (m8) -- (led);
+\draw[inna, <->] (m7) -- (sm);
+\ckleg{-1.3,-6.0}{tcpa/TCP or WebSocket: every message arrives in order, udpa/UDP: fast and the newest message wins, inna/inside one program or chip}
+\end{tikzpicture}}
+
+% ---- LED board seen from above (6 x 6 roads, 1 unit = 10 cm) ----
+\newcommand{\boardbase}{%
+\fill[black!88, rounded corners=3pt] (-0.5,-0.5) rectangle (5.5,5.5);
+\foreach \i in {0,...,4}{\foreach \j in {0,...,4}{%
+  \fill[black!60] (\i+0.13,\j+0.13) rectangle (\i+0.87,\j+0.87);
+  \fill[black!22] (\i+0.24,\j+0.24) rectangle (\i+0.52,\j+0.52);
+  \fill[black!30] (\i+0.56,\j+0.30) rectangle (\i+0.78,\j+0.62);
+  \fill[black!38] (\i+0.28,\j+0.58) rectangle (\i+0.66,\j+0.78);}}
+\foreach \i in {0,...,5}{%
+  \draw[black, line width=4.5pt] (\i,-0.05) -- (\i,5.05);
+  \draw[black, line width=4.5pt] (-0.05,\i) -- (5.05,\i);}
+\foreach \i in {0,...,5}{\foreach \k in {0,...,30}{%
+  \fill[black!55] (\i,\k/6) circle (0.025);
+  \fill[black!55] (\k/6,\i) circle (0.025);}}
+\foreach \x/\y/\c in {0/4/tA, 4/4/tB, 0/0/tD, 4/0/tC}{%
+  \fill[\c!30!black!60] (\x+0.13,\y+0.13) rectangle (\x+0.87,\y+0.87);
+  \fill[\c] (\x+0.3,\y+0.3) rectangle (\x+0.7,\y+0.7);
+  \fill[white] (\x+0.4,\y+0.5) circle (0.05); \fill[white] (\x+0.6,\y+0.5) circle (0.05);}}
+\newcommand{\nmark}[3]{\node[circle, fill=yellow!85!orange, draw=black, line width=0.4pt, inner sep=0.6pt, minimum size=3.6mm, font=\tiny\bfseries] at (#1,#2) {#3};}
+\newcommand{\bike}[4]{%
+\fill[#3!35] ($(#1,#2)+(#4:0.40)$) circle (0.05);
+\fill[#3!65] ($(#1,#2)+(#4:0.21)$) circle (0.075);
+\fill[#3, draw=white, line width=0.4pt] (#1,#2) circle (0.12);}
+\newcommand{\dpoint}[3]{\draw[#3!50, line width=0.8pt] (#1,#2) circle (0.26); \draw[#3, line width=1.4pt] (#1,#2) circle (0.16); \fill[#3] (#1,#2) circle (0.07);}
+\newcommand{\heavy}[2]{\draw[obs!60!black, line width=4pt] (#1) -- (#2); \draw[obs, line width=4pt, dash pattern=on 3pt off 5pt] (#1) -- (#2);}
+\newcommand{\roadwork}[2]{\draw[obs, line width=4pt] (#1) -- (#2);}
+\newcommand{\accident}[2]{\draw[obs, line width=4pt, dash pattern=on 3pt off 3pt] (#1) -- (#2);}
+\newcommand{\puddle}[2]{\draw[cyan!55, line width=4pt] (#1) -- (#2); \draw[cyan!15, line width=1.6pt, dash pattern=on 1pt off 2.5pt] (#1) -- (#2);}
+\newcommand{\findme}[2]{\fill[white, opacity=0.25] (#1,#2) circle (0.36); \fill[white, opacity=0.5] (#1,#2) circle (0.24); \fill[white] (#1,#2) circle (0.13);}
+
+% ---- phone game screen (7 x 3.4 units) ----
+\newcommand{\phonemock}{%
+\fill[black!85, rounded corners=9pt] (-0.3,-0.3) rectangle (7.3,3.7);
+\fill[cyan!20] (0,1.7) rectangle (7,3.4);
+\fill[cli!14] (0,0) rectangle (7,1.7);
+\filldraw[fill=srv!30, draw=srv!70!black] (0.2,1.5) rectangle (1.0,3.0);
+\filldraw[fill=adm!35, draw=adm!70!black] (1.1,1.6) rectangle (1.8,2.4);
+\filldraw[fill=brd!30, draw=brd!70!black] (1.9,1.65) -- (2.6,1.65) -- (2.6,2.2) -- (2.25,2.5) -- (1.9,2.2) -- cycle;
+\filldraw[fill=adm!35, draw=adm!70!black] (4.5,1.65) rectangle (5.1,2.3);
+\filldraw[fill=srv!30, draw=srv!70!black] (5.2,1.55) rectangle (6.0,3.1);
+\filldraw[fill=cli!35, draw=cli!70!black] (6.1,1.6) rectangle (6.85,2.6);
+\fill[brown!60!black] (4.17,1.6) rectangle (4.23,1.8); \fill[cli!70!black] (4.2,1.95) circle (0.18);
+\fill[black!55] (1.8,0) -- (5.2,0) -- (3.75,1.7) -- (3.25,1.7) -- cycle;
+\draw[white, line width=0.8pt, dash pattern=on 4pt off 4pt] (3.5,0) -- (3.5,1.7);
+\filldraw[fill=black!15, draw=black!70] (3.62,1.12) rectangle (3.88,1.32);
+\fill[obs] (3.05,1.22) -- (3.15,1.48) -- (3.25,1.22) -- cycle;
+\fill[black!85] (3.43,0.08) rectangle (3.57,0.3);
+\fill[tA] (3.3,0.28) rectangle (3.7,0.6);
+\fill[brown!65] (3.34,0.6) rectangle (3.66,0.82);
+\fill[tA!60!black] (3.5,0.95) circle (0.13);
+\node[fill=black!70, text=white, rounded corners=2pt, font=\scriptsize\bfseries, inner sep=2pt] at (3.5,3.15) {2:41};
+\foreach \c/\s/\x in {tA/120/0.35,tB/95/0.95,tC/140/1.55,tD/80/2.15}
+  \node[fill=\c, text=white, font=\tiny\bfseries, rounded corners=1pt, inner sep=1.5pt, minimum width=5mm] at (\x,3.15) {\s};
+\fill[white, opacity=0.9] (6.45,2.85) circle (0.38); \draw[black!60] (6.45,2.85) circle (0.38);
+\draw[-{Stealth[length=5pt]}, line width=1.8pt, obs] (6.45,2.85) ++(230:0.2) -- ++(50:0.5);
+\fill[white, opacity=0.85] (0.55,0.5) circle (0.32); \fill[black!70] (0.43,0.5) -- (0.65,0.63) -- (0.65,0.37) -- cycle;
+\fill[white, opacity=0.85] (1.4,0.5) circle (0.32); \fill[black!70] (1.52,0.5) -- (1.3,0.63) -- (1.3,0.37) -- cycle;
+\node[fill=obs!80, text=white, rounded corners=3pt, font=\tiny\bfseries, minimum width=8mm, minimum height=6mm] at (5.6,0.5) {Brake};
+\node[fill=cli, text=white, rounded corners=3pt, font=\tiny\bfseries, minimum width=8mm, minimum height=8mm] at (6.5,0.6) {Gas};
+\node[fill=white, text=black, rounded corners=3pt, font=\tiny\bfseries, minimum width=9mm, minimum height=5mm] at (0.9,1.45) {Find me};}
+
+% ---- side cut of the board (14 units wide) ----
+\newcommand{\boardside}{%
+\fill[brown!20] (-0.6,-0.35) rectangle (14.6,0);
+\foreach \x/\h/\c in {1.0/0.7/black!18, 2.2/1.1/black!22, 4.6/1.9/black!25, 5.8/2.6/black!28, 7.4/2.2/black!25, 8.6/1.6/black!22, 10.9/1.0/black!18}
+  \filldraw[fill=\c, draw=black!45] (\x,1.5) rectangle (\x+0.9,1.5+\h);
+\filldraw[fill=tB!35, draw=tB!70!black] (12.4,1.5) rectangle (13.4,2.3);
+\fill[black!70, rounded corners=1pt] (0.5,0) rectangle (1.1,0.9);
+\fill[black!70, rounded corners=1pt] (12.9,0) rectangle (13.5,0.9);
+\filldraw[fill=brown!45, draw=brown!70!black] (0,0.9) rectangle (14,1.3);
+\fill[black!80] (0,1.3) rectangle (14,1.38);
+\foreach \x in {0.3,0.9,...,13.8} \fill[black!35] (\x,1.42) circle (0.06);
+\foreach \x/\c in {3.3/tA, 3.9/tA, 6.9/obs, 7.5/obs, 10.5/tC} \fill[\c] (\x,1.42) circle (0.07);
+\fill[white, opacity=0.55] (0,1.38) rectangle (14,1.52);
+\filldraw[fill=brd!40, draw=brd] (2.3,0.35) rectangle (4.3,0.85);
+\node[font=\tiny] at (3.3,0.6) {ESP32};
+\filldraw[fill=brd, draw=brd!60!black] (6.75,0.62) rectangle (7.25,0.88);
+\filldraw[fill=adm!60, draw=adm!70!black] (1.8,0.6) circle (0.24);
+\filldraw[fill=adm!60, draw=adm!70!black] (12.2,0.6) circle (0.24);
+\filldraw[fill=black!15, draw=black!50] (9.3,0.35) rectangle (10.9,0.85);
+\node[font=\tiny] at (10.1,0.6) {Power};}
+
+% ---- layout helpers ----
+\newenvironment{ckfig}{\begin{figure}[!htb]\centering}{\end{figure}}
+\renewcommand{\topfraction}{0.9}\renewcommand{\bottomfraction}{0.8}\renewcommand{\textfraction}{0.07}\renewcommand{\floatpagefraction}{0.85}
+\setcounter{topnumber}{3}\setcounter{bottomnumber}{2}\setcounter{totalnumber}{4}
+\newcommand{\msub}[1]{\par\needspace{5\baselineskip}\smallskip\noindent{\bfseries #1:}\par\nobreak\vspace{-2pt}}
+\tikzset{msga/.style={draw=cli!70!black, line width=0.8pt}, cmda/.style={draw=obs, line width=1pt}, loopa/.style={draw=srv, line width=1pt}, hwa/.style={draw=black!60, line width=1.2pt, dash pattern=on 1.5pt off 1.5pt}, wanta/.style={draw=cli, line width=1.6pt}, reala/.style={draw=obs, line width=1.6pt}, siga/.style={draw=srv, line width=0.8pt}, thra/.style={draw=obs, line width=0.9pt, dash pattern=on 4pt off 2pt}, evta/.style={draw=cli, line width=1pt}}
+\tikzset{iol/.style={font=\scriptsize, fill=white, inner sep=1.2pt, rounded corners=1pt, align=center}}
+% legend row: start point, list of style/text
+\newcommand{\ckleg}[2]{%
+\coordinate (lgp) at (#1);
+\foreach \ls/\lt in {#2}{%
+  \draw[\ls,->] (lgp) -- ++(0.8,0) node[right, font=\scriptsize, text=black] (lgt) {\lt};
+  \coordinate (lgp) at ([xshift=5mm]lgt.east);}}
+% purpose table: colour (unused), runs on, technology, requirements
+\newcommand{\ckinfo}[4]{\par\smallskip\noindent{\renewcommand{\arraystretch}{1.25}%
+\begin{tabular}{|L{0.30}|L{0.50}|L{0.20}|}\hline
+\textbf{Runs on} & \textbf{Technology} & \textbf{Requirements} \\ \hline
+#2 & #3 & #4 \\ \hline
+\end{tabular}}\par\smallskip}
+% module data map: n in, n out, centre text, centre style, inputs, outputs, legend list
+% inputs and outputs: {name}/style/{data}/arrow style
+\newcommand{\iomap}[7]{%
+\begin{tikzpicture}[ck]
+\pgfmathsetmacro{\nmax}{max(#1,#2)}
+\node[#4, line width=2pt, minimum width=30mm, minimum height=\nmax*10.5mm+2mm, font=\normalsize] (c) at (0,0) {#3};
+\foreach \nm/\st/\dd/\ar [count=\ii] in {#5}{%
+  \pgfmathsetmacro{\yy}{((#1+1)/2-\ii)*1.05}
+  \node[\st, minimum width=25mm, minimum height=8.5mm, font=\scriptsize] (in\ii) at (-6.6,\yy) {\nm};
+  \draw[\ar,->] (in\ii.east) -- node[iol]{\dd} (c.west |- in\ii);}
+\foreach \nm/\st/\dd/\ar [count=\ii] in {#6}{%
+  \pgfmathsetmacro{\yy}{((#2+1)/2-\ii)*1.05}
+  \node[\st, minimum width=25mm, minimum height=8.5mm, font=\scriptsize] (out\ii) at (6.6,\yy) {\nm};
+  \draw[\ar,->] (c.east |- out\ii) -- node[iol]{\dd} (out\ii.west);}
+\node[font=\scriptsize\bfseries, text=black!60] at (-6.6,\nmax*0.525+0.4) {Inputs come from};
+\node[font=\scriptsize\bfseries, text=black!60] at (6.6,\nmax*0.525+0.4) {Outputs go to};
+\ckleg{-7.6,-\nmax*0.525-0.5}{#7}
+\end{tikzpicture}}
+
+% keep an intro sentence and its table together on one page
+\newcommand{\ckkeep}[1]{\par\noindent\begin{minipage}{\linewidth}\setlength{\parskip}{4pt}#1\end{minipage}\par\smallskip}
+\widowpenalty=10000 \clubpenalty=10000
+
+\begin{document}
+
+\thispagestyle{ckfirst}
+\begin{center}
+{\bfseries GEBZE TECHNICAL UNIVERSITY\par}
+{Computer Engineering Department\par}
+{CSE 396 Module Documentation\par}
+\vspace{8pt}
+{\LARGE\bfseries Çılgın Kurye\par}
+\vspace{3pt}
+{\large\itshape Module M1: Game Server and Rules\par}
+\vspace{6pt}
+\textbf{Company:} Board\&Byte\hspace{1.4em}\textbf{Group:} Group-8\hspace{1.4em}\textbf{Date:} 6 November 2026
+\end{center}
+\begin{center}\footnotesize\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{0.27\linewidth}|p{0.15\linewidth}|p{0.27\linewidth}|p{0.15\linewidth}|}\hline
+\textbf{Name} & \textbf{Student No.} & \textbf{Name} & \textbf{Student No.} \\ \hline
+Tuğberk Akbulut & 230104004070 & Abdullatif Yılmaz & 230104004031 \\ \hline
+Berk Andaçgil & 230104004066 & Selim Barut & 220104004046 \\ \hline
+Umutcan Ocak & 220104004903 &  &  \\ \hline
+\end{tabular}
+\end{center}
+\vspace{2pt}
+
+
+
+% ---- table and list helpers ----
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{\dimexpr#1\linewidth-2\tabcolsep-\arrayrulewidth\relax}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{\dimexpr#1\linewidth-2\tabcolsep-\arrayrulewidth\relax}}
+\newcommand{\ckdone}{\item[$\boxtimes$]}
+\newcommand{\ckopen}{\item[$\square$]}
+\newcommand{\mdot}{$\bullet$}
+\newcounter{msec}
+\newcounter{chap}
+% ---- end of helpers ----
+\newcommand{\msection}[1]{\needspace{8\baselineskip}\stepcounter{msec}\section{\arabic{msec}. #1}}
+
+\msection{Purpose}
+
+M1 is the brain of the game. It runs on the main computer and it is the only part that can change
+the game. It keeps the game clock and the one true game state. It knows every team, store, package,
+delivery point, score, fall, obstacle and earthquake. Phones only send their buttons. M1 decides
+what happens, and then everybody sees the same result.
+
+\ckinfo{srv}{Main computer, in one server program together with M2, M3 and M4}{TypeScript on Node.js, a fixed step game loop with 30 ticks per second, seeded random numbers, JSON files for the city plan and the game log}{R1 R2 R4 R5 R6 R7 R9 R11}
+
+M1 has no network code. All its inputs and outputs are data in the memory of the server program. The
+figure shows which module gives M1 each kind of data and which module gets each result.
+
+\begin{ckfig}
+\iomap{6}{6}{\textbf{M1}\\Game server\\and rules}{sv}
+{{M2, from phones}/cl/{controls, joins,\\``Find me''}/inna, {M2, from admin}/ad/{commands,\\parameters}/inna, {M2, from board}/bd/{earthquake\\events}/inna, {M4 Traffic}/sv/{NPC cars, bot controls,\\travel times}/inna, {M3 Physics}/sv/{poses, collisions,\\falls}/inna, {City plan file}/hwb/{roads, stores,\\delivery points}/inna}
+{{M2, to phones}/cl/{game state\\30 per second}/inna, {M2, to admin}/ad/{state, metrics,\\replies}/inna, {M2, to board}/bd/{board state,\\vibrate}/inna, {M3 Physics}/sv/{controls, obstacles,\\earthquake}/inna, {M4 Traffic}/sv/{players, obstacles,\\parameters}/inna, {Disk}/hwb/{game log}/inna}
+{inna/data in the memory of the server program}
+\end{ckfig}
+
+\msection{Requirements covered}
+
+\ckkeep{%
+M1 takes part in eight of the eleven system requirements. The last column says what will work when
+M1 is finished.
+
+\begin{tabular}{|L{0.06}|L{0.15}|L{0.40}|L{0.39}|}
+\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M1 does for it} & \textbf{When M1 is done} \\ \hline 
+R1 & Multiplayer game & Lobby with 4 teams and at most 2 players in a team. Bots fill the empty places. A game is at most 5 minutes. & A full game runs from the lobby to the winner, with humans and bots together \\ \hline
+R2 & Delivery cycle & Automatic pickup at the store. Picks a delivery point by travel time, with a near or far chance per player & Every player always has a package or a point to go to, and points are fair \\ \hline
+R4 & Collisions and falls & Gives a penalty time after every fall that M3 reports & A fallen player waits and then rides on with the package \\ \hline
+R5 & No map on the phone & Puts the compass target and the ``Find me'' waiting time into the game state & The phone can show the arrow and the button without a map \\ \hline
+R6 & Obstacles & Keeps the one obstacle list that M3, M4, M5 and M8 use. Adds random obstacles during the game and removes each obstacle when its time ends & A new or ended obstacle, automatic or from the admin, is seen everywhere in the same tick \\ \hline
+R7 & Earthquake & One path for a hand hit, the motors and the admin button. Road work and falls inside the radius & A hit on the board changes the game for everybody \\ \hline
+R9 & Live admin panel & Checks admin commands and sends each parameter to the module that uses it & Every parameter can be changed during the game \\ \hline
+R11 & Engineering requirements & Only M1 changes the game state. Every game can be played again from the log & The same log always gives the same game \\ \hline
+\end{tabular}}
+
+\msection{Inputs and outputs}
+
+\ckkeep{%
+The table gives the content of each input and output. Value ranges are shown only for the main
+control values.
+
+\begin{tabular}{|L{0.11}|L{0.17}|L{0.18}|L{0.54}|}
+\hline \textbf{Direction} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline 
+In & Controls & M2, from phones & Throttle and brake from 0 to 1, steer from −1 to 1, a control number. ``Find me'' comes as an event \\ \hline
+In & Join & M2, from phones & Player key, name, team. M2 also reports when a player is lost or comes back \\ \hline
+In & Admin commands & M2, from admin & Parameter changes, start, pause, resume, end, reset, new game code, obstacles, earthquake \\ \hline
+In & Board events & M2, from board & Source (hand or motors), strength from 0 to 10, zone, confidence \\ \hline
+In & Traffic & M4 & NPC cars, bot controls, travel time table \\ \hline
+In & Physics & M3 & New motorcycle poses, collision and fall events \\ \hline
+Out & Game state & M2, to phones and admin & Every tick: phase, time, scores, players, NPC cars, obstacles, earthquake. For each player also the compass target, the ``Find me'' waiting time and the number of the last control that M1 used \\ \hline
+Out & Board state & M2, to board & Phase, players, delivery points, obstacles and earthquake in board coordinates \\ \hline
+Out & Metrics & M2, to admin & Twice per second: the values of all admin graphs \\ \hline
+Out & Game log & Disk & The seed and, for every tick, the controls, admin commands and board events \\ \hline
+\end{tabular}}
+
+\msection{Main components}
+
+\ckkeep{%
+M1 is made of seven parts. Each part takes some data and gives a result to the next part or to
+another module.
+
+\begin{tabular}{|L{0.21}|L{0.39}|L{0.40}|}
+\hline \textbf{Component} & \textbf{Takes} & \textbf{Gives} \\ \hline 
+Game loop & The clock & Runs the steps of a tick in a fixed order, 30 times per second \\ \hline
+Match and lobby & Joins, lost players, admin start and pause & Game phase, teams, bots in empty places \\ \hline
+Delivery and scoring & Poses, travel times & Packages, delivery points, automatic deliveries, points \\ \hline
+Penalties & Fall events from M3 & Penalty time, then a stand up request to M3 \\ \hline
+Obstacles and earthquake & Obstacle parameters, admin obstacles, board events & The obstacle list with end times, earthquake centre and radius \\ \hline
+Admin and parameters & Admin commands & Checked values sent to the owner module, ok or error replies \\ \hline
+State builder and recorder & The world after the tick & Frozen game state, board state, metrics with a short history, the game log \\ \hline
+\end{tabular}}
+
+\msection{How it works}
+
+\msub{What a tick is}
+The game world does not change all the time. It changes in small steps, like the pictures of a film.
+One step is called a tick, and the server makes 30 ticks in one second. Between two ticks, M2 only
+collects the messages from the phones, the admin and the board. In a tick, M1 uses all of them
+together, moves the world one step forward and makes a new state. Then M2 sends this state to
+everybody. So every player sees the same world after every tick.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck]
+\draw[black!45, ->, line width=0.8pt] (-0.3,0) -- (14.6,0) node[right, font=\scriptsize]{time};
+\foreach \x/\l in {1.2/1, 5.8/2, 10.4/3}{%
+  \node[sv, minimum width=17mm, minimum height=8mm, font=\scriptsize] (t\l) at (\x,0) {Tick \l};
+  \draw[inna, ->] (t\l.north) -- ++(0,0.8) node[above, font=\scriptsize, align=center]{new state\\to M2};}
+\foreach \qa/\qb/\n in {2.3/4.3/2, 6.9/8.9/3}{%
+  \node[nb, draw=cli, fill=cliL, minimum width=20mm, minimum height=7mm, font=\scriptsize] (q\n) at ({(\qa+\qb)/2},-1.5) {};
+  \foreach \k in {0,1,2} \fill[cli] ({\qa+0.45+\k*0.55},-1.5) circle (0.09);
+  \node[font=\scriptsize, text=cli!70!black] at ({(\qa+\qb)/2},-2.15) {messages wait in the queue};
+  \draw[msga, ->] (q\n.east) -| (t\n.south);}
+\draw[srv, <->, line width=0.9pt] (1.2,2.25) -- node[iol]{one tick: one thirtieth of a second} (5.8,2.25);
+\ckleg{0,-2.85}{inna/new state after each tick, msga/{messages from phones, admin and board}}
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{The steps of one tick}
+A tick always runs the same eight steps in the same order. First M1 takes the inputs that M2 has
+collected. Then it applies admin commands and board events, updates the game phase, asks M4 for
+traffic and bot controls, and asks M3 to move all motorcycles. After that the game rules run. At the
+end M1 builds a frozen copy of the state for M2 and writes one line to the game log. Because the order
+never changes and all random numbers come from one seed, the same inputs always give the same game.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck, node distance=3.5mm]
+\node[cl, minimum width=17mm] (a) {Inputs};
+\node[ad, minimum width=17mm, right=of a] (b) {Admin and\\board events};
+\node[sv, minimum width=17mm, right=of b] (c) {Game\\phase};
+\node[sv, minimum width=17mm, right=of c, fill=tB!20, draw=tB!80!black] (d) {Traffic\\M4};
+\node[sv, minimum width=17mm, right=of d, fill=tD!18, draw=tD!80!black] (e) {Physics\\M3};
+\node[sv, minimum width=17mm, right=of e, fill=obs!12, draw=obs] (f) {Rules};
+\node[sv, minimum width=17mm, right=of f] (g) {Frozen\\state};
+\node[hwb, minimum width=17mm, right=of g] (h) {Log};
+\foreach \u/\v in {a/b,b/c,c/d,d/e,e/f,f/g,g/h} \draw[inna,->] (\u) -- (\v);
+\draw[inna,->, srv] (h.south) -- ++(0,-0.6) -| node[al, pos=0.25]{next tick} (a.south);
+\ckleg{0,-1.6}{inna/order of the steps, loopa/start of the next tick}
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Controls inside a tick}
+A phone sends its controls on every change and at least 10 times per second, but there are 30 ticks
+per second. So in some ticks a new control comes and in some ticks nothing comes. If nothing comes,
+M1 keeps the last control of that player. If more than one control comes, M1 uses the newest one for
+throttle, brake and steer. ``Find me'' is different. It is an event, not a value. If any message in
+the tick has a ``Find me'' press, the press counts, even when a newer message has no press. So a
+button press is never lost.
+
+\msub{Game flow}
+A game has five phases. In the lobby players join and choose a team. When the admin presses start, a
+3 second countdown begins and nobody can move. Then the game runs for at most 5 minutes. The admin can
+end the game early. The admin can also pause and resume at any time. During a pause everything stops:
+the game time, the penalty times, the waiting time for lost players and the NPC cars. A pause during
+the countdown starts the countdown again after the resume. When the time ends, the team with the most
+points wins. If two teams have the same points, the game ends in a draw between them.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck]
+\node[st, draw=cli, fill=cliL] (l) at (0,0) {Lobby};
+\node[st, draw=adm, fill=admL] (c) at (3.6,0) {Countdown};
+\node[st, draw=srv, fill=srvL, line width=1.4pt] (r) at (7.2,0) {Running};
+\node[st, draw=brd, fill=brdL] (f) at (11.2,0) {Finished};
+\node[st, draw=black!50, fill=black!6] (p) at (5.4,-2.0) {Paused};
+\draw[inna,->] (l) -- node[al]{start} (c);
+\draw[inna,->] (c) -- node[al]{3 s} (r);
+\draw[inna,->] ([yshift=1.5mm]r.east) -- node[al, above=1pt]{time over} ([yshift=1.5mm]f.west);
+\draw[inna,->, obs] ([yshift=-1.5mm]r.east) -- node[al, below=1pt]{admin end} ([yshift=-1.5mm]f.west);
+\draw[inna,->] ([xshift=-6mm]r.south) |- node[al, pos=0.3]{pause} ([yshift=1.5mm]p.east);
+\draw[inna,->] ([yshift=-1.5mm]p.east) -| node[al, pos=0.7]{resume} ([xshift=6mm]r.south);
+\draw[inna,->] (c.south) |- node[al, pos=0.3]{pause} (p.west);
+\draw[inna,->] (f.north) -- ++(0,0.6) -| node[al, pos=0.25]{new game} (l.north);
+\ckleg{0.2,-3.0}{inna/phase change, cmda/admin command}
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Players who leave and come back}
+M2 sees when the link of a phone is lost and tells M1. M1 keeps the place of this player for 30
+seconds. If the player does not come back in this time, a bot takes the motorcycle and plays on. If
+the player comes back later with the same player key, the bot gives the motorcycle back. The admin
+sets how many bots fill the empty places at the start.
+
+\msub{Deliveries and points}
+A player gets a package automatically when the motorcycle is inside the area of the own team's store.
+M1 then picks a delivery point for this player. M4 gives a table with the travel time from the store
+to every possible point. The times count the obstacles that are on the roads at that moment. The
+admin sets for each player whether the new delivery point appears near the store or far from it, and
+M1 picks the point with this setting. Two players never get the same point at
+the same time. A far point gives more points. Every delivery gets a base value, and the longer the
+expected travel time is, the bigger the bonus on top of it. The admin sets both the base value and
+the bonus. The points are fixed when the point is chosen, so a new obstacle
+later does not change them.
+
+There is no delivery button. When the player comes to the delivery point and stops inside its area,
+M1 delivers the package automatically and adds the points. The size of the area is an admin
+parameter. A fall does not lose the package. The player only waits for the penalty time.
+
+\begin{ckfig}
+\begin{tikzpicture}[x=1.1cm, y=1.1cm]
+\boardbase
+\draw[tA, line width=2.4pt, rounded corners=3pt, opacity=0.9] (1,4) -- (1,3) -- (2,3) -- (2,2) -- (2.5,2);
+\dpoint{2.5}{2}{tA}
+\draw[tA!45, line width=1pt, dashed] (4,1.5) circle (0.18);
+\bike{1}{3.5}{tA}{90}
+\bike{3.5}{4}{tB}{0}
+\bike{4}{2.5}{tC}{-90}
+\bike{1.5}{1}{tD}{180}
+\roadwork{3,2}{3,3}
+\nmark{0.5}{5.2}{1}\nmark{0.55}{3.5}{2}\nmark{1.5}{2.7}{3}\nmark{2.5}{2.5}{4}\nmark{4.45}{1.5}{5}\nmark{3.35}{2.5}{6}
+\node[anchor=west, font=\small, align=left] at (6.0,2.5) {\begin{tabular}{@{}c@{\ \ }l@{}}
+\textbf{1} & Team store in the team colour\\[3pt]
+\textbf{2} & Player with a package,\\ & a dot with a tail\\[3pt]
+\textbf{3} & Fastest route found by M4\\[3pt]
+\textbf{4} & Near delivery point,\\ & blinks in the player's colour\\[3pt]
+\textbf{5} & A far point, worth more points\\[3pt]
+\textbf{6} & Road work, so the route\\ & goes around\end{tabular}};
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Earthquakes}
+An earthquake can come from a hand hit on the board, from the vibration motors or from the admin
+button. All of them take the same path in M1. The board sends a strength from 0 to 10 and one of
+9 zones. M1 uses the centre of that zone as the centre of the earthquake. A stronger hit makes a
+bigger earthquake. Motorcycles near the centre fall, and the roads near the centre close with road
+work for a limited time.
+
+\msub{Obstacles}
+M1 keeps one list of obstacles. Each obstacle has a type, a road segment, a lane, a position and an end
+time. During the game M1 adds new obstacles by itself at random places. The admin sets for each of the
+four types how often it appears and how long it stays. A new obstacle never appears right next to a
+player or right in front of one, so nobody falls without a chance to react. Obstacles from the admin
+and the road work from an earthquake also have a duration. When the time of an obstacle ends, M1
+removes it from the list. While the game is paused, no new obstacle appears and the times stop. When
+the list changes, M4 computes the routes again, and M5 and M8 show the change.
+
+\msub{Admin parameters}
+Every parameter has a name, a group, a minimum, a maximum and an owner module. When the admin changes a value, M1 checks the limits first.
+Then it saves the value, sends it to the owner (for example grip to M3) and sends ``ok'' back to the
+panel. A wrong value gets an error and the old value stays.
+
+\msection{Testing}
+
+M1 is tested alone, without the network and without the real M2, M3 and M4. Small fake parts take
+their place inside the test and give fixed test data: scripted controls and joins, fixed poses and fall
+events, a fixed travel time table and recorded admin commands and board events. With this data we
+check every rule: the game phases with pause and end, the lobby and the bots, a lost player who comes
+back, the delivery cycle and the fair choice of points, two ``Find me'' presses in one tick, every
+admin command with good and wrong values, the earthquake radius, and the automatic obstacles with
+their rates, durations, distance to the players and the stop during a pause. Because all random numbers come
+from one seed, the same test data must always give exactly the same game state.
+
+\end{document}

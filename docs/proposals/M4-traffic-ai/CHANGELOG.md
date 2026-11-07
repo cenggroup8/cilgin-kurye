@@ -2,12 +2,19 @@
 
 Members: Hasan Alperen Elmas, Batuhan Yanar, Muhib Taha Boy
 
-## v1.0 — 5 November 2026
+## v1.1 — 7 November 2026
+
+Routes are computed again when an obstacle appears or ends, because obstacles now come and go
+during the game.
+
+Approved by: the team (issue #10)
+
+## v1.0 — 6 November 2026
 
 Version for submission: purpose, requirements covered, inputs and outputs, main components,
 how it works, testing and demonstration, with drawings of the planned board and screens.
 
-Approved by: — (in review in issue #10)
+Approved by: the team (issue #10)
 
 ## v0.1 — 1 November 2026
 

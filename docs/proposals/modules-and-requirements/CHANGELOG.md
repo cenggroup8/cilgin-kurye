@@ -1,5 +1,12 @@
 # Modules and requirements (all modules in one document) — changelog
 
+## v1.1 — 7 November 2026
+
+Timed and automatic obstacles in R6 and in M1, M4, M5, M6 and M8. Page layout: headings,
+tables and figures are no longer split across pages.
+
+Approved by: the team (issue #1)
+
 ## v1.0 — 6 November 2026
 
 Version for submission. Project overview, system architecture, system requirements R1–R11,

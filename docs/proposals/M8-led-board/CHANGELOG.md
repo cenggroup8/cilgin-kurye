@@ -2,6 +2,12 @@
 
 Members: Ayşe Poyraz, Hasan Hüseyin Özdemir, Muhib Taha Boy, Umutcan Ocak
 
+## v1.1 — 7 November 2026
+
+The road work after an earthquake stays on the board until M1 removes it from the obstacle list.
+
+Approved by: the team (issue #14)
+
 ## v1.0 — 6 November 2026
 
 Version for submission: purpose, requirements covered, inputs and outputs, main components,

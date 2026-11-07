@@ -359,7 +359,6 @@
 
 % keep an intro sentence and its table together on one page
 \newcommand{\ckkeep}[1]{\par\noindent\begin{minipage}{\linewidth}\setlength{\parskip}{4pt}#1\end{minipage}\par\smallskip}
-\widowpenalty=10000 \clubpenalty=10000
 
 \begin{document}
 
@@ -469,7 +468,7 @@ segments, and cars can drive both ways. Each segment has a cost: the expected ti
 Turning left or making a U turn adds a small extra cost. Obstacles change the costs. Heavy traffic
 and an accident make a segment slower, and road work closes it. M4 uses Dijkstra's shortest path
 search to find the fastest routes. The graph is small, so one search is very fast. M4 computes the
-routes again whenever a cost changes: when an obstacle appears or ends, when the
+routes again whenever a cost changes: when the obstacle list changes, when the
 traffic on a road gets much heavier or lighter, or when the admin changes a route parameter. From the results it makes the travel time table: the time from each of the four stores to
 every possible delivery point. M1 uses this table to choose fair near and far points.
 

@@ -37,9 +37,9 @@ The table lists the requirements of the whole system. The last column shows the 
 | R1 | Multiplayer game | At most 8 players in 4 teams (at most 2 per team). A game lasts at most 5 minutes. AI bots fill empty places. The team with the most delivery points wins. | M1 M2 M4 M5 |
 | R2 | Delivery cycle | The player takes a package from the store. The server chooses a delivery point by travel time with the current obstacles. The point blinks on the board in the player's colour. The player delivers and returns to the store. The near / far chance is set per player by the admin. | M1 M4 M5 M8 |
 | R3 | Driving and controls | Free driving, lane changes and passing obstacles. No reverse, U turn by steering. Throttle, brake, left and right buttons on the phone. | M3 M5 |
-| R4 | Collisions, falls, traffic | In a fast collision both players fall and wait a short penalty. NPC cars create real traffic. Hitting a car, a building or an obstacle fast makes the player fall. Penalty time and traffic density are admin parameters. | M1 M3 M4 |
+| R4 | Collisions, falls, traffic | In a fast collision both players fall and wait a short penalty. NPC cars create real traffic. Hitting a car, a building or an obstacle fast makes the player fall. Penalty time and traffic / obstacle density are admin parameters. | M1 M3 M4 |
 | R5 | No map on the phone | The phone shows only a compass arrow to the delivery point (or back to the store). No distance and no roads. Players must look at the board. “Find me” lights the player's LED white for 1 s. | M1 M5 M8 |
-| R6 | Obstacles | Four types: heavy traffic, road work, accident, water puddle. On the board red always means “this road slows you down” and the pattern shows the type. A water puddle is light blue. Obstacles appear by themselves at random places during the game, never right next to a player, and each one ends after a set time. The admin can also add obstacles and can change the effect, the rate and the duration of each type. | M1 M3 M4 M6 M8 |
+| R6 | Obstacles | Four types: heavy traffic, road work, accident, water puddle. On the board red always means “this road slows you down” and the pattern shows the type. A water puddle is light blue. The admin can change the effect of each type. | M1 M3 M4 M6 M8 |
 | R7 | Earthquake mode | Starts by hitting the board by hand or with the admin button (vibration motors under the board). The sensor measures strength and approximate area. In the game the camera shakes, motorcycles fall and roads near the centre close. A shock wave spreads on the board. The strength is an admin parameter. | M1 M3 M5 M6 M7 M8 |
 | R8 | Physical LED board | 60 × 60 cm, 6 roads in each direction (5 × 5 blocks), programmable addressable RGB LED strips on all roads, 3D printed buildings, four team stores in the corners with LEDs in the team colour. The ESP32 connects over Wi-Fi. The 3D city and the board are built from the same city plan. | M5 M7 M8 |
 | R9 | Live admin panel | All parameters are changed during the game. The admin sees the change in three places: 3D simulation, LED board and live graphs. | M1 M2 M6 |
@@ -99,7 +99,7 @@ M1 takes part in eight of the eleven system requirements. The last column says w
 | R2 | Delivery cycle | Automatic pickup at the store. Picks a delivery point by travel time, with a near or far chance per player | Every player always has a package or a point to go to, and points are fair |
 | R4 | Collisions and falls | Gives a penalty time after every fall that M3 reports | A fallen player waits and then rides on with the package |
 | R5 | No map on the phone | Puts the compass target and the “Find me” waiting time into the game state | The phone can show the arrow and the button without a map |
-| R6 | Obstacles | Keeps the one obstacle list that M3, M4, M5 and M8 use. Adds random obstacles during the game and removes each obstacle when its time ends | A new or ended obstacle, automatic or from the admin, is seen everywhere in the same tick |
+| R6 | Obstacles | Keeps the one obstacle list that M3, M4, M5 and M8 use | An obstacle from the admin is seen everywhere in the same tick |
 | R7 | Earthquake | One path for a hand hit, the motors and the admin button. Road work and falls inside the radius | A hit on the board changes the game for everybody |
 | R9 | Live admin panel | Checks admin commands and sends each parameter to the module that uses it | Every parameter can be changed during the game |
 | R11 | Engineering requirements | Only M1 changes the game state. Every game can be played again from the log | The same log always gives the same game |
@@ -131,7 +131,7 @@ M1 is made of seven parts. Each part takes some data and gives a result to the n
 | Match and lobby | Joins, lost players, admin start and pause | Game phase, teams, bots in empty places |
 | Delivery and scoring | Poses, travel times | Packages, delivery points, automatic deliveries, points |
 | Penalties | Fall events from M3 | Penalty time, then a stand up request to M3 |
-| Obstacles and earthquake | Obstacle parameters, admin obstacles, board events | The obstacle list with end times, earthquake centre and radius |
+| Obstacles and earthquake | Admin obstacles, board events | The obstacle list, earthquake centre and radius |
 | Admin and parameters | Admin commands | Checked values sent to the owner module, ok or error replies |
 | State builder and recorder | The world after the tick | Frozen game state, board state, metrics with a short history, the game log |
 
@@ -165,11 +165,11 @@ There is no delivery button. When the player comes to the delivery point and sto
 
 **Earthquakes:**
 
-An earthquake can come from a hand hit on the board, from the vibration motors or from the admin button. All of them take the same path in M1. The board sends a strength from 0 to 10 and one of 9 zones. M1 uses the centre of that zone as the centre of the earthquake. A stronger hit makes a bigger earthquake. Motorcycles near the centre fall, and the roads near the centre close with road work for a limited time.
+An earthquake can come from a hand hit on the board, from the vibration motors or from the admin button. All of them take the same path in M1. The board sends a strength from 0 to 10 and one of 9 zones. M1 uses the centre of that zone as the centre of the earthquake. A stronger hit makes a bigger earthquake. Motorcycles near the centre fall, and the roads near the centre close with road work.
 
 **Obstacles:**
 
-M1 keeps one list of obstacles. Each obstacle has a type, a road segment, a lane, a position and an end time. During the game M1 adds new obstacles by itself at random places. The admin sets for each of the four types how often it appears and how long it stays. A new obstacle never appears right next to a player or right in front of one, so nobody falls without a chance to react. Obstacles from the admin and the road work from an earthquake also have a duration. When the time of an obstacle ends, M1 removes it from the list. While the game is paused, no new obstacle appears and the times stop. When the list changes, M4 computes the routes again, and M5 and M8 show the change.
+M1 keeps one list of obstacles. Each obstacle has a type, a road segment, a lane and a position. When the list changes, M4 computes the routes again, and M5 and M8 draw the new obstacles.
 
 **Admin parameters:**
 
@@ -177,7 +177,7 @@ Every parameter has a name, a group, a minimum, a maximum and an owner module. W
 
 ### 5.6. Testing
 
-M1 is tested alone, without the network and without the real M2, M3 and M4. Small fake parts take their place inside the test and give fixed test data: scripted controls and joins, fixed poses and fall events, a fixed travel time table and recorded admin commands and board events. With this data we check every rule: the game phases with pause and end, the lobby and the bots, a lost player who comes back, the delivery cycle and the fair choice of points, two “Find me” presses in one tick, every admin command with good and wrong values, the earthquake radius, and the automatic obstacles with their rates, durations, distance to the players and the stop during a pause. Because all random numbers come from one seed, the same test data must always give exactly the same game state.
+M1 is tested alone, without the network and without the real M2, M3 and M4. Small fake parts take their place inside the test and give fixed test data: scripted controls and joins, fixed poses and fall events, a fixed travel time table and recorded admin commands and board events. With this data we check every rule: the game phases with pause and end, the lobby and the bots, a lost player who comes back, the delivery cycle and the fair choice of points, two “Find me” presses in one tick, every admin command with good and wrong values, and the earthquake radius. Because all random numbers come from one seed, the same test data must always give exactly the same game state.
 
 ## 6. M2 Network and Synchronization
 
@@ -403,7 +403,7 @@ M4 has five parts. The route planner is used by both the NPC cars and the bots.
 
 **The road graph and routes:**
 
-The city has 6 roads in each direction. Where two roads cross, there is an intersection, so the graph has 36 intersections. Between them there are 60 road segments, and cars can drive both ways. Each segment has a cost: the expected time to drive it. Turning left or making a U turn adds a small extra cost. Obstacles change the costs. Heavy traffic and an accident make a segment slower, and road work closes it. M4 uses Dijkstra's shortest path search to find the fastest routes. The graph is small, so one search is very fast. M4 computes the routes again whenever a cost changes: when an obstacle appears or ends, when the traffic on a road gets much heavier or lighter, or when the admin changes a route parameter. From the results it makes the travel time table: the time from each of the four stores to every possible delivery point. M1 uses this table to choose fair near and far points.
+The city has 6 roads in each direction. Where two roads cross, there is an intersection, so the graph has 36 intersections. Between them there are 60 road segments, and cars can drive both ways. Each segment has a cost: the expected time to drive it. Turning left or making a U turn adds a small extra cost. Obstacles change the costs. Heavy traffic and an accident make a segment slower, and road work closes it. M4 uses Dijkstra's shortest path search to find the fastest routes. The graph is small, so one search is very fast. M4 computes the routes again whenever a cost changes: when the obstacle list changes, when the traffic on a road gets much heavier or lighter, or when the admin changes a route parameter. From the results it makes the travel time table: the time from each of the four stores to every possible delivery point. M1 uses this table to choose fair near and far points.
 
 **NPC traffic:**
 
@@ -492,7 +492,7 @@ The city is built from the same city plan as the LED board: 6 roads in each dire
 
 **Obstacles and falls in the 3D city:**
 
-Obstacles from the game state are drawn on their road: cones and a barrier for road work, crashed cars for an accident, slow cars for heavy traffic and a wet patch for a water puddle. Obstacles come and go during the game, and each change is seen in the 3D city in the same tick as on the board. A fallen motorcycle lies on the road, and the page shows a penalty countdown until M1 lets it stand up again.
+Obstacles from the game state are drawn on their road: cones and a barrier for road work, crashed cars for an accident, slow cars for heavy traffic and a wet patch for a water puddle. So a change by the admin is seen in the 3D city in the same tick as on the board. A fallen motorcycle lies on the road, and the page shows a penalty countdown until M1 lets it stand up again.
 
 ### 9.6. Testing
 
@@ -518,7 +518,7 @@ M6 takes part in five requirements. The last column says what will work when M6 
 
 | **ID** | **Requirement** | **What M6 does for it** | **When M6 is done** |
 |---|---|---|---|
-| R6 | Obstacles | Map tools: a brush for each obstacle type, an eraser, a tool to close a road, an obstacle in front of a player, and the traffic density. Parameters for how often each obstacle type appears and how long it stays | The admin can put any obstacle on any road during the game and can change the rate and the duration of each type |
+| R6 | Obstacles | Map tools: a brush for each obstacle type, an eraser, a tool to close a road, an obstacle in front of a player, and the traffic density | The admin can put any obstacle on any road during the game |
 | R7 | Earthquake | An earthquake panel with a strength control and a live seismic graph of the board sensor | The admin can start an earthquake and compare it with a hand hit |
 | R9 | Live admin panel | A form for every parameter group, and graphs with a mark for every change | Every change and its effect are seen on one page |
 | R10 | Network and measurement | Ping, jitter, loss and frame rate graphs, and the network settings for each player and the board | The admin can make the network worse and measure the result |
@@ -557,7 +557,7 @@ The figure below shows the planned layout. The top bar shows the game phase, the
 
 **Parameters:**
 
-The parameters are in groups: game, obstacles, players, physics, earthquake, network (one set for each player) and board link. When the page opens, it asks M1 for all parameters with their limits and builds the forms from this list, so a new parameter needs no new page code. The obstacles group has two values for each of the four types: how often it appears by itself and how long it stays.
+The parameters are in groups: game, obstacles, players, physics, earthquake, network (one set for each player) and board link. When the page opens, it asks M1 for all parameters with their limits and builds the forms from this list, so a new parameter needs no new page code.
 
 **Network settings:**
 
@@ -569,7 +569,7 @@ The main goal of the panel is to show the effect of a change. So every change pu
 
 **Adding an obstacle:**
 
-The admin first chooses a tool, for example the road work brush. Then the admin clicks on a road on the live map. The map manager finds the nearest road segment, the lane and the position on it with the numbering of the city plan. The communication manager sends an “add obstacle” command with the type, road, lane and position. M1 checks that the road exists. Then it adds the obstacle to the list. In the next tick the obstacle is in the game state, so the map, the phones and the board show it at the same time. It stays for the duration of its type, and then M1 removes it. The eraser removes it earlier with a “remove obstacle” command. “Close road” puts road work on a whole segment, and “in front of a player” puts the chosen obstacle a little ahead of that player's motorcycle.
+The admin first chooses a tool, for example the road work brush. Then the admin clicks on a road on the live map. The map manager finds the nearest road segment, the lane and the position on it with the numbering of the city plan. The communication manager sends an “add obstacle” command with the type, road, lane and position. M1 checks that the road exists. Then it adds the obstacle to the list. In the next tick the obstacle is in the game state, so the map, the phones and the board show it at the same time. The eraser sends a “remove obstacle” command in the same way. “Close road” puts road work on a whole segment, and “in front of a player” puts the chosen obstacle a little ahead of that player's motorcycle.
 
 **Earthquake:**
 
@@ -751,7 +751,7 @@ In the lobby the roads are dark and the four stores glow in the team colours. In
 
 **Earthquake:**
 
-When an earthquake starts, a ring of light grows from the centre of the earthquake over the whole board, like a wave on water, and slowly fades. The road work after an earthquake is not a decision of M8. M1 puts it into the obstacle list, and M8 only draws it like any other obstacle until M1 removes it from the list.
+When an earthquake starts, a ring of light grows from the centre of the earthquake over the whole board, like a wave on water, and slowly fades. The road work after an earthquake is not a decision of M8. M1 puts it into the obstacle list, and M8 only draws it like any other obstacle.
 
 ### 12.6. Testing
 

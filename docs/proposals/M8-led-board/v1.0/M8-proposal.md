@@ -80,7 +80,7 @@ In the lobby the roads are dark and the four stores glow in the team colours. In
 
 **Earthquake:**
 
-When an earthquake starts, a ring of light grows from the centre of the earthquake over the whole board, like a wave on water, and slowly fades. The road work after an earthquake is not a decision of M8. M1 puts it into the obstacle list, and M8 only draws it like any other obstacle until M1 removes it from the list.
+When an earthquake starts, a ring of light grows from the centre of the earthquake over the whole board, like a wave on water, and slowly fades. The road work after an earthquake is not a decision of M8. M1 puts it into the obstacle list, and M8 only draws it like any other obstacle.
 
 ## 6. Testing
 

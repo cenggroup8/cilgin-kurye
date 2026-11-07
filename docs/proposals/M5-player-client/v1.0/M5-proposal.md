@@ -77,7 +77,7 @@ The city is built from the same city plan as the LED board: 6 roads in each dire
 
 **Obstacles and falls in the 3D city:**
 
-Obstacles from the game state are drawn on their road: cones and a barrier for road work, crashed cars for an accident, slow cars for heavy traffic and a wet patch for a water puddle. Obstacles come and go during the game, and each change is seen in the 3D city in the same tick as on the board. A fallen motorcycle lies on the road, and the page shows a penalty countdown until M1 lets it stand up again.
+Obstacles from the game state are drawn on their road: cones and a barrier for road work, crashed cars for an accident, slow cars for heavy traffic and a wet patch for a water puddle. So a change by the admin is seen in the 3D city in the same tick as on the board. A fallen motorcycle lies on the road, and the page shows a penalty countdown until M1 lets it stand up again.
 
 ## 6. Testing
 

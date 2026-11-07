@@ -359,7 +359,6 @@
 
 % keep an intro sentence and its table together on one page
 \newcommand{\ckkeep}[1]{\par\noindent\begin{minipage}{\linewidth}\setlength{\parskip}{4pt}#1\end{minipage}\par\smallskip}
-\widowpenalty=10000 \clubpenalty=10000
 
 \begin{document}
 
@@ -410,12 +409,12 @@ table.
 M8 gets all its data from M7 in the same program and gives light to the LED strips. The figure shows
 the data on both sides.
 
-\begin{figure}[H]\centering
+\begin{ckfig}
 \iomap{4}{2}{\textbf{M8}\\LED engine\\and board}{bd}
 {{M7 link part}/bd/{newest board state}/inna, {M7 link part}/bd/{config: colours,\\brightness, power limit}/inna, {M7 link part}/bd/{link state}/inna, {City plan file}/hwb/{road grid,\\store places}/inna}
 {{RGB LED strips}/hwb/{colour of every LED,\\60 frames per second}/hwa, {M7 link part}/bd/{frame report}/inna}
 {inna/inside the ESP32 program, hwa/data wire to the LED strips}
-\end{figure}
+\end{ckfig}
 
 \msection{Requirements covered}
 
@@ -597,8 +596,7 @@ white, so everybody can see that the board is waiting.
 \msub{Earthquake}
 When an earthquake starts, a ring of light grows from the centre of the earthquake over the whole
 board, like a wave on water, and slowly fades. The road work after an earthquake is not a decision of
-M8. M1 puts it into the obstacle list, and M8 only draws it like any other obstacle until M1 removes it
-from the list.
+M8. M1 puts it into the obstacle list, and M8 only draws it like any other obstacle.
 
 \begin{ckfig}
 \begin{tikzpicture}[x=0.62cm, y=0.62cm]

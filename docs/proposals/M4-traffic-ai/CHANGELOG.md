@@ -2,6 +2,13 @@
 
 Members: Hasan Alperen Elmas, Batuhan Yanar, Muhib Taha Boy
 
+## v1.1 — 7 November 2026
+
+Routes are computed again when an obstacle appears or ends, because obstacles now come and go
+during the game.
+
+Approved by: the team (issue #10)
+
 ## v1.0 — 6 November 2026
 
 Version for submission: purpose, requirements covered, inputs and outputs, main components,

@@ -22,7 +22,7 @@ M6 takes part in five requirements. The last column says what will work when M6 
 
 | **ID** | **Requirement** | **What M6 does for it** | **When M6 is done** |
 |---|---|---|---|
-| R6 | Obstacles | Map tools: a brush for each obstacle type, an eraser, a tool to close a road, an obstacle in front of a player, and the traffic density. Parameters for how often each obstacle type appears and how long it stays | The admin can put any obstacle on any road during the game and can change the rate and the duration of each type |
+| R6 | Obstacles | Map tools: a brush for each obstacle type, an eraser, a tool to close a road, an obstacle in front of a player, and the traffic density | The admin can put any obstacle on any road during the game |
 | R7 | Earthquake | An earthquake panel with a strength control and a live seismic graph of the board sensor | The admin can start an earthquake and compare it with a hand hit |
 | R9 | Live admin panel | A form for every parameter group, and graphs with a mark for every change | Every change and its effect are seen on one page |
 | R10 | Network and measurement | Ping, jitter, loss and frame rate graphs, and the network settings for each player and the board | The admin can make the network worse and measure the result |
@@ -61,7 +61,7 @@ The figure below shows the planned layout. The top bar shows the game phase, the
 
 **Parameters:**
 
-The parameters are in groups: game, obstacles, players, physics, earthquake, network (one set for each player) and board link. When the page opens, it asks M1 for all parameters with their limits and builds the forms from this list, so a new parameter needs no new page code. The obstacles group has two values for each of the four types: how often it appears by itself and how long it stays.
+The parameters are in groups: game, obstacles, players, physics, earthquake, network (one set for each player) and board link. When the page opens, it asks M1 for all parameters with their limits and builds the forms from this list, so a new parameter needs no new page code.
 
 **Network settings:**
 
@@ -73,7 +73,7 @@ The main goal of the panel is to show the effect of a change. So every change pu
 
 **Adding an obstacle:**
 
-The admin first chooses a tool, for example the road work brush. Then the admin clicks on a road on the live map. The map manager finds the nearest road segment, the lane and the position on it with the numbering of the city plan. The communication manager sends an “add obstacle” command with the type, road, lane and position. M1 checks that the road exists. Then it adds the obstacle to the list. In the next tick the obstacle is in the game state, so the map, the phones and the board show it at the same time. It stays for the duration of its type, and then M1 removes it. The eraser removes it earlier with a “remove obstacle” command. “Close road” puts road work on a whole segment, and “in front of a player” puts the chosen obstacle a little ahead of that player's motorcycle.
+The admin first chooses a tool, for example the road work brush. Then the admin clicks on a road on the live map. The map manager finds the nearest road segment, the lane and the position on it with the numbering of the city plan. The communication manager sends an “add obstacle” command with the type, road, lane and position. M1 checks that the road exists. Then it adds the obstacle to the list. In the next tick the obstacle is in the game state, so the map, the phones and the board show it at the same time. The eraser sends a “remove obstacle” command in the same way. “Close road” puts road work on a whole segment, and “in front of a player” puts the chosen obstacle a little ahead of that player's motorcycle.
 
 **Earthquake:**
 

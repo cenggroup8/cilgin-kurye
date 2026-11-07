@@ -2,12 +2,12 @@
 
 Members: Tuğberk Akbulut, Hasan Alperen Elmas, Hasan Hüseyin Özdemir, Muhib Taha Boy
 
-## v1.0 — 5 November 2026
+## v1.0 — 6 November 2026
 
 Version for submission: purpose, requirements covered, inputs and outputs, main components,
 how it works, testing and demonstration, with drawings of the planned board and screens.
 
-Approved by: — (in review in issue #13)
+Approved by: the team (issue #13)
 
 ## v0.1 — 1 November 2026
 

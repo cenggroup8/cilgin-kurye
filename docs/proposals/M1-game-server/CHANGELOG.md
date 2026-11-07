@@ -2,6 +2,12 @@
 
 Members: Tuğberk Akbulut, Abdullatif Yılmaz, Berk Andaçgil, Selim Barut, Umutcan Ocak
 
+## v2.0 — 7 November 2026
+
+The project now has six modules. Module numbers in the text follow the new list: M3 is physics, traffic and AI, M4 is the player client, M5 is the admin panel and M6 is the LED board with its ESP32.
+
+Approved by: — (in review in issue #17)
+
 ## v1.1 — 7 November 2026
 
 Obstacles now appear by themselves at random places during the game and end after a set

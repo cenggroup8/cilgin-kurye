@@ -2,6 +2,7 @@ name: proposals
 
 # Version folders (docs/proposals/<module>/vX.Y/ and docs/decisions/vX.Y/) are frozen once they are on main.
 # New versions are added as new folders; this check fails if an existing one is changed.
+# The only exception is removing the whole folder of a module that was merged into another one.
 on:
   pull_request:
     paths: ["docs/proposals/**", "docs/decisions/**"]
@@ -24,14 +25,29 @@ jobs:
             base="${{ github.event.before }}"
             if [ "$base" = "0000000000000000000000000000000000000000" ]; then exit 0; fi
           fi
-          bad=$(git diff --no-renames --name-status "$base"...HEAD -- 'docs/proposals/*/v*/*' 'docs/decisions/v*/*' | grep -E '^(M|D)' || true)
+          changes=$(git diff --no-renames --name-status "$base"...HEAD -- 'docs/proposals/*/v*/*' 'docs/decisions/v*/*')
+          # A changed file is never allowed.
+          bad=$(echo "$changes" | grep -E '^M' || true)
+          # A deleted file is allowed only when its whole module folder was removed
+          # (the module was merged into another one; see docs/proposals/README.md).
+          while IFS=$'\t' read -r st path; do
+            [ "$st" = "D" ] || continue
+            case "$path" in
+              docs/proposals/*) module=$(echo "$path" | cut -d/ -f1-3) ;;
+              *) module="" ;;
+            esac
+            if [ -z "$module" ] || [ -d "$module" ]; then
+              bad="$bad"$'\n'"$st	$path"
+            fi
+          done <<< "$changes"
+          bad=$(echo "$bad" | sed '/^$/d')
           if [ -n "$bad" ]; then
             echo "These files are inside an existing version folder and must not change:"
             echo "$bad"
             echo "Copy the folder to a new version (for example v0.1 -> v0.2) and edit the copy."
             exit 1
           fi
-          echo "OK: only new files were added to version folders."
+          echo "OK: only new files were added, or whole merged module folders were removed."
       - name: Every version folder has a .md and a .pdf
         run: |
           status=0

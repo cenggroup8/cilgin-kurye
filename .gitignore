@@ -19,12 +19,12 @@ venv/
 
 # PlatformIO
 .pio/
-firmware/.pio/
+M6-led-board/firmware/.pio/
 
 # Local settings and secrets (Wi-Fi passwords stay out of git)
 .env
 *.local.json
-firmware/include/secrets.h
+M6-led-board/firmware/include/secrets.h
 
 # Test output
 recordings/*.jsonl

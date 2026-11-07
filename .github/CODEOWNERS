@@ -4,19 +4,12 @@
 # (On a private free repository this only requests reviews; it does not block merging.)
 
 # --- Shared contracts: every module lead reviews ---
-# /contracts/             @<m1-lead> @<m2-lead> @<m4-lead> @<m7-lead> @<m8-lead>
+# /contracts/              @<m1-lead> @<m2-lead> @<m3-lead> @<m4-lead> @<m5-lead> @<m6-lead>
 
-# --- Server ---
-# /server/m1-game/        @<tugberk> @<abdullatif> @<berk> @<selim> @<umutcan>
-# /server/m2-network/     @<tugberk> @<ayse> @<hasan-huseyin> @<umutcan>
-# /server/m3-physics/     @<abdullatif> @<hasan-alperen> @<batuhan> @<selim>
-# /server/m4-traffic/     @<hasan-alperen> @<batuhan> @<muhib>
-
-# --- Clients ---
-# /client/                @<abdullatif> @<berk> @<selim>
-# /admin/                 @<batuhan> @<ayse> @<berk>
-
-# --- Board ---
-# /firmware/src/m7/       @<tugberk> @<hasan-alperen> @<hasan-huseyin> @<muhib>
-# /firmware/lib/m8_engine/ @<ayse> @<hasan-huseyin> @<muhib> @<umutcan>
-# /hardware/              @<ayse> @<hasan-huseyin> @<muhib> @<umutcan>
+# --- Modules ---
+# /M1-game-server/         @<tugberk> @<abdullatif> @<berk> @<selim> @<umutcan>
+# /M2-network/             @<tugberk> @<ayse> @<hasan-huseyin> @<umutcan>
+# /M3-physics-traffic/     @<abdullatif> @<hasan-alperen> @<batuhan> @<selim> @<muhib>
+# /M4-player-client/       @<abdullatif> @<berk> @<selim>
+# /M5-admin-panel/         @<batuhan> @<ayse> @<berk>
+# /M6-led-board/           @<tugberk> @<hasan-alperen> @<hasan-huseyin> @<muhib> @<ayse> @<umutcan>

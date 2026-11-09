@@ -7,7 +7,9 @@ resume in the countdown are shown in the game flow figure. The join screen in th
 longer has the team choice (the team is chosen in the lobby, as in M4). The admin chooses one zone
 or the whole board for an earthquake (M5, as in M6). M1 board events have the centre too. M4 is
 listed under R6. A new admin login takes the place of the old one (M2). The rate sentence in M2
-is clearer. Wider first column in the module table.
+is clearer. Wider first column in the module table. New member distribution
+(issue #18): Ayşe Poyraz moves from M6 to M4, Batuhan Yanar adds M4, Hasan Hüseyin Özdemir adds
+M5. People per module: M1 5, M2 4, M3 5, M4 5, M5 4, M6 5.
 
 Approved by: — (in review in issue #17)
 

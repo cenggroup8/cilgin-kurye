@@ -3,13 +3,13 @@
 # GitHub requests a review from the owners when a pull request touches their folder.
 # (On a private free repository this only requests reviews; it does not block merging.)
 
-# --- Shared contracts: every module lead reviews ---
-# /contracts/              @<m1-lead> @<m2-lead> @<m3-lead> @<m4-lead> @<m5-lead> @<m6-lead>
+# --- Shared contracts: every member can review ---
+# /contracts/              @<tugberk> @<abdullatif> @<hasan-alperen> @<batuhan> @<ayse> @<berk> @<hasan-huseyin> @<muhib> @<selim> @<umutcan>
 
 # --- Modules ---
 # /M1-game-server/         @<tugberk> @<abdullatif> @<berk> @<selim> @<umutcan>
 # /M2-network/             @<tugberk> @<ayse> @<hasan-huseyin> @<umutcan>
 # /M3-physics-traffic/     @<abdullatif> @<hasan-alperen> @<batuhan> @<selim> @<muhib>
-# /M4-player-client/       @<abdullatif> @<berk> @<selim>
-# /M5-admin-panel/         @<batuhan> @<ayse> @<berk>
-# /M6-led-board/           @<tugberk> @<hasan-alperen> @<hasan-huseyin> @<muhib> @<ayse> @<umutcan>
+# /M4-player-client/       @<abdullatif> @<batuhan> @<ayse> @<berk> @<selim>
+# /M5-admin-panel/         @<batuhan> @<ayse> @<berk> @<hasan-huseyin>
+# /M6-led-board/           @<tugberk> @<hasan-alperen> @<hasan-huseyin> @<muhib> @<umutcan>

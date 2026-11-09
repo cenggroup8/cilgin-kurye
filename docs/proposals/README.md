@@ -17,7 +17,7 @@ The project has six modules since v2.0.
 | M4 Player Client and 3D City | [`M4-player-client/`](M4-player-client/) | [v2.0](M4-player-client/v2.0/) | In review |
 | M5 Admin Panel and Monitoring | [`M5-admin-panel/`](M5-admin-panel/) | [v2.0](M5-admin-panel/v2.0/) | In review |
 | M6 LED Board and ESP32 | [`M6-led-board/`](M6-led-board/) | [v2.0](M6-led-board/v2.0/) | In review |
-| Modules and requirements (all in one) | [`modules-and-requirements/`](modules-and-requirements/) | [v2.0](modules-and-requirements/v2.0/) | In review |
+| Modules and requirements (all in one) | [`modules-and-requirements/`](modules-and-requirements/) | [v2.1](modules-and-requirements/v2.1/) | In review |
 
 ### Earlier eight module structure (v1.x)
 

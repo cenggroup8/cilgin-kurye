@@ -59,6 +59,5 @@ Obstacle types: `heavy_traffic`, `road_work`, `accident`, `puddle`.
 
 MessagePack, protocol version 1. Messages that must arrive (config, vibrate, earthquake
 events, status) go on TCP. The board state, sensor samples and delay probes go on UDP.
-Server port 47100, board port 47101.
 Full examples with exact bytes: `board_protocol_vectors.json`.
 Field meanings: M6 module document, Inputs and outputs.

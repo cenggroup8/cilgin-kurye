@@ -1,5 +1,16 @@
 # Modules and requirements (all modules in one document) — changelog
 
+## v2.1 — 9 November 2026
+
+Fixes from the review in issue #17. The six modules stay in this one document. Pause and
+resume in the countdown are shown in the game flow figure. The join screen in the M2 figure no
+longer has the team choice (the team is chosen in the lobby, as in M4). The admin chooses one zone
+or the whole board for an earthquake (M5, as in M6). M1 board events have the centre too. M4 is
+listed under R6. A new admin login takes the place of the old one (M2). The rate sentence in M2
+is clearer. Wider first column in the module table.
+
+Approved by: — (in review in issue #17)
+
 ## v2.0 — 7 November 2026
 
 Six modules instead of eight: M3 and M4 are joined into M3 Physics, Traffic and AI, and M7 and M8 are joined into M6 LED Board and ESP32. Module numbers, the system map, the module table and the member table follow the new list.

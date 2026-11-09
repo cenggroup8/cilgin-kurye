@@ -48,30 +48,30 @@ The table lists the requirements of the whole system. The last column shows the 
 
 ## 4. Modules
 
-The project has six modules on three sides: the server (M1 to M3), the phone and admin pages (M4, M5) and the physical board (M6). Every module has at least 3 members, and every member works in 2 or 3 modules. So a module can go on even if one member leaves.
+The project has six modules on three sides: the server (M1 to M3), the phone and admin pages (M4, M5) and the physical board (M6). Every module has at least 4 members, and every member works in 2 or 3 modules. So a module can go on even if one member leaves.
 
 | **Module** | **Name** | **Task** | **People** |
 |---|---|---|---|
 | M1 | Game Server and Rules | Single authority: game loop, rules, score, delivery, fall penalty, admin commands. | 5 |
 | M2 | Network and Synchronization | Phone, admin and board connections. Message encoding. Safe game state. Ping and network delay / loss settings. | 4 |
 | M3 | Physics, Traffic and AI | Motorcycle motion, collisions, falls, effects of obstacles and earthquakes, prediction on the phone. Routes and travel times, NPC traffic, bot drivers. | 5 |
-| M4 | Player Client and 3D City | 3D city on the phone, controls, compass, prediction and correction. | 3 |
-| M5 | Admin Panel and Monitoring | Live parameters, map and obstacle tools, earthquake panel, graphs. | 3 |
-| M6 | LED Board and ESP32 | Board connection, motion sensor and earthquake detection, vibration motors, LED animation engine and the physical board: base, LED strips, 3D printed city. | 6 |
+| M4 | Player Client and 3D City | 3D city on the phone, controls, compass, prediction and correction. | 5 |
+| M5 | Admin Panel and Monitoring | Live parameters, map and obstacle tools, earthquake panel, graphs. | 4 |
+| M6 | LED Board and ESP32 | Board connection, motion sensor and earthquake detection, vibration motors, LED animation engine and the physical board: base, LED strips, 3D printed city. | 5 |
 
 | **Member** | **M1** | **M2** | **M3** | **M4** | **M5** | **M6** |
 |---|---|---|---|---|---|---|
 | Tuğberk Akbulut | X | X |  |  |  | X |
 | Abdullatif Yılmaz | X |  | X | X |  |  |
 | Hasan Alperen Elmas |  |  | X |  |  | X |
-| Batuhan Yanar |  |  | X |  | X |  |
-| Ayşe Poyraz |  | X |  |  | X | X |
+| Batuhan Yanar |  |  | X | X | X |  |
+| Ayşe Poyraz |  | X |  | X | X |  |
 | Berk Andaçgil | X |  |  | X | X |  |
-| Hasan Hüseyin Özdemir |  | X |  |  |  | X |
+| Hasan Hüseyin Özdemir |  | X |  |  | X | X |
 | Muhib Taha Boy |  |  | X |  |  | X |
 | Selim Barut | X |  | X | X |  |  |
 | Umutcan Ocak | X | X |  |  |  | X |
-| **People** | **5** | **4** | **5** | **3** | **3** | **6** |
+| **People** | **5** | **4** | **5** | **5** | **4** | **5** |
 
 ## 5. M1 Game Server and Rules
 
@@ -373,7 +373,7 @@ M3 is tested alone with a small test program that plays the role of M1. It makes
 
 ## 8. M4 Player Client and 3D City
 
-*Team: Abdullatif Yılmaz, Berk Andaçgil, Selim Barut*
+*Team: Abdullatif Yılmaz, Batuhan Yanar, Ayşe Poyraz, Berk Andaçgil, Selim Barut*
 
 ### 8.1. Purpose
 
@@ -454,7 +454,7 @@ M4 is tested alone against a fake server that sends recorded game states and ans
 
 ## 9. M5 Admin Panel and Monitoring
 
-*Team: Batuhan Yanar, Ayşe Poyraz, Berk Andaçgil*
+*Team: Batuhan Yanar, Ayşe Poyraz, Berk Andaçgil, Hasan Hüseyin Özdemir*
 
 ### 9.1. Purpose
 
@@ -539,7 +539,7 @@ M5 is tested alone against a fake server that plays back a recorded game with it
 
 ## 10. M6 LED Board and ESP32
 
-*Team: Tuğberk Akbulut, Hasan Alperen Elmas, Hasan Hüseyin Özdemir, Muhib Taha Boy, Ayşe Poyraz, Umutcan Ocak*
+*Team: Tuğberk Akbulut, Hasan Alperen Elmas, Hasan Hüseyin Özdemir, Muhib Taha Boy, Umutcan Ocak*
 
 ### 10.1. Purpose
 

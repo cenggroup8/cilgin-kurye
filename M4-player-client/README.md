@@ -31,7 +31,7 @@ document describes.
 
 ## Team
 
-Abdullatif Yılmaz, Berk Andaçgil, Selim Barut
+Abdullatif Yılmaz, Batuhan Yanar, Ayşe Poyraz, Berk Andaçgil, Selim Barut
 
 ## Documents
 

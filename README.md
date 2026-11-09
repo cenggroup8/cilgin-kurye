@@ -53,9 +53,9 @@ and watches the results in the 3D city, on the board and in live graphs.
 | **M1** Game Server and Rules | [`M1-game-server/`](M1-game-server) | [v2.0](docs/proposals/M1-game-server/v2.0/M1-proposal.pdf) | Tuğberk Akbulut, Abdullatif Yılmaz, Berk Andaçgil, Selim Barut, Umutcan Ocak |
 | **M2** Network and Synchronization | [`M2-network/`](M2-network) | [v2.0](docs/proposals/M2-network/v2.0/M2-proposal.pdf) | Tuğberk Akbulut, Ayşe Poyraz, Hasan Hüseyin Özdemir, Umutcan Ocak |
 | **M3** Physics, Traffic and AI | [`M3-physics-traffic/`](M3-physics-traffic) | [v2.0](docs/proposals/M3-physics-traffic/v2.0/M3-proposal.pdf) | Abdullatif Yılmaz, Hasan Alperen Elmas, Batuhan Yanar, Selim Barut, Muhib Taha Boy |
-| **M4** Player Client and 3D City | [`M4-player-client/`](M4-player-client) | [v2.0](docs/proposals/M4-player-client/v2.0/M4-proposal.pdf) | Abdullatif Yılmaz, Berk Andaçgil, Selim Barut |
-| **M5** Admin Panel and Monitoring | [`M5-admin-panel/`](M5-admin-panel) | [v2.0](docs/proposals/M5-admin-panel/v2.0/M5-proposal.pdf) | Batuhan Yanar, Ayşe Poyraz, Berk Andaçgil |
-| **M6** LED Board and ESP32 | [`M6-led-board/`](M6-led-board) | [v2.0](docs/proposals/M6-led-board/v2.0/M6-proposal.pdf) | Tuğberk Akbulut, Hasan Alperen Elmas, Hasan Hüseyin Özdemir, Muhib Taha Boy, Ayşe Poyraz, Umutcan Ocak |
+| **M4** Player Client and 3D City | [`M4-player-client/`](M4-player-client) | [v2.0](docs/proposals/M4-player-client/v2.0/M4-proposal.pdf) | Abdullatif Yılmaz, Batuhan Yanar, Ayşe Poyraz, Berk Andaçgil, Selim Barut |
+| **M5** Admin Panel and Monitoring | [`M5-admin-panel/`](M5-admin-panel) | [v2.0](docs/proposals/M5-admin-panel/v2.0/M5-proposal.pdf) | Batuhan Yanar, Ayşe Poyraz, Berk Andaçgil, Hasan Hüseyin Özdemir |
+| **M6** LED Board and ESP32 | [`M6-led-board/`](M6-led-board) | [v2.0](docs/proposals/M6-led-board/v2.0/M6-proposal.pdf) | Tuğberk Akbulut, Hasan Alperen Elmas, Hasan Hüseyin Özdemir, Muhib Taha Boy, Umutcan Ocak |
 
 All modules together, with the requirements and the system design:
 [**Modules and Requirements v2.0**](docs/proposals/modules-and-requirements/v2.0/Cilgin_Kurye_Modules_and_Requirements.pdf).

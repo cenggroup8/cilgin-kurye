@@ -29,7 +29,7 @@ document describes.
 
 ## Team
 
-Batuhan Yanar, Ayşe Poyraz, Berk Andaçgil
+Batuhan Yanar, Ayşe Poyraz, Berk Andaçgil, Hasan Hüseyin Özdemir
 
 ## Documents
 

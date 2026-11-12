@@ -1,0 +1,2038 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+\documentclass[
+  english,
+  10pt,
+  a4paper,
+]{article}
+\usepackage{xcolor}
+\usepackage[top=22mm,bottom=20mm,left=18mm,right=18mm]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{longtable,booktabs,array}
+\usepackage{caption}
+\captionsetup[table]{skip=6pt}
+\newcounter{none} % for unnumbered tables
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+\ifLuaTeX
+\usepackage[bidi=basic,shorthands=off]{babel}
+\else
+\usepackage[bidi=default,shorthands=off]{babel}
+\fi
+\ifLuaTeX
+  \usepackage{selnolig} % disable illegal ligatures
+\fi
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+% ---- Çılgın Kurye document theme: same look as the CSE 396 project proposal ----
+% Compile with XeLaTeX (also works on Overleaf). Fonts: TeX Gyre Termes (Times), DejaVu Sans Mono.
+\usepackage{fontspec}
+\setmainfont{texgyretermes}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold, ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
+\setsansfont{texgyreheros}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold, ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
+\setmonofont{DejaVuSansMono}[Extension=.ttf, UprightFont=*, BoldFont=*-Bold, ItalicFont=*-Oblique, BoldItalicFont=*-BoldOblique, Scale=0.80]
+\setmathfont{texgyretermes-math.otf}
+
+\usepackage{xcolor}
+\definecolor{ckblue}{HTML}{1F3A5F}
+\definecolor{cklight}{HTML}{E8EEF5}
+\definecolor{ckgrey}{HTML}{F2F2F2}
+\definecolor{ckline}{HTML}{555555}
+\definecolor{shadecolor}{HTML}{F4F5F7}
+
+% Headings as in the proposal: serif, bold; subsections bold italic. Numbers are part of the heading text.
+\setcounter{secnumdepth}{0}
+\usepackage{titlesec}
+\titleformat{\section}{\rmfamily\Large\bfseries}{}{0pt}{}
+\titleformat{\subsection}{\rmfamily\large\bfseries\itshape}{}{0pt}{}
+\titleformat{\subsubsection}{\rmfamily\normalsize\bfseries}{}{0pt}{}
+\titlespacing*{\section}{0pt}{12pt}{4pt}
+\titlespacing*{\subsection}{0pt}{8pt}{3pt}
+
+% Header and footer (the first page has only the footer, like the proposal)
+\usepackage{fancyhdr,lastpage}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\itshape CSE 396 · Group 8 · Çılgın Kurye}
+\fancyhead[R]{\footnotesize\itshape\ckmodule}
+\fancyfoot[C]{\footnotesize Page \thepage\ of \pageref*{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\setlength{\headheight}{14pt}
+\fancypagestyle{ckfirst}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}\fancyfoot[C]{\footnotesize Page \thepage\ of \pageref*{LastPage}}}
+
+% Inline code: breaks only after . : ( , / _ and spaces, never inside a name
+\usepackage[obeyspaces,spaces]{url}
+\AtBeginDocument{%
+  \renewcommand{\UrlBreaks}{\do\.\do\:\do\(\do\,\do\/\do\_\do\|}%
+  \renewcommand{\UrlBigBreaks}{}%
+  \renewcommand{\UrlNoBreaks}{}%
+  \urlstyle{tt}}
+
+% Tables: boxed grid as in the proposal, smaller text
+\usepackage{etoolbox}
+\AtBeginEnvironment{longtable}{\footnotesize\renewcommand{\arraystretch}{1.2}}
+\setlength{\LTpre}{6pt}
+\setlength{\LTpost}{8pt}
+\setlength{\arrayrulewidth}{0.4pt}
+
+% Code blocks: long lines wrap; diagrams stay in one piece
+\usepackage{framed}
+\usepackage{fvextra}
+\RecustomVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\footnotesize, breaklines}
+\makeatletter
+\@ifundefined{Shaded}{}{\renewenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}}
+\@ifundefined{Highlighting}{}{\RecustomVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}, fontsize=\footnotesize, breaklines, breakanywhere}}
+\makeatother
+
+% Figures drawn with TikZ
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,calc,backgrounds,shapes.geometric}
+\tikzset{
+  ck/.style={font=\footnotesize, >={Stealth[length=5pt]}, line width=0.6pt},
+  box/.style={draw=ckline, fill=white, rounded corners=2pt, align=center, inner sep=4pt, minimum height=7mm},
+  mod/.style={box, fill=ckgrey},
+  this/.style={box, fill=cklight, draw=ckblue, line width=0.9pt},
+  group/.style={draw=ckline, dashed, rounded corners=3pt, inner sep=6pt},
+  lbl/.style={font=\scriptsize, align=center, inner sep=1.5pt},
+  msg/.style={->, draw=ckline},
+}
+\usepackage{caption}
+\captionsetup[figure]{font=small, labelfont=bf, skip=4pt}
+\newcommand{\ckfigure}[2]{\begin{figure}[htbp]\centering #1\caption{#2}\end{figure}}
+
+\usepackage{enumitem}
+\setlist{itemsep=1pt, topsep=3pt}
+\setlength{\parskip}{4pt}
+\setlength{\parindent}{0pt}
+\raggedbottom
+% ---- end of theme ----
+\newcommand{\ckmodule}{Modules and Requirements}
+\usepackage{graphicx}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+% fallback for those not using the hyperref driver hyperxmp:
+\makeatletter
+\@ifundefined{xmpquote}{\newcommand{\xmpquote}[1]{#1}}{}
+\makeatother
+\hypersetup{
+  pdftitle={Çılgın Kurye: Modules and Requirements},
+  pdflang={en},
+  colorlinks=true,
+  linkcolor={black},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={black},
+  pdfcreator={LaTeX}}
+
+\title{M1 Game Server and Rules --- Module Documentation}
+\author{}
+\date{}
+
+
+% ---- colours and drawings ----
+\usepackage{colortbl}
+\usepackage{float}
+\makeatletter
+\newcommand{\needspace}[1]{\begingroup\setlength{\dimen@}{#1}\vskip\z@\@plus\dimen@\penalty -100\vskip\z@\@plus -\dimen@\vskip\dimen@\penalty 9999\vskip -\dimen@\vskip\z@skip\endgroup}
+\makeatother
+% ---- colours ----
+\definecolor{srv}{HTML}{2E6FB7}\colorlet{srvL}{srv!15}
+\definecolor{cli}{HTML}{2E9E5B}\colorlet{cliL}{cli!15}
+\definecolor{adm}{HTML}{E08A1E}\colorlet{admL}{adm!18}
+\definecolor{brd}{HTML}{7B4FB3}\colorlet{brdL}{brd!15}
+\definecolor{tcpc}{HTML}{1F5FA8}
+\definecolor{udpc}{HTML}{D9531E}
+\definecolor{obs}{HTML}{D7263D}
+\definecolor{tA}{HTML}{00A6D6}
+\definecolor{tB}{HTML}{3BB273}
+\definecolor{tC}{HTML}{F2C14E}
+\definecolor{tD}{HTML}{9B5DE5}
+
+% ---- styles ----
+\tikzset{
+  nb/.style={rounded corners=3pt, line width=0.9pt, align=center, inner sep=4pt, minimum height=9mm, font=\footnotesize},
+  sv/.style={nb, draw=srv, fill=srvL},
+  cl/.style={nb, draw=cli, fill=cliL},
+  ad/.style={nb, draw=adm, fill=admL},
+  bd/.style={nb, draw=brd, fill=brdL},
+  hwb/.style={nb, draw=black!50, fill=black!5},
+  tcpa/.style={draw=tcpc, line width=1.5pt},
+  udpa/.style={draw=udpc, line width=1.5pt, dash pattern=on 5pt off 2.5pt},
+  inna/.style={draw=black!55, line width=1pt},
+  al/.style={font=\scriptsize, fill=white, inner sep=1.2pt, rounded corners=1pt},
+  grp/.style={draw=black!35, dashed, rounded corners=5pt, inner sep=7pt},
+  glbl/.style={font=\scriptsize\bfseries, text=black!65},
+  hl/.style={line width=2.6pt},
+  st/.style={nb, rounded corners=8pt, minimum width=24mm},
+  co/.style={draw=black!60, line width=0.5pt},
+  cot/.style={font=\scriptsize, align=left, text=black!80},
+}
+
+% ---- system map; argument = module to highlight (M1 ... M6, or none) ----
+\newcommand{\systemmap}[1]{%
+\tikzset{M1/.style={},M2/.style={},M3/.style={},M4/.style={},M5/.style={},M6/.style={},none/.style={}}%
+\tikzset{#1/.style={hl}}%
+\begin{tikzpicture}[ck]
+\node[cl, M4, minimum width=27mm] (m4) at (0,3) {\textbf{M4}\\Player phones};
+\node[ad, M5, minimum width=27mm] (m5) at (0,0.4) {\textbf{M5}\\Admin panel};
+\node[sv, M2, minimum width=27mm, minimum height=38mm] (m2) at (4.6,1.7) {\textbf{M2}\\Network\\and sync};
+\node[sv, M1, minimum width=27mm, minimum height=38mm] (m1) at (8.4,1.7) {\textbf{M1}\\Game server\\and rules};
+\node[sv, M3, minimum width=27mm, minimum height=38mm] (m3) at (12.2,1.7) {\textbf{M3}\\Physics,\\traffic\\and AI};
+\node[grp, fit=(m2)(m1)(m3)] (pc) {};
+\node[glbl, anchor=south west] at (pc.north west) {MAIN COMPUTER};
+\node[bd, M6, minimum width=27mm, minimum height=16mm] (m6) at (4.6,-2.9) {\textbf{M6}\\ESP32 program:\\link and LED parts};
+\node[hwb, minimum width=25mm] (led) at (8.4,-2.4) {RGB LED\\strips};
+\node[hwb, minimum width=25mm] (sm) at (8.4,-3.6) {Sensor and\\4 motors};
+\node[grp, fit=(m6)(led)(sm)] (bb) {};
+\node[glbl, anchor=north east] at (bb.south east) {LED CITY BOARD};
+\draw[tcpa, <->] (m4.east) -- node[al]{WebSocket} (m4.east -| m2.west);
+\draw[tcpa, <->] (m5.east) -- node[al]{WebSocket} (m5.east -| m2.west);
+\draw[tcpa, <->] ([xshift=-6mm]m6.north) -- node[al]{TCP} ([xshift=-6mm]m2.south);
+\draw[udpa, <->] ([xshift=6mm]m6.north) -- node[al]{UDP} ([xshift=6mm]m2.south);
+\draw[inna, <->] (m2) -- (m1);
+\draw[inna, <->] (m1) -- (m3);
+\draw[inna, ->] (m6.east |- led) -- (led);
+\draw[inna, <->] (m6.east |- sm) -- (sm);
+\ckleg{-1.3,-5.4}{tcpa/TCP or WebSocket: every message arrives in order, udpa/UDP: fast and the newest message wins, inna/inside one program or chip}
+\end{tikzpicture}}
+
+% ---- LED board seen from above (6 x 6 roads, 1 unit = 10 cm) ----
+\newcommand{\boardbase}{%
+\fill[black!88, rounded corners=3pt] (-0.5,-0.5) rectangle (5.5,5.5);
+\foreach \i in {0,...,4}{\foreach \j in {0,...,4}{%
+  \fill[black!60] (\i+0.13,\j+0.13) rectangle (\i+0.87,\j+0.87);
+  \fill[black!22] (\i+0.24,\j+0.24) rectangle (\i+0.52,\j+0.52);
+  \fill[black!30] (\i+0.56,\j+0.30) rectangle (\i+0.78,\j+0.62);
+  \fill[black!38] (\i+0.28,\j+0.58) rectangle (\i+0.66,\j+0.78);}}
+\foreach \i in {0,...,5}{%
+  \draw[black, line width=4.5pt] (\i,-0.05) -- (\i,5.05);
+  \draw[black, line width=4.5pt] (-0.05,\i) -- (5.05,\i);}
+\foreach \i in {0,...,5}{\foreach \k in {0,...,30}{%
+  \fill[black!55] (\i,\k/6) circle (0.025);
+  \fill[black!55] (\k/6,\i) circle (0.025);}}
+\foreach \x/\y/\c in {0/4/tA, 4/4/tB, 0/0/tD, 4/0/tC}{%
+  \fill[\c!30!black!60] (\x+0.13,\y+0.13) rectangle (\x+0.87,\y+0.87);
+  \fill[\c] (\x+0.3,\y+0.3) rectangle (\x+0.7,\y+0.7);
+  \fill[white] (\x+0.4,\y+0.5) circle (0.05); \fill[white] (\x+0.6,\y+0.5) circle (0.05);}}
+\newcommand{\nmark}[3]{\node[circle, fill=yellow!85!orange, draw=black, line width=0.4pt, inner sep=0.6pt, minimum size=3.6mm, font=\tiny\bfseries] at (#1,#2) {#3};}
+\newcommand{\bike}[4]{%
+\fill[#3!35] ($(#1,#2)+(#4:0.40)$) circle (0.05);
+\fill[#3!65] ($(#1,#2)+(#4:0.21)$) circle (0.075);
+\fill[#3, draw=white, line width=0.4pt] (#1,#2) circle (0.12);}
+\newcommand{\dpoint}[3]{\draw[#3!50, line width=0.8pt] (#1,#2) circle (0.26); \draw[#3, line width=1.4pt] (#1,#2) circle (0.16); \fill[#3] (#1,#2) circle (0.07);}
+\newcommand{\heavy}[2]{\draw[obs!60!black, line width=4pt] (#1) -- (#2); \draw[obs, line width=4pt, dash pattern=on 3pt off 5pt] (#1) -- (#2);}
+\newcommand{\roadwork}[2]{\draw[obs, line width=4pt] (#1) -- (#2);}
+\newcommand{\accident}[2]{\draw[obs, line width=4pt, dash pattern=on 3pt off 3pt] (#1) -- (#2);}
+\newcommand{\puddle}[2]{\draw[cyan!55, line width=4pt] (#1) -- (#2); \draw[cyan!15, line width=1.6pt, dash pattern=on 1pt off 2.5pt] (#1) -- (#2);}
+\newcommand{\findme}[2]{\fill[white, opacity=0.25] (#1,#2) circle (0.36); \fill[white, opacity=0.5] (#1,#2) circle (0.24); \fill[white] (#1,#2) circle (0.13);}
+
+% ---- phone game screen (7 x 3.4 units) ----
+\newcommand{\phonemock}{%
+\fill[black!85, rounded corners=9pt] (-0.3,-0.3) rectangle (7.3,3.7);
+\fill[cyan!20] (0,1.7) rectangle (7,3.4);
+\fill[cli!14] (0,0) rectangle (7,1.7);
+\filldraw[fill=srv!30, draw=srv!70!black] (0.2,1.5) rectangle (1.0,3.0);
+\filldraw[fill=adm!35, draw=adm!70!black] (1.1,1.6) rectangle (1.8,2.4);
+\filldraw[fill=brd!30, draw=brd!70!black] (1.9,1.65) -- (2.6,1.65) -- (2.6,2.2) -- (2.25,2.5) -- (1.9,2.2) -- cycle;
+\filldraw[fill=adm!35, draw=adm!70!black] (4.5,1.65) rectangle (5.1,2.3);
+\filldraw[fill=srv!30, draw=srv!70!black] (5.2,1.55) rectangle (6.0,3.1);
+\filldraw[fill=cli!35, draw=cli!70!black] (6.1,1.6) rectangle (6.85,2.6);
+\fill[brown!60!black] (4.17,1.6) rectangle (4.23,1.8); \fill[cli!70!black] (4.2,1.95) circle (0.18);
+\fill[black!55] (1.8,0) -- (5.2,0) -- (3.75,1.7) -- (3.25,1.7) -- cycle;
+\draw[white, line width=0.8pt, dash pattern=on 4pt off 4pt] (3.5,0) -- (3.5,1.7);
+\filldraw[fill=black!15, draw=black!70] (3.62,1.12) rectangle (3.88,1.32);
+\fill[obs] (3.05,1.22) -- (3.15,1.48) -- (3.25,1.22) -- cycle;
+\fill[black!85] (3.43,0.08) rectangle (3.57,0.3);
+\fill[tA] (3.3,0.28) rectangle (3.7,0.6);
+\fill[brown!65] (3.34,0.6) rectangle (3.66,0.82);
+\fill[tA!60!black] (3.5,0.95) circle (0.13);
+\node[fill=black!70, text=white, rounded corners=2pt, font=\scriptsize\bfseries, inner sep=2pt] at (3.5,3.15) {2:41};
+\foreach \c/\s/\x in {tA/120/0.35,tB/95/0.95,tC/140/1.55,tD/80/2.15}
+  \node[fill=\c, text=white, font=\tiny\bfseries, rounded corners=1pt, inner sep=1.5pt, minimum width=5mm] at (\x,3.15) {\s};
+\fill[white, opacity=0.9] (6.45,2.85) circle (0.38); \draw[black!60] (6.45,2.85) circle (0.38);
+\draw[-{Stealth[length=5pt]}, line width=1.8pt, obs] (6.45,2.85) ++(230:0.2) -- ++(50:0.5);
+\fill[white, opacity=0.85] (0.55,0.5) circle (0.32); \fill[black!70] (0.43,0.5) -- (0.65,0.63) -- (0.65,0.37) -- cycle;
+\fill[white, opacity=0.85] (1.4,0.5) circle (0.32); \fill[black!70] (1.52,0.5) -- (1.3,0.63) -- (1.3,0.37) -- cycle;
+\node[fill=obs!80, text=white, rounded corners=3pt, font=\tiny\bfseries, minimum width=8mm, minimum height=6mm] at (5.6,0.5) {Brake};
+\node[fill=cli, text=white, rounded corners=3pt, font=\tiny\bfseries, minimum width=8mm, minimum height=8mm] at (6.5,0.6) {Gas};
+\node[fill=white, text=black, rounded corners=3pt, font=\tiny\bfseries, minimum width=9mm, minimum height=5mm] at (0.9,1.45) {Find me};}
+
+% ---- side cut of the board (14 units wide) ----
+\newcommand{\boardside}{%
+\fill[brown!20] (-0.6,-0.35) rectangle (14.6,0);
+\foreach \x/\h/\c in {1.0/0.7/black!18, 2.2/1.1/black!22, 4.6/1.9/black!25, 5.8/2.6/black!28, 7.4/2.2/black!25, 8.6/1.6/black!22, 10.9/1.0/black!18}
+  \filldraw[fill=\c, draw=black!45] (\x,1.5) rectangle (\x+0.9,1.5+\h);
+\filldraw[fill=tB!35, draw=tB!70!black] (12.4,1.5) rectangle (13.4,2.3);
+\fill[black!70, rounded corners=1pt] (0.5,0) rectangle (1.1,0.9);
+\fill[black!70, rounded corners=1pt] (12.9,0) rectangle (13.5,0.9);
+\filldraw[fill=brown!45, draw=brown!70!black] (0,0.9) rectangle (14,1.3);
+\fill[black!80] (0,1.3) rectangle (14,1.38);
+\foreach \x in {0.3,0.9,...,13.8} \fill[black!35] (\x,1.42) circle (0.06);
+\foreach \x/\c in {3.3/tA, 3.9/tA, 6.9/obs, 7.5/obs, 10.5/tC} \fill[\c] (\x,1.42) circle (0.07);
+\fill[white, opacity=0.55] (0,1.38) rectangle (14,1.52);
+\filldraw[fill=brd!40, draw=brd] (2.3,0.35) rectangle (4.3,0.85);
+\node[font=\tiny] at (3.3,0.6) {ESP32};
+\filldraw[fill=brd, draw=brd!60!black] (6.75,0.62) rectangle (7.25,0.88);
+\filldraw[fill=adm!60, draw=adm!70!black] (1.8,0.6) circle (0.24);
+\filldraw[fill=adm!60, draw=adm!70!black] (12.2,0.6) circle (0.24);
+\filldraw[fill=black!15, draw=black!50] (9.3,0.35) rectangle (10.9,0.85);
+\node[font=\tiny] at (10.1,0.6) {Power};}
+
+% ---- layout helpers ----
+\newenvironment{ckfig}{\begin{figure}[!htb]\centering}{\end{figure}}
+\renewcommand{\topfraction}{0.9}\renewcommand{\bottomfraction}{0.8}\renewcommand{\textfraction}{0.07}\renewcommand{\floatpagefraction}{0.85}
+\setcounter{topnumber}{3}\setcounter{bottomnumber}{2}\setcounter{totalnumber}{4}
+\newcommand{\msub}[1]{\par\needspace{5\baselineskip}\smallskip\noindent{\bfseries #1:}\par\nobreak\vspace{-2pt}}
+\tikzset{msga/.style={draw=cli!70!black, line width=0.8pt}, cmda/.style={draw=obs, line width=1pt}, loopa/.style={draw=srv, line width=1pt}, hwa/.style={draw=black!60, line width=1.2pt, dash pattern=on 1.5pt off 1.5pt}, wanta/.style={draw=cli, line width=1.6pt}, reala/.style={draw=obs, line width=1.6pt}, siga/.style={draw=srv, line width=0.8pt}, thra/.style={draw=obs, line width=0.9pt, dash pattern=on 4pt off 2pt}, evta/.style={draw=cli, line width=1pt}}
+\tikzset{iol/.style={font=\scriptsize, fill=white, inner sep=1.2pt, rounded corners=1pt, align=center}}
+% legend row: start point, list of style/text
+\newcommand{\ckleg}[2]{%
+\coordinate (lgp) at (#1);
+\foreach \ls/\lt in {#2}{%
+  \draw[\ls,->] (lgp) -- ++(0.8,0) node[right, font=\scriptsize, text=black] (lgt) {\lt};
+  \coordinate (lgp) at ([xshift=5mm]lgt.east);}}
+% purpose table: colour (unused), runs on, technology, requirements
+\newcommand{\ckinfo}[4]{\par\smallskip\noindent{\renewcommand{\arraystretch}{1.25}%
+\begin{tabular}{|L{0.30}|L{0.50}|L{0.20}|}\hline
+\textbf{Runs on} & \textbf{Technology} & \textbf{Requirements} \\ \hline
+#2 & #3 & #4 \\ \hline
+\end{tabular}}\par\smallskip}
+% module data map: n in, n out, centre text, centre style, inputs, outputs, legend list
+% inputs and outputs: {name}/style/{data}/arrow style
+\newcommand{\iomap}[7]{%
+\begin{tikzpicture}[ck]
+\pgfmathsetmacro{\nmax}{max(#1,#2)}
+\node[#4, line width=2pt, minimum width=30mm, minimum height=\nmax*10.5mm+2mm, font=\normalsize] (c) at (0,0) {#3};
+\foreach \nm/\st/\dd/\ar [count=\ii] in {#5}{%
+  \pgfmathsetmacro{\yy}{((#1+1)/2-\ii)*1.05}
+  \node[\st, minimum width=25mm, minimum height=8.5mm, font=\scriptsize] (in\ii) at (-6.6,\yy) {\nm};
+  \draw[\ar,->] (in\ii.east) -- node[iol]{\dd} (c.west |- in\ii);}
+\foreach \nm/\st/\dd/\ar [count=\ii] in {#6}{%
+  \pgfmathsetmacro{\yy}{((#2+1)/2-\ii)*1.05}
+  \node[\st, minimum width=25mm, minimum height=8.5mm, font=\scriptsize] (out\ii) at (6.6,\yy) {\nm};
+  \draw[\ar,->] (c.east |- out\ii) -- node[iol]{\dd} (out\ii.west);}
+\node[font=\scriptsize\bfseries, text=black!60] at (-6.6,\nmax*0.525+0.4) {Inputs come from};
+\node[font=\scriptsize\bfseries, text=black!60] at (6.6,\nmax*0.525+0.4) {Outputs go to};
+\ckleg{-7.6,-\nmax*0.525-0.5}{#7}
+\end{tikzpicture}}
+
+% keep an intro sentence and its table together on one page
+\newcommand{\ckkeep}[1]{\par\noindent\begin{minipage}{\linewidth}\setlength{\parskip}{4pt}#1\end{minipage}\par\smallskip}
+\widowpenalty=10000 \clubpenalty=10000
+
+\begin{document}
+
+% ---- table and list helpers ----
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{\dimexpr#1\linewidth-2\tabcolsep-\arrayrulewidth\relax}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{\dimexpr#1\linewidth-2\tabcolsep-\arrayrulewidth\relax}}
+\newcommand{\ckdone}{\item[$\boxtimes$]}
+\newcommand{\ckopen}{\item[$\square$]}
+\newcommand{\mdot}{$\bullet$}
+\newcounter{msec}
+\newcounter{chap}
+% ---- end of helpers ----
+\newcommand{\msection}[1]{\needspace{8\baselineskip}\stepcounter{msec}\subsection{\arabic{chap}.\arabic{msec} #1}}
+\thispagestyle{ckfirst}
+\begin{center}
+\vspace*{-6mm}
+\includegraphics[height=26mm]{board-byte-logo.jpg}\par
+\vspace{4pt}
+{\bfseries GEBZE TECHNICAL UNIVERSITY\par}
+{Computer Engineering Department\par}
+{CSE 396 Module Documentation\par}
+\vspace{8pt}
+{\LARGE\bfseries Çılgın Kurye\par}
+\vspace{3pt}
+{\large\itshape Modules and requirements\par}
+\vspace{6pt}
+\textbf{Company:} Board\&Byte\hspace{1.4em}\textbf{Group:} Group-8\hspace{1.4em}\textbf{Date:} 7 November 2026
+\end{center}
+\begin{center}\footnotesize\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{0.27\linewidth}|p{0.15\linewidth}|p{0.27\linewidth}|p{0.15\linewidth}|}\hline
+\textbf{Name} & \textbf{Student No.} & \textbf{Name} & \textbf{Student No.} \\ \hline
+Tuğberk Akbulut & 230104004070 & Abdullatif Yılmaz & 230104004031 \\ \hline
+Hasan Alperen Elmas & 1801042604 & Batuhan Yanar & 220104004059 \\ \hline
+Ayşe Poyraz & 230104004085 & Berk Andaçgil & 230104004066 \\ \hline
+Hasan Hüseyin Özdemir & 230104004048 & Muhib Taha Boy & 230104004165 \\ \hline
+Selim Barut & 220104004046 & Umutcan Ocak & 220104004903 \\ \hline
+\end{tabular}
+\end{center}
+
+\section{1. Project overview}
+
+Çılgın Kurye is a multiplayer motorcycle courier game. Players play it in the web browser of their
+own phones, so there is nothing to install. Up to 8 players play at the same time in 4 teams, and the
+whole game runs on a server on one computer. Each player rides a motorcycle in a 3D city and carries
+packages from the team's store to delivery points. The team with the most points after 5 minutes
+wins.
+
+The special part of the game is that the phone has no map. To find the delivery point, players must
+look at the 60 × 60 cm city board on the table. LED strips in the roads of the board show all
+motorcycles, delivery points and obstacles in real time. The players can also hit the board with
+their hand to start an earthquake in the game. The admin computer is the control centre. During the
+game the admin changes parameters and sees each change in three places: in the 3D city on the
+phones, on the LED board and in live graphs. The computer, the phones and the board talk over Wi-Fi.
+
+\begin{ckfig}
+\includegraphics[width=0.80\linewidth]{target-system.png}
+\end{ckfig}
+
+\clearpage
+\section{2. System architecture}
+
+The main computer runs one server program. Inside it, M1 runs the game, M3 moves the motorcycles,
+the traffic and the bots, and M2 does all the network work. This program makes every final decision,
+so all players see the same game. The phones (M4) only send their buttons and draw the 3D city. The
+admin page (M5) sends commands and shows graphs.
+
+In the LED board there is one ESP32 (M6). It runs one Arduino program with two parts. The link part
+talks to the server, reads the motion sensor and drives the vibration motors. The LED part draws the
+LED frames. The figure below shows all six modules and the links between them. Each module chapter
+later has its own figure with only the data that goes into and out of that module.
+
+\begin{ckfig}
+\systemmap{none}
+\end{ckfig}
+
+\msub{Which link uses which protocol}
+A web browser can only open a WebSocket for talk in both directions, so the phones and the admin page
+use WebSocket, which runs on TCP. The LED board uses two channels. Messages that must never be lost go
+on TCP: the config, the vibrate commands for the motors, the earthquake events and the status report.
+Data that comes many times per second goes on UDP: the board state, the sensor samples and the delay
+probes. With UDP a lost packet is simply replaced by the next one, so the LEDs never stop to wait.
+
+\msub{The path of one button press}
+The next figure follows one press of the gas button. The phone moves its own motorcycle at once. The
+message goes to the server, M2 checks it, and M1 uses it in the next tick. Then the new state goes to
+every phone, to the admin page and to the board.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck]
+\node[cl, minimum width=22mm] (a) at (0,0) {Player presses\\gas};
+\node[cl, minimum width=22mm] (b) at (3.3,0) {Phone moves\\at once};
+\node[sv, minimum width=22mm] (c) at (6.6,0) {M2 checks,\\M1 tick};
+\node[sv, minimum width=22mm] (d) at (9.9,0) {State to\\everybody};
+\node[cl, minimum width=22mm] (e) at (13.2,1.2) {Other phones\\draw it};
+\node[ad, minimum width=22mm] (f) at (13.2,0) {Admin map\\and graphs};
+\node[bd, minimum width=22mm] (g) at (13.2,-1.2) {LED dot\\moves};
+\draw[inna,->] (a) -- (b);
+\draw[tcpa,->] (b) -- (c);
+\draw[inna,->] (c) -- (d);
+\draw[tcpa,->] (d) -- (e.west);
+\draw[tcpa,->] (d) -- (f);
+\draw[udpa,->] (d) -- (g.west);
+\ckleg{0.5,-2.4}{tcpa/WebSocket on TCP, udpa/UDP, inna/inside the phone or the server}
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Five rules for the whole system}
+First, there is one authority: only M1 changes the game state,
+and only inside a tick. Second, inputs are safe: phones send controls, never positions or scores,
+and M2 checks every message before M1 sees it. Third, all modules use shared contract files for the
+messages and one shared city plan, so the 3D city and the board always match. Fourth, each module
+can be built and tested alone with fake data from its neighbours. Fifth, the inputs of every tick
+go into a log, so a game can be played again exactly for testing.
+
+\section{3. System requirements}
+
+\ckkeep{%
+The table lists the requirements of the whole system. The last column shows the modules that meet
+each requirement.
+
+\begin{tabular}{|L{0.05}|L{0.16}|L{0.63}|L{0.16}|}
+\hline \textbf{No} & \textbf{Requirement} & \textbf{Description} & \textbf{Modules} \\ \hline 
+R1 & Multiplayer game & At most 8 players in 4 teams (at most 2 per team). A game lasts at most 5 minutes. AI bots fill empty places. The team with the most delivery points wins. & M1 M2 M3 M4 \\ \hline
+R2 & Delivery cycle & The player takes a package from the store. The server chooses a delivery point by travel time with the current obstacles. The point blinks on the board in the player's colour. The player delivers and returns to the store. The near / far chance is set per player by the admin. & M1 M3 M4 M6 \\ \hline
+R3 & Driving and controls & Free driving, lane changes and passing obstacles. No reverse, U turn by steering. Throttle, brake, left and right buttons on the phone. & M3 M4 \\ \hline
+R4 & Collisions, falls, traffic & In a fast collision both players fall and wait a short penalty. NPC cars create real traffic. Hitting a car, a building or an obstacle fast makes the player fall. Penalty time and traffic density are admin parameters. & M1 M3 \\ \hline
+R5 & No map on the phone & The phone shows only a compass arrow to the delivery point (or back to the store). No distance and no roads. Players must look at the board. ``Find me'' lights the player's LED white for 1 s. & M1 M4 M6 \\ \hline
+R6 & Obstacles & Four types: heavy traffic, road work, accident, water puddle. On the board red always means ``this road slows you down'' and the pattern shows the type. A water puddle is light blue. Obstacles appear by themselves at random places during the game, never right next to a player, and each one ends after a set time. The admin can also add obstacles and can change the effect, the rate and the duration of each type. & M1 M3 M5 M6 \\ \hline
+R7 & Earthquake mode & Starts by hitting the board by hand or with the admin button (vibration motors under the board). The sensor measures strength and approximate area. In the game the camera shakes, motorcycles fall and roads near the centre close. A shock wave spreads on the board. The strength is an admin parameter. & M1 M3 M4 M5 M6 \\ \hline
+R8 & Physical LED board & 60 × 60 cm, 6 roads in each direction (5 × 5 blocks), programmable addressable RGB LED strips on all roads, 3D printed buildings, four team stores in the corners with LEDs in the team colour. The ESP32 connects over Wi-Fi. The 3D city and the board are built from the same city plan. & M4 M6 \\ \hline
+R9 & Live admin panel & All parameters are changed during the game. The admin sees the change in three places: 3D simulation, LED board and live graphs. & M1 M2 M5 \\ \hline
+R10 & Network and measurement & Computer, phones and board talk over Wi-Fi. The admin can add delay, packet loss and a frame rate limit per player, and delay and loss on the board link. Ping, packet loss and frame rate are measured live. & M2 M4 M5 M6 \\ \hline
+R11 & Engineering requirements & The main computer makes all game decisions (single authority). The phone only sends controls and sees its own motorcycle at once. Inputs and outputs of every module are defined, and each module can be developed and tested with mock data. & M1 to M6 \\ \hline
+\end{tabular}}
+
+\section{4. Modules}
+
+\ckkeep{%
+The project has six modules on three sides: the server (M1 to M3), the phone and admin pages (M4,
+M5) and the physical board (M6). Every module has at least 3 members, and every member works in 2 or
+3 modules. So a module can go on even if one member leaves.
+
+\begin{tabular}{|L{0.07}|L{0.28}|L{0.56}|L{0.09}|}
+\hline \textbf{Module} & \textbf{Name} & \textbf{Task} & \textbf{People} \\ \hline 
+M1 & Game Server and Rules & Single authority: game loop, rules, score, delivery, fall penalty, admin commands. & 5 \\ \hline
+M2 & Network and Synchronization & Phone, admin and board connections. Message encoding. Safe game state. Ping and network delay / loss settings. & 4 \\ \hline
+M3 & Physics, Traffic and AI & Motorcycle motion, collisions, falls, effects of obstacles and earthquakes, prediction on the phone. Routes and travel times, NPC traffic, bot drivers. & 5 \\ \hline
+M4 & Player Client and 3D City & 3D city on the phone, controls, compass, prediction and correction. & 3 \\ \hline
+M5 & Admin Panel and Monitoring & Live parameters, map and obstacle tools, earthquake panel, graphs. & 3 \\ \hline
+M6 & LED Board and ESP32 & Board connection, motion sensor and earthquake detection, vibration motors, LED animation engine and the physical board: base, LED strips, 3D printed city. & 6 \\ \hline
+\end{tabular}}
+
+\ckkeep{%
+\begin{tabular}{|L{0.34}|C{0.11}|C{0.11}|C{0.11}|C{0.11}|C{0.11}|C{0.11}|}
+\hline \textbf{Member} & \textbf{M1} & \textbf{M2} & \textbf{M3} & \textbf{M4} & \textbf{M5} & \textbf{M6} \\ \hline 
+Tuğberk Akbulut & X & X & & & & X \\ \hline
+Abdullatif Yılmaz & X & & X & X & & \\ \hline
+Hasan Alperen Elmas & & & X & & & X \\ \hline
+Batuhan Yanar & & & X & & X & \\ \hline
+Ayşe Poyraz & & X & & & X & X \\ \hline
+Berk Andaçgil & X & & & X & X & \\ \hline
+Hasan Hüseyin Özdemir & & X & & & & X \\ \hline
+Muhib Taha Boy & & & X & & & X \\ \hline
+Selim Barut & X & & X & X & & \\ \hline
+Umutcan Ocak & X & X & & & & X \\ \hline
+\textbf{People} & \textbf{5} & \textbf{4} & \textbf{5} & \textbf{3} & \textbf{3} & \textbf{6} \\ \hline
+\end{tabular}}
+
+\bigskip
+\needspace{16\baselineskip}
+\setcounter{chap}{5}\setcounter{msec}{0}
+\section{5. M1 Game Server and Rules}
+\textit{Team: Tuğberk Akbulut, Abdullatif Yılmaz, Berk Andaçgil, Selim Barut, Umutcan Ocak}
+
+\msection{Purpose}
+
+M1 is the brain of the game. It runs on the main computer and it is the only part that can change
+the game. It keeps the game clock and the one true game state. It knows every team, store, package,
+delivery point, score, fall, obstacle and earthquake. Phones only send their buttons. M1 decides
+what happens, and then everybody sees the same result.
+
+\ckinfo{srv}{Main computer, in one server program together with M2 and M3}{TypeScript on Node.js, a fixed step game loop with 30 ticks per second, seeded random numbers, JSON files for the city plan and the game log}{R1 R2 R4 R5 R6 R7 R9 R11}
+
+M1 has no network code. All its inputs and outputs are data in the memory of the server program. The
+figure shows which module gives M1 each kind of data and which module gets each result.
+
+\begin{ckfig}
+\iomap{6}{6}{\textbf{M1}\\Game server\\and rules}{sv}
+{{M2, from phones}/cl/{controls, joins,\\``Find me''}/inna, {M2, from admin}/ad/{commands,\\parameters}/inna, {M2, from board}/bd/{earthquake\\events}/inna, {M3 Traffic}/sv/{NPC cars, bot controls,\\travel times}/inna, {M3 Physics}/sv/{poses, collisions,\\falls}/inna, {City plan file}/hwb/{roads, stores,\\delivery points}/inna}
+{{M2, to phones}/cl/{game state\\30 per second}/inna, {M2, to admin}/ad/{state, metrics,\\replies}/inna, {M2, to board}/bd/{board state,\\vibrate}/inna, {M3 Physics}/sv/{controls, obstacles,\\earthquake}/inna, {M3 Traffic}/sv/{players, obstacles,\\parameters}/inna, {Disk}/hwb/{game log}/inna}
+{inna/data in the memory of the server program}
+\end{ckfig}
+
+\msection{Requirements covered}
+
+\ckkeep{%
+M1 takes part in eight of the eleven system requirements. The last column says what will work when
+M1 is finished.
+
+\begin{tabular}{|L{0.06}|L{0.15}|L{0.40}|L{0.39}|}
+\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M1 does for it} & \textbf{When M1 is done} \\ \hline 
+R1 & Multiplayer game & Lobby with 4 teams and at most 2 players in a team. Bots fill the empty places. A game is at most 5 minutes. & A full game runs from the lobby to the winner, with humans and bots together \\ \hline
+R2 & Delivery cycle & Automatic pickup at the store. Picks a delivery point by travel time, with a near or far chance per player & Every player always has a package or a point to go to, and points are fair \\ \hline
+R4 & Collisions and falls & Gives a penalty time after every fall that M3 reports & A fallen player waits and then rides on with the package \\ \hline
+R5 & No map on the phone & Puts the compass target and the ``Find me'' waiting time into the game state & The phone can show the arrow and the button without a map \\ \hline
+R6 & Obstacles & Keeps the one obstacle list that M3, M4 and M6 use. Adds random obstacles during the game and removes each obstacle when its time ends & A new or ended obstacle, automatic or from the admin, is seen everywhere in the same tick \\ \hline
+R7 & Earthquake & One path for a hand hit, the motors and the admin button. Road work and falls inside the radius & A hit on the board changes the game for everybody \\ \hline
+R9 & Live admin panel & Checks admin commands and sends each parameter to the module that uses it & Every parameter can be changed during the game \\ \hline
+R11 & Engineering requirements & Only M1 changes the game state. Every game can be played again from the log & The same log always gives the same game \\ \hline
+\end{tabular}}
+
+\msection{Inputs and outputs}
+
+\ckkeep{%
+The table gives the content of each input and output. Value ranges are shown only for the main
+control values.
+
+\begin{tabular}{|L{0.11}|L{0.17}|L{0.18}|L{0.54}|}
+\hline \textbf{Direction} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline 
+In & Controls & M2, from phones & Throttle and brake from 0 to 1, steer from −1 to 1, a control number. ``Find me'' comes as an event \\ \hline
+In & Join & M2, from phones & Player key, name, team. M2 also reports when a player is lost or comes back \\ \hline
+In & Admin commands & M2, from admin & Parameter changes, start, pause, resume, end, reset, new game code, obstacles, earthquake \\ \hline
+In & Board events & M2, from board & Source (hand or motors), strength from 0 to 10, zone, confidence \\ \hline
+In & Traffic & M3 & NPC cars, bot controls, travel time table \\ \hline
+In & Physics & M3 & New motorcycle poses, collision and fall events \\ \hline
+Out & Game state & M2, to phones and admin & Every tick: phase, time, scores, players, NPC cars, obstacles, earthquake. For each player also the compass target, the ``Find me'' waiting time and the number of the last control that M1 used \\ \hline
+Out & Board state & M2, to board & Phase, players, delivery points, obstacles and earthquake in board coordinates \\ \hline
+Out & Metrics & M2, to admin & Twice per second: the values of all admin graphs \\ \hline
+Out & Game log & Disk & The seed and, for every tick, the controls, admin commands and board events \\ \hline
+\end{tabular}}
+
+\msection{Main components}
+
+\ckkeep{%
+M1 is made of seven parts. Each part takes some data and gives a result to the next part or to
+another module.
+
+\begin{tabular}{|L{0.21}|L{0.39}|L{0.40}|}
+\hline \textbf{Component} & \textbf{Takes} & \textbf{Gives} \\ \hline 
+Game loop & The clock & Runs the steps of a tick in a fixed order, 30 times per second \\ \hline
+Match and lobby & Joins, lost players, admin start and pause & Game phase, teams, bots in empty places \\ \hline
+Delivery and scoring & Poses, travel times & Packages, delivery points, automatic deliveries, points \\ \hline
+Penalties & Fall events from M3 & Penalty time, then a stand up request to M3 \\ \hline
+Obstacles and earthquake & Obstacle parameters, admin obstacles, board events & The obstacle list with end times, earthquake centre and radius \\ \hline
+Admin and parameters & Admin commands & Checked values sent to the owner module, ok or error replies \\ \hline
+State builder and recorder & The world after the tick & Frozen game state, board state, metrics with a short history, the game log \\ \hline
+\end{tabular}}
+
+\msection{How it works}
+
+\msub{What a tick is}
+The game world does not change all the time. It changes in small steps, like the pictures of a film.
+One step is called a tick, and the server makes 30 ticks in one second. Between two ticks, M2 only
+collects the messages from the phones, the admin and the board. In a tick, M1 uses all of them
+together, moves the world one step forward and makes a new state. Then M2 sends this state to
+everybody. So every player sees the same world after every tick.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck]
+\draw[black!45, ->, line width=0.8pt] (-0.3,0) -- (14.6,0) node[right, font=\scriptsize]{time};
+\foreach \x/\l in {1.2/1, 5.8/2, 10.4/3}{%
+  \node[sv, minimum width=17mm, minimum height=8mm, font=\scriptsize] (t\l) at (\x,0) {Tick \l};
+  \draw[inna, ->] (t\l.north) -- ++(0,0.8) node[above, font=\scriptsize, align=center]{new state\\to M2};}
+\foreach \qa/\qb/\n in {2.3/4.3/2, 6.9/8.9/3}{%
+  \node[nb, draw=cli, fill=cliL, minimum width=20mm, minimum height=7mm, font=\scriptsize] (q\n) at ({(\qa+\qb)/2},-1.5) {};
+  \foreach \k in {0,1,2} \fill[cli] ({\qa+0.45+\k*0.55},-1.5) circle (0.09);
+  \node[font=\scriptsize, text=cli!70!black] at ({(\qa+\qb)/2},-2.15) {messages wait in the queue};
+  \draw[msga, ->] (q\n.east) -| (t\n.south);}
+\draw[srv, <->, line width=0.9pt] (1.2,2.25) -- node[iol]{one tick: one thirtieth of a second} (5.8,2.25);
+\ckleg{0,-2.85}{inna/new state after each tick, msga/{messages from phones, admin and board}}
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{The steps of one tick}
+A tick always runs the same eight steps in the same order. First M1 takes the inputs that M2 has
+collected. Then it applies admin commands and board events, updates the game phase, asks M3 for
+traffic and bot controls, and then asks it to move all motorcycles. After that the game rules run. At the
+end M1 builds a frozen copy of the state for M2 and writes one line to the game log. Because the order
+never changes and all random numbers come from one seed, the same inputs always give the same game.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck, node distance=3.5mm]
+\node[cl, minimum width=17mm] (a) {Inputs};
+\node[ad, minimum width=17mm, right=of a] (b) {Admin and\\board events};
+\node[sv, minimum width=17mm, right=of b] (c) {Game\\phase};
+\node[sv, minimum width=17mm, right=of c, fill=tB!20, draw=tB!80!black] (d) {Traffic\\M3};
+\node[sv, minimum width=17mm, right=of d, fill=tD!18, draw=tD!80!black] (e) {Physics\\M3};
+\node[sv, minimum width=17mm, right=of e, fill=obs!12, draw=obs] (f) {Rules};
+\node[sv, minimum width=17mm, right=of f] (g) {Frozen\\state};
+\node[hwb, minimum width=17mm, right=of g] (h) {Log};
+\foreach \u/\v in {a/b,b/c,c/d,d/e,e/f,f/g,g/h} \draw[inna,->] (\u) -- (\v);
+\draw[inna,->, srv] (h.south) -- ++(0,-0.6) -| node[al, pos=0.25]{next tick} (a.south);
+\ckleg{0,-1.6}{inna/order of the steps, loopa/start of the next tick}
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Controls inside a tick}
+A phone sends its controls on every change and at least 10 times per second, but there are 30 ticks
+per second. So in some ticks a new control comes and in some ticks nothing comes. If nothing comes,
+M1 keeps the last control of that player. If more than one control comes, M1 uses the newest one for
+throttle, brake and steer. ``Find me'' is different. It is an event, not a value. If any message in
+the tick has a ``Find me'' press, the press counts, even when a newer message has no press. So a
+button press is never lost.
+
+\msub{Game flow}
+A game has five phases. In the lobby players join and choose a team. When the admin presses start, a
+3 second countdown begins and nobody can move. Then the game runs for at most 5 minutes. The admin can
+end the game early. The admin can also pause and resume at any time. During a pause everything stops:
+the game time, the penalty times, the waiting time for lost players and the NPC cars. A pause during
+the countdown starts the countdown again after the resume. When the time ends, the team with the most
+points wins. If two teams have the same points, the game ends in a draw between them.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck]
+\node[st, draw=cli, fill=cliL] (l) at (0,0) {Lobby};
+\node[st, draw=adm, fill=admL] (c) at (3.6,0) {Countdown};
+\node[st, draw=srv, fill=srvL, line width=1.4pt] (r) at (7.2,0) {Running};
+\node[st, draw=brd, fill=brdL] (f) at (11.2,0) {Finished};
+\node[st, draw=black!50, fill=black!6] (p) at (5.4,-2.0) {Paused};
+\draw[inna,->] (l) -- node[al]{start} (c);
+\draw[inna,->] (c) -- node[al]{3 s} (r);
+\draw[inna,->] ([yshift=1.5mm]r.east) -- node[al, above=1pt]{time over} ([yshift=1.5mm]f.west);
+\draw[inna,->, obs] ([yshift=-1.5mm]r.east) -- node[al, below=1pt]{admin end} ([yshift=-1.5mm]f.west);
+\draw[inna,->] ([xshift=-6mm]r.south) |- node[al, pos=0.3]{pause} ([yshift=1.5mm]p.east);
+\draw[inna,->] ([yshift=-1.5mm]p.east) -| node[al, pos=0.7]{resume} ([xshift=6mm]r.south);
+\draw[inna,->] (c.south) |- node[al, pos=0.3]{pause} (p.west);
+\draw[inna,->] (f.north) -- ++(0,0.6) -| node[al, pos=0.25]{new game} (l.north);
+\ckleg{0.2,-3.0}{inna/phase change, cmda/admin command}
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Players who leave and come back}
+M2 sees when the link of a phone is lost and tells M1. M1 keeps the place of this player for 30
+seconds. If the player does not come back in this time, a bot takes the motorcycle and plays on. If
+the player comes back later with the same player key, the bot gives the motorcycle back. The admin
+sets how many bots fill the empty places at the start.
+
+\msub{Deliveries and points}
+A player gets a package automatically when the motorcycle is inside the area of the own team's store.
+M1 then picks a delivery point for this player. M3 gives a table with the travel time from the store
+to every possible point. The times count the obstacles that are on the roads at that moment. The
+admin sets for each player whether the new delivery point appears near the store or far from it, and
+M1 picks the point with this setting. Two players never get the same point at
+the same time. A far point gives more points. Every delivery gets a base value, and the longer the
+expected travel time is, the bigger the bonus on top of it. The admin sets both the base value and
+the bonus. The points are fixed when the point is chosen, so a new obstacle
+later does not change them.
+
+There is no delivery button. When the player comes to the delivery point and stops inside its area,
+M1 delivers the package automatically and adds the points. The size of the area is an admin
+parameter. A fall does not lose the package. The player only waits for the penalty time.
+
+\begin{ckfig}
+\begin{tikzpicture}[x=1.1cm, y=1.1cm]
+\boardbase
+\draw[tA, line width=2.4pt, rounded corners=3pt, opacity=0.9] (1,4) -- (1,3) -- (2,3) -- (2,2) -- (2.5,2);
+\dpoint{2.5}{2}{tA}
+\draw[tA!45, line width=1pt, dashed] (4,1.5) circle (0.18);
+\bike{1}{3.5}{tA}{90}
+\bike{3.5}{4}{tB}{0}
+\bike{4}{2.5}{tC}{-90}
+\bike{1.5}{1}{tD}{180}
+\roadwork{3,2}{3,3}
+\nmark{0.5}{5.2}{1}\nmark{0.55}{3.5}{2}\nmark{1.5}{2.7}{3}\nmark{2.5}{2.5}{4}\nmark{4.45}{1.5}{5}\nmark{3.35}{2.5}{6}
+\node[anchor=west, font=\small, align=left] at (6.0,2.5) {\begin{tabular}{@{}c@{\ \ }l@{}}
+\textbf{1} & Team store in the team colour\\[3pt]
+\textbf{2} & Player with a package,\\ & a dot with a tail\\[3pt]
+\textbf{3} & Fastest route found by M3\\[3pt]
+\textbf{4} & Near delivery point,\\ & blinks in the player's colour\\[3pt]
+\textbf{5} & A far point, worth more points\\[3pt]
+\textbf{6} & Road work, so the route\\ & goes around\end{tabular}};
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Earthquakes}
+An earthquake can come from a hand hit on the board, from the vibration motors or from the admin
+button. All of them take the same path in M1. The board sends a strength from 0 to 10 and one of
+9 zones. M1 uses the centre of that zone as the centre of the earthquake. A stronger hit makes a
+bigger earthquake. Motorcycles near the centre fall, and the roads near the centre close with road
+work for a limited time.
+
+\msub{Obstacles}
+M1 keeps one list of obstacles. Each obstacle has a type, a road segment, a lane, a position and an end
+time. During the game M1 adds new obstacles by itself at random places. The admin sets for each of the
+four types how often it appears and how long it stays. A new obstacle never appears right next to a
+player or right in front of one, so nobody falls without a chance to react. Obstacles from the admin
+and the road work from an earthquake also have a duration. When the time of an obstacle ends, M1
+removes it from the list. While the game is paused, no new obstacle appears and the times stop. When
+the list changes, M3 computes the routes again, and M4 and M6 show the change.
+
+\msub{Admin parameters}
+Every parameter has a name, a group, a minimum, a maximum and an owner module. When the admin changes a value, M1 checks the limits first.
+Then it saves the value, sends it to the owner (for example grip to M3) and sends ``ok'' back to the
+panel. A wrong value gets an error and the old value stays.
+
+\msection{Testing}
+
+M1 is tested alone, without the network and without the real M2 and M3. Small fake parts take
+their place inside the test and give fixed test data: scripted controls and joins, fixed poses and fall
+events, a fixed travel time table and recorded admin commands and board events. With this data we
+check every rule: the game phases with pause and end, the lobby and the bots, a lost player who comes
+back, the delivery cycle and the fair choice of points, two ``Find me'' presses in one tick, every
+admin command with good and wrong values, the earthquake radius, and the automatic obstacles with
+their rates, durations, distance to the players and the stop during a pause. Because all random numbers come
+from one seed, the same test data must always give exactly the same game state.
+
+\bigskip
+\needspace{16\baselineskip}
+\setcounter{chap}{6}\setcounter{msec}{0}
+\section{6. M2 Network and Synchronization}
+\textit{Team: Tuğberk Akbulut, Ayşe Poyraz, Hasan Hüseyin Özdemir, Umutcan Ocak}
+
+\msection{Purpose}
+
+M2 connects the phones, the admin page and the LED board to the game server. It does not make game
+decisions. It takes messages from outside, checks them and gives them to M1. After each tick it takes
+the state from M1 and sends it to everybody. M2 also makes sure that nothing from outside can change
+the game state directly. For the admin, it measures the network and it can make the network worse on
+purpose for tests.
+
+\ckinfo{srv}{Main computer, in the same server program as M1}{TypeScript on Node.js, WebSocket for phones and admin, TCP and UDP for the LED board, MessagePack binary messages, QR code for joining}{R1 R9 R10 R11}
+
+M2 is the only module with links to the outside. The figure shows every neighbour and the kind of link
+that each message uses.
+
+\begin{ckfig}
+\iomap{5}{5}{\textbf{M2}\\Network\\and sync}{sv}
+{{M4 Phones}/cl/{hello, join, controls,\\``Find me'', ping replies}/tcpa, {M5 Admin page}/ad/{login, commands,\\parameters}/tcpa, {M6 Board (TCP)}/bd/{earthquake events,\\status}/tcpa, {M6 Board (UDP)}/bd/{sensor samples,\\delay replies}/udpa, {M1 Game server}/sv/{frozen state,\\metrics}/inna}
+{{M1 Game server}/sv/{checked inputs,\\lost players}/inna, {M4 Phones}/cl/{game state, join reply,\\ping, frame rate limit}/tcpa, {M5 Admin page}/ad/{state, metrics,\\replies, board data}/tcpa, {M6 Board (TCP)}/bd/{config, vibrate}/tcpa, {M6 Board (UDP)}/bd/{board state,\\delay probe}/udpa}
+{tcpa/WebSocket or TCP, udpa/UDP, inna/inside the server program}
+\end{ckfig}
+
+\msection{Requirements covered}
+
+\ckkeep{%
+M2 takes part in four requirements. The last column says what will work when M2 is finished.
+
+\begin{tabular}{|L{0.06}|L{0.15}|L{0.40}|L{0.39}|}
+\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M2 does for it} & \textbf{When M2 is done} \\ \hline 
+R1 & Multiplayer game & Up to 8 phones join with a QR code or a six digit game code, only with the browser & Players join in seconds without installing anything \\ \hline
+R9 & Live admin panel & Admin channel for commands, parameters, state, metrics and board data & The admin page controls the game from any computer on the game Wi-Fi \\ \hline
+R10 & Network and measurement & Ping and jitter for each phone, real loss on the board link. Added delay, jitter and loss for each player and for the board & The admin can make the network worse and see the effect live \\ \hline
+R11 & Engineering requirements & Inputs are checked and queued. Every phone gets the same frozen state of each tick & No phone can change the game by itself, and all players see the same game \\ \hline
+\end{tabular}}
+
+\msection{Inputs and outputs}
+
+\ckkeep{%
+The table lists every message group with its link. All messages are MessagePack, a compact binary
+form of JSON.
+
+\begin{tabular}{|L{0.11}|L{0.17}|L{0.18}|L{0.54}|}
+\hline \textbf{Direction} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline 
+In & Phone messages & M4, WebSocket & Hello with player key, name and game code, join with team, controls, ``Find me'', ping replies \\ \hline
+In & Admin messages & M5, WebSocket & Commands, parameter changes, requests for parameters and the game log \\ \hline
+In & Board messages & M6, TCP and UDP & Earthquake events and status on TCP. Sensor samples and delay replies on UDP \\ \hline
+In & State and metrics & M1 & Frozen game state and board state every tick, metrics twice per second \\ \hline
+Out & To M1 & M1 & Checked controls, joins, ``Find me'', admin commands, board events, lost and returning players, network metrics \\ \hline
+Out & To phones & M4, WebSocket & Game state 30 times per second, join replies, ping, frame rate limit \\ \hline
+Out & To admin & M5, WebSocket & State 10 times per second, metrics, replies, board data \\ \hline
+Out & To board & M6, TCP and UDP & Config and vibrate commands on TCP. Board state and delay probes on UDP \\ \hline
+\end{tabular}}
+
+\msection{Main components}
+
+\ckkeep{%
+M2 is made of eight parts. Each one takes some data and gives a result to the next part.
+
+\begin{tabular}{|L{0.21}|L{0.39}|L{0.40}|}
+\hline \textbf{Component} & \textbf{Takes} & \textbf{Gives} \\ \hline 
+Web server and join & Page requests from phones and the admin & The phone and admin pages, the 3D models, the city plan, the QR code and the game code \\ \hline
+Sessions and access & New links, player keys & One session for each phone and one admin. A player key keeps the same motorcycle after a reload \\ \hline
+Codec and checker & Raw messages & Checked messages. A bad message gets an error reply. Too many or too large messages are dropped \\ \hline
+Input queue & Checked inputs & The inputs of one tick for M1 \\ \hline
+State broadcaster & Frozen state from M1 & The same encoded bytes for every phone, a smaller state for the admin and the board \\ \hline
+Network emulator & Admin network settings & Added delay, jitter and loss for each player and for the board \\ \hline
+Ping and metrics & Ping replies, order numbers & Ping, jitter, loss, clock offset and frame rate for the admin graphs \\ \hline
+Board link & Board messages & One TCP channel and one UDP stream to the board \\ \hline
+\end{tabular}}
+
+\msection{How it works}
+
+\msub{Which link uses which protocol}
+A web browser can only open a WebSocket for talk in both directions, so phones and the admin page use
+WebSocket. WebSocket runs on TCP, so every message arrives and the order is kept. The LED board is not
+a browser, so it can use both TCP and UDP. On TCP it gets the messages that must never be lost: the
+config (player colours, brightness, power limit) and the vibrate commands. The board also sends
+earthquake events and its status report on TCP. The fast and repeated data goes on UDP: the board
+state, the sensor samples and the small delay probes. Here only the newest message is useful. If one
+UDP packet is lost, the next one replaces it. TCP would wait for the lost packet and the LEDs would
+stop for a moment, so UDP is the better choice for this data.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck]
+\fill[tcpc!8, rounded corners=4pt] (2.0,0.95) rectangle (11.0,-0.95);
+\fill[tcpc!8, rounded corners=4pt] (2.0,-1.35) rectangle (11.0,-3.25);
+\fill[tcpc!14, rounded corners=4pt] (2.0,-3.65) rectangle (11.0,-5.55);
+\fill[udpc!12, rounded corners=4pt] (2.0,-5.95) rectangle (11.0,-8.25);
+\node[font=\scriptsize\bfseries, text=tcpc] at (6.5,0.72) {WebSocket on TCP};
+\node[font=\scriptsize\bfseries, text=tcpc] at (6.5,-1.58) {WebSocket on TCP};
+\node[font=\scriptsize\bfseries, text=tcpc] at (6.5,-3.88) {TCP: must arrive};
+\node[font=\scriptsize\bfseries, text=udpc] at (6.5,-6.18) {UDP: newest wins};
+\node[sv, minimum width=24mm, minimum height=91mm, line width=2pt] (m2) at (0.6,-3.65) {\textbf{M2}\\on the main\\computer};
+\node[cl, minimum width=22mm, minimum height=16mm] (ph) at (12.4,0) {\textbf{M4}\\Phones};
+\node[ad, minimum width=22mm, minimum height=16mm] (ad) at (12.4,-2.3) {\textbf{M5}\\Admin page};
+\node[bd, minimum width=22mm, minimum height=39mm] (bo) at (12.4,-5.9) {\textbf{M6}\\LED board};
+\draw[tcpa,->] (2.0,0.2) -- node[al]{game state, 30 per second} (11.0,0.2);
+\draw[tcpa,<-] (2.0,-0.4) -- node[al]{controls, ``Find me''} (11.0,-0.4);
+\draw[tcpa,->] (2.0,-2.1) -- node[al]{state, metrics, board data} (11.0,-2.1);
+\draw[tcpa,<-] (2.0,-2.7) -- node[al]{commands, parameters} (11.0,-2.7);
+\draw[tcpa,->] (2.0,-4.4) -- node[al]{config, vibrate} (11.0,-4.4);
+\draw[tcpa,<-] (2.0,-5.0) -- node[al]{earthquake event, status} (11.0,-5.0);
+\draw[udpa,->] (2.0,-6.7) -- node[al]{board state} (11.0,-6.7);
+\draw[udpa,<-] (2.0,-7.25) -- node[al]{sensor samples} (11.0,-7.25);
+\draw[udpa,<->] (2.0,-7.8) -- node[al]{delay probe} (11.0,-7.8);
+\ckleg{-0.4,-8.8}{tcpa/TCP or WebSocket: every message arrives in order, udpa/UDP: fast and the newest message wins}
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Messages on the board TCP channel}
+WebSocket cuts the data into messages by itself, but plain TCP is only a stream of bytes. So each
+message on the board TCP channel starts with its length, and the other side reads exactly that many
+bytes. Small messages like a vibrate command are sent at once, without waiting to fill a bigger
+packet. Every message on both board channels has an order number, so old UDP packets can be dropped.
+Each start of the server makes a new session number. When the board sees a new session number, it
+starts its order numbers again, so new messages are not dropped as old ones.
+
+\msub{Joining}
+At the start the admin screen shows a QR code and a six digit game code. The QR code holds the IP
+address of the main computer and the game code. A player scans it, and
+the phone opens the game page from the main computer. A player without a camera types the address and
+the code. The first time, the browser saves a random player key. If the page reloads or Wi-Fi drops,
+the phone sends the same key and gets the same motorcycle back. The LED board first looks for the
+server on the local network. If it finds nothing, it uses a backup server address saved in the ESP32's flash memory.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck]
+\fill[black!80, rounded corners=4pt] (-0.2,-0.2) rectangle (6.2,4.2);
+\fill[white] (0,0) rectangle (6,4);
+\fill[srv] (0,3.55) rectangle (6,4);
+\node[text=white, font=\scriptsize\bfseries, anchor=west] at (0.15,3.78) {Çılgın Kurye, admin};
+\node[font=\scriptsize\bfseries] at (1.75,3.25) {Scan to join};
+\begin{scope}[shift={(0.55,0.55)}]
+\pgfmathsetseed{7}
+\foreach \x in {0,...,20}{\foreach \y in {0,...,20}{%
+  \pgfmathparse{rnd>0.52?1:0}\ifnum\pgfmathresult=1 \fill[black] (\x*0.11,\y*0.11) rectangle ++(0.11,0.11);\fi}}
+\foreach \x/\y in {0/0,0/14,14/14}{\fill[white] (\x*0.11-0.02,\y*0.11-0.02) rectangle ++(0.81,0.81);
+  \fill[black] (\x*0.11,\y*0.11) rectangle ++(0.77,0.77); \fill[white] (\x*0.11+0.11,\y*0.11+0.11) rectangle ++(0.55,0.55); \fill[black] (\x*0.11+0.22,\y*0.11+0.22) rectangle ++(0.33,0.33);}
+\end{scope}
+\node[font=\scriptsize, anchor=west] at (3.3,2.9) {or open};
+\node[font=\scriptsize\ttfamily, anchor=west] at (3.3,2.5) {192.168.1.20};
+\node[font=\scriptsize, anchor=west] at (3.3,1.9) {Game code};
+\node[draw=srv, fill=srvL, font=\large\bfseries, rounded corners=2pt, anchor=west] at (3.3,1.3) {482 913};
+\node[font=\tiny, anchor=west, text=black!60] at (3.3,0.45) {Players: 3 of 8};
+\begin{scope}[shift={(8.0,-0.3)}]
+\fill[black!85, rounded corners=7pt] (-0.15,-0.15) rectangle (2.55,4.75);
+\fill[white] (0,0) rectangle (2.4,4.6);
+\node[font=\scriptsize\bfseries] at (1.2,4.25) {Join the game};
+\node[draw=black!40, minimum width=20mm, font=\tiny, anchor=west, text=black!55] at (0.2,3.7) {Name: Deniz};
+\node[draw=black!40, minimum width=20mm, font=\tiny, anchor=west, text=black!55] at (0.2,3.2) {Code: 482 913};
+\node[font=\tiny\bfseries] at (1.2,2.75) {Choose a team};
+\node[fill=tA, text=white, font=\tiny\bfseries, minimum width=9mm, minimum height=6mm, rounded corners=2pt] at (0.65,2.25) {Blue};
+\node[fill=tB, text=white, font=\tiny\bfseries, minimum width=9mm, minimum height=6mm, rounded corners=2pt] at (1.75,2.25) {Green};
+\node[fill=tC, text=black, font=\tiny\bfseries, minimum width=9mm, minimum height=6mm, rounded corners=2pt] at (0.65,1.55) {Yellow};
+\node[fill=tD, text=white, font=\tiny\bfseries, minimum width=9mm, minimum height=6mm, rounded corners=2pt] at (1.75,1.55) {Purple};
+\node[fill=cli, text=white, font=\tiny\bfseries, minimum width=20mm, minimum height=6mm, rounded corners=2pt] at (1.2,0.6) {Ready};
+\end{scope}
+\draw[inna,->, line width=1.2pt] (6.3,1.9) -- node[al]{scan} (7.75,1.9);
+\node[font=\scriptsize\bfseries, text=black!60] at (3,-0.6) {Admin screen};
+\node[font=\scriptsize\bfseries, text=black!60] at (9.2,-0.8) {Phone};
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Keeping the game state safe}
+Many phones send messages at the same time, but only M1 may change the game state, and only inside a
+tick. So M2 never writes to the state. A phone can only send controls. It can never send a position or
+a score. M2 decodes each message, checks its type and fields, and keeps every value in its range (for
+example steer stays between −1 and 1). Each session can only control its own player. A message with
+an old or repeated order number is dropped. Each session also has a limit on the number and size of
+its messages, so one phone cannot flood the server. Good inputs wait in a queue, and M1 reads the queue at the
+start of the next tick. At the end of the tick M2 encodes the frozen state once and sends the same
+bytes to all phones.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck, node distance=4mm]
+\node[cl, minimum width=16mm] (p) {Phone\\message};
+\node[sv, minimum width=16mm, right=of p] (c) {Decode\\and check};
+\node[sv, minimum width=16mm, right=of c] (q) {Input\\queue};
+\node[sv, minimum width=16mm, right=of q, fill=srv!35, line width=1.6pt] (t) {M1 tick};
+\node[sv, minimum width=16mm, right=of t] (f) {Frozen\\state};
+\node[sv, minimum width=16mm, right=of f] (e) {Encode\\once};
+\node[cl, minimum width=16mm, right=of e] (a) {All\\phones};
+\node[nb, draw=obs, fill=obs!10, below=8mm of c] (x) {Dropped,\\error reply};
+\draw[tcpa,->] (p) -- (c);
+\foreach \u/\v in {c/q,q/t,t/f,f/e} \draw[inna,->] (\u) -- (\v);
+\draw[tcpa,->] (e) -- (a);
+\draw[cmda,->] (c) -- node[al]{bad} (x);
+\ckleg{4.2,-1.75}{tcpa/WebSocket, inna/inside the server, cmda/refused message}
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Network settings from the admin}
+For tests the admin can make the network worse by hand. Each player has an up queue and a down queue,
+and the board link has the same pair. The admin sets three values for each queue: an added delay, a
+jitter that makes the delay change randomly, and a loss chance. The loss is used only on the state and
+control messages. Join, ``Find me'' and admin replies are never dropped, because the game
+would break without them. The admin can also set a frame rate limit for a phone and the board state
+rate, from 10 to 30 per second.
+
+\msub{Measuring the network}
+Twice per second M2 sends a ping with the server time. The phone answers with its own time, its frame
+rate and the number of the last state it got. From this M2 finds the round trip time, the jitter and
+the clock offset of the phone. On WebSocket a real Wi-Fi loss is not seen as a missing message,
+because TCP sends it again. It shows as a jump in the delay. So for phones M2 reports ping and jitter.
+On the board UDP stream a lost packet is really missing, so gaps in the order numbers give the real
+packet loss.
+
+\msub{How much data}
+We expect the full game state to be a few kilobytes. Sent 30 times per second to 8 phones, this is
+only a few megabits per second in total, which
+a normal 2.4 GHz Wi-Fi router can carry.
+
+\msection{Testing}
+
+M2 is tested alone with test data instead of the real neighbours. A fake M1 sends a moving test state,
+scripted bot phones play the role of up to 8 real phones, and a small test program plays the board.
+With this setup we send good, broken and too large messages and check that no bad value reaches M1.
+We also check the load with 8 phones, how exact the added delay, jitter and loss are, that join and
+``Find me'' are never dropped, reconnecting with the player key, and a server restart with the test
+board.
+
+\bigskip
+\needspace{16\baselineskip}
+\setcounter{chap}{7}\setcounter{msec}{0}
+\section{7. M3 Physics, Traffic and AI}
+\textit{Team: Abdullatif Yılmaz, Hasan Alperen Elmas, Batuhan Yanar, Selim Barut, Muhib Taha Boy}
+
+\msection{Purpose}
+
+M3 moves everything on the roads. It has two parts. The physics part turns throttle, brake and
+steering into speed, direction and position. It finds collisions, decides when a motorcycle falls,
+and adds the effect of obstacles and earthquakes to the motion. The traffic part finds routes and
+travel times on the road network, moves the NPC cars that make the traffic, and drives the AI bots
+that fill the empty places in a game. A bot makes the same control record that a phone sends, so for
+M1 a bot and a human player look the same. The physics code also runs on the phone, where it guesses
+the player's own motorcycle before the server answers.
+
+\ckinfo{srv}{Main computer inside the game server, called by M1 in every tick. The physics part also runs in the phone browser for prediction}{TypeScript, a 3D physics engine that runs on the web, our own shortest path search (Dijkstra), a car following model for NPC cars, a state machine and path following for bots, seeded random numbers}{R1 R2 R3 R4 R6 R7 R11}
+
+M3 has no network code. On the server it talks only to M1, and on the phone only to M4. The figure
+shows what goes in and what comes out.
+
+\begin{ckfig}
+\iomap{4}{4}{\textbf{M3}\\Physics, traffic\\and AI}{sv}
+{{City plan file}/hwb/{roads, lanes,\\buildings, stores}/inna, {M1 Game server}/sv/{controls, players,\\obstacles, earthquake}/inna, {M1 Game server}/sv/{physics, traffic\\and bot parameters}/inna, {M4 Phone}/cl/{own controls,\\server state}/inna}
+{{M1 Game server}/sv/{poses, collisions,\\falls}/inna, {M1 Game server}/sv/{NPC cars,\\bot controls}/inna, {M1 Game server}/sv/{travel times,\\traffic metrics}/inna, {M4 Phone}/cl/{predicted own\\motorcycle}/inna}
+{inna/function calls inside the server or inside the phone page}
+\end{ckfig}
+
+\msection{Requirements covered}
+
+\ckkeep{%
+M3 takes part in seven requirements. The last column says what will work when M3 is finished.
+
+\begin{tabular}{|L{0.06}|L{0.15}|L{0.40}|L{0.39}|}
+\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M3 does for it} & \textbf{When M3 is done} \\ \hline 
+R1 & Multiplayer game & Bots take the empty places and play like players & A game can start with only one human player \\ \hline
+R2 & Delivery cycle & Travel time table from each store, which M1 uses for fair near and far points & No team gets easier delivery points than another \\ \hline
+R3 & Driving and controls & Throttle, brake, left and right. No reverse. A U turn by steering in a small circle at low speed & The motorcycle drives, brakes and turns like an arcade game \\ \hline
+R4 & Collisions, falls, traffic & Collisions with buildings, barriers, NPC cars and motorcycles. A fast hit makes the motorcycle fall. NPC cars make real traffic & Nothing drives through a wall, fast crashes end in a fall, and the city is full of cars that never lock up \\ \hline
+R6 & Obstacles & Road work and accidents are solid. An accident has a slow zone. A puddle makes the motorcycle slide. Heavy traffic adds slow cars, and road work closes the road for routes and cars & Each obstacle type feels different when you drive, and cars and bots go around every obstacle \\ \hline
+R7 & Earthquake & Less grip inside the earthquake area that M1 sends & Riding in an earthquake is harder \\ \hline
+R11 & Engineering requirements & The same input always gives the same result. The server result wins, the phone only predicts. Talks only to M1 with plain data & The own motorcycle reacts at once and still matches the server, and M3 can be tested without the other modules \\ \hline
+\end{tabular}}
+
+\msection{Inputs and outputs}
+
+\ckkeep{%
+M1 calls M3 in every tick: first the traffic part, then the physics part. M4 uses the physics code for
+one motorcycle.
+
+\begin{tabular}{|L{0.11}|L{0.17}|L{0.18}|L{0.54}|}
+\hline \textbf{Direction} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline 
+In & City plan & Shared file & Roads, lanes, intersections, blocks, buildings, stores and possible delivery points \\ \hline
+In & Controls & M1 & Every tick: throttle and brake from 0 to 1, steer from −1 to 1, for humans and bots, and a speed factor for each player \\ \hline
+In & Game data & M1 & Players, obstacles with type, road, lane and position, the earthquake area and the motorcycles that fall \\ \hline
+In & Parameters & M5, through M1 & Top speed, grip, fall speed, grip in a puddle and in an earthquake, number of NPC cars, traffic effects, bot skill \\ \hline
+Out & Poses & M1 & Position, direction, speed, lean, sliding, fallen \\ \hline
+Out & Events & M1 & Collisions (with what and how fast) and falls \\ \hline
+Out & NPC cars & M1, then M4, M5 & Position, direction, speed, lane, size \\ \hline
+Out & Bot controls & M1 & The same record as a phone: throttle, brake, steer \\ \hline
+Out & Travel times & M1 & Seconds from each team store to every possible delivery point \\ \hline
+Out & Traffic metrics & M1, then M5 & Number of NPC cars, mean NPC speed, bot route changes \\ \hline
+Out & Predicted pose & M4 & The player's own motorcycle before the server answers \\ \hline
+\end{tabular}}
+
+\msection{Main components}
+
+\ckkeep{%
+M3 has ten parts. The first four are the physics part and the next five are the traffic part. They
+all run on the server. The predictor runs on the phone.
+
+\begin{tabular}{|L{0.21}|L{0.39}|L{0.40}|}
+\hline \textbf{Component} & \textbf{Takes} & \textbf{Gives} \\ \hline 
+Motorcycle model & Controls, parameters & New speed, direction, lean and sliding \\ \hline
+Colliders & City plan, obstacle list, NPC cars & Solid shapes, slow zones and slippery areas \\ \hline
+Collision solver and fall judge & Moved objects, colliders & Pushed apart objects, collision and fall events \\ \hline
+Earthquake effect & Earthquake area & Lower grip inside the area \\ \hline
+Road graph & City plan & 36 intersections and 60 roads in both directions, with lanes and turn costs \\ \hline
+Route planner & Road graph, obstacles, traffic, parameters & Fastest routes and the travel time table, computed again when a cost changes \\ \hline
+NPC traffic & Routes, players, car hits, number of cars & Moved, added and removed NPC cars \\ \hline
+Bot drivers & Routes, the bot's motorcycle, game data & One control record for each bot in every tick \\ \hline
+Traffic metrics & Cars and bots & Values for the admin graphs \\ \hline
+Predictor & Own controls, server state & Predicted own motorcycle with a smooth correction \\ \hline
+\end{tabular}}
+
+\msection{How it works}
+
+\msub{The two parts in one tick}
+In every tick M1 first calls the traffic part. It moves the NPC cars and makes one control record for
+each bot. Then M1 calls the physics part with the controls of all players, humans and bots together.
+The physics part gives the car hits straight to the traffic part, so a hit car can stop or leave the
+road in the next tick.
+
+\msub{One physics step}
+The server runs 30 ticks per second, and the physics part runs 2 substeps in each tick. Small steps
+keep fast motorcycles from passing through thin walls. Each substep does five things in a fixed order,
+as the figure shows. Because the order is fixed, the same inputs always give the same result on the
+server and on the phone.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck, node distance=4mm]
+\node[cl, minimum width=19mm] (a) {Speed and\\steering};
+\node[sv, minimum width=19mm, right=of a, fill=tC!25, draw=tC!70!black] (b) {Grip and\\sliding};
+\node[sv, minimum width=19mm, right=of b] (c) {Walls and\\obstacles};
+\node[sv, minimum width=19mm, right=of c, fill=tD!18, draw=tD!80!black] (d) {Cars and\\motorcycles};
+\node[nb, draw=obs, fill=obs!10, minimum width=19mm, right=of d] (e) {Fall\\check};
+\foreach \u/\v in {a/b,b/c,c/d,d/e} \draw[inna,->] (\u) -- (\v);
+\draw[loopa,->] (e.south) -- ++(0,-0.55) -| node[al, pos=0.25]{2 substeps in each tick} (a.south);
+\ckleg{0,-1.5}{inna/order of the parts, loopa/next substep}
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Driving}
+The throttle adds speed up to the top speed, and the brake and air drag take speed
+away. There is no reverse. The steering changes the direction. At low speed the motorcycle can turn
+in a small circle, so a U turn is easy. At high speed the turn is wider. The model also
+gives a lean angle, which M4 uses to tilt the 3D motorcycle in a turn.
+
+\msub{Grip and sliding}
+In a turn the motorcycle needs a side force. M3 compares the size of this
+force with the grip limit. If the force is below the limit, the motorcycle follows the turn. If it
+is above the limit, the motorcycle slides out of the turn. We compare only the size, so a left turn
+and a right turn act the same. On a water puddle the grip limit is very low, so the motorcycle
+slides but does not slow down. Inside the earthquake area the grip is lower too.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck]
+\begin{scope}
+\fill[black!65] (-0.5,-0.5) rectangle (4.5,3.2);
+\draw[white, dash pattern=on 5pt off 5pt] (2,-0.5) -- (2,3.2);
+\draw[cli, line width=1.6pt, ->] (1,-0.2) .. controls (1,1.5) and (1.6,2.4) .. (3.6,2.6);
+\fill[tA] (1,0.6) circle (0.15);
+\node[font=\scriptsize, text=white, align=center] at (3.3,0.6) {grip is\\enough};
+\node[font=\scriptsize\bfseries] at (2,-0.85) {Normal turn};
+\end{scope}
+\begin{scope}[shift={(5.6,0)}]
+\fill[black!65] (-0.5,-0.5) rectangle (4.5,3.2);
+\draw[white, dash pattern=on 5pt off 5pt] (2,-0.5) -- (2,3.2);
+\draw[cli!60, line width=1.2pt, dashed] (1,-0.2) .. controls (1,1.5) and (1.6,2.4) .. (3.6,2.6);
+\draw[obs, line width=1.6pt, ->] (1,-0.2) .. controls (1,1.4) and (1.1,2.2) .. (1.2,3.1);
+\fill[tA] (1,0.6) circle (0.15);
+\node[font=\scriptsize, text=white, align=center] at (3.3,0.6) {too fast,\\slides out};
+\node[font=\scriptsize\bfseries] at (2,-0.85) {Too fast in a turn};
+\end{scope}
+\begin{scope}[shift={(11.2,0)}]
+\fill[black!65] (-0.5,-0.5) rectangle (4.5,3.2);
+\draw[white, dash pattern=on 5pt off 5pt] (2,-0.5) -- (2,3.2);
+\fill[cyan!35] (1.0,1.2) ellipse (0.9 and 0.5);
+\draw[white, line width=0.8pt, dash pattern=on 1pt off 2pt] (1.0,1.2) ellipse (0.6 and 0.3);
+\draw[obs, line width=1.6pt, ->] (1,-0.2) -- (1,0.9) .. controls (1.1,1.5) and (1.6,1.8) .. (2.6,2.9);
+\fill[tA] (1,0.4) circle (0.15);
+\node[font=\scriptsize, text=white, align=center] at (3.3,0.6) {puddle,\\low grip};
+\node[font=\scriptsize\bfseries] at (2,-0.85) {On a puddle};
+\end{scope}
+\ckleg{0,-1.45}{wanta/wanted path, reala/real path}
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Collisions and falls}
+Buildings, the outer wall and the road work barriers come from the city
+plan and the obstacle list as solid shapes. NPC cars and motorcycles have simple shapes too. A contact
+pushes the objects apart. If the hit speed is above the fall speed that the admin set, the motorcycle
+falls. When two motorcycles hit each other and their relative speed is above the limit, both of them
+fall. A fallen motorcycle is not solid, so it does not block the road for others. M1 gives the penalty
+time and later asks M3 to stand the motorcycle up again. An accident is solid in one lane and has a
+slow zone around it.
+
+\msub{The road graph and routes}
+The city has 6 roads in each direction. Where two roads cross,
+there is an intersection, so the graph has 36 intersections. Between them there are 60 road
+segments, and cars can drive both ways. Each segment has a cost: the expected time to drive it.
+Turning left or making a U turn adds a small extra cost. Obstacles change the costs. Heavy traffic
+and an accident make a segment slower, and road work closes it. M3 uses Dijkstra's shortest path
+search to find the fastest routes. The graph is small, so one search is very fast. M3 computes the
+routes again whenever a cost changes: when an obstacle appears or ends, when the
+traffic on a road gets much heavier or lighter, or when the admin changes a route parameter. From the
+results it makes the travel time table: the time from each of the four stores to every possible
+delivery point. M1 uses this table to choose fair near and far points.
+
+\begin{ckfig}
+\begin{tikzpicture}[x=1.1cm, y=1.1cm]
+\boardbase
+\draw[tA, line width=2.4pt, rounded corners=3pt] (1,4) -- (1,2) -- (3,2) -- (3,1) -- (3.5,1);
+\draw[tA!50, line width=1.4pt, dashed, rounded corners=3pt] (1,4) -- (3,4) -- (3,2.6);
+\roadwork{3,3}{3,2}
+\heavy{1,1}{2,1}
+\dpoint{3.5}{1}{tA}
+\foreach \x in {0,...,5}{\foreach \y in {0,...,5}{\fill[white] (\x,\y) circle (0.06);}}
+\nmark{0.55}{5.15}{1}\nmark{0.6}{2.6}{2}\nmark{3.35}{3.4}{3}\nmark{3.4}{2.5}{4}\nmark{1.5}{0.65}{5}\nmark{3.95}{1.4}{6}
+\node[anchor=west, font=\small, align=left] at (6.0,2.5) {\begin{tabular}{@{}c@{\ \ }l@{}}
+\textbf{1} & Start: the team store\\[3pt]
+\textbf{2} & Fastest route, found by Dijkstra\\[3pt]
+\textbf{3} & Shorter road, but closed\\[3pt]
+\textbf{4} & Road work: cost is infinite\\[3pt]
+\textbf{5} & Heavy traffic: cost is higher\\[3pt]
+\textbf{6} & Delivery point\\[3pt]
+$\circ$ & Intersection, a node of the graph\end{tabular}};
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{NPC traffic}
+Each NPC car follows a lane and picks a new turn at each intersection. A car
+keeps a safe gap behind the car or the motorcycle in front of it. If the gap gets small, it slows
+down smoothly, and it speeds up again when the road is free. A car enters an intersection only when
+the intersection is free, so cars do not drive through each other. New cars never appear close to a
+player. If a car is stuck for too long, M3 removes it and adds it again somewhere else, so the
+traffic never locks up. The admin sets the number of cars, and heavy traffic obstacles add extra slow
+cars on their road.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck]
+\fill[black!65] (0,0) rectangle (13,1.4);
+\draw[white, dash pattern=on 6pt off 6pt] (0,0.7) -- (13,0.7);
+\fill[tD!70, rounded corners=1.5pt] (1,0.15) rectangle (2.2,0.55);
+\fill[adm!80, rounded corners=1.5pt] (5.2,0.15) rectangle (6.4,0.55);
+\fill[tA] (9.6,0.35) circle (0.17);
+\draw[cli, line width=1pt, <->] (2.3,-0.2) -- node[below, font=\scriptsize]{gap is big: speed up} (5.1,-0.2);
+\draw[obs, line width=1pt, <->] (6.5,-0.2) -- node[below, font=\scriptsize]{gap is small: slow down} (9.4,-0.2);
+\draw[white, ->, line width=1pt] (2.3,0.35) -- (3.3,0.35);
+\draw[white, ->, line width=1pt] (6.5,0.35) -- (6.9,0.35);
+\fill[black!65] (11.2,1.4) rectangle (12.6,3.0);
+\fill[black!65] (11.2,-1.6) rectangle (12.6,0);
+\fill[tC!80, rounded corners=1.5pt] (11.5,2.2) rectangle (11.9,2.9);
+\node[font=\scriptsize, anchor=west] at (12.7,2.4) {waits until the};
+\node[font=\scriptsize, anchor=west] at (12.7,2.05) {crossing is free};
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Bots}
+Every bot has a small state machine that follows the delivery cycle, as the figure below shows. The
+bot drives to the store, gets the package, drives to the delivery point, stops there so the package
+is delivered, and then goes back. On the way it follows the route from the planner. It steers toward a
+point a little ahead on the path, so the motion looks smooth. A bot can fall or get stuck in any of
+these four states. If it falls, it waits for the penalty time and then goes on in the same state. If
+it is stuck, it asks for a new route and goes on in the same state. One ``bot skill'' value sets the
+top speed, the reaction time and some steering noise, so the admin can make bots weaker or stronger.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck]
+\node[st, draw=tA, fill=tA!15] (s) at (0,0) {Go to store};
+\node[st, draw=tC!80!black, fill=tC!20] (p) at (3.8,0) {Get package};
+\node[st, draw=srv, fill=srvL] (d) at (7.6,0) {Drive to point};
+\node[st, draw=cli, fill=cliL] (v) at (11.4,0) {Deliver};
+\node[grp, fit=(s)(p)(d)(v), inner sep=9pt] (g) {};
+\node[glbl, anchor=south west] at (g.north west) {ANY OF THESE STATES};
+\node[st, draw=obs, fill=obs!10] (f) at (3.2,-2.6) {Fallen: wait};
+\node[st, draw=adm, fill=admL] (r) at (8.2,-2.6) {Stuck: new route};
+\draw[inna,->] (s) -- node[al]{arrived} (p);
+\draw[inna,->] (p) -- node[al]{got it} (d);
+\draw[inna,->] (d) -- node[al]{stops at point} (v);
+\draw[inna,->] (v.north) -- ++(0,0.75) -| node[al, pos=0.25]{delivered, go back} (s.north);
+\draw[cmda,->] ([xshift=-8mm]f.north |- g.south) -- node[al]{fall} ([xshift=-8mm]f.north);
+\draw[loopa,->] ([xshift=8mm]f.north) -- node[al]{back to the same state} ([xshift=8mm]f.north |- g.south);
+\draw[cmda,->] ([xshift=-8mm]r.north |- g.south) -- node[al]{stuck} ([xshift=-8mm]r.north);
+\draw[loopa,->] ([xshift=8mm]r.north) -- node[al]{route ok} ([xshift=8mm]r.north |- g.south);
+\ckleg{-1,-3.6}{inna/delivery cycle, cmda/problem while driving, loopa/go on in the same state}
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Prediction on the phone}
+On the phone, the player must see the own motorcycle move at once,
+not after the delay of the network. So M4 runs a copy of the physics part for this one motorcycle.
+Each control gets a number and is kept in a list. When a server state arrives, the phone takes the
+real position from the server, throws away the controls that the server has already used, and runs
+the remaining controls again. If the new result is close to what the player sees, the difference is
+blended away in a short time. If it is far, for example after a crash, the motorcycle jumps to the
+right place.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck]
+\draw[black!40, ->] (0,0) -- (13,0) node[right, font=\scriptsize]{time};
+\foreach \x/\l in {1/1,3/2,5/3,7/4,9/5} {\fill[cli] (\x,0.9) circle (0.09); \node[font=\tiny] at (\x,1.2) {control \l};}
+\node[font=\scriptsize\bfseries, text=cli, anchor=east] at (-0.1,0.9) {Phone};
+\node[font=\scriptsize\bfseries, text=srv, anchor=east] at (-0.1,-0.9) {Server};
+\draw[tcpa,->] (1,0.8) -- (4.0,-0.8);
+\draw[tcpa,->] (3,0.8) -- (6.0,-0.8);
+\node[sv, minimum height=6mm, font=\tiny] (s) at (6.6,-0.9) {state with control 2};
+\draw[tcpa,->] (6.6,-0.6) -- (9.6,0.75);
+\node[cl, minimum height=6mm, font=\tiny, align=center] at (11.6,0.9) {take server position,\\run controls 3 to 5 again};
+\fill[cli!25, rounded corners=2pt] (4.6,0.55) rectangle (9.4,0.65);
+\node[font=\tiny, text=cli!70!black] at (7,0.4) {controls 3 to 5 are not yet known by the server};
+\ckleg{0,-1.6}{tcpa/message over WebSocket}
+\end{tikzpicture}
+\end{ckfig}
+
+\msection{Testing}
+
+M3 is tested alone with a small test program that plays the role of M1. It makes a world from the
+city plan and gives scripted controls, fixed player positions, a list of test obstacles and an
+earthquake area as test data. For the physics part we check a straight run and braking, a U turn,
+slides to the left and to the right, wall and car crashes, and the earthquake radius. For the traffic
+part we check routes with and without closed roads, equal travel times for all teams in a city that is
+the same on all sides, new routes when the traffic changes, many cars in a long run without a traffic
+lock, and bots that finish their deliveries. The same inputs and the same seed must always give
+exactly the same result. The predictor is tested with recorded server states and added delay and loss.
+A small test page shows a simple 3D view of the city from above, so one motorcycle can also be driven
+with the keyboard and the parameters can be changed with keys.
+
+\bigskip
+\needspace{16\baselineskip}
+\setcounter{chap}{8}\setcounter{msec}{0}
+\section{8. M4 Player Client and 3D City}
+\textit{Team: Abdullatif Yılmaz, Berk Andaçgil, Selim Barut}
+
+\msection{Purpose}
+
+M4 is the web page on each player's phone. The player scans a QR code or types the game code, chooses
+a team, and drives a motorcycle in a low poly 3D city with buttons on the screen. There is no map on
+the phone. Only a compass arrow shows the direction of the delivery point or of the store. So players
+must look at the LED board on the table to find their way.
+
+\ckinfo{cli}{Player phone, only the web browser, nothing to install. The page comes from M2}{TypeScript web page with Three.js for 3D, low poly models from one Blender file shared with the board buildings, MessagePack messages, the M3 physics code for prediction}{R1 R2 R3 R5 R7 R8 R10 R11}
+
+The phone talks only to M2. It gets the page once over HTTP and then keeps one WebSocket open. The
+figure shows the data in both directions.
+
+\begin{ckfig}
+\iomap{4}{3}{\textbf{M4}\\Player phone\\and 3D city}{cl}
+{{M2, HTTP}/sv/{page, 3D models,\\city plan}/tcpa, {M2, WebSocket}/sv/{game state, join reply,\\ping, frame rate limit}/tcpa, {Player}/hwb/{touch on\\the buttons}/inna, {M3 code}/sv/{predicted own\\motorcycle}/inna}
+{{M2, WebSocket}/sv/{controls,\\``Find me''}/tcpa, {M2, WebSocket}/sv/{join, ping replies}/tcpa, {Player}/hwb/{3D view, compass,\\scores}/inna}
+{tcpa/HTTP or WebSocket on TCP, inna/inside the phone}
+\end{ckfig}
+
+\msection{Requirements covered}
+
+\ckkeep{%
+M4 takes part in eight requirements. The last column says what will work when M4 is finished.
+
+\begin{tabular}{|L{0.06}|L{0.15}|L{0.40}|L{0.39}|}
+\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M4 does for it} & \textbf{When M4 is done} \\ \hline 
+R1 & Multiplayer game & Join, team choice, timer and the scores of all teams & A player joins and plays from the browser only \\ \hline
+R2 & Delivery cycle & Package icon and a short message when the package is delivered & The player always knows if a package is on board \\ \hline
+R3 & Driving and controls & Gas, brake, left and right buttons & The motorcycle can be driven with two thumbs \\ \hline
+R5 & No map on the phone & Only a compass arrow, and the ``Find me'' button & The player must use the LED board to find the way \\ \hline
+R7 & Earthquake & The camera shakes, more near the centre & An earthquake is felt on every phone \\ \hline
+R8 & Same city as the board & The 3D city is built from the shared city plan and the same models & The same building is found on the phone and on the board \\ \hline
+R10 & Network and measurement & Frame rate limit from the admin, frame rate report & The admin sees how each phone runs \\ \hline
+R11 & Engineering requirements & Own motorcycle is predicted at once and corrected by the server & Driving feels direct even on a slow network \\ \hline
+\end{tabular}}
+
+\msection{Inputs and outputs}
+
+\ckkeep{%
+The page sends its controls on every change and at least 10 times per second, and it gets a new state
+30 times per second.
+
+\begin{tabular}{|L{0.11}|L{0.17}|L{0.18}|L{0.54}|}
+\hline \textbf{Direction} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline 
+In & Page, models, city plan & M2, HTTP & When the page loads: the program, the 3D models and the city plan \\ \hline
+In & Game state & M2, from M1 & Players, NPC cars, obstacles, scores, compass target, ``Find me'' waiting time, number of the last control that the server used \\ \hline
+In & Join reply, ping, net config & M2 & Player, team, colour, server time, frame rate limit \\ \hline
+In & Touch & Player & Buttons \\ \hline
+Out & Controls & M2, then M1 & Throttle, brake, steer, a control number \\ \hline
+Out & Join, ``Find me'' & M2, then M1 & Player key, name, game code, team, ``Find me'' request \\ \hline
+Out & Ping reply & M2 & Phone time, frame rate, last state received \\ \hline
+\end{tabular}}
+
+\msection{Main components}
+
+\ckkeep{%
+The page has five parts. The network client is the only part that talks to M2.
+
+\begin{tabular}{|L{0.21}|L{0.39}|L{0.40}|}
+\hline \textbf{Component} & \textbf{Takes} & \textbf{Gives} \\ \hline 
+Screens and HUD & Game state, join reply & Join, lobby, countdown, game and end screens, timer, scores, compass \\ \hline
+Controls & Touch on the buttons & The control record and the button events \\ \hline
+Network client & Messages from M2, the saved player key & Decoded state for the other parts, reconnect after a lost link \\ \hline
+Prediction & Own controls, server state & Own motorcycle at once, with a smooth correction \\ \hline
+3D city and scene & City plan, models, game state & The 3D picture with motorcycles, cars and obstacles \\ \hline
+\end{tabular}}
+
+\msection{How it works}
+
+\msub{The game screen}
+The phone is held sideways. The 3D view fills the screen, and the camera
+follows the motorcycle from behind. At the top the player sees the time left and the score of each
+team. In the top corner there is the compass. The arrow points to the delivery point, or to the
+store when the player has no package. It never shows the distance or the roads. The buttons are
+large so that the thumbs can find them without looking: left and right on one side, gas and brake
+on the other side. There is no delivery button: when the player stops at the delivery point, the
+package is delivered automatically. The ``Find me'' button asks the server to flash the
+player's LED on the board in white for 1 second. After a press, the button is grey and shows the
+waiting time that M1 puts into the game state.
+
+\begin{ckfig}
+\begin{tikzpicture}[x=1.35cm, y=1.35cm]
+\phonemock
+\nmark{3.5}{3.62}{1}\nmark{0.05}{3.42}{2}\nmark{6.95}{3.42}{3}\nmark{3.05}{0.55}{4}\nmark{3.55}{1.55}{5}\nmark{0.95}{0.05}{6}\nmark{6.05}{0.05}{7}\nmark{0.3}{1.45}{8}
+\node[anchor=north, font=\small] at (3.5,-0.45) {\begin{tabular}{@{}c@{\ \ }l@{\qquad}c@{\ \ }l@{\qquad}c@{\ \ }l@{}}
+\textbf{1} & Time left & \textbf{4} & Own motorcycle, team colour & \textbf{7} & Gas and brake \\
+\textbf{2} & Team scores & \textbf{5} & NPC car and an obstacle & \textbf{8} & ``Find me'' button \\
+\textbf{3} & Compass arrow, no map & \textbf{6} & Left and right & & \end{tabular}};
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Screens}
+The page has five screens. On the join screen the player types a name and joins
+the game. In the lobby the player chooses one of the four teams and waits.
+A 3 second countdown starts the game. The game screen is shown above. At the end, the page shows the
+winner and the scores of all teams.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck]
+\foreach \x/\t/\c in {0/Join/cli, 2.9/Lobby/tA, 5.8/Countdown/adm, 8.7/Game/srv, 11.6/End/brd}{%
+  \fill[black!85, rounded corners=4pt] (\x-0.1,-0.1) rectangle (\x+2.0,1.2);
+  \fill[\c!18] (\x,0) rectangle (\x+1.9,1.1);
+  \node[font=\scriptsize\bfseries, text=\c!70!black] at (\x+0.95,0.55) {\t};}
+\foreach \x in {2.05,4.95,7.85,10.75} \draw[inna,->] (\x,0.55) -- (\x+0.8,0.55);
+\node[font=\tiny] at (0.95,-0.35) {name and code};
+\node[font=\tiny] at (3.85,-0.35) {choose a team};
+\node[font=\tiny] at (6.75,-0.35) {3, 2, 1};
+\node[font=\tiny] at (9.65,-0.35) {at most 5 minutes};
+\node[font=\tiny] at (12.55,-0.35) {winner and scores};
+\ckleg{0,-0.95}{inna/next screen}
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Smooth play on a real network}
+The server sends a state 30 times per second, but Wi-Fi adds
+delay. If the phone waited for the server, the motorcycle would react late to a button. So the phone
+moves its own motorcycle at once with the M3 code, and corrects it when the real state arrives. For
+the other players and the NPC cars, the phone keeps the last few states and draws them a little in
+the past. Then it can always move them smoothly between two real states, and they do not jump.
+
+\msub{The 3D city}
+The city is built from the same city plan as the LED board: 6 roads in each
+direction, 60 road segments and 25 blocks. Tall buildings stand in the centre, houses and trees are
+outside, and the four team stores in the corners have the team colours. The models are low poly and
+come from one Blender file. The board uses the same models for 3D printing, so a player can find the same building on the board and on the phone. Objects that
+repeat, like trees and houses, are drawn as instances, so a mid range phone can draw a smooth picture. During an earthquake the camera shakes, and the
+shaking is stronger near the centre of the earthquake.
+
+\msub{Obstacles and falls in the 3D city}
+Obstacles from the game state are drawn on their road: cones and a barrier for road work, crashed
+cars for an accident, slow cars for heavy traffic and a wet patch for a water puddle. Obstacles come
+and go during the game, and each change is seen in the 3D city in the same tick as on the board. A fallen motorcycle lies on the
+road, and the page shows a penalty countdown until M1 lets it stand up again.
+
+\msection{Testing}
+
+M4 is tested alone against a fake server that sends recorded game states and answers the join and
+the controls. We check joining on Android and iPhone, every button and every screen, the compass
+target, the ``Find me'' waiting time, reconnecting after a page reload with the same player key, and
+the prediction with added delay and loss. We also check that a mid range phone draws the full city
+smoothly.
+
+\bigskip
+\needspace{16\baselineskip}
+\setcounter{chap}{9}\setcounter{msec}{0}
+\section{9. M5 Admin Panel and Monitoring}
+\textit{Team: Batuhan Yanar, Ayşe Poyraz, Berk Andaçgil}
+
+\msection{Purpose}
+
+M5 is the admin screen. On one page the admin starts and controls the game, changes all parameters
+during play, puts obstacles on a live map, starts earthquakes and watches the results as live graphs.
+Each change can be seen in three places: in the 3D city on the phones, on the LED board, and in the
+graphs on this page.
+
+\ckinfo{adm}{Browser on the main computer, or a laptop on the game Wi-Fi. The page comes from M2}{TypeScript web page, a light chart library for the live graphs, a 2D drawing of the city for the live map, MessagePack messages over one WebSocket}{R6 R7 R9 R10 R11}
+
+The admin page talks only to M2, over one WebSocket. The figure shows
+what the page gets and what it sends.
+
+\begin{ckfig}
+\iomap{5}{3}{\textbf{M5}\\Admin panel}{ad}
+{{M2, from M1}/sv/{game state\\10 per second}/tcpa, {M2, from M1}/sv/{metrics twice\\per second}/tcpa, {M2, from M1}/sv/{parameters,\\replies}/tcpa, {M2, from M6}/bd/{sensor samples,\\status, events}/tcpa, {Admin}/hwb/{mouse and\\keyboard}/inna}
+{{M2, then M1}/sv/{game commands,\\obstacles, earthquake}/tcpa, {M2, then M1}/sv/{parameter\\changes}/tcpa, {Admin}/hwb/{graph data as CSV,\\game log}/inna}
+{tcpa/WebSocket on TCP, inna/inside the admin computer}
+\end{ckfig}
+
+\msection{Requirements covered}
+
+\ckkeep{%
+M5 takes part in five requirements. The last column says what will work when M5 is finished.
+
+\begin{tabular}{|L{0.06}|L{0.15}|L{0.40}|L{0.39}|}
+\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M5 does for it} & \textbf{When M5 is done} \\ \hline 
+R6 & Obstacles & Map tools: a brush for each obstacle type, an eraser, a tool to close a road, an obstacle in front of a player, and the traffic density. Parameters for how often each obstacle type appears and how long it stays & The admin can put any obstacle on any road during the game and can change the rate and the duration of each type \\ \hline
+R7 & Earthquake & An earthquake panel with a strength control and a live seismic graph of the board sensor & The admin can start an earthquake and compare it with a hand hit \\ \hline
+R9 & Live admin panel & A form for every parameter group, and graphs with a mark for every change & Every change and its effect are seen on one page \\ \hline
+R10 & Network and measurement & Ping, jitter, loss and frame rate graphs, and the network settings for each player and the board & The admin can make the network worse and measure the result \\ \hline
+R11 & Engineering requirements & Works against a fake server with recorded data & M5 can be built before the server is ready \\ \hline
+\end{tabular}}
+
+\msection{Inputs and outputs}
+
+\ckkeep{%
+All data comes through M2. The game state for the map comes less often than to the phones, because
+the map needs fewer updates.
+
+\begin{tabular}{|L{0.11}|L{0.17}|L{0.18}|L{0.54}|}
+\hline \textbf{Direction} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline 
+In & Game state & M1, through M2 & 10 times per second, for the live map \\ \hline
+In & Metrics & M1, through M2 & Twice per second: scores, delivery times and distances, speeds, falls, traffic, ping, jitter, loss, frame rate, board delay. After a reconnect also the recent history \\ \hline
+In & Parameters, replies & M1, through M2 & Every parameter with its value and limits, ok or error for each command \\ \hline
+In & Board data & M6, through M2 & Sensor data, board status, earthquake events \\ \hline
+Out & Commands & M2, then M1 & Parameter changes, start, pause, resume, end, reset, obstacles, earthquake, new game code \\ \hline
+Out & Files & Admin & Graph data as CSV, game log \\ \hline
+\end{tabular}}
+
+\msection{Main components}
+
+\ckkeep{%
+The page is made of five parts. The communication manager is the only part that talks to M2.
+
+\begin{tabular}{|L{0.21}|L{0.39}|L{0.40}|}
+\hline \textbf{Component} & \textbf{Takes} & \textbf{Gives} \\ \hline 
+Communication manager & Messages from M2, commands from the other parts & Decoded data for each part, reconnect and full update after a lost link \\ \hline
+Parameter manager & Parameter list with limits, admin input & Forms built from the list, changes sent to M1 \\ \hline
+Map manager & Game state, clicks on the map & The live map, and obstacle commands with road, lane and position \\ \hline
+Graph engine & Metrics, board samples, change marks & Live graphs, the seismic graph, CSV files \\ \hline
+Top bar and earthquake panel & Phase, time, board status, button presses & Game commands, earthquake command, the event log \\ \hline
+\end{tabular}}
+
+\msection{How it works}
+
+\msub{The page}
+The figure below shows the planned layout. The top bar shows the game phase, the time left, the
+buttons to start, pause and end the game, the game code and a small light for the board link (green
+when the board is connected). On the left are the parameter forms. In the centre is the live map: the
+city from above, drawn again 10 times per second with all motorcycles, NPC cars, obstacles and
+delivery points. On the right are the live graphs. At the bottom are the earthquake panel and the
+seismic graph.
+
+\begin{ckfig}
+\begin{tikzpicture}[x=1cm, y=1cm]
+\fill[black!80, rounded corners=4pt] (-0.2,-0.2) rectangle (16.2,9.2);
+\fill[black!3] (0,0) rectangle (16,9);
+\fill[srv] (0,8.4) rectangle (16,9);
+\node[text=white, font=\scriptsize\bfseries, anchor=west] at (0.15,8.7) {Running \quad 2:41 left};
+\foreach \x/\t/\c in {4.2/Start/cli, 5.4/Pause/adm, 6.6/End/obs}
+  \node[fill=\c, text=white, font=\tiny\bfseries, rounded corners=2pt, minimum width=10mm] at (\x,8.7) {\t};
+\node[text=white, font=\scriptsize, anchor=west] at (9.5,8.7) {Game code 482 913};
+\fill[cli] (14.6,8.7) circle (0.12); \node[text=white, font=\scriptsize, anchor=west] at (14.8,8.7) {Board};
+\fill[white, draw=black!20] (0.15,2.3) rectangle (3.85,8.25);
+\node[font=\scriptsize\bfseries, anchor=west] at (0.3,8.0) {Parameters};
+\foreach \y/\t/\v in {7.4/Traffic cars/0.55, 6.6/Grip/0.7, 5.8/Top speed/0.6, 5.0/Fall speed/0.4, 4.2/Near chance/0.5, 3.4/Ping of player 3/0.3}{%
+  \node[font=\tiny, anchor=west] at (0.3,\y+0.25) {\t};
+  \draw[black!25, line width=2pt] (0.35,\y-0.05) -- (3.6,\y-0.05);
+  \draw[srv, line width=2pt] (0.35,\y-0.05) -- (0.35+3.25*\v,\y-0.05);
+  \fill[white, draw=srv] (0.35+3.25*\v,\y-0.05) circle (0.09);}
+\node[font=\tiny, text=black!55, anchor=west] at (0.3,2.6) {Physics, Network, Board ...};
+\begin{scope}[shift={(4.5,2.75)}, x=0.86cm, y=0.86cm]
+\boardbase
+\bike{1}{3.5}{tA}{90}\bike{3.5}{4}{tB}{0}\bike{4}{2.5}{tD}{-90}\bike{1.5}{1}{tC}{180}
+\dpoint{2.5}{2}{tA}\dpoint{5}{3.5}{tB}
+\roadwork{3,2}{3,3}\heavy{0,2}{1,2}\puddle{2,4}{2,5}
+\end{scope}
+\foreach \y/\t/\c in {6.9/Brush/obs, 6.3/Eraser/black!50, 5.7/Close road/obs}
+  \node[fill=\c, text=white, font=\tiny\bfseries, rounded corners=2pt, minimum width=14mm] at (10.4,\y+0.6) {\t};
+\begin{scope}[shift={(11.3,6.1)}]
+\fill[white, draw=black!20] (0,-0.1) rectangle (4.55,2.15);
+\node[font=\tiny\bfseries, anchor=west] at (0.05,1.95) {Mean NPC speed};
+\draw[srv, line width=0.9pt] plot[smooth] coordinates {(0.1,1.3)(0.6,1.35)(1.1,1.25)(1.6,1.3)(2.1,1.28)(2.5,1.0)(2.9,0.6)(3.4,0.5)(3.9,0.55)(4.4,0.5)};
+\draw[adm, line width=0.8pt] (2.3,0) -- (2.3,1.8); \node[font=\tiny, text=adm!80!black, anchor=west] at (2.32,1.75) {traffic 60};
+\end{scope}
+\begin{scope}[shift={(11.3,3.7)}]
+\fill[white, draw=black!20] (0,-0.1) rectangle (4.55,2.15);
+\node[font=\tiny\bfseries, anchor=west] at (0.05,1.95) {Ping of each player};
+\draw[tA, line width=0.8pt] plot[smooth] coordinates {(0.1,0.4)(1,0.45)(2,0.4)(3,0.42)(4.4,0.4)};
+\draw[tC, line width=0.8pt] plot[smooth] coordinates {(0.1,0.5)(1,0.48)(2,0.52)(2.6,1.3)(3.4,1.35)(4.4,1.3)};
+\draw[adm, line width=0.8pt] (2.45,0) -- (2.45,1.8); \node[font=\tiny, text=adm!80!black, anchor=west] at (2.47,1.75) {ping +80};
+\end{scope}
+\begin{scope}[shift={(11.3,2.35)}]
+\fill[white, draw=black!20] (0,-0.1) rectangle (4.55,1.15);
+\node[font=\tiny\bfseries, anchor=west] at (0.05,0.95) {Team scores};
+\foreach \i/\h/\c in {0/0.55/tA,1/0.4/tB,2/0.7/tC,3/0.3/tD} \fill[\c] (0.5+\i*1.0,0) rectangle ++(0.6,\h);
+\end{scope}
+\fill[white, draw=black!20] (0.15,0.15) rectangle (15.85,2.1);
+\node[font=\scriptsize\bfseries, anchor=west] at (0.3,1.85) {Earthquake};
+\node[fill=obs, text=white, font=\tiny\bfseries, rounded corners=2pt, minimum width=20mm, minimum height=6mm] at (1.4,1.0) {Start earthquake};
+\node[font=\tiny, anchor=west] at (2.6,1.3) {Strength};
+\draw[black!25, line width=2pt] (2.6,0.9) -- (4.4,0.9); \draw[obs, line width=2pt] (2.6,0.9) -- (3.8,0.9); \fill[white, draw=obs] (3.8,0.9) circle (0.09);
+\draw[brd, line width=0.6pt] plot[smooth, samples=200, domain=0:10.6] ({4.9+\x}, {1.0 + 0.06*sin(900*\x) + (\x>6 ? 0.6*exp(-1.5*max(\x-6,0))*sin(2000*(\x-6)) : 0)});
+\draw[obs, line width=0.8pt] (10.9,0.3) -- (10.9,1.8); \node[font=\tiny, text=obs, anchor=west] at (10.95,1.7) {hit 6.2, zone 5};
+\nmark{0.2}{8.4}{1}\nmark{3.95}{8.2}{2}\nmark{4.4}{7.45}{3}\nmark{9.75}{7.8}{4}\nmark{11.25}{8.15}{5}\nmark{0.2}{2.1}{6}\nmark{14.55}{8.95}{7}
+\node[anchor=north, font=\small] at (8,-0.45) {\begin{tabular}{@{}c@{\ \ }l@{\qquad}c@{\ \ }l@{\qquad}c@{\ \ }l@{}}
+\textbf{1} & Game phase, time and buttons & \textbf{4} & Map tools & \textbf{6} & Earthquake panel and seismic graph \\
+\textbf{2} & Parameter forms & \textbf{5} & Live graphs with change marks & \textbf{7} & Board link light \\
+\textbf{3} & Live map of the city & & & & \end{tabular}};
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Parameters}
+The parameters are in groups: game, obstacles, players, physics, earthquake, network (one set for
+each player) and board link. When the page opens, it asks M1 for all parameters with their limits and
+builds the forms from this list, so a new parameter needs no new page code. The obstacles group has
+two values for each of the four types: how often it appears by itself and how long it stays.
+
+\msub{Network settings}
+The network group has one row for each player and one for the board. In each row the admin sets an
+added delay, a jitter and a loss chance, and for a phone also a frame rate limit. M2 applies these
+values at once. The ping, jitter and loss graphs show the result next to the change mark.
+
+\msub{Cause and effect}
+The main goal of the panel is to show the effect of a change. So every change puts a thin vertical
+line on all graphs, with the name of the parameter. For example, when the admin sets more traffic,
+the line appears and the graph of the mean NPC speed goes down right after it. At the same time the
+phones show more cars and the board shows more red. The graph data can be saved as a CSV file for the
+report.
+
+\msub{Adding an obstacle}
+The admin first chooses a tool, for example the road work brush. Then the admin clicks on a road on
+the live map. The map manager finds the nearest road segment, the lane and the position on it with the
+numbering of the city plan. The communication manager sends an ``add obstacle'' command with the type,
+road, lane and position. M1 checks that the road exists.
+Then it adds the obstacle to the list. In the next tick the obstacle is
+in the game state, so the map, the phones and the board show it at the same time. It stays for the duration of its type, and then M1
+removes it. The eraser removes it earlier with a ``remove obstacle'' command. ``Close road'' puts road work on a whole segment, and
+``in front of a player'' puts the chosen obstacle a little ahead of that player's motorcycle.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck]
+\node[ad, minimum width=21mm] (a) at (0,0) {Admin clicks\\a road};
+\node[ad, minimum width=21mm] (b) at (3.1,0) {Map manager:\\road, lane, place};
+\node[sv, minimum width=21mm] (c) at (6.4,0) {M2 checks\\the message};
+\node[sv, minimum width=21mm] (d) at (9.6,0) {M1 adds it\\to the list};
+\node[ad, minimum width=21mm] (e) at (13.4,1.25) {Live map};
+\node[cl, minimum width=21mm] (f) at (13.4,0) {3D city on\\the phones};
+\node[bd, minimum width=21mm] (g) at (13.4,-1.25) {Red pattern\\on the board};
+\node[nb, draw=adm, fill=white, font=\scriptsize] (r) at (6.4,-1.45) {reply: ok};
+\draw[inna,->] (a) -- (b);
+\draw[tcpa,->] (b) -- (c);
+\draw[inna,->] (c) -- (d);
+\draw[tcpa,->] (d) -- (e.west);
+\draw[tcpa,->] (d) -- (f.west);
+\draw[udpa,->] (d) -- (g.west);
+\draw[tcpa,->] (d.south) |- (r.east);
+\draw[tcpa,->] (r.west) -| (b.south);
+\ckleg{0,-2.4}{tcpa/WebSocket, udpa/UDP to the board, inna/inside the page or the server}
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Earthquake}
+The start button sends a command to M1, and M1 asks the board to run its motors. The seismic graph shows the sensor signal of the board
+live. Each earthquake event puts a mark on the graph with its strength and
+zone. A hand hit on the board shows on the same graph, so the admin can compare the two.
+
+\msub{After a lost link}
+If the WebSocket breaks, the page shows a grey bar and tries to connect again. After the new connection,
+M2 sends the full parameter list, the current game state and the recent history of all graphs that
+M1 keeps. So the page fills the forms, the map and the graphs again and the admin can go on at once.
+
+\msection{Testing}
+
+M5 is tested alone against a fake server that plays back a recorded game with its metrics, parameter
+list and board data. We check every parameter form with good and wrong values, every map tool, all
+graphs and the CSV export, a second admin login, and that after a lost link the
+forms, the map and the graphs are complete again.
+
+\bigskip
+\needspace{16\baselineskip}
+\setcounter{chap}{10}\setcounter{msec}{0}
+\section{10. M6 LED Board and ESP32}
+\textit{Team: Tuğberk Akbulut, Hasan Alperen Elmas, Hasan Hüseyin Özdemir, Muhib Taha Boy, Ayşe Poyraz, Umutcan Ocak}
+
+\msection{Purpose}
+
+M6 is the physical city board and the program on its ESP32. The board is 60 × 60 cm. Programmable
+addressable RGB LED strips lie in all roads and in the four stores, and there are 3D printed buildings,
+a motion sensor and four vibration motors. In the game the board is the only map, so it must be clear
+to read from every side of the table. One ESP32 runs one Arduino program with two parts. The link part
+gets the game state from the main computer over Wi-Fi, finds the strength and the place of a hit on the
+board, drives the vibration motors and reports the health of the board to the admin. The LED part turns
+the game state into light.
+
+\ckinfo{brd}{ESP32 in the LED board, and the board itself for the hardware}{C++ with Arduino for ESP32, TCP and UDP over Wi-Fi with MessagePack messages, programmable addressable RGB LED strips with an external power supply, a motion sensor with accelerometer and gyroscope, 4 vibration motors, 3D printing, a plywood base}{R2 R5 R6 R7 R8 R10 R11}
+
+M6 talks to the server over Wi-Fi and to the hardware under the board. The figure shows the data on
+both sides.
+
+\begin{ckfig}
+\iomap{5}{4}{\textbf{M6}\\LED board\\and ESP32}{bd}
+{{M2, TCP}/sv/{config, vibrate}/tcpa, {M2, UDP}/sv/{board state,\\delay probe}/udpa, {Motion sensor}/hwb/{sensor data}/hwa, {USB cable}/hwb/{Wi-Fi and\\calibration settings}/hwa, {City plan file}/hwb/{road grid,\\store places}/inna}
+{{M2, TCP}/sv/{earthquake event,\\status}/tcpa, {M2, UDP}/sv/{sensor samples,\\delay replies}/udpa, {4 motors}/hwb/{vibration power}/hwa, {RGB LED strips}/hwb/{colour of every LED,\\60 frames per second}/hwa}
+{tcpa/TCP, udpa/UDP, inna/built into the program, hwa/wire to the hardware}
+\end{ckfig}
+
+\msection{Requirements covered}
+
+\ckkeep{%
+M6 takes part in seven requirements. The last column says what will work when M6 is finished.
+
+\begin{tabular}{|L{0.06}|L{0.15}|L{0.40}|L{0.39}|}
+\hline \textbf{ID} & \textbf{Requirement} & \textbf{What M6 does for it} & \textbf{When M6 is done} \\ \hline 
+R2 & Delivery cycle & Delivery points blink in the player's colour, a flash when the package is delivered & Each player finds the own delivery point on the board \\ \hline
+R5 & No map on the phone & The board is the map with all motorcycles. ``Find me'' makes the player's dot white for 1 s & A player can always find the own motorcycle \\ \hline
+R6 & Obstacles & A red pattern for each type on the whole road segment, light blue for a puddle & Every obstacle type is clear from a distance \\ \hline
+R7 & Earthquake & Finds hand hits and motor shaking with the sensor, with a strength from 0 to 10 and a zone in a 3 × 3 grid. Drives the motors for the admin button. A shock wave from the earthquake centre & A hit on the table starts an earthquake in the game, and the earthquake is seen on the table \\ \hline
+R8 & Physical LED board & 60 × 60 cm, 6 roads in each direction, LEDs on all roads, printed buildings, four stores. One ESP32 for the LEDs, the sensor and the motors brings the game state over Wi-Fi & The finished board stands on the table and shows the live game without a cable to the computer \\ \hline
+R10 & Network and measurement & Delay replies, sensor samples for the seismic graph, comes back after a lost link & The admin sees the board delay and the sensor signal live \\ \hline
+R11 & Engineering requirements & PC emulators for both sides of the link, a demo mode without a server & The server and the board can be built and tested without each other \\ \hline
+\end{tabular}}
+
+\msection{Inputs and outputs}
+
+\ckkeep{%
+Messages that must arrive use TCP, fast and repeated data uses UDP. The board state comes 10 to 30 times
+per second, but the LED part draws 60 frames per second, so it fills the time between two states by
+itself.
+
+\begin{tabular}{|L{0.11}|L{0.17}|L{0.18}|L{0.54}|}
+\hline \textbf{Direction} & \textbf{Data} & \textbf{From / to} & \textbf{Content} \\ \hline 
+In & Board state & M2, UDP & 10 to 30 per second: phase, players (team, colour, position, flags), delivery points, obstacles, earthquake \\ \hline
+In & Config & M2, TCP & Player colours, brightness from 0.1 to 1, power limit \\ \hline
+In & Vibrate & M2, TCP & Motors to use, strength from 0 to 1, duration \\ \hline
+In & Delay probe & M2, UDP & A small message with the server time, answered at once \\ \hline
+In & Sensor & Hardware & Motion data from the accelerometer and the gyroscope \\ \hline
+In & Settings & USB cable & Wi-Fi name and password, backup server address, calibration values \\ \hline
+In & City plan & Shared file & Road grid and store places, turned into the LED map when the code is built \\ \hline
+Out & Light & LED strips & The colour of every LED, 60 frames per second \\ \hline
+Out & Vibration & 4 motors & Motor power with a soft start and safety limits \\ \hline
+Out & Earthquake event & M2, TCP, to M1 and M5 & Source (hand or motors), strength from 0 to 10, centre, zone from 0 to 8, confidence \\ \hline
+Out & Sensor samples & M2, UDP, to M5 & Sensor data for the seismic graph, sent in small groups \\ \hline
+Out & Status, delay reply & M2 & Status on TCP once per second: frame rate, Wi-Fi signal, power estimate, errors. Delay replies on UDP \\ \hline
+\end{tabular}}
+
+\msection{Main components}
+
+\ckkeep{%
+M6 has eleven parts. The first six are the link part and the last five are the LED part. All of them
+run in the main loop of the Arduino program.
+
+\begin{tabular}{|L{0.21}|L{0.39}|L{0.40}|}
+\hline \textbf{Component} & \textbf{Takes} & \textbf{Gives} \\ \hline 
+Network link & Wi-Fi, server address & One TCP channel and one UDP stream, a new link after a loss \\ \hline
+Message codec & Raw messages & Checked messages. Old, broken or wrong version messages are dropped \\ \hline
+State hand over & Checked board state and config & The newest full state for the LED part \\ \hline
+Hit detector & Sensor samples & Earthquake events with strength, zone and confidence \\ \hline
+Motor controller & Vibrate commands & Motor power with a soft start and safety limits \\ \hline
+Status and settings & Frame report, USB settings & Status reports, delay replies, settings saved in flash \\ \hline
+LED map & City plan & The place of every LED on the roads and in the stores, made by a script \\ \hline
+Motion smoother & The last two board states & Smooth motorcycle positions along the roads for every frame \\ \hline
+Layers and effects & Board state, phase, link state & Five layers and the patterns for obstacles, earthquakes and game phases \\ \hline
+Post processing and output & The mixed frame, config & Corrected colours inside the brightness and power limit, sent to the strips \\ \hline
+Demo mode & A built in scenario & A full game look without a server \\ \hline
+\end{tabular}}
+
+\msection{How it works}
+
+\msub{One program with a main loop}
+The ESP32 runs one Arduino program. The main loop repeats the same steps again and again: it reads the
+new network messages, reads the sensor, drives the motors, lets the LED part draw one LED frame and
+sends the reports. The link part keeps the newest full board state in memory. At the start of each
+frame the LED part reads this state, so it always draws the latest game.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck]
+\draw[brd, line width=1.2pt, rounded corners=6pt, fill=brd!4] (2.6,-1.2) rectangle (16.0,1.55);
+\node[font=\scriptsize\bfseries, text=brd, anchor=north west] at (2.7,1.5) {ESP32: one Arduino program};
+\node[bd, minimum width=19mm] (n) at (4.1,0.2) {Read network\\messages};
+\node[bd, minimum width=19mm] (s) at (6.75,0.2) {Read sensor,\\find hits};
+\node[bd, minimum width=19mm] (m) at (9.4,0.2) {Drive\\motors};
+\node[nb, draw=brd, fill=brd!25, line width=1.3pt, minimum width=19mm] (l) at (12.05,0.2) {Draw\\LED frame};
+\node[bd, minimum width=19mm] (r) at (14.7,0.2) {Send\\reports};
+\foreach \u/\v in {n/s,s/m,m/l,l/r} \draw[inna,->] (\u) -- (\v);
+\draw[loopa,->] (r.south) -- ++(0,-0.55) -| node[al, pos=0.25]{next round of the loop} (n.south);
+\node[sv, minimum width=20mm, minimum height=22mm] (pc) at (0,0.2) {Main\\computer\\(M2)};
+\draw[tcpa,<->] ([yshift=5mm]pc.east) -- node[iol]{TCP} ([yshift=5mm]pc.east -| n.west);
+\draw[udpa,<->] ([yshift=-5mm]pc.east) -- node[iol]{UDP} ([yshift=-5mm]pc.east -| n.west);
+\node[hwb, minimum width=19mm] (hs) at (6.75,-2.4) {Motion sensor};
+\node[hwb, minimum width=19mm] (hm) at (9.4,-2.4) {4 motors};
+\node[hwb, minimum width=19mm] (hl) at (12.05,-2.4) {RGB LED strips};
+\draw[hwa,->] (hs.north) -- (hs.north |- 0,-1.2);
+\draw[hwa,->] (hm.north |- 0,-1.2) -- (hm.north);
+\draw[hwa,->] (hl.north |- 0,-1.2) -- (hl.north);
+\ckleg{0,-3.3}{tcpa/TCP, udpa/UDP, inna/steps of the loop, loopa/next round, hwa/wire to the hardware}
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{The board}
+The base is plywood. On it there are 6 roads in each direction, so the city has 5 × 5 blocks. The LED
+strips lie in the roads between the crossings. There are no LEDs at the crossings, because two strips
+cannot lie on top of each other. The buildings are 3D printed from the same models as the 3D city on
+the phone, so a player finds the same building on the board and on the phone. The LEDs need an
+external power supply, and the software keeps the power under the limit in the config.
+
+\begin{ckfig}
+\begin{tikzpicture}[x=1.15cm, y=1.15cm]
+\boardbase
+\bike{1}{3.5}{tA}{90}\bike{2.5}{4}{tA}{180}
+\bike{3.5}{4}{tB}{0}\bike{5}{2.5}{tB}{90}
+\bike{1.5}{1}{tD}{180}\bike{0}{1.5}{tD}{-90}
+\bike{4}{2.5}{tC}{-90}\bike{4.5}{0}{tC}{180}
+\dpoint{2.5}{2}{tA}\dpoint{5}{3.5}{tB}\dpoint{0.5}{3}{tD}\dpoint{3}{0.5}{tC}
+\heavy{0,2}{1,2}
+\roadwork{3,2}{3,3}
+\accident{4,1}{5,1}
+\puddle{2,4}{2,5}
+\findme{3.5}{4}
+\nmark{0.5}{5.25}{1}\nmark{0.62}{3.5}{2}\nmark{2.5}{2.45}{3}\nmark{0.5}{2.3}{4}\nmark{3.35}{2.5}{5}\nmark{4.5}{1.35}{6}\nmark{1.65}{4.5}{7}\nmark{3.5}{4.5}{8}
+\node[anchor=west, font=\small, align=left] at (6.0,2.5) {\begin{tabular}{@{}c@{\ \ }l@{}}
+\textbf{1} & Team store in the team colour\\[3pt]
+\textbf{2} & Motorcycle: a bright dot with a short tail\\[3pt]
+\textbf{3} & Delivery point: blinks in the player's tone\\[3pt]
+\textbf{4} & Heavy traffic: a slow dim red wave\\[3pt]
+\textbf{5} & Road work: bright steady red\\[3pt]
+\textbf{6} & Accident: red blinking\\[3pt]
+\textbf{7} & Water puddle: light blue shimmer\\[3pt]
+\textbf{8} & ``Find me'': white flash for 1 second\end{tabular}};
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{What is inside the board}
+The figure below is a side cut of the board. The motion sensor is fixed at the centre, under the
+plywood, so it feels a hit from every side. The four vibration motors are under the four corners. The
+ESP32 and a power supply for the LEDs and the motors sit under the board too.
+
+\begin{ckfig}
+\begin{tikzpicture}[x=0.9cm, y=0.9cm]
+\boardside
+\nmark{3.3}{-0.15}{1}\nmark{7.0}{0.3}{2}\nmark{1.8}{0.05}{3}\nmark{12.2}{0.05}{3}\nmark{10.1}{-0.15}{4}
+\nmark{6.25}{1.7}{5}\nmark{6.25}{4.4}{6}\nmark{12.9}{2.55}{7}
+\node[anchor=north, font=\small] at (7,-0.6) {\begin{tabular}{@{}c@{\ \ }l@{\qquad}c@{\ \ }l@{\qquad}c@{\ \ }l@{}}
+\textbf{1} & ESP32 & \textbf{4} & Power supply & \textbf{6} & 3D printed buildings \\
+\textbf{2} & Motion sensor at the centre & \textbf{5} & RGB LED strips on the roads & \textbf{7} & Team store with LEDs \\
+\textbf{3} & Vibration motors at the corners & & & & \end{tabular}};
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Colours}
+There are four teams and each team has one colour: blue, green, yellow and purple. The two players of a
+team have a light and a dark tone of the team colour. Red is used only for obstacles, so red always
+means ``this road slows you down''. The pattern of the red tells the type of the obstacle. A water
+puddle is light blue, because it makes the road slippery, not slow. White is used only for ``Find
+me'', so a player always knows that the white dot is the own motorcycle.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck]
+\foreach \r/\t in {0/Heavy traffic, 1/Road work, 2/Accident, 3/Water puddle}
+  \node[font=\scriptsize\bfseries, anchor=east] at (2.3,-\r*0.75) {\t};
+\foreach \k in {0,...,5}{%
+  \pgfmathsetmacro{\a}{40+40*sin(\k*60)}
+  \fill[obs!\a!black] (2.7+\k*0.32,0) circle (0.11);
+  \fill[obs] (2.7+\k*0.32,-0.75) circle (0.11);
+  \pgfmathtruncatemacro{\w}{mod(\k,2)}
+  \ifnum\w=0 \fill[obs] (2.7+\k*0.32,-1.5) circle (0.11); \else \fill[black!75] (2.7+\k*0.32,-1.5) circle (0.11); \fi
+  \pgfmathsetmacro{\b}{30+20*sin(\k*97)}
+  \pgfmathsetmacro{\b}{45+25*sin(\k*97)}\fill[cyan!\b!white] (2.7+\k*0.32,-2.25) circle (0.11);}
+\node[font=\scriptsize, anchor=west] at (4.75,0) {the light moves slowly along the road};
+\node[font=\scriptsize, anchor=west] at (4.75,-0.75) {the whole road is red, it does not move};
+\node[font=\scriptsize, anchor=west] at (4.75,-1.5) {red blinks on and off};
+\node[font=\scriptsize, anchor=west] at (4.75,-2.25) {light blue light that shimmers};
+\foreach \i/\c in {0/tA,1/tB,2/tC,3/tD}{%
+  \fill[\c] (11.0+\i*0.75,-0.55) circle (0.17); \fill[\c!55] (11.0+\i*0.75,-1.05) circle (0.17);}
+\node[font=\scriptsize\bfseries] at (12.12,0.0) {Team colours};
+\node[font=\scriptsize] at (12.12,-1.5) {light and dark tone};
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Layers}
+The LED part draws 60 frames per second. Each frame is made from five layers, from the bottom to the
+top: the roads, the obstacles, the delivery points, the motorcycles and a top layer for short effects.
+A higher layer covers a lower one, so when two things fall on the same LED, the higher one is shown.
+When two motorcycles are on the same LED, their colours take turns. After the layers, the LED part
+corrects the colours for the eye, sets the brightness from the config, and lowers all LEDs a little if
+the frame would need more power than the limit.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck]
+\foreach \i/\t/\c in {0/Roads/gray, 1/Obstacles/obs, 2/Delivery points/adm, 3/Motorcycles/tA, 4/Top effects/brd}{%
+  \fill[\c!25, draw=\c, line width=0.9pt] (\i*0.35,\i*0.62) -- ++(4.2,0) -- ++(0.9,0.45) -- ++(-4.2,0) -- cycle;
+  \node[font=\scriptsize, anchor=west] at (\i*0.35+5.3,\i*0.62+0.22) {\t};}
+\draw[inna,->] (8.5,1.9) -- node[al]{mix} (9.6,1.9);
+\node[nb, draw=srv, fill=srvL, minimum width=20mm] (pp) at (11.0,1.9) {Colour,\\brightness,\\power limit};
+\draw[hwa,->] (pp) -- (12.8,1.9);
+\ckleg{0,-0.6}{inna/inside the program, hwa/data wire to the strips}
+\node[nb, draw=black!50, fill=black!8, minimum width=14mm] at (13.6,1.9) {RGB LED\\strips};
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Smooth motion on the roads}
+The board state comes less often than the frames, so the motion smoother moves each motorcycle dot
+between the last two states. It moves the dot along the roads, through the crossing, and never in a
+straight line over a block. The dot is drawn one state behind the newest one, so it adds a small
+delay. If a state is lost, the dot keeps moving along its road with its last speed until the next
+state comes. The dot has a short tail, so the direction of motion is easy to see.
+
+\msub{Two channels}
+The board keeps one TCP channel and one UDP stream to the server. Messages that must arrive go on TCP:
+the config, the vibrate commands, the earthquake events and the status report. Each TCP message starts
+with its length, because TCP is only a stream of bytes. Data that comes again and again goes on UDP:
+the board state, the sensor samples and the delay probes. If one UDP packet is lost, the next one
+replaces it, so the LEDs never wait. Every message has an order number, so the board drops a UDP
+packet that comes late. Each start of the server makes a new session number. When the board sees a
+new session number, it starts its order numbers again, so it does not drop new messages as old ones.
+
+\msub{Finding a hit}
+The sensor measures the motion all the time. First a filter takes away gravity and slow
+tilting, so only the shaking is left. The detector also learns the normal noise of the room and puts the
+start threshold well above it. So the threshold goes up on a noisy table, and normal play does not
+start an earthquake. When the signal passes the threshold, a hit starts, and the detector takes a
+short window from this moment. The stronger the shaking in this window, the higher the strength. Like
+a real earthquake scale, the strength grows slowly for very strong hits, so a light tap and a hard
+hit both get a useful value. The scale is set once in calibration with a standard hit, and the result
+is kept between 0 and 10.
+
+\msub{Finding the zone}
+The accelerometer shows the direction of the first push of the board, and the gyroscope shows how the
+board tilts. Together they show the side of the hit, and the size of the push shows how far the hit is
+from the centre. From this the detector picks one of 9 zones in a 3 × 3 grid and gives a confidence
+value. After a hit the detector waits a short time, so one hit makes only one event.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck]
+\begin{scope}
+\fill[adm!15] (3.0,-1.7) rectangle (4.5,1.9);
+\draw[black!40] (-0.2,0) -- (8.2,0);
+\draw[black!40,->] (0,-1.7) -- (0,2.0);
+\draw[obs, line width=0.9pt, dash pattern=on 4pt off 2pt] (0,0.45) -- (8,0.45);
+\draw[obs, line width=0.9pt, dash pattern=on 4pt off 2pt] (0,-0.45) -- (8,-0.45);
+\draw[srv, line width=0.8pt, smooth, samples=400, domain=0:8] plot (\x, {0.12*sin(1500*\x) + 0.06*sin(1900*\x) + (\x>3 ? 1.6*exp(-1.6*max(\x-3,0))*sin(2200*(\x-3)) : 0)});
+\node[font=\scriptsize, text=adm!80!black] at (3.75,2.15) {short window};
+\node[font=\scriptsize, text=obs, anchor=west] at (5.6,0.7) {threshold};
+\node[font=\scriptsize, anchor=west] at (0.3,-1.1) {room noise};
+\node[font=\scriptsize] at (4.2,-2.0) {time};
+\node[al, draw=cli, text=cli!70!black, line width=0.8pt] at (6.9,1.5) {event sent};
+\draw[evta, ->] (4.5,1.5) -- (6.25,1.5);
+\end{scope}
+\begin{scope}[shift={(9.4,-1.5)}]
+\foreach \i in {0,1,2}{\foreach \j in {0,1,2}{%
+  \pgfmathtruncatemacro{\z}{(2-\j)*3+\i}
+  \filldraw[fill=black!6, draw=black!40] (\i,\j) rectangle ++(1,1);
+  \node[font=\tiny, text=black!50] at (\i+0.18,\j+0.82) {\z};}}
+\fill[obs!45] (2,1) rectangle ++(1,1);
+\node[font=\tiny, text=black!70] at (2.18,1.82) {5};
+\fill[brd] (1.5,1.5) circle (0.09);
+\draw[obs, line width=1pt, ->] (1.5,1.5) -- (2.5,1.45);
+\fill[obs] (2.55,1.45) circle (0.1);
+\node[font=\scriptsize] at (1.5,-0.3) {zone 5, confidence 0.8};
+\node[font=\scriptsize] at (1.5,3.3) {board from above};
+\end{scope}
+\ckleg{0,-2.6}{siga/sensor signal, thra/start threshold, evta/event to the server}
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Motors}
+The four motors are under the corners, at zones 0, 2, 6 and 8. When the admin presses the earthquake
+button, M1 sends a vibrate command on TCP. The command says which motors to use, the strength and the
+time. When the admin chooses one zone, M1 uses the motors nearest to it. For the whole board it uses all
+four. M6 starts the motors slowly, so the power does not jump. While the motors run, the detector stops
+learning the room noise, and the whole shaking gives only one event with ``motors'' as its source. So
+the earthquake in the game follows the real shaking of the table, and the motors do not start a second
+earthquake.
+
+\msub{Earthquake on the board}
+When an earthquake starts, a ring of light grows from the centre of the earthquake over the whole
+board, like a wave on water, and slowly fades. The road work after an earthquake is not a decision of
+M6. M1 puts it into the obstacle list, and M6 only draws it like any other obstacle until M1 removes it
+from the list.
+
+\begin{ckfig}
+\begin{tikzpicture}[x=0.62cm, y=0.62cm]
+\foreach \s/\r in {0/0.6, 7.2/1.6, 14.4/2.8}{%
+  \begin{scope}[shift={(\s,0)}]
+  \boardbase
+  \begin{scope}
+  \clip (-0.5,-0.5) rectangle (5.5,5.5);
+  \draw[white, line width=5pt, opacity=0.35] (3.4,2.6) circle (\r+0.25);
+  \draw[yellow!70!orange, line width=3pt] (3.4,2.6) circle (\r);
+  \end{scope}
+  \fill[obs] (3.4,2.6) circle (0.12);
+  \end{scope}}
+\node[font=\scriptsize] at (2.5,-1.1) {start};
+\node[font=\scriptsize] at (9.7,-1.1) {a moment later};
+\node[font=\scriptsize] at (16.9,-1.1) {later};
+\end{tikzpicture}
+\end{ckfig}
+
+\msub{Game phases and the link}
+Every game phase has its own look, so the people around the table always know what happens.
+
+\begin{ckfig}
+\begin{tikzpicture}[x=0.4cm, y=0.4cm]
+\foreach \sx/\t in {0/Lobby, 7.6/Countdown, 15.2/Running, 22.8/Paused, 30.4/Finished}{%
+  \begin{scope}[shift={(\sx,0)}]\boardbase\end{scope}
+  \node[font=\scriptsize\bfseries] at (\sx+2.5,-1.3) {\t};}
+\begin{scope}[shift={(7.6,0)}]
+  \draw[adm!70!yellow, line width=2.2pt] (0,0) rectangle (5,5);
+  \draw[adm!50!yellow, line width=2.2pt, opacity=0.6] (1,1) rectangle (4,4);
+  \node[font=\bfseries, text=white] at (2.5,2.5) {3};
+\end{scope}
+\begin{scope}[shift={(15.2,0)}]
+  \bike{1}{3.5}{tA}{90}\bike{3.5}{4}{tB}{0}\bike{4}{2.5}{tC}{-90}\bike{1.5}{1}{tD}{180}
+  \dpoint{2.5}{2}{tA}\roadwork{3,2}{3,3}
+\end{scope}
+\begin{scope}[shift={(22.8,0)}]
+  \bike{1}{3.5}{tA}{90}\bike{3.5}{4}{tB}{0}\bike{4}{2.5}{tC}{-90}\bike{1.5}{1}{tD}{180}
+  \fill[black, opacity=0.55, rounded corners=3pt] (-0.5,-0.5) rectangle (5.5,5.5);
+\end{scope}
+\begin{scope}[shift={(30.4,0)}]
+  \foreach \i in {0,...,5}{\draw[tB, line width=2pt] (\i,0) -- (\i,5); \draw[tB, line width=2pt] (0,\i) -- (5,\i);}
+\end{scope}
+\node[font=\scriptsize, align=center] at (2.5,-2.4) {stores glow,\\roads dark};
+\node[font=\scriptsize, align=center] at (10.1,-2.4) {light moves in,\\3, 2, 1};
+\node[font=\scriptsize, align=center] at (17.7,-2.4) {the live game};
+\node[font=\scriptsize, align=center] at (25.3,-2.4) {all dims and\\breathes slowly};
+\node[font=\scriptsize, align=center] at (32.9,-2.4) {roads in the\\winner colour};
+\end{tikzpicture}
+\end{ckfig}
+
+In the lobby the roads are dark and the four stores glow in the team colours. In the countdown the
+light moves from the edge to the centre in three steps, one for each number. During the game the board
+shows the live state. In a pause everything stays where it is, but all LEDs dim and breathe slowly. At
+the end all roads turn to the colour of the winner team, and in a draw the colours of the winners take
+turns.
+
+\msub{When the link is lost}
+If no state comes for a short time, M6 stops the motors at once and the link state becomes
+``searching''. The roads go dark and the stores breathe slowly in a dim white, so everybody can see
+that the board is waiting. Then M6 tries to connect again: first to the server it finds on the local
+network, then to the backup address. The Wi-Fi name, the password, the backup address and the
+calibration values are stored in the ESP32's flash memory. We can change them over the USB cable, so we
+do not need to build the code again at a new place.
+
+\begin{ckfig}
+\begin{tikzpicture}[ck]
+\node[st, draw=black!50, fill=black!6] (b) at (0,0) {Start};
+\node[st, draw=adm, fill=admL] (w) at (3.4,0) {Join Wi-Fi};
+\node[st, draw=adm, fill=admL] (f) at (6.8,0) {Find server};
+\node[st, draw=cli, fill=cliL, line width=1.4pt] (c) at (10.2,0) {Connected};
+\node[st, draw=obs, fill=obs!10] (s) at (6.8,-1.8) {Searching};
+\draw[inna,->] (b) -- (w);
+\draw[inna,->] (w) -- node[al]{ok} (f);
+\draw[inna,->] (f) -- node[al]{found} (c);
+\draw[inna,->] (c) |- node[al, pos=0.3]{no state} (s);
+\draw[inna,->] (s) -- node[al]{retry} (f);
+\draw[inna,->] (s) -| node[al, pos=0.75]{no Wi-Fi} (w);
+\ckleg{0,-2.7}{inna/change of the link state}
+\end{tikzpicture}
+\end{ckfig}
+
+\msection{Testing}
+
+M6 is tested without the server in two ways. For the link part two PC programs are used. A server
+emulator takes the place of M2. It sends test board states, config and vibrate commands with delay and
+loss that we can change, and it shows the earthquake events and the seismic signal. A board emulator
+takes the place of the real board, so the server side can also be tested without it. We check the
+shared example messages, broken packets, a long run, heavy loss, a router restart and a server restart.
+For the sensor we hit each of the 9 zones many times and check that hits are found, that the zone is
+right or a neighbour zone, and that the motors do not start a false earthquake. The LED part is tested
+on the real board with a built in demo scenario. It gives recorded board states as test data and plays
+a full game with every animation and every game phase. Test patterns check the order and place of the
+LEDs, the 8 player colours (three people must name each colour correctly), the power limit at full
+white and the heat in a long run.
+
+\end{document}

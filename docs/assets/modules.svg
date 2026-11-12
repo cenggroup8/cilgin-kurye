@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 420" width="1280" height="420" role="img" aria-label="Modules">
+<rect width="1280" height="420" rx="24" fill="#0f1328"/>
+<rect x="30" y="30" width="390" height="170" rx="18" fill="#181d3a" stroke="#ff4d5e" stroke-opacity="0.6" stroke-width="1.5"/>
+<circle cx="76" cy="78" r="26" fill="#ff4d5e" fill-opacity="0.18" stroke="#ff4d5e" stroke-width="2"/>
+<text x="76" y="85" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" font-weight="800" fill="#ff4d5e">M1</text>
+<text x="116" y="85" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" font-weight="700" fill="#ffffff">Game Server and Rules</text>
+<text x="52" y="130" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" fill="#aab0dd">Game loop, phases, deliveries, scores,</text>
+<text x="52" y="152" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" fill="#aab0dd">falls, obstacles, earthquake</text>
+<text x="52" y="182" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" fill="#ff4d5e">/M1-game-server</text>
+<rect x="440" y="30" width="390" height="170" rx="18" fill="#181d3a" stroke="#7c5cff" stroke-opacity="0.6" stroke-width="1.5"/>
+<circle cx="486" cy="78" r="26" fill="#7c5cff" fill-opacity="0.18" stroke="#7c5cff" stroke-width="2"/>
+<text x="486" y="85" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" font-weight="800" fill="#7c5cff">M2</text>
+<text x="526" y="85" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" font-weight="700" fill="#ffffff">Network and Synchronization</text>
+<text x="462" y="130" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" fill="#aab0dd">Web server, WebSocket, board link, delay and</text>
+<text x="462" y="152" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" fill="#aab0dd">loss measuring</text>
+<text x="462" y="182" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" fill="#7c5cff">/M2-network</text>
+<rect x="850" y="30" width="390" height="170" rx="18" fill="#181d3a" stroke="#2ee59d" stroke-opacity="0.6" stroke-width="1.5"/>
+<circle cx="896" cy="78" r="26" fill="#2ee59d" fill-opacity="0.18" stroke="#2ee59d" stroke-width="2"/>
+<text x="896" y="85" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" font-weight="800" fill="#2ee59d">M3</text>
+<text x="936" y="85" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" font-weight="700" fill="#ffffff">Physics, Traffic and AI</text>
+<text x="872" y="130" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" fill="#aab0dd">Motorcycle physics, collisions, road graph,</text>
+<text x="872" y="152" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" fill="#aab0dd">NPC cars, bots</text>
+<text x="872" y="182" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" fill="#2ee59d">/M3-physics-traffic</text>
+<rect x="30" y="220" width="390" height="170" rx="18" fill="#181d3a" stroke="#3d8bff" stroke-opacity="0.6" stroke-width="1.5"/>
+<circle cx="76" cy="268" r="26" fill="#3d8bff" fill-opacity="0.18" stroke="#3d8bff" stroke-width="2"/>
+<text x="76" y="275" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" font-weight="800" fill="#3d8bff">M4</text>
+<text x="116" y="275" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" font-weight="700" fill="#ffffff">Player Client and 3D City</text>
+<text x="52" y="320" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" fill="#aab0dd">Phone page, low poly 3D city, controls,</text>
+<text x="52" y="342" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" fill="#aab0dd">compass, prediction</text>
+<text x="52" y="372" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" fill="#3d8bff">/M4-player-client</text>
+<rect x="440" y="220" width="390" height="170" rx="18" fill="#181d3a" stroke="#ff9f43" stroke-opacity="0.6" stroke-width="1.5"/>
+<circle cx="486" cy="268" r="26" fill="#ff9f43" fill-opacity="0.18" stroke="#ff9f43" stroke-width="2"/>
+<text x="486" y="275" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" font-weight="800" fill="#ff9f43">M5</text>
+<text x="526" y="275" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" font-weight="700" fill="#ffffff">Admin Panel and Monitoring</text>
+<text x="462" y="320" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" fill="#aab0dd">Live parameters, events, graphs, records of</text>
+<text x="462" y="342" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" fill="#aab0dd">each game</text>
+<text x="462" y="372" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" fill="#ff9f43">/M5-admin-panel</text>
+<rect x="850" y="220" width="390" height="170" rx="18" fill="#181d3a" stroke="#ffc83d" stroke-opacity="0.6" stroke-width="1.5"/>
+<circle cx="896" cy="268" r="26" fill="#ffc83d" fill-opacity="0.18" stroke="#ffc83d" stroke-width="2"/>
+<text x="896" y="275" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" font-weight="800" fill="#ffc83d">M6</text>
+<text x="936" y="275" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" font-weight="700" fill="#ffffff">LED Board and ESP32</text>
+<text x="872" y="320" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" fill="#aab0dd">ESP32 program, link to server, LED drawing,</text>
+<text x="872" y="342" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" fill="#aab0dd">sensor and motors</text>
+<text x="872" y="372" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" fill="#ffc83d">/M6-led-board</text>
+</svg>

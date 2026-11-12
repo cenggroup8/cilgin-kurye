@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate contracts/board_protocol_vectors.json (M7 board protocol, version 1).
+"""Generate contracts/board_protocol_vectors.json (board protocol of M6, version 1).
 
 Each vector holds a message as JSON and its exact MessagePack bytes in hex.
 The ESP32 firmware, the server (M2) and the PC tools must all encode and

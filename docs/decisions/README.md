@@ -23,4 +23,4 @@ Proposal'larla aynı kural geçerli: **her sürüm kendi klasöründe**, main'e 
 3. Kararın sonucunu ilgili yere işleyin: ortak formatlar `contracts/`, modül detayları o modülün README'si veya proposal'ı.
 4. `CHANGELOG.md` dosyasına hangi kararların verildiğini ve kimin onayladığını yazın; yukarıdaki tabloyu güncelleyin.
 
-Kararlar toplantıda Claude Docs'taki paylaşılan listede de işaretlenebilir; repoya o listenin dışa aktarılmış hali konur.
+Kararlar toplantıda paylaşılan listede de işaretlenebilir; repoya o listenin dışa aktarılmış hali konur.

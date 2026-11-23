@@ -25,10 +25,19 @@ M3 moves everything on the roads. It has two parts. The physics part turns throt
 ## Planned layout
 
 ```
-src/physics/   motorcycle model, colliders, collision solver, earthquake effect, predictor
-src/traffic/   road graph, route planner, NPC traffic, bot drivers, traffic metrics
-test/          tests with a fake M1, scripted controls and test obstacles
-debug/         small 3D test page with keyboard driving
+src/
+  physics/
+    bike/        M3-1  motorcycle model
+    predictor/   M3-1  prediction on the phone
+    collide/     M3-2  colliders, collision solver, fall judge, earthquake effect
+  traffic/
+    graph/       M3-3  road graph
+    routes/      M3-3  route planner, travel time table
+    npc/         M3-4  NPC traffic, traffic metrics
+    bots/        M3-5  bot drivers
+test/
+  fakes/         M3-1  fake M1
+debug/           M3-1  test page with keyboard driving
 ```
 
 The code is not written yet. Each part can be built and tested alone with test data, as the module
@@ -40,6 +49,5 @@ Abdullatif Yılmaz, Hasan Alperen Elmas, Batuhan Yanar, Selim Barut, Muhib Taha 
 
 ## Documents
 
-- Module document v2.0: [PDF](../docs/proposals/M3-physics-traffic/v2.0/M3-proposal.pdf) · [Markdown](../docs/proposals/M3-physics-traffic/v2.0/M3-proposal.md)
-- All modules in one document: [PDF](../docs/proposals/modules-and-requirements/v2.0/Cilgin_Kurye_Modules_and_Requirements.pdf)
-- Shared message formats and city plan: [`contracts/`](../contracts/)
+- Modules and Requirements v2.1: [PDF](../docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.pdf) · [Markdown](../docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.md)
+- Plan for the 4 December demo: issue #25

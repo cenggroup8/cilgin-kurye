@@ -24,9 +24,17 @@ M1 is the brain of the game. It runs on the main computer and it is the only par
 ## Planned layout
 
 ```
-src/        game loop, phases, rules, deliveries, penalties, obstacles, earthquake, admin commands
-test/       rule tests with fake M2 and M3 and fixed test data
-logs/       recorded games for replay tests (not in git)
+src/
+  loop/       M1-1  game loop, tick order, seeded random numbers
+  state/      M1-1  world state, state builder, metrics, game log
+  match/      M1-2  phases, lobby, bot fill, lost players
+  delivery/   M1-3  package, delivery point, score, compass target, "Find me"
+  hazards/    M1-4  penalties, obstacles, earthquake
+  admin/      M1-5  admin commands, parameter registry
+test/
+  fakes/      M1-1  fake M2 and fake M3
+  scenarios/        demo scenario and rule test inputs
+logs/               recorded games (not in git)
 ```
 
 The code is not written yet. Each part can be built and tested alone with test data, as the module
@@ -38,6 +46,5 @@ Tuğberk Akbulut, Abdullatif Yılmaz, Berk Andaçgil, Selim Barut, Umutcan Ocak
 
 ## Documents
 
-- Module document v2.0: [PDF](../docs/proposals/M1-game-server/v2.0/M1-proposal.pdf) · [Markdown](../docs/proposals/M1-game-server/v2.0/M1-proposal.md)
-- All modules in one document: [PDF](../docs/proposals/modules-and-requirements/v2.0/Cilgin_Kurye_Modules_and_Requirements.pdf)
-- Shared message formats and city plan: [`contracts/`](../contracts/)
+- Modules and Requirements v2.1: [PDF](../docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.pdf) · [Markdown](../docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.md)
+- Plan for the 4 December demo: issue #23

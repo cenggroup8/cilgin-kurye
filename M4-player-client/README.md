@@ -21,9 +21,15 @@ M4 is the web page on each player's phone. The player scans a QR code or types t
 ## Planned layout
 
 ```
-src/        network client, 3D scene, controls, compass and HUD, prediction with the M3 physics code
-assets/     low poly models shared with the board buildings
-test/       tests against a fake server with recorded game states
+src/
+  net/         M4-3  network client
+  screens/     M4-1  screens and HUD
+  controls/    M4-2  buttons
+  predict/     M4-4  prediction (uses the M3 physics code)
+  scene/       M4-5  3D city and scene
+assets/        M4-5  low poly models
+test/
+  fake-server/ M4-2  fake server and recorded game
 ```
 
 The code is not written yet. Each part can be built and tested alone with test data, as the module
@@ -35,6 +41,5 @@ Abdullatif Yılmaz, Batuhan Yanar, Ayşe Poyraz, Berk Andaçgil, Selim Barut
 
 ## Documents
 
-- Module document v2.0: [PDF](../docs/proposals/M4-player-client/v2.0/M4-proposal.pdf) · [Markdown](../docs/proposals/M4-player-client/v2.0/M4-proposal.md)
-- All modules in one document: [PDF](../docs/proposals/modules-and-requirements/v2.0/Cilgin_Kurye_Modules_and_Requirements.pdf)
-- Shared message formats and city plan: [`contracts/`](../contracts/)
+- Modules and Requirements v2.1: [PDF](../docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.pdf) · [Markdown](../docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.md)
+- Plan for the 4 December demo: issue #26

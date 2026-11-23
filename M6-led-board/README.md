@@ -26,8 +26,20 @@ M6 is the physical city board and the program on its ESP32. The board is 60 × 6
 ## Planned layout
 
 ```
-firmware/   one Arduino program for the ESP32: link part (network, sensor, motors, status) and LED part (LED map, smoother, layers, output, demo mode)
-hardware/   wiring, parts list and 3D printed parts of the board
+firmware/
+  src/
+    link/     M6-1  Wi-Fi, TCP and UDP, message codec, state hand over
+    quake/    M6-2  hit detector, motor controller
+    led/      M6-3  LED map, post processing and output
+              M6-4  motion smoother, layers and effects, demo mode
+    sys/      M6-3  status report, settings
+  test/             tests that run on the PC (codec, smoother, detector)
+hardware/     M6-5  wiring, pin table, parts list, print files
+
+Shared scripts in ../tools/ (planned):
+  server_emu    M6-5  stands in for the server
+  board_emu     M6-5  stands in for the board (M2 uses it too)
+  make_led_map  M6-3  builds the LED map from the city plan
 ```
 
 The code is not written yet. Each part can be built and tested alone with test data, as the module
@@ -39,6 +51,5 @@ Tuğberk Akbulut, Hasan Alperen Elmas, Hasan Hüseyin Özdemir, Muhib Taha Boy, 
 
 ## Documents
 
-- Module document v2.0: [PDF](../docs/proposals/M6-led-board/v2.0/M6-proposal.pdf) · [Markdown](../docs/proposals/M6-led-board/v2.0/M6-proposal.md)
-- All modules in one document: [PDF](../docs/proposals/modules-and-requirements/v2.0/Cilgin_Kurye_Modules_and_Requirements.pdf)
-- Shared message formats and city plan: [`contracts/`](../contracts/)
+- Modules and Requirements v2.1: [PDF](../docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.pdf) · [Markdown](../docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.md)
+- Plan for the 4 December demo: issue #28

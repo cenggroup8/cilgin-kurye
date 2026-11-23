@@ -20,8 +20,14 @@ M5 is the admin screen. On one page the admin starts and controls the game, chan
 ## Planned layout
 
 ```
-src/        communication manager, parameter forms, live map and obstacle tools, earthquake panel, graphs
-test/       tests against a fake server that plays back a recorded game
+src/
+  comm/      M5-1  communication manager
+  topbar/    M5-1  top bar, earthquake panel, event log
+  params/    M5-2  parameter manager
+  map/       M5-3  map manager
+  graphs/    M5-4  graph engine
+test/
+  fake-server/ M5-2  fake server and recorded game
 ```
 
 The code is not written yet. Each part can be built and tested alone with test data, as the module
@@ -33,6 +39,5 @@ Batuhan Yanar, Ayşe Poyraz, Berk Andaçgil, Hasan Hüseyin Özdemir
 
 ## Documents
 
-- Module document v2.0: [PDF](../docs/proposals/M5-admin-panel/v2.0/M5-proposal.pdf) · [Markdown](../docs/proposals/M5-admin-panel/v2.0/M5-proposal.md)
-- All modules in one document: [PDF](../docs/proposals/modules-and-requirements/v2.0/Cilgin_Kurye_Modules_and_Requirements.pdf)
-- Shared message formats and city plan: [`contracts/`](../contracts/)
+- Modules and Requirements v2.1: [PDF](../docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.pdf) · [Markdown](../docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.md)
+- Plan for the 4 December demo: issue #27

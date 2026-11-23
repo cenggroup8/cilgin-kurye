@@ -22,8 +22,17 @@ M2 connects the phones, the admin page and the LED board to the game server. It 
 ## Planned layout
 
 ```
-src/        WebSocket server, board TCP and UDP link, message codec, checks, input queue, state broadcaster, network emulator, measurements
-test/       tests with a fake M1, fake phones and the shared example messages
+src/
+  http/        M2-1  pages, 3D models, city plan, QR and game code
+  session/     M2-1  sessions and access
+  codec/       M2-2  message coding and checks
+  queue/       M2-2  input queue
+  broadcast/   M2-3  state broadcaster
+  metrics/     M2-3  ping and measurements
+  board/       M2-4  board TCP channel and UDP stream
+  netem/       M2-4  network emulator
+test/
+  fakes/       M2-3  fake M1 and bot phones
 ```
 
 The code is not written yet. Each part can be built and tested alone with test data, as the module
@@ -35,6 +44,5 @@ Tuğberk Akbulut, Ayşe Poyraz, Hasan Hüseyin Özdemir, Umutcan Ocak
 
 ## Documents
 
-- Module document v2.0: [PDF](../docs/proposals/M2-network/v2.0/M2-proposal.pdf) · [Markdown](../docs/proposals/M2-network/v2.0/M2-proposal.md)
-- All modules in one document: [PDF](../docs/proposals/modules-and-requirements/v2.0/Cilgin_Kurye_Modules_and_Requirements.pdf)
-- Shared message formats and city plan: [`contracts/`](../contracts/)
+- Modules and Requirements v2.1: [PDF](../docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.pdf) · [Markdown](../docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.md)
+- Plan for the 4 December demo: issue #24

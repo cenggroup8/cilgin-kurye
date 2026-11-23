@@ -29,3 +29,7 @@ M6-led-board/firmware/include/secrets.h
 # Test output
 recordings/*.jsonl
 test-output/
+
+# Recorded games
+M1-game-server/logs/*
+!M1-game-server/logs/.gitkeep

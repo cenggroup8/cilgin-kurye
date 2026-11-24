@@ -59,8 +59,10 @@ and has no length in front.
 | `A` | Answer to an `ack` message | both | TCP | no | vectors |
 
 A message with `ack` is answered with an `A` message that has the same `seq`
-(vectors: the earthquake event and its answer both have `seq` 77). The answer
-means "I used this message". Proposal: if no answer comes in 1 s on an open TCP
+and the type of that message in `d.of` (vectors: the earthquake event and its
+answer both have `seq` 77, and the answer has `of: "Q"`). The answer means
+"I used this message". `of` is needed because each type counts by itself, so a
+config and a vibrate command can have the same `seq`. Proposal: if no answer comes in 1 s on an open TCP
 channel, the sender sends the message again with the same `seq`, and the receiver
 answers again but does not use it twice.
 
@@ -214,7 +216,11 @@ Sent once per second (doc 10.3).
 
 ### `A` Answer
 
-No content. The `seq` is the `seq` of the message that it answers.
+The `seq` is the `seq` of the message that it answers.
+
+| Field | Meaning | Source |
+| --- | --- | --- |
+| `of` | Type of the message that it answers, for example `"V"` | vectors, proposal |
 
 ## 5. Order numbers
 

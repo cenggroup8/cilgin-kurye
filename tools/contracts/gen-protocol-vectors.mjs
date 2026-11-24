@@ -32,7 +32,7 @@ const VECTORS = {
   vibrate: { t: "V", v: 1, sid: SID, seq: 9, ts: 61200, ack: true,
              d: { mask: 5, duty: 0.8, ms: 1500, ramp_ms: 200 } },
   ping: { t: "P", v: 1, sid: SID, seq: 620, ts: 60790, d: {} },
-  ack: { t: "A", v: 1, sid: SID, seq: 77, ts: 123470, d: {} },
+  ack: { t: "A", v: 1, sid: SID, seq: 77, ts: 123470, d: { of: "Q" } },
   // board -> server
   hello: { t: "H", v: 1, seq: 1, ts: 1200,
            d: { fw: "0.4.1", plan: "0.1.0", board: "board-01" } },

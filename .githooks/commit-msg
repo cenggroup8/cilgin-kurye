@@ -1,0 +1,25 @@
+#!/bin/sh
+# Rejects commit messages that credit an AI tool.
+# Turn it on once per clone:  git config core.hooksPath .githooks
+
+ROOT=$(git rev-parse --show-toplevel)
+
+if BAD=$("$ROOT/tools/commit-rules/check-ai-trailers.sh" < "$1"); then
+  exit 0
+fi
+
+cat >&2 <<EOF
+
+Commit rejected: the message credits an AI tool.
+Commit reddedildi: mesajda bir AI aracı yazar olarak geçiyor.
+
+These lines are not allowed:
+$BAD
+
+Remove every "Co-authored-by: <AI tool>" line and every
+"Generated with ..." line, then commit again. Only people are authors here.
+If an agent wrote this commit, tell it: do not add AI co-author or
+"generated with" lines to commit messages (see CLAUDE.md / AGENTS.md).
+
+EOF
+exit 1

@@ -1,0 +1,69 @@
+name: commit-rules
+
+# Fails when a pushed commit credits an AI tool in its message or author.
+# The rule and the script are explained in AGENTS.md.
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  no-ai-coauthor:
+    name: No AI co-author
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check commit messages
+        env:
+          EVENT: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_AFTER: ${{ github.event.after }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          if [ "$EVENT" = "pull_request" ]; then
+            RANGE="$PR_BASE..$PR_HEAD"
+          elif [ -z "$PUSH_BEFORE" ] || [ "$PUSH_BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            # New branch: check what is not on the default branch yet.
+            RANGE="origin/$DEFAULT_BRANCH..$PUSH_AFTER"
+          else
+            RANGE="$PUSH_BEFORE..$PUSH_AFTER"
+          fi
+
+          FAILED=0
+          for SHA in $(git rev-list "$RANGE"); do
+            if BAD=$(git log -1 --format='%B%nAuthor: %an <%ae>%nCommitter: %cn <%ce>' "$SHA" \
+                     | sh tools/commit-rules/check-ai-trailers.sh); then
+              continue
+            fi
+            FAILED=1
+            echo "::error title=AI credit in commit $SHA::$(git log -1 --format=%s "$SHA")"
+            echo "Commit $SHA has lines that credit an AI tool:"
+            echo "$BAD"
+            echo
+          done
+
+          if [ "$FAILED" = 1 ]; then
+            cat <<'EOF'
+          These commits are rejected: only people are authors in this repository.
+          Bu commitler reddedildi: bu repoda yalnızca insanlar yazar olarak geçer.
+
+          Fix: remove every "Co-authored-by: <AI tool>" and "Generated with ..." line.
+            last commit:   git commit --amend
+            older commits: git rebase -i <base>   (choose "reword")
+          then push again (git push --force-with-lease on your own branch).
+
+          To catch this before pushing, turn on the local hook once:
+            git config core.hooksPath .githooks
+          If an agent wrote the commit, it must follow AGENTS.md.
+          EOF
+            exit 1
+          fi
+          echo "No AI credit found in $(git rev-list --count "$RANGE") commit(s)."

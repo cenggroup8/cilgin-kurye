@@ -40,8 +40,42 @@ test/
 debug/           M3-1  test page with keyboard driving
 ```
 
-The code is not written yet. Each part can be built and tested alone with test data, as the module
-document describes.
+Shared by all M3 packages:
+
+```
+src/
+  common/
+    rng.ts       seeded random numbers (never use Math.random in M3)
+    types.ts     game data from M1: players, obstacles, world coordinates
+  traffic/graph/
+    types.ts     RoadGraph interface (M3-3 builds the real graph)
+    laneGeometry.ts  lane positions and turn kinds
+test/fakes/
+  fakeRoadGraph.ts   6 x 6 grid city, 36 intersections, 60 roads
+```
+
+Each part can be built and tested alone with test data, as the module document describes.
+
+## Running
+
+```
+npm install
+npm test            # all tests
+npm run typecheck
+npm run demo:npc    # two minutes of NPC traffic with fake data, prints metrics and a map
+```
+
+## NPC traffic (M3-4)
+
+`src/traffic/npc/` — M1 calls `NpcTraffic.step()` once per tick, before the physics part.
+
+- In: `dt`, players, obstacles, car hits from physics, changed admin parameters (`TrafficInput`).
+- Out: NPC car poses (`NpcCarPose`) and traffic metrics (`TrafficMetrics`).
+- Car following: Intelligent Driver Model (`idm.ts`).
+- Intersections: each box has four quarter cells; a car enters only after it locks all cells
+  of its path and its exit lane has room (`intersections.ts`).
+- The car count moves to the admin value a few cars per tick; new cars never appear near a player;
+  stuck cars are removed and added again elsewhere; heavy traffic adds slow cars on its road.
 
 ## Team
 

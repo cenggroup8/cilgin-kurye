@@ -35,6 +35,17 @@ IDs come from formulas, so no module needs a lookup table.
 | North–south segment from `n_r_c` to `n_(r+1)_c` | `v_r_c` | `30 + 6r + c` (30–59) |
 | Block between rows r, r+1 and columns c, c+1 (0–4) | `b_r_c` | `5r + c` (0–24) |
 
+## Zones
+
+The earthquake and the board use 9 zones in a 3 × 3 grid over the 500 m × 500 m city:
+`zone = 3 × row + column`, row 0 in the north, column 0 in the west (`board_protocol.md`).
+The centre of a zone, in metres:
+
+    x = (column + 0.5) × 500 / 3
+    z = (row + 0.5) × 500 / 3
+
+So zone 0 has its centre at about (83.3, 83.3), zone 4 at (250, 250) and zone 8 at about (416.7, 416.7).
+
 ## Lanes
 
 Every segment has 2 lanes in each direction. An obstacle or event names a lane with a number:

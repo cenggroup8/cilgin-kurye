@@ -33,8 +33,13 @@ export interface SubstepContext {
   h: number;
   /** Number of the substep in this tick, from 0. */
   substep: number;
-  /** Controls of this tick by player. A player without controls keeps still. */
+  /** Controls of this tick by player. A player without controls has no throttle, no brake and no steering. */
   controls: ReadonlyMap<number, BikeInput>;
+  /**
+   * Turn rate (radians per second) that the rider wants in this substep, by
+   * player. speedAndSteering writes it, gripAndSliding limits it by the grip.
+   */
+  turn: Map<number, number>;
   /** Stages add their events here. */
   events: PhysicsEvent[];
   carHits: CarHit[];
@@ -86,7 +91,7 @@ export function stepPhysics(
   const carHits: CarHit[] = [];
   const h = input.dt / SUBSTEPS_PER_TICK;
   for (let substep = 0; substep < SUBSTEPS_PER_TICK; substep++) {
-    const ctx: SubstepContext = { world, input, h, substep, controls, events, carHits };
+    const ctx: SubstepContext = { world, input, h, substep, controls, turn: new Map(), events, carHits };
     for (const name of SUBSTEP_ORDER) stages[name](ctx);
   }
 

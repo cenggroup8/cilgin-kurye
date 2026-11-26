@@ -1,15 +1,32 @@
+import { DEFAULT_BIKE_TUNING, type BikeTuning } from './bike/tuning';
 import { DEFAULT_PHYSICS_PARAMS } from './params';
-import type { BikeState, PhysicsParams } from './types';
+import type { BikeState, PhysicsParams, Surface } from './types';
+
+/** Gives the ground at a point. The colliders (M3-2) replace the default. */
+export type SurfaceProvider = (x: number, y: number, params: PhysicsParams) => Surface;
+
+/** A normal road everywhere: normal grip, no speed cap. */
+export const normalRoad: SurfaceProvider = (_x, _y, params) => ({ grip: params.grip, speedCap: null });
 
 /** Everything the physics part keeps between two ticks. */
 export interface PhysicsWorld {
   params: PhysicsParams;
+  tuning: BikeTuning;
+  surfaceAt: SurfaceProvider;
   /** Motorcycles by player number. */
   bikes: Map<number, BikeState>;
 }
 
-export function createWorld(params: Partial<PhysicsParams> = {}): PhysicsWorld {
-  return { params: { ...DEFAULT_PHYSICS_PARAMS, ...params }, bikes: new Map() };
+export function createWorld(
+  params: Partial<PhysicsParams> = {},
+  tuning: Partial<BikeTuning> = {},
+): PhysicsWorld {
+  return {
+    params: { ...DEFAULT_PHYSICS_PARAMS, ...params },
+    tuning: { ...DEFAULT_BIKE_TUNING, ...tuning },
+    surfaceAt: normalRoad,
+    bikes: new Map(),
+  };
 }
 
 /** Puts a standing motorcycle on the map, for example at the team store. */

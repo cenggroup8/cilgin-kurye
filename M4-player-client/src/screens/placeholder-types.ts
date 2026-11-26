@@ -59,6 +59,13 @@ export interface ErrorMessage {
   reason: JoinRefusal;
 }
 
+/**
+ * How many players are in each team, index = team number. GUESS: the lobby
+ * needs this to show a full team, but the game state fields are not decided.
+ * M1 and M2 must say where this comes from.
+ */
+export type TeamCounts = readonly number[];
+
 /** Who the player is. M4-3 will fill this from the welcome message. */
 export interface PlayerInfo {
   player: number;

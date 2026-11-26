@@ -41,12 +41,48 @@ for (const d of plan.delivery_candidates) {
 }
 check(JSON.stringify(plan.stores.map((s) => s.team).sort()) === "[0,1,2,3]", "stores");
 
+// Buildings: one per block, inside its block, off the road, clockwise, store pickup areas free.
+check(plan.buildings.length === (L - 1) * (L - 1), "building count");
+// contracts/README.md (Buildings): 10 m from the centre line = the lanes and a 3 m sidewalk.
+const SIDEWALK_M = 3;
+const roadHalf = plan.grid.lanes_per_direction * plan.grid.lane_width_m + SIDEWALK_M;
+const inside = (pt, poly) => {
+  // Even-odd rule; a point on the edge counts as outside here, which is fine for this check.
+  let yes = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, zi] = poly[i];
+    const [xj, zj] = poly[j];
+    if (zi > pt[1] !== zj > pt[1] && pt[0] < ((xj - xi) * (pt[1] - zi)) / (zj - zi) + xi) yes = !yes;
+  }
+  return yes;
+};
+for (const b of plan.buildings) {
+  const [r, c] = b.block.split("_").slice(1).map(Number);
+  check(b.id === 5 * r + c, `building id ${b.block}`);
+  check(b.height_m > 0, `building height ${b.block}`);
+  let area2 = 0;
+  for (let i = 0; i < b.footprint.length; i++) {
+    const [x, z] = b.footprint[i];
+    const [nx, nz] = b.footprint[(i + 1) % b.footprint.length];
+    area2 += x * nz - nx * z;
+    check(x >= c * P + roadHalf && x <= (c + 1) * P - roadHalf && z >= r * P + roadHalf && z <= (r + 1) * P - roadHalf,
+      `building ${b.block} corner ${i} on the road, on the sidewalk or outside its block`);
+  }
+  check(area2 > 0, `building ${b.block} is not clockwise (x east, z south)`);
+  for (const s of plan.stores) {
+    const { x, z, radius_m } = s.pickup;
+    const ring = Array.from({ length: 16 }, (_, k) => [x + radius_m * Math.cos((k * Math.PI) / 8), z + radius_m * Math.sin((k * Math.PI) / 8)]);
+    check(![[x, z], ...ring].some((pt) => inside(pt, b.footprint)), `building ${b.block} covers the store of team ${s.team}`);
+  }
+}
+
 // --- protocol vectors ------------------------------------------------------
 const vec = read("board_protocol_vectors.json");
 for (const v of vec.vectors) {
   const raw = Buffer.from(v.msgpack_hex, "hex");
   check(pack(v.json).equals(raw), `vector ${v.name}: encode gives other bytes`);
   check(raw.length === v.bytes, `vector ${v.name}: byte count`);
+  if (v.json.d && "plan" in v.json.d) check(v.json.d.plan === plan.version, `vector ${v.name}: plan version is not ${plan.version}`);
   // float32 keeps about 7 digits, so numbers are compared with 7 digits.
   const round = (obj) => JSON.parse(JSON.stringify(obj, (_k, x) => (typeof x === "number" ? Number(x.toPrecision(7)) : x)));
   let back;

@@ -33,6 +33,39 @@ IDs come from formulas, so no module needs a lookup table.
 | Intersection, row r, column c (0–5) | `n_r_c` | `6r + c` (0–35) |
 | East–west segment from `n_r_c` to `n_r_(c+1)` | `h_r_c` | `5r + c` (0–29) |
 | North–south segment from `n_r_c` to `n_(r+1)_c` | `v_r_c` | `30 + 6r + c` (30–59) |
+| Block between rows r, r+1 and columns c, c+1 (0–4) | `b_r_c` | `5r + c` (0–24) |
+
+## Zones
+
+The earthquake and the board use 9 zones in a 3 × 3 grid over the 500 m × 500 m city:
+`zone = 3 × row + column`, row 0 in the north, column 0 in the west (`board_protocol.md`).
+The centre of a zone, in metres:
+
+    x = (column + 0.5) × 500 / 3
+    z = (row + 0.5) × 500 / 3
+
+So zone 0 has its centre at about (83.3, 83.3), zone 4 at (250, 250) and zone 8 at about (416.7, 416.7).
+
+## Lanes
+
+Every segment has 2 lanes in each direction. An obstacle or event names a lane with a number:
+
+| Lane | Meaning |
+| --- | --- |
+| 0 | The whole road |
+| 1, 2 | Driving in the direction of the segment (`h_r_c` to the east, `v_r_c` to the south) |
+| 3, 4 | Driving the other way |
+
+1 and 3 are next to the centre line, 2 and 4 are at the side of the road. Traffic drives
+on the right. A module that counts lanes in another way converts at its own border.
+
+## Buildings
+
+`buildings` in `city_plan.json` has one box per block until the 3D model is ready (#22, K8/K9):
+`{ id, block, footprint: [[x, z], ...], height_m }`. The footprint is in metres, corners clockwise
+seen from above. A building stays 10 m from the road centre line (2 lanes of 3.5 m and a 3 m
+sidewalk). In the four corner blocks the store corner (30 m × 30 m) is left free. Heights are
+placeholders (12–36 m). The 3D model file belongs to M5.
 
 ## Teams
 
@@ -45,5 +78,5 @@ IDs come from formulas, so no module needs a lookup table.
 
 ## Status
 
-All files are a draft. `city_plan.json` has no buildings yet; they wait for the
-3D model decision (#22).
+All files are a draft. The buildings in `city_plan.json` are simple boxes for the
+module demo; the real shapes come with the 3D model (#22).

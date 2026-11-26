@@ -121,8 +121,8 @@ Flags of a player, as bits:
 | Place | Value | Meaning |
 | --- | --- | --- |
 | 0 | integer 0–59 | Road segment (`contracts/README.md`, ID rules) |
-| 1 | integer 1–4 | Type: 1 heavy traffic, 2 road work, 3 accident, 4 water puddle |
-| 2 | integer | Lane. 0 means the whole road |
+| 1 | integer 1–4 | Type: 1 `heavy_traffic`, 2 `road_work`, 3 `accident`, 4 `puddle` (the names M1 uses in the admin commands) |
+| 2 | integer 0–4 | Lane. 0 means the whole road; 1–4 as in `contracts/README.md` (Lanes) |
 
 The board shows an obstacle on the whole road segment (doc 10.2), so the position
 on the segment is not sent to the board.

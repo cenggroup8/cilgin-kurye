@@ -1,0 +1,46 @@
+name: contracts
+
+# Checks the shared files in contracts/ and that they match the scripts in tools/contracts/.
+# Run the same on your computer: cd tools/contracts && npm ci && npm run gen && npm run check
+
+on:
+  push:
+    paths:
+      - "contracts/**"
+      - "tools/contracts/**"
+      - ".github/workflows/contracts.yml"
+  pull_request:
+    paths:
+      - "contracts/**"
+      - "tools/contracts/**"
+      - ".github/workflows/contracts.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Contract check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tools/contracts
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - run: npm ci
+
+      - name: Check the files
+        run: npm run check
+
+      - name: Files match the scripts
+        run: |
+          npm run gen
+          if ! git diff --ignore-cr-at-eol --exit-code -- ../../contracts; then
+            echo "::error::contracts/ is not what the scripts generate. Run 'npm run gen' in tools/contracts and commit the result."
+            exit 1
+          fi

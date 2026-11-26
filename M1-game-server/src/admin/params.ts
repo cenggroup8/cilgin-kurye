@@ -80,6 +80,13 @@ export class ParamRegistry {
    * and the old value stays (v2.1 section 5.5).
    */
   set(name: string, value: unknown): SetResult {
+    const r = this.check(name, value);
+    if (r.ok) this.values.set(r.name, r.value);
+    return r;
+  }
+
+  /** Same checks as `set`, but nothing is saved. */
+  check(name: string, value: unknown): SetResult {
     const d = this.defs.get(name);
     if (!d) return { ok: false, error: "unknown_param" };
     if (typeof value !== "number" || !Number.isFinite(value)) {
@@ -87,11 +94,10 @@ export class ParamRegistry {
     }
     if (d.integer && !Number.isInteger(value)) return { ok: false, error: "bad_value" };
     if (value < d.min || value > d.max) return { ok: false, error: "out_of_range" };
-    this.values.set(name, value);
     return { ok: true, name, value, owner: d.owner };
   }
 
-  /** Back to the start values (admin reset). */
+  /** Back to the start values (admin command `param_reset`). */
   resetAll(): void {
     for (const d of this.defs.values()) this.values.set(d.name, d.start);
   }

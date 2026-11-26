@@ -183,6 +183,71 @@ describe("param_set", () => {
     expect(params.get("physics.grip")).toBe(1);
     expect(sent).toEqual([]);
   });
+
+  it("a value for a module without a sink is refused and not saved", () => {
+    const params = new ParamRegistry(PARAMS);
+    const admin = new AdminHandler({
+      params,
+      match: new FakeMatch(),
+      hazards: new FakeHazards(),
+      network: { newGameCode: () => {} },
+      sinks: {},
+    });
+    const out = admin.apply(cmd("param_set", { name: "physics.grip", value: 0.8 }));
+    expect(out.reply).toMatchObject({ ok: false, error: "owner_not_connected" });
+    expect(out.notice).toBeUndefined();
+    expect(params.get("physics.grip")).toBe(1);
+    // A wrong value still gets its own error first.
+    expect(admin.apply(cmd("param_set", { name: "physics.grip", value: 9 })).reply).toMatchObject({ error: "out_of_range" });
+    // M1 needs no sink.
+    expect(admin.apply(cmd("param_set", { name: "game.penalty_s", value: 5 })).reply.ok).toBe(true);
+    expect(admin.pushAll().sort()).toEqual(["M2", "M3", "M4", "M6"]);
+  });
+});
+
+describe("sending all values", () => {
+  it("pushAll sends every value except M1's to its owner", () => {
+    const { admin, sent } = setup();
+    expect(admin.pushAll()).toEqual([]);
+    expect(sent).toHaveLength(PARAMS.filter((p) => p.owner !== "M1").length);
+    expect(sent).toContain("M3 physics.grip=1");
+    expect(sent).toContain("M6 board.brightness=0.5");
+    expect(sent.some((s) => s.includes("game."))).toBe(false);
+  });
+
+  it("reset keeps the admin values; param_reset brings the start values back and sends them", () => {
+    const { admin, params, sent, match } = setup("playing");
+    admin.apply(cmd("param_set", { name: "physics.grip", value: 0.8 }));
+    admin.apply(cmd("param_set", { name: "game.penalty_s", value: 9 }));
+    admin.apply(cmd("reset"));
+    expect(match.phase).toBe("lobby");
+    expect(params.get("physics.grip")).toBe(0.8);
+    expect(params.get("game.penalty_s")).toBe(9);
+
+    sent.length = 0;
+    const c = cmd("param_reset");
+    const out = admin.apply(c);
+    expect(out.reply).toEqual({ t: "reply", id: c.id, ok: true });
+    expect(params.get("physics.grip")).toBe(1);
+    expect(params.get("game.penalty_s")).toBe(3);
+    expect(sent).toContain("M3 physics.grip=1");
+    expect(out.params?.t).toBe("params");
+    expect(out.params?.list.find((p) => p.name === "physics.grip")?.value).toBe(1);
+  });
+});
+
+describe("earthquake parameters", () => {
+  it("radius, duration and road closing time are M1 values", () => {
+    const p = new ParamRegistry(PARAMS);
+    for (const [name, start] of [
+      ["quake.radius_per_mag_m", 10],
+      ["quake.duration_s", 5],
+      ["quake.road_close_s", 30],
+    ] as const) {
+      expect(p.get(name)).toBe(start);
+      expect(PARAMS.find((d) => d.name === name)?.owner).toBe("M1");
+    }
+  });
 });
 
 describe("game commands", () => {
@@ -227,6 +292,8 @@ describe("obstacles and earthquake", () => {
       cmd("obstacle_ahead", { player: 2, type: "puddle" }),
       cmd("quake", { mag: 6.5, zone: 4 }),
       cmd("quake", { mag: 10, zone: -1 }),
+      cmd("obstacle_add", { type: "puddle", segment: 40, lane: 4, pos: 0 }),
+      cmd("obstacle_add", { type: "accident", segment: 41, lane: 0, pos: 1 }),
     ]);
     expect(outs.every((o) => o.reply.ok)).toBe(true);
     expect(hazards.calls).toEqual([
@@ -236,6 +303,8 @@ describe("obstacles and earthquake", () => {
       "ahead 2 puddle",
       "quake 6.5 4",
       "quake 10 -1",
+      "add puddle 40 4 0",
+      "add accident 41 0 1",
     ]);
   });
 
@@ -246,6 +315,8 @@ describe("obstacles and earthquake", () => {
       cmd("obstacle_add", { type: "accident", segment: -1, lane: 0, pos: 0.5 }),
       cmd("obstacle_add", { type: "accident", segment: 1, lane: 0, pos: 2 }),
       cmd("obstacle_add", { type: "accident", segment: 1.5, lane: 0, pos: 0.5 }),
+      cmd("obstacle_add", { type: "accident", segment: 1, lane: 5, pos: 0.5 }),
+      cmd("obstacle_add", { type: "accident", segment: 1, lane: -1, pos: 0.5 }),
       cmd("obstacle_remove", {}),
       cmd("road_close", { segment: "3" }),
       cmd("obstacle_ahead", { player: 8, type: "puddle" }),
@@ -272,6 +343,7 @@ describe("phase permissions", () => {
     reset: undefined,
     new_code: undefined,
     param_set: { name: "physics.grip", value: 0.9 },
+    param_reset: undefined,
     obstacle_add: { type: "accident", segment: 1, lane: 0, pos: 0.2 },
     obstacle_remove: { id: 1 },
     road_close: { segment: 1 },

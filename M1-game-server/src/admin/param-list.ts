@@ -10,6 +10,13 @@ export const PLAYERS = 8;
 export const OBSTACLE_TYPES = ["heavy_traffic", "road_work", "accident", "puddle"] as const;
 export type ObstacleType = (typeof OBSTACLE_TYPES)[number];
 
+/**
+ * Lane of an obstacle (contracts/README.md): 0 = the whole road.
+ * 1 and 2 drive in the direction of the segment (h_r_c to the east, v_r_c to the south),
+ * 3 and 4 the other way. 1 and 3 are next to the centre line.
+ */
+export const MAX_LANE = 4;
+
 function game(): ParamDef[] {
   return [
     { name: "game.bots", group: "game", min: 0, max: 8, start: 8, integer: true, owner: "M1", label: "Bots that fill empty places at the start" },
@@ -53,6 +60,9 @@ function physics(): ParamDef[] {
 function quake(): ParamDef[] {
   return [
     { name: "quake.strength", group: "quake", min: 0, max: 2, start: 1, owner: "M1", label: "Factor on the strength of every earthquake" },
+    { name: "quake.radius_per_mag_m", group: "quake", min: 2, max: 30, start: 10, owner: "M1", label: "Radius of the earthquake area per strength step (m)" },
+    { name: "quake.duration_s", group: "quake", min: 1, max: 20, start: 5, owner: "M1", label: "How long the earthquake lasts (s)" },
+    { name: "quake.road_close_s", group: "quake", min: 5, max: 180, start: 30, owner: "M1", label: "How long the road work from an earthquake stays (s)" },
     { name: "quake.grip", group: "quake", min: 0.05, max: 1, start: 0.5, owner: "M3", label: "Grip inside the earthquake area" },
   ];
 }

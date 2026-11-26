@@ -3,7 +3,7 @@
 // gives one reply per command. It decides nothing about the game itself.
 // No clock and no random numbers: it only runs inside step 2 of a tick.
 
-import { OBSTACLE_TYPES, PLAYERS, type ObstacleType } from "./param-list.js";
+import { MAX_LANE, OBSTACLE_TYPES, PLAYERS, type ObstacleType } from "./param-list.js";
 import type { Owner, ParamInfo, ParamRegistry } from "./params.js";
 
 /** Same phases as M1-2 (`src/match`). */
@@ -11,7 +11,10 @@ export type Phase = "lobby" | "countdown" | "playing" | "paused" | "ended";
 
 export type Result = { ok: true } | { ok: false; error: string };
 
-/** M1-2: match and lobby. `Match` from `src/match` fits this, `end` gets the scores in M1-1. */
+/**
+ * M1-2: match and lobby. `end` has no scores on purpose: the admin does not know them.
+ * M1-1 connects it, for example `end: () => match.end(game.scores())`.
+ */
 export interface MatchControl {
   readonly phase: Phase;
   start(botCount: number): Result;
@@ -47,6 +50,7 @@ export type CommandName =
   | "reset"
   | "new_code"
   | "param_set"
+  | "param_reset"
   | "obstacle_add"
   | "obstacle_remove"
   | "road_close"
@@ -72,6 +76,13 @@ export interface ParamNotice {
 export interface AdminOutput {
   reply: Reply;
   notice?: ParamNotice;
+  /** After `param_reset`: the full list again, for the admin forms. */
+  params?: ParamsMessage;
+}
+
+export interface ParamsMessage {
+  t: "params";
+  list: ParamInfo[];
 }
 
 const ALL: readonly Phase[] = ["lobby", "countdown", "playing", "paused", "ended"];
@@ -80,6 +91,7 @@ const IN_GAME: readonly Phase[] = ["playing", "paused"];
 /** Which command is allowed in which phase. */
 export const ALLOWED: Readonly<Record<CommandName, readonly Phase[]>> = {
   param_set: ALL,
+  param_reset: ALL,
   new_code: ALL,
   reset: ALL,
   start: ["lobby"],
@@ -98,7 +110,10 @@ export interface AdminDeps {
   match: MatchControl;
   hazards: HazardControl;
   network: NetworkControl;
-  /** One sink per owner module. M1's own values are read from the registry, so M1 needs none. */
+  /**
+   * One sink per owner module. M1's own values are read from the registry, so M1 needs none.
+   * A value for an owner without a sink is refused with `owner_not_connected`.
+   */
   sinks: Partial<Record<Owner, ParamSink>>;
 }
 
@@ -124,8 +139,24 @@ export class AdminHandler {
   constructor(private readonly deps: AdminDeps) {}
 
   /** Answer to `params_get`: every parameter with its value and limits. */
-  paramsMessage(): { t: "params"; list: ParamInfo[] } {
+  paramsMessage(): ParamsMessage {
     return { t: "params", list: this.deps.params.list() };
+  }
+
+  /**
+   * Sends every current value to its owner module. M1-1 calls this once when the server
+   * starts and at every `start`, so no module keeps an old value.
+   * Returns the owners that have values but no sink, for the log.
+   */
+  pushAll(): Owner[] {
+    const missing = new Set<Owner>();
+    for (const p of this.deps.params.list()) {
+      if (p.owner === "M1") continue;
+      const sink = this.deps.sinks[p.owner];
+      if (sink) sink(p.name, p.value);
+      else missing.add(p.owner);
+    }
+    return [...missing];
   }
 
   /** Step 2 of the tick: all admin commands of this tick, in the order they came. */
@@ -156,7 +187,12 @@ export class AdminHandler {
         return done(match.end());
       case "reset":
         // Parameters keep the values the admin set; only the match starts again.
+        // `param_reset` brings the start values back.
         return done(match.reset());
+      case "param_reset":
+        this.deps.params.resetAll();
+        this.pushAll();
+        return { reply: { t: "reply", id: cmd.id, ok: true }, params: this.paramsMessage() };
       case "new_code":
         this.deps.network.newGameCode();
         return done({ ok: true });
@@ -165,7 +201,7 @@ export class AdminHandler {
       case "obstacle_add": {
         const type = obstacleType(a.type);
         const segment = int(a.segment, 0, Number.MAX_SAFE_INTEGER);
-        const lane = int(a.lane, 0, Number.MAX_SAFE_INTEGER);
+        const lane = int(a.lane, 0, MAX_LANE);
         const pos = num(a.pos, 0, 1);
         if (type === undefined || segment === undefined || lane === undefined || pos === undefined) {
           return fail(BAD_ARGS);
@@ -197,9 +233,13 @@ export class AdminHandler {
 
   private setParam(id: number, a: Record<string, unknown>): AdminOutput {
     if (typeof a.name !== "string") return { reply: { t: "reply", id, ok: false, error: BAD_ARGS } };
-    const r = this.deps.params.set(a.name, a.value);
+    const r = this.deps.params.check(a.name, a.value);
     if (!r.ok) return { reply: { t: "reply", id, ok: false, error: r.error } };
-    this.deps.sinks[r.owner]?.(r.name, r.value);
+    // A value that cannot reach its module is not saved, so the admin never sees a false "ok".
+    const sink = r.owner === "M1" ? undefined : this.deps.sinks[r.owner];
+    if (r.owner !== "M1" && !sink) return { reply: { t: "reply", id, ok: false, error: "owner_not_connected" } };
+    this.deps.params.set(r.name, r.value);
+    sink?.(r.name, r.value);
     return {
       reply: { t: "reply", id, ok: true },
       notice: { t: "param", name: r.name, value: r.value },

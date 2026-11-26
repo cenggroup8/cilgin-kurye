@@ -21,4 +21,17 @@ export const TEXT = {
     full: "Full",
     yours: "Your team",
   },
+  countdown: {
+    title: "Get ready",
+    go: "Go!",
+    unknown: "…",
+  },
+  end: {
+    title: "Game over",
+    wins: (team: string) => `${team} wins!`,
+    draw: (teams: string) => `Draw: ${teams}`,
+    and: "and",
+    winner: "Winner",
+    yours: "Your team",
+  },
 } as const;

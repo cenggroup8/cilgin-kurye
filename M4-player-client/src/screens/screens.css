@@ -69,3 +69,45 @@
   text-align: center;
   color: #555;
 }
+
+.countdown-screen {
+  align-items: center;
+  text-align: center;
+}
+
+.countdown-number {
+  font-size: 40vmin;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.result-title {
+  text-align: center;
+  font-size: 2rem;
+}
+
+.score-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.score-row {
+  padding: 12px 14px;
+  border-left: 10px solid var(--team-color, #666);
+  border-radius: 8px;
+  background: #f3f4f6;
+  font-size: 1.125rem;
+}
+
+.score-row[data-winner="true"] {
+  font-weight: 700;
+  background: #fff7d6;
+}
+
+.score-row[data-mine="true"] {
+  outline: 3px solid #111;
+}

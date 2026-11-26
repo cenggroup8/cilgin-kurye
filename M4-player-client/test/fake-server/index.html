@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Çılgın Kurye · Kontrol demosu</title>
+  <link rel="stylesheet" href="./demo.css">
+</head>
+<body>
+  <main>
+    <h1>Kontrol demosu</h1>
+    <form>
+      <label>Oyuncu <input name="name" value="Kurye" required maxlength="32"></label>
+      <label>Oyun kodu <input name="code" value="DEMO" required maxlength="4"></label>
+      <label>Takım <select name="team"><option value="0">Mavi</option><option value="1">Yeşil</option><option value="2">Mor</option><option value="3">Sarı</option></select></label>
+      <button type="submit">Katıl</button>
+    </form>
+    <p id="status" role="status">Bağlantı bekleniyor.</p>
+    <dl>
+      <div><dt>Faz</dt><dd id="phase">—</dd></div>
+      <div><dt>Olay</dt><dd id="event">—</dd></div>
+      <div><dt>Kontrol</dt><dd id="control">—</dd></div>
+    </dl>
+  </main>
+  <div id="controls" hidden>
+    <div class="pair">
+      <button type="button" data-control="left" aria-label="Sol">←</button>
+      <button type="button" data-control="right" aria-label="Sağ">→</button>
+    </div>
+    <div class="pair">
+      <button type="button" data-control="brake">Fren</button>
+      <button type="button" data-control="throttle">Gaz</button>
+    </div>
+  </div>
+  <script type="module" src="./demo.js"></script>
+</body>
+</html>

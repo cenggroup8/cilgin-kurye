@@ -53,6 +53,8 @@ function physics(): ParamDef[] {
     { name: "physics.grip_puddle", group: "physics", min: 0.05, max: 1, start: 0.4, owner: "M3", label: "Grip on a water puddle" },
     { name: "physics.fall_speed_mps", group: "physics", min: 1, max: 20, start: 6, owner: "M3", label: "Hit speed above which a motorcycle falls (m/s)" },
     { name: "physics.npc_count", group: "physics", min: 0, max: 60, start: 20, integer: true, owner: "M3", label: "Number of NPC cars" },
+    { name: "physics.npc_speed_mps", group: "physics", min: 5, max: 20, start: 11, owner: "M3", label: "Speed of an NPC car on a free road (m/s)" },
+    { name: "physics.npc_hit_stop_s", group: "physics", min: 0, max: 10, start: 2.5, owner: "M3", label: "Time an NPC car stops after a motorcycle hits it (s)" },
     { name: "physics.bot_skill", group: "physics", min: 0, max: 1, start: 0.5, owner: "M3", label: "Bot skill (0 weak – 1 strong)" },
   ];
 }

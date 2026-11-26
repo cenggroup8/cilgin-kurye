@@ -26,7 +26,7 @@ npm run board                       # terminal 2 (or the real board)
 ```
 
 Options: `npm run server -- --port 47100 --seed 1 --hz 30`,
-`npm run board -- --host 192.168.1.20 --port 47100 --broadcast --leds 6`.
+`npm run board -- --host 192.168.1.20 --port 47100 --broadcast --leds 5`.
 Without `--broadcast` the board emulator sends its Hello straight to `--host`
 (the backup address); with it, it searches with a UDP broadcast first, like the real board.
 
@@ -64,8 +64,9 @@ its zone, like M1 does (doc 5.5). Seeded: the same seed gives the same game.
 points, motorcycles with a tail, effects), the game phases and the "searching"
 look. It is the B plan view of #28: if the board is not ready, the LED part is
 shown on the screen. The LED layout here is only for the screen (`--leds` LEDs on
-each segment, none at the crossings, four store LEDs per corner); the real layout
-comes from the LED map of M6-3.
+each segment, none at the crossings, two store LEDs per corner); the real layout
+comes from the LED map of M6-3; the default of 5 LEDs per segment and 2 per store
+follows `M6-led-board/hardware/strip_layout.md`.
 
 ## Tests
 

@@ -1,4 +1,4 @@
-// Board emulator screen: npm run board -- [--host 127.0.0.1] [--port 47100] [--broadcast] [--leds 6]
+// Board emulator screen: npm run board -- [--host 127.0.0.1] [--port 47100] [--broadcast] [--leds 5]
 //
 // Shows the board as the LEDs would show the newest board state.
 // Keys: 1-9 hit zone 1-9 (zone 0-8), m changes the strength, w turns the Wi-Fi
@@ -11,7 +11,7 @@ import { drawScreen, numArg, onKeys, parseArgs, screenEnd, screenStart } from ".
 const args = parseArgs(process.argv.slice(2));
 const host = typeof args.host === "string" ? args.host : "127.0.0.1";
 const port = numArg(args, "port", 47100);
-const leds = numArg(args, "leds", 6);
+const leds = numArg(args, "leds", 5);
 const MAGS = [3, 6, 9];
 let magIndex = 1;
 let wifi = true;

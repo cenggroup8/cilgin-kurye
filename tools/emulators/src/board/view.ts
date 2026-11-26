@@ -4,8 +4,9 @@
 // emulator shows the LED part on the screen.
 //
 // The LED layout here is simple and only for the screen: `ledsPerSegment`
-// LEDs on each of the 60 segments, none at the crossings, four store LEDs in
-// each corner. The real layout comes from the LED map of M6-3.
+// LEDs on each of the 60 segments (5 as in M6-led-board/hardware/strip_layout.md),
+// none at the crossings, two store LEDs in each corner, one above the other.
+// The real layout comes from the LED map of M6-3.
 
 export type Rgb = readonly [number, number, number];
 
@@ -56,7 +57,7 @@ export function layout(L: number): { n: number; cells: Cell[][] } {
       if (onCol && !onRow) cells[y][x] = { kind: "led", seg: 30 + 6 * Math.floor(y / step) + x / step }; // v_r_c
     }
   }
-  // Four store LEDs in each corner block, next to the store node.
+  // Two store LEDs in each corner block, next to the store node (strip_layout.md).
   const corners: [number, number, number][] = [
     [0, 1, 1],
     [1, n - 2, 1],
@@ -67,9 +68,7 @@ export function layout(L: number): { n: number; cells: Cell[][] } {
     const dx = cx === 1 ? 1 : -1;
     const dy = cy === 1 ? 1 : -1;
     for (const [x, y] of [
-      [cx, cy],
       [cx + dx, cy],
-      [cx, cy + dy],
       [cx + dx, cy + dy],
     ])
       cells[y][x] = { kind: "store", team };
@@ -89,7 +88,7 @@ export function snapToRoad(u: number, v: number, L: number): { x: number; y: num
 }
 
 export function renderBoard(input: ViewInput): string[] {
-  const L = input.ledsPerSegment ?? 6;
+  const L = input.ledsPerSegment ?? 5;
   const { n, cells } = layout(L);
   const t = input.nowMs / 1000;
   const cfg = input.config ?? {};

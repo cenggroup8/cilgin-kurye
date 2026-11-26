@@ -4,5 +4,6 @@ export { DEFAULT_PHYSICS_PARAMS, PHYSICS_PARAM_KEYS, applyParamChanges } from '.
 export { createWorld, addBike, removeBike, normalRoad } from './world';
 export type { PhysicsWorld, SurfaceProvider } from './world';
 export * from './bike';
+export * from './predictor';
 export { SUBSTEPS_PER_TICK, SUBSTEP_ORDER, EMPTY_STAGES, stepPhysics } from './step';
 export type { StageName, Stage, PhysicsStages, SubstepContext } from './step';

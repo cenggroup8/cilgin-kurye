@@ -69,7 +69,7 @@ export class BoardEmu {
       if (this.connected) this.sendUdp(this.make("N", { hz: 100, a: [0.01, 0.02, 0.01, 0.03, 0.02, 0.01, 0.02, 0.01, 0.02, 0.01] }));
     });
     this.every(1000 / this.o.statusHz, () => {
-      if (this.connected) this.sendTcp(this.make("T", { fw: "emu", plan: "0.1.0", last_seq: this.states.at(-1)?.seq ?? 0, fps: 60, rssi: -50, ma_est: 1200, heap: 100000, err: [] }));
+      if (this.connected) this.sendTcp(this.make("T", { fw: "emu", plan: "0.2.0", last_seq: this.states.at(-1)?.seq ?? 0, fps: 60, rssi: -50, ma_est: 1200, heap: 100000, err: [] }));
     });
     this.every(250, () => {
       for (const q of this.pendingQuakes.values()) this.sendTcp(q); // no answer yet: same seq again
@@ -112,7 +112,7 @@ export class BoardEmu {
     if (!this.sock) {
       this.serverAddr = undefined;
       // Hello as a search (a broadcast on the real board; here the backup address).
-      this.sendUdpTo(this.make("H", { fw: "emu", plan: "0.1.0", board: "emu" }), this.o.host);
+      this.sendUdpTo(this.make("H", { fw: "emu", plan: "0.2.0", board: "emu" }), this.o.host);
     }
   }
 
@@ -125,7 +125,7 @@ export class BoardEmu {
       this.connects++;
       this.lastStateAt = performance.now();
       this.lastIn.clear();
-      this.sendTcp(this.make("H", { fw: "emu", plan: "0.1.0", board: "emu" }));
+      this.sendTcp(this.make("H", { fw: "emu", plan: "0.2.0", board: "emu" }));
     });
     s.on("data", (chunk: Buffer) => {
       for (const b of deframer.push(chunk)) this.onTcp(b);

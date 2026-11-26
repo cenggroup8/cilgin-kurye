@@ -1,0 +1,10 @@
+// The physics part also runs in the phone browser (prediction in M4).
+// This check builds it without Node.js types, so any server only API fails here.
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2022"],
+    "types": []
+  },
+  "include": ["src/physics", "src/common"]
+}

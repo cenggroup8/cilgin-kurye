@@ -47,6 +47,8 @@ src/
   common/
     rng.ts       seeded random numbers (never use Math.random in M3)
     types.ts     game data from M1: players, obstacles, world coordinates
+    coords.ts    the one place that converts contracts/ coordinates (x east, z south, degrees)
+                 and M3 coordinates (x east, y north, radians)
   traffic/graph/
     types.ts     RoadGraph interface (M3-3 builds the real graph)
     laneGeometry.ts  lane positions and turn kinds
@@ -57,6 +59,9 @@ test/fakes/
 Each part can be built and tested alone with test data, as the module document describes.
 
 ## Running
+
+The tools are the same as in M1 and M2: TypeScript 7, Vitest 5, `NodeNext`. So relative
+imports end in `.js` (`from './types.js'`), also in the files that run in the browser.
 
 ```
 npm install
@@ -76,6 +81,40 @@ npm run demo:npc    # two minutes of NPC traffic with fake data, prints metrics 
   of its path and its exit lane has room (`intersections.ts`).
 - The car count moves to the admin value a few cars per tick; new cars never appear near a player;
   stuck cars are removed and added again elsewhere; heavy traffic adds slow cars on its road.
+
+**Pause and new game.** While the game is paused M1 does not call `step()`, so nothing moves and
+no timer runs. For a new game M1 calls `reset(seed)` (or makes a new `NpcTraffic`): all cars and
+counters go, the admin parameters stay. Extra heavy traffic cars belong to an obstacle id, so an
+old instance must not be used for a new game without `reset`.
+
+**Border to M1** (`contract.ts`, in the language of `contracts/`):
+
+```ts
+const traffic = new NpcTraffic(graph, { seed });
+// every tick, before physics:
+const { cars, metrics } = traffic.step({
+  dt,                                                  // s, must be > 0; cut to 0.1
+  players,                                             // M3 coordinates
+  obstacles: fromContractObstacles(m1.obstacles.items, graph), // type 'heavy_traffic', segment, lane 0-4, pos 0-1
+  carHits,                                             // from the physics step before
+  params: trafficParamChanges(changedAdminValues),     // registry names, see below
+});
+const forM4andM5 = cars.map((c) => toContractCar(c, graph)); // x, z, heading in degrees, segment, lane 1-4
+```
+
+Bad input (unknown segment, lane, type, `dt` <= 0, a parameter out of range) throws `RangeError`.
+M1 checks these values before, so an error means a bug.
+
+**Admin parameters** owned by M3-4 (`params.ts`; limits are a proposal for M1's `param-list.ts`):
+
+| Name | Range | Start | Traffic parameter |
+|---|---|---|---|
+| `physics.npc_count` | 0–60 | 20 | `carCount` |
+| `physics.npc_speed_mps` | 5–20 | 11 | `maxSpeed` |
+| `physics.npc_hit_stop_s` | 0–10 | 2.5 | `hitStopTime` |
+| `obstacles.heavy_traffic.effect` | 0–1 | 0.5 | extra cars `round(8 × effect)`, speed factor `1 − 0.8 × effect` |
+
+The other values in `DEFAULT_TRAFFIC_PARAMS` stay at their start values.
 
 ## Team
 

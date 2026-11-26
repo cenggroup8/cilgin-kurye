@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { Rng } from '../../../src/common/rng';
-import { buildEdgeFrames, turnKind } from '../../../src/traffic/graph/laneGeometry';
-import { idmAcceleration } from '../../../src/traffic/npc/idm';
-import { buildTurnPath, IntersectionLocks, pointOnPath } from '../../../src/traffic/npc/intersections';
-import { makeGridGraph } from '../../fakes/fakeRoadGraph';
+import { Rng } from '../../../src/common/rng.js';
+import { buildEdgeFrames, turnKind } from '../../../src/traffic/graph/laneGeometry.js';
+import { idmAcceleration } from '../../../src/traffic/npc/idm.js';
+import { buildTurnPath, IntersectionLocks, pointOnPath } from '../../../src/traffic/npc/intersections.js';
+import { makeGridGraph } from '../../fakes/fakeRoadGraph.js';
 
 describe('fake road graph', () => {
   it('has 36 intersections and 60 roads like the real city', () => {

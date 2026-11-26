@@ -3,7 +3,7 @@
  * city plan. Same shape as the real city: 6 roads in each direction, so
  * 36 intersections and 60 roads (module document 7.5).
  */
-import type { DirectedEdge, GraphNode, Road, RoadGraph } from '../../src/traffic/graph/types';
+import type { DirectedEdge, GraphNode, Road, RoadGraph } from '../../src/traffic/graph/types.js';
 
 export interface GridOptions {
   /** Roads in each direction. */
@@ -32,8 +32,8 @@ export function makeGridGraph(opts: GridOptions = {}): RoadGraph {
   for (let j = 0; j < size; j++) {
     for (let i = 0; i < size - 1; i++) addRoad(j * size + i, j * size + i + 1);
   }
-  for (let i = 0; i < size; i++) {
-    for (let j = 0; j < size - 1; j++) addRoad(j * size + i, (j + 1) * size + i);
+  for (let j = 0; j < size - 1; j++) {
+    for (let i = 0; i < size; i++) addRoad(j * size + i, (j + 1) * size + i);
   }
 
   const edges: DirectedEdge[] = [];

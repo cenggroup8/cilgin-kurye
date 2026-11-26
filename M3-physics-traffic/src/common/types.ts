@@ -1,14 +1,19 @@
 /**
  * Plain data types that M1 gives to M3 every tick ("Game data" in the module
  * document, section 7.3). They are shared by the physics part, NPC traffic and
- * bots. Proposal by M3-4; when the shared contracts/ folder exists, these types
- * should move there or be generated from it.
+ * bots.
  *
- * World coordinates (proposal, used until the city plan file exists):
+ * Coordinates inside M3:
  * - Units are metres and seconds.
- * - The ground is the x / y plane. M4 can map y to the 3D z axis.
- * - heading is in radians, 0 = +x, counter clockwise is positive.
+ * - x to the east, y to the north (the ground plane).
+ * - heading in radians, 0 = east, counter clockwise is positive.
  * - Traffic drives on the right.
+ * contracts/ uses x east, z south and degrees clockwise from north. The change
+ * happens in one place, src/common/coords.ts.
+ *
+ * M1 sends obstacles in the contracts form (type 'heavy_traffic', segment,
+ * lane 0-4, pos 0-1). src/traffic/npc/contract.ts turns them into the Obstacle
+ * below, which uses the edges and lanes of the road graph.
  */
 
 export interface Vec2 {
@@ -21,13 +26,16 @@ export type ObstacleType = 'heavyTraffic' | 'roadWork' | 'accident' | 'puddle';
 export interface Obstacle {
   id: number;
   type: ObstacleType;
-  /** Road (undirected) the obstacle is on. */
+  /** Road (undirected) the obstacle is on: the contracts segment id. */
   roadId: number;
-  /** Directed edge, if the obstacle is only on one side of the road (accident, puddle). */
+  /**
+   * Directed edge the obstacle is on. `lane` and `s` are measured on this edge.
+   * Missing: the forward edge of the road (from road.a to road.b).
+   */
   edgeId?: number;
-  /** Lane index on that edge, 0 = the lane next to the centre line. */
+  /** Lane index on that edge, 0 = the lane next to the centre line. Missing = the whole road. */
   lane?: number;
-  /** Distance from the start of the edge (metres). Missing = middle of the road. */
+  /** Distance from the start stop line of that edge (metres). Missing = middle of the road. */
   s?: number;
 }
 

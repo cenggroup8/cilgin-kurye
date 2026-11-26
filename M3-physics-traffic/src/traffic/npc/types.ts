@@ -4,7 +4,7 @@
  * In:  players, obstacles, car hits from physics (M3-2), parameters (M5 via M1).
  * Out: NPC car poses (to M1, then M4 and M5) and traffic metrics (to M1, then M5).
  */
-import type { Obstacle, PlayerPose } from '../../common/types';
+import type { Obstacle, PlayerPose } from '../../common/types.js';
 
 export type NpcState = 'driving' | 'stopped' | 'offroad';
 
@@ -50,11 +50,12 @@ export interface TrafficParams {
   maxDespawnPerTick: number;
 }
 
+/** Start values. carCount, maxSpeed and hitStopTime match the M1 parameter registry (params.ts). */
 export const DEFAULT_TRAFFIC_PARAMS: TrafficParams = {
-  carCount: 60,
+  carCount: 20,
   maxSpeed: 11,
   heavyTrafficExtraCars: 4,
-  heavyTrafficSpeedFactor: 0.4,
+  heavyTrafficSpeedFactor: 0.6,
   minSpawnDistance: 40,
   stuckTimeout: 20,
   offroadImpactSpeed: 7,

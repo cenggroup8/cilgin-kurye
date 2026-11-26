@@ -8,9 +8,9 @@
  *  90 s   both obstacles end, admin sets 40 cars
  * Every 5 s it prints the traffic metrics, and at the end a map of the city.
  */
-import type { Obstacle } from '../src/common/types';
-import { NpcTraffic, type TrafficOutput } from '../src/traffic/npc';
-import { makeGridGraph } from '../test/fakes/fakeRoadGraph';
+import type { Obstacle } from '../src/common/types.js';
+import { NpcTraffic, type TrafficOutput } from '../src/traffic/npc/index.js';
+import { makeGridGraph } from '../test/fakes/fakeRoadGraph.js';
 
 const graph = makeGridGraph();
 const traffic = new NpcTraffic(graph, { seed: 2026, params: { carCount: 60 } });

@@ -3,8 +3,8 @@
  * what kind of turn two edges make. Used by NPC traffic; bots (M3-5) can use the
  * same helpers to follow lanes.
  */
-import type { Vec2 } from '../../common/types';
-import type { DirectedEdge, RoadGraph } from './types';
+import type { Vec2 } from '../../common/types.js';
+import type { DirectedEdge, RoadGraph } from './types.js';
 
 export interface EdgeFrame {
   /** Centre line point at the start stop line. */

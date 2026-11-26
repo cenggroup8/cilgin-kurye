@@ -234,6 +234,57 @@ describe("sending all values", () => {
     expect(out.params?.t).toBe("params");
     expect(out.params?.list.find((p) => p.name === "physics.grip")?.value).toBe(1);
   });
+
+  it("param_reset is refused and changes nothing when an owner has no sink", () => {
+    const params = new ParamRegistry(PARAMS);
+    const sent: string[] = [];
+    const admin = new AdminHandler({
+      params,
+      match: new FakeMatch(),
+      hazards: new FakeHazards(),
+      network: { newGameCode: () => {} },
+      sinks: { M3: (n, v) => sent.push(`M3 ${n}=${v}`) },
+    });
+    admin.apply(cmd("param_set", { name: "game.penalty_s", value: 9 }));
+    admin.apply(cmd("param_set", { name: "physics.grip", value: 0.8 }));
+    sent.length = 0;
+    const out = admin.apply(cmd("param_reset"));
+    expect(out.reply).toMatchObject({ ok: false, error: "owner_not_connected" });
+    expect(out.params).toBeUndefined();
+    expect(params.get("game.penalty_s")).toBe(9);
+    expect(params.get("physics.grip")).toBe(0.8);
+    expect(sent).toEqual([]);
+  });
+
+  it("start sends every value to its owner before the match starts", () => {
+    const { admin, sent, match } = setup();
+    const out = admin.apply(cmd("start"));
+    expect(out.reply.ok).toBe(true);
+    expect(match.phase).toBe("countdown");
+    expect(sent).toHaveLength(PARAMS.filter((p) => p.owner !== "M1").length);
+    expect(sent).toContain("M3 physics.npc_speed_mps=11");
+  });
+
+  it("start is not blocked by a module without a sink", () => {
+    const match = new FakeMatch();
+    const admin = new AdminHandler({
+      params: new ParamRegistry(PARAMS),
+      match,
+      hazards: new FakeHazards(),
+      network: { newGameCode: () => {} },
+      sinks: {},
+    });
+    expect(admin.apply(cmd("start")).reply.ok).toBe(true);
+    expect(match.phase).toBe("countdown");
+  });
+
+  it("M3 traffic parameters have the limits M3 asked for (#61)", () => {
+    const params = new ParamRegistry(PARAMS);
+    const speed = params.list().find((p) => p.name === "physics.npc_speed_mps");
+    const stop = params.list().find((p) => p.name === "physics.npc_hit_stop_s");
+    expect(speed).toMatchObject({ min: 5, max: 20, value: 11, owner: "M3" });
+    expect(stop).toMatchObject({ min: 0, max: 10, value: 2.5, owner: "M3" });
+  });
 });
 
 describe("earthquake parameters", () => {

@@ -144,8 +144,8 @@ export class AdminHandler {
   }
 
   /**
-   * Sends every current value to its owner module. M1-1 calls this once when the server
-   * starts and at every `start`, so no module keeps an old value.
+   * Sends every current value to its owner module. The `start` command calls it itself;
+   * M1-1 calls it once when the server starts. So no module keeps an old value.
    * Returns the owners that have values but no sink, for the log.
    */
   pushAll(): Owner[] {
@@ -155,6 +155,15 @@ export class AdminHandler {
       const sink = this.deps.sinks[p.owner];
       if (sink) sink(p.name, p.value);
       else missing.add(p.owner);
+    }
+    return [...missing];
+  }
+
+  /** Owners that have parameters but no sink. */
+  private missingOwners(): Owner[] {
+    const missing = new Set<Owner>();
+    for (const p of this.deps.params.list()) {
+      if (p.owner !== "M1" && !this.deps.sinks[p.owner]) missing.add(p.owner);
     }
     return [...missing];
   }
@@ -178,6 +187,9 @@ export class AdminHandler {
 
     switch (cmd.name) {
       case "start":
+        // Modules that connected after the last change get every value before the match.
+        // A missing owner is only logged here (M1-1); it must not block the match.
+        this.pushAll();
         return done(match.start(this.deps.params.get("game.bots")));
       case "pause":
         return done(match.pause());
@@ -189,10 +201,13 @@ export class AdminHandler {
         // Parameters keep the values the admin set; only the match starts again.
         // `param_reset` brings the start values back.
         return done(match.reset());
-      case "param_reset":
+      case "param_reset": {
+        // Same rule as param_set: if an owner cannot be reached, nothing is changed.
+        if (this.missingOwners().length > 0) return fail("owner_not_connected");
         this.deps.params.resetAll();
         this.pushAll();
         return { reply: { t: "reply", id: cmd.id, ok: true }, params: this.paramsMessage() };
+      }
       case "new_code":
         this.deps.network.newGameCode();
         return done({ ok: true });

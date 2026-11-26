@@ -12,9 +12,9 @@ npm run check    # checks both files
 
 | Script | What it does |
 | --- | --- |
-| `gen-city-plan.mjs` | Writes `city_plan.json` from the grid rules |
+| `gen-city-plan.mjs` | Writes `city_plan.json` from the grid rules, with one box building per block |
 | `gen-protocol-vectors.mjs` | Writes `board_protocol_vectors.json`: one example of each board message and its exact MessagePack bytes |
-| `check-contracts.mjs` | City plan IDs and geometry; every vector encodes to the same bytes and decodes back; the largest board state fits in one Wi-Fi packet |
+| `check-contracts.mjs` | City plan IDs and geometry; buildings inside their block, off the road, clockwise, store areas free; every vector encodes to the same bytes and decodes back; the largest board state fits in one Wi-Fi packet |
 | `protocol.mjs` | The encoding rule both scripts share |
 
 These scripts replace the old Python ones. With the same input they give the same

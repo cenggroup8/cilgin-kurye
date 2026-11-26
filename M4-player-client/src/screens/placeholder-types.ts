@@ -72,3 +72,36 @@ export interface PlayerInfo {
   /** The chosen team, or null while the player has not picked one. */
   team: TeamId | null;
 }
+
+// ---- Added for the countdown and end screens (M4-1, step 4) ----
+
+/** The countdown before the game lasts 3 seconds (v2.1 section 8.5). Not a guess. */
+export const COUNTDOWN_SECONDS = 3;
+
+/**
+ * TAHMİN: M1 runs 30 ticks per second (v2.1 section 5.5, and `TICKS_PER_SECOND`
+ * in PR #59). The phone needs it to turn ticks into seconds. The game state may
+ * give seconds instead; then this constant goes away.
+ */
+export const TICKS_PER_SECOND = 30;
+
+/**
+ * TAHMİN: ticks left in the countdown, like `countdownTicksLeft` of `Match` in
+ * PR #59 (M1-2). Whether and how the game state carries it is not decided
+ * (#35, #29). `undefined` means "not known yet".
+ */
+export type CountdownTicksLeft = number | undefined;
+
+/**
+ * TAHMİN: the points of each team, index = team number. v2.1 section 5.3 says the
+ * state has "scores"; the exact shape is not written. Missing or wrong values are read as 0.
+ */
+export type TeamScores = readonly number[];
+
+/**
+ * TAHMİN: the winning teams at the end, one team for a win and more than one for a
+ * draw (like `winners` of `Match` in PR #59). M1 decides the winner, so the page
+ * does not work it out from the scores. The state may not carry this field; then
+ * M1-1 or M2-2 must add it.
+ */
+export type Winners = readonly number[];

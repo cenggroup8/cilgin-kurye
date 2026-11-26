@@ -12,7 +12,7 @@
 
 import { createSocket, type RemoteInfo, type Socket as UdpSocket } from "node:dgram";
 import { connect, type Socket } from "node:net";
-import { MOTOR_ZONES, clamp01, seededRandom, zoneCentre } from "../common/cityPlan.js";
+import { MOTOR_ZONES, clamp01, loadCityPlan, seededRandom, zoneCentre } from "../common/cityPlan.js";
 import { DEFAULT_PORT, Deframer, MAX_FRAME, MessageFactory, decode, encode, frame, type BoardMsg } from "../common/protocol.js";
 
 export type LinkState = "searching" | "connected";
@@ -34,7 +34,7 @@ export interface BoardEmulatorOptions {
   broadcast?: boolean;
   board?: string;
   fw?: string;
-  /** Version of the city plan in the board (compared with `C.plan`). */
+  /** Version of the city plan in the board (compared with `C.plan`). Default: contracts/city_plan.json. */
   plan?: string;
   /** No board state for this long: back to searching (proposal: 1 s). */
   searchAfterMs?: number;
@@ -89,7 +89,7 @@ const DEFAULTS = {
   broadcast: false,
   board: "board-emu",
   fw: "emu-0.1.0",
-  plan: "0.1.0",
+  plan: "",
   searchAfterMs: 1000,
   backupAfterMs: 5000,
   resendMs: 1000,
@@ -150,6 +150,8 @@ export class BoardEmulator {
 
   constructor(options: BoardEmulatorOptions = {}) {
     this.o = { ...DEFAULTS, ...options } as typeof DEFAULTS;
+    // The board is built with the city plan, so it knows the version of contracts/city_plan.json.
+    if (!this.o.plan) this.o.plan = loadCityPlan().version;
     this.events = options.events ?? {};
     this.random = seededRandom(this.o.seed);
   }

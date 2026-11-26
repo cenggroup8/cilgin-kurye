@@ -9,6 +9,6 @@ export const BIKE_STAGES: Pick<PhysicsStages, 'speedAndSteering' | 'gripAndSlidi
 };
 
 export { maxWheelAngle, nextSpeed, wantedTurnRate } from './model';
-export { wrapAngle } from './motion';
+export { applyGrip, wrapAngle } from './motion';
 export { DEFAULT_BIKE_TUNING, G } from './tuning';
 export type { BikeTuning } from './tuning';

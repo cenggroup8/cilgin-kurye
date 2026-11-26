@@ -44,7 +44,7 @@ export interface BikeState {
   heading: number;
   /** Forward speed in m/s. Never negative: there is no reverse. */
   speed: number;
-  /** Side speed in m/s while the motorcycle slides out of a turn, 0 otherwise. */
+  /** Side speed in m/s while the motorcycle slides out of a turn, positive to the rider's left; 0 otherwise. */
   slip: number;
   /** Lean angle for drawing (M4), radians, positive = leaning to the right. */
   lean: number;

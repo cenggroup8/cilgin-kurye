@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>M3 test page</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #1d2129; color: #e8eaf0; font: 13px/1.45 ui-monospace, Menlo, Consolas, monospace; overflow: hidden; }
+      canvas { display: block; width: 100vw; height: 100vh; }
+      .panel { position: fixed; background: rgba(20, 23, 30, 0.86); border: 1px solid #343a46; border-radius: 6px; padding: 8px 10px; }
+      #hud { top: 10px; left: 10px; min-width: 240px; white-space: pre; }
+      #help { bottom: 10px; left: 10px; white-space: pre; color: #aab1c0; }
+      .slide { color: #ffb347; }
+    </style>
+  </head>
+  <body>
+    <canvas id="view"></canvas>
+    <div id="hud" class="panel"></div>
+    <div id="help" class="panel">↑ / W  throttle      ↓ / S  brake      ← → / A D  steer
+1 / 2  top speed -/+     3 / 4  grip -/+     5 / 6  speed factor -/+
+Q  earthquake area      N  NPC cars on/off  C  camera (follow / city)
++ / -  zoom             R  back to start    P  pause</div>
+    <script type="module" src="./drive.ts"></script>
+  </body>
+</html>

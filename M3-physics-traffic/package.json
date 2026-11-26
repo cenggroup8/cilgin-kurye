@@ -9,12 +9,14 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit && npm run typecheck:physics",
     "typecheck:physics": "tsc -p tsconfig.physics.json",
-    "demo:npc": "tsx debug/npc-demo.ts"
+    "demo:npc": "tsx debug/npc-demo.ts",
+    "debug": "vite debug --port 5173 --strictPort"
   },
   "devDependencies": {
     "@types/node": "22.10.2",
     "tsx": "4.19.2",
     "typescript": "5.6.3",
+    "vite": "5.4.21",
     "vitest": "2.1.8"
   }
 }

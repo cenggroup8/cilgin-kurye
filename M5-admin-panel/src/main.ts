@@ -1,11 +1,12 @@
 import './admin.css';
 import { AdminConnection } from './comm/connection.ts';
 import type { AdminState, LogEntry, MetricSample, Parameter } from './comm/protocol.ts';
+import { initMapManager } from './map/map-manager.ts';
 import { bindTopbar, commandLabel } from './topbar/topbar.ts';
 
 const connection = new AdminConnection(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/admin`);
 const params = document.querySelector<HTMLDListElement>('#params')!;
-const map = document.querySelector<HTMLDListElement>('#map')!;
+const mapContainer = document.querySelector<HTMLElement>('#map')!;
 const metrics = document.querySelector<HTMLDListElement>('#metrics')!;
 const marks = document.querySelector<HTMLElement>('#marks')!;
 const events = document.querySelector<HTMLOListElement>('#events')!;
@@ -26,12 +27,7 @@ function showValues(element: HTMLDListElement, values: Iterable<readonly [string
   }));
 }
 
-function showMap(state: AdminState) {
-  showValues(map, [
-    ['Oyuncular', state.players.length], ['NPC araçlar', state.npcCars.length],
-    ['Engeller', state.obstacles.length], ['Teslimat noktaları', state.deliveryPoints.length],
-  ]);
-}
+const mapManager = initMapManager(mapContainer, connection);
 
 function showParams() {
   showValues(params, Array.from(paramValues.values(), ({ name, label, value }) => [label ?? name, value]));
@@ -68,13 +64,11 @@ connection.subscribe((update) => {
       paramValues.clear();
       for (const param of update.params) paramValues.set(param.name, param);
       showParams();
-      showMap(update.state);
       metricValues.clear();
       showMetrics([...update.metrics, ...update.board.samples]);
       addEvents(update.events);
       break;
     case 'state':
-      showMap(update.state);
       break;
     case 'params':
       paramValues.clear();

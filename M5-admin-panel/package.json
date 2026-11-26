@@ -5,7 +5,8 @@
   "scripts": {
     "build": "node build.ts",
     "demo": "npm run build && node test/comm/demoServer.ts",
-    "test": "node --test test/comm/*.test.ts",
+    "demo:map": "npm run build && node test/map/mapDemoServer.ts",
+    "test": "node --test test/comm/*.test.ts test/map/*.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

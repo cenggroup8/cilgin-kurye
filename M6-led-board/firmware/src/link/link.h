@@ -23,7 +23,7 @@ struct LinkSettings {
   /** TCP and UDP port of the server (a setting, not fixed in the protocol). */
   uint16_t port = 47100;
   std::string fw = "0.1.0";
-  std::string plan = "0.1.0";
+  std::string plan = "0.2.0";
   std::string board = "board-01";
   uint32_t helloEveryMs = 1000;     // search: one Hello per second
   uint32_t backupAfterMs = 5000;    // no answer to the search: try the backup address too

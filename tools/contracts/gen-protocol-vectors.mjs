@@ -8,12 +8,15 @@
 // Keep every float value non-whole (0.6, not 1.0): JSON cannot tell 1.0 from 1,
 // so a whole float would not give the same bytes in every language.
 
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { ENCODING, pack } from "./protocol.mjs";
 
 /** Session number of the server in the examples (board_protocol.md section 6). */
 const SID = 1402754;
+
+/** The board names the city plan it has by its version, so the vectors use the current one. */
+const PLAN = JSON.parse(readFileSync(fileURLToPath(new URL("../../contracts/city_plan.json", import.meta.url)), "utf8")).version;
 
 const VECTORS = {
   // server -> board
@@ -25,7 +28,7 @@ const VECTORS = {
     ob: [[12, 2, 0], [41, 3, 1], [20, 1, 0]],
     eq: [1, 0.52, 0.48, 7, 840] } },
   config: { t: "C", v: 1, sid: SID, seq: 4, ts: 0, ack: true, d: {
-    plan: "0.1.0", bright: 0.6, max_ma: 4000,
+    plan: PLAN, bright: 0.6, max_ma: 4000,
     tones: [[80, 160, 255], [0, 60, 220], [90, 255, 90], [0, 150, 40],
             [200, 110, 255], [110, 0, 200], [255, 230, 80], [210, 140, 0]],
     anim: { tail: 2, dp_blink_hz: 1.5 } } },
@@ -35,13 +38,13 @@ const VECTORS = {
   ack: { t: "A", v: 1, sid: SID, seq: 77, ts: 123470, d: { of: "Q" } },
   // board -> server
   hello: { t: "H", v: 1, seq: 1, ts: 1200,
-           d: { fw: "0.4.1", plan: "0.1.0", board: "board-01" } },
+           d: { fw: "0.4.1", plan: PLAN, board: "board-01" } },
   quake: { t: "Q", v: 1, seq: 77, ts: 123456, ack: true,
            d: { id: 12, src: "hit", peak_g: 3.8, mag: 6.1, u: 0.31, v: 0.72, zone: 6, conf: 0.7 } },
   sensor: { t: "N", v: 1, seq: 9001, ts: 123400,
             d: { hz: 100, a: [0.01, 0.02, 0.01, 0.85, 2.9, 3.8, 1.2, 0.4, 0.1, 0.03] } },
   status: { t: "T", v: 1, seq: 310, ts: 310020,
-            d: { fw: "0.4.1", plan: "0.1.0", last_seq: 52031, fps: 60,
+            d: { fw: "0.4.1", plan: PLAN, last_seq: 52031, fps: 60,
                  rssi: -52, ma_est: 1850, heap: 182000, err: [] } },
   pong: { t: "O", v: 1, seq: 620, ts: 310050,
           d: { ping_ts: 60790, state_seq: 52031, state_age_ms: 9 } },

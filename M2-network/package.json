@@ -8,7 +8,8 @@
     "build": "tsc -p tsconfig.json",
     "test": "vitest run",
     "demo": "tsx src/demo.ts",
-    "demo:bots": "tsx src/demo.ts --bots"
+    "demo:bots": "tsx src/demo.ts --bots",
+    "demo:broadcast": "tsx src/demo-broadcast.ts"
   },
   "engines": {
     "node": ">=20"

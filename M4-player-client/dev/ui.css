@@ -1,0 +1,95 @@
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #9fdcff;
+  color: #fff;
+  font: 600 14px/1.3 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: none;
+  overscroll-behavior: none;
+}
+
+canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.hud { position: fixed; }
+
+.speed {
+  top: max(12px, env(safe-area-inset-top));
+  left: max(16px, env(safe-area-inset-left));
+  font-size: 30px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+.speed small { font-size: 14px; font-weight: 700; margin-left: 4px; opacity: 0.85; }
+
+.tools {
+  top: max(12px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+  display: flex;
+  gap: 8px;
+}
+.fps {
+  top: calc(max(12px, env(safe-area-inset-top)) + 48px);
+  right: max(16px, env(safe-area-inset-right));
+  font-size: 11px;
+  opacity: 0.7;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.btn {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  background: rgba(20, 24, 32, 0.18);
+  color: #fff;
+  cursor: pointer;
+  touch-action: none;
+}
+.btn.down, .btn.on { background: rgba(255, 255, 255, 0.35); }
+.btn svg { width: 46%; height: 46%; display: block; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35)); }
+
+.tool { width: 40px; height: 40px; border-radius: 12px; }
+
+.steer, .pedals {
+  bottom: max(20px, env(safe-area-inset-bottom));
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+}
+.steer { left: max(20px, env(safe-area-inset-left)); }
+.pedals { right: max(20px, env(safe-area-inset-right)); }
+.round { width: 108px; height: 108px; border-radius: 50%; }
+.brake { width: 100px; height: 100px; border-radius: 24px; }
+.gas { width: 108px; height: 140px; border-radius: 28px; }
+
+.paused {
+  inset: 0;
+  display: none;
+  place-items: center;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  background: rgba(0, 0, 0, 0.25);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+.paused.show { display: grid; }
+
+@media (max-height: 440px) {
+  .round { width: 92px; height: 92px; }
+  .brake { width: 86px; height: 86px; }
+  .gas { width: 92px; height: 120px; }
+}

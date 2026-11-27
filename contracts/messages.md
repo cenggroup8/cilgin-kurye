@@ -48,7 +48,7 @@ the first `seq` it sends.
 | `error` | `reason` string, `ref` string (optional) | A refused message. `ref` is the `t` of the refused message when it is known |
 | `state` | `seq` integer, `s` map | The frozen game state of tick `seq`, 30 times per second. `s` is M1's game state (#78). Every phone gets the same bytes |
 | `ping` | `id` integer ≥ 1, `st` number | Twice per second. `st` is the server time in ms |
-| `net` | `fps_limit` integer 0–120 | Frame rate limit of this player (admin parameter `net.<p>.fps_limit`). Sent only to the phone of that player: when it joins and when the admin changes the value. 0 means no limit |
+| `net` | `fps_limit` integer 0–120 | Frame rate limit of this player (admin parameter `net.<p>.fps_limit`). Sent only to the phone of that player (by M2-3): when the admin changes the value, and when the player joins or comes back. 0 means no limit |
 
 ## Admin → server
 

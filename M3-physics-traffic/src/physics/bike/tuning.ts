@@ -24,6 +24,12 @@ export interface BikeTuning {
   reverseAccel: number;
   /** TAHMİN. Largest reverse speed, m/s. Must stay below physics.fall_speed_mps (6), so backing into a wall is never a fall. */
   reverseMax: number;
+  /**
+   * TAHMİN (proposal of LatifY, to be tried on the demo). The motorcycle must have stood still
+   * (brake held, no throttle, speed at or below reverseEnterSpeed) for this long, in seconds,
+   * before the reverse starts. A rider who brakes to a stop at the delivery point does not roll back at once.
+   */
+  reverseWaitS: number;
 }
 
 export const DEFAULT_BIKE_TUNING: Readonly<BikeTuning> = {
@@ -37,6 +43,7 @@ export const DEFAULT_BIKE_TUNING: Readonly<BikeTuning> = {
   reverseEnterSpeed: 0.05,
   reverseAccel: 3,
   reverseMax: 2.5,
+  reverseWaitS: 0.5,
 };
 
 /** Gravity, m/s². */

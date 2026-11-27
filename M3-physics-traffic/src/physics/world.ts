@@ -28,6 +28,12 @@ export interface PhysicsWorld {
   buildings: Polygon[];
   /** The city rectangle. The outer wall stands OUTER_WALL_MARGIN_M outside it. Null: no outer wall. */
   bounds: WorldBounds | null;
+  /**
+   * Seconds that each motorcycle has stood still with the brake held (player number -> seconds).
+   * The reverse starts after `tuning.reverseWaitS`. It is kept here and not in BikeState, so it
+   * is not in the output of the physics step and not in what the phone gets from the server.
+   */
+  stoppedS: Map<number, number>;
 }
 
 export function createWorld(
@@ -41,6 +47,7 @@ export function createWorld(
     bikes: new Map(),
     buildings: [],
     bounds: null,
+    stoppedS: new Map(),
   };
 }
 
@@ -63,9 +70,11 @@ export function addBike(
     lastSeq: -1,
   };
   world.bikes.set(id, bike);
+  world.stoppedS.set(id, 0);
   return bike;
 }
 
 export function removeBike(world: PhysicsWorld, id: number): void {
   world.bikes.delete(id);
+  world.stoppedS.delete(id);
 }

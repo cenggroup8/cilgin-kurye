@@ -65,11 +65,11 @@ describe('speed', () => {
     expect(bike.heading).toBe(0);
   });
 
-  // Changed for the small reverse (reverse.test.ts): the brake is let go at the reverse threshold (0.05 m/s), so this only tests braking from speed.
+  // The small reverse (reverse.test.ts) starts only after the motorcycle has stood for 0.5 s; here the brake is let go at the reverse threshold (0.05 m/s), so this only tests braking from speed.
   it('the brake stops a moving motorcycle without going backwards', () => {
     let lastX = 0;
     let backwards = 0;
-    // The brake is held for the whole tick, so the second substep can already begin the reverse: at most a few millimetres.
+    // The brake is let go at 0.05 m/s and there is no wait that could end: the motorcycle does not go backwards at all (the limit is only a safety margin).
     const bike = drive(worldWithBike(15), 30 * 5, (b) => ({ brake: b.speed > 0.05 ? 1 : 0 }), 1, (b) => {
       backwards = Math.max(backwards, lastX - b.x);
       lastX = b.x;

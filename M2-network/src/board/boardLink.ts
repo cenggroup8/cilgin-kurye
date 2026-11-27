@@ -12,6 +12,7 @@ import { createServer, type Server, type Socket } from "node:net";
 import { type BoardMsg, Deframer, MAX_FRAME, type MsgType, PROTOCOL_VERSION, decode, encode, frame } from "./codec.js";
 import { SeqTracker } from "./seq.js";
 import { NetemQueue, NetemSettings } from "../netem/netem.js";
+import { type WorldBoardState, WORLD_SIZE_M, toBoardState } from "./worldState.js";
 
 /** Earthquake event for M1 (board_protocol.md, `Q`). */
 export interface QuakeEvent {
@@ -52,6 +53,8 @@ export interface BoardLinkOptions {
   netem?: NetemSettings;
   random?: () => number;
   events?: BoardEvents;
+  /** Side of the city in metres, for `setWorldState` (city_plan.json `world.size_m`). */
+  worldSizeM?: number;
 }
 
 export interface BoardMetrics {
@@ -147,9 +150,23 @@ export class BoardLink {
     return this.port;
   }
 
-  /** Newest board state from M1. The link sends it at the board state rate. */
+  /** Newest board state, already in the lists of the `S` message. The link sends it at the board state rate. */
   setState(d: Record<string, unknown>): void {
     this.state = d;
+  }
+
+  /**
+   * Newest board state from M1 in world coordinates (metres, degrees). It is turned into
+   * the `S` lists here (board_protocol.md section 4). A state with an unknown phase or
+   * obstacle type is not used: the old state stays and the answer is false.
+   */
+  setWorldState(w: WorldBoardState): boolean {
+    try {
+      this.state = toBoardState(w, this.opts.worldSizeM ?? WORLD_SIZE_M);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /** Config for the board (colours, brightness, power limit). Sent on every Hello and on change. */

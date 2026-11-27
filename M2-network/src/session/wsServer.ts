@@ -64,6 +64,10 @@ export function attachWebSockets(http: Server, opts: WsOptions): WsHandle {
   function accept(ws: WebSocket, role: "player" | "admin"): void {
     const connId = nextId++;
     links.set(connId, ws);
+    // A message over maxPayload or a broken frame makes ws emit "error" and then close the
+    // link itself (1009, 1002). Without a listener Node throws the error and the whole server
+    // stops, so one bad phone could end the game for everybody.
+    ws.on("error", () => {});
     const { replacedAdmin } = registry.open(connId, role);
     if (replacedAdmin !== undefined) drop(replacedAdmin, CLOSE.adminReplaced, "replaced by a new admin login");
 

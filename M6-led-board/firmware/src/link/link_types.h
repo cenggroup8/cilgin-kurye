@@ -68,7 +68,7 @@ struct Rgb {
 struct BoardConfig {
   std::string plan;           // city plan version of the server
   float bright = 0.5f;        // 0.1–1
-  uint16_t maxMa = 2000;      // power limit of the LEDs
+  uint16_t maxMa = 8000;      // power limit of the LEDs in mA (start value of board.max_ma)
   Rgb tones[8];               // place = 2 × team + tone
   uint8_t tail = 2;           // length of the tail of a motorcycle dot, in LEDs
   float dpBlinkHz = 1.0f;     // how fast a delivery point blinks

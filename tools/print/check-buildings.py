@@ -5,7 +5,7 @@
 #   - prints without supports: no face hangs over more than 45° except on the bed (z = 0)
 #   - base fits the block: 89.6 × 89.6 mm and stays inside the board block
 #   - height: the highest point is height_m of the block in city_plan.json × 1.12
-#   - distance to the LED strips (#75) and to the store LEDs
+#   - distance to the LED strips and to the store LEDs (sizes from strip_layout.json, #75)
 #   - fits the printer: the size of the largest part
 #
 # And depo.stl (the team depot): closed, no overhang over 45°, and in each corner it fits
@@ -15,20 +15,36 @@
 
 import json, math, os, struct, sys
 
+sys.stdout.reconfigure(encoding="utf-8")
+
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 plan = json.load(open(os.path.join(ROOT, "contracts", "city_plan.json")))
-K, M, P, OFF = 1.12, 20, 112, (112 - 83.33) / 2
-MIN_STRIP, MIN_LED = 6.0, 3.0  # mm
+# Smallest free gap (mm) between a part's base and a strip edge / a store LED. With the 15 mm strip
+# the sidewalk plate edge is 3.7 mm from the strip and the depot 2.5 mm; the buildings stand 2.4 mm
+# further in. Nothing touches the strip, so these limits only keep room for gluing.
+MIN_STRIP, MIN_DEPOT_STRIP, MIN_LED, MIN_DEPOT_LED = 3.5, 2.0, 3.0, 0.5
+
+# Strip and store LED sizes come from the strip layout (#75), so a new strip needs no edit here.
+LAYOUT = os.path.join(ROOT, "M6-led-board", "hardware", "strip_layout.json")
+if not os.path.exists(LAYOUT):
+    sys.exit("strip_layout.json yok: önce #75 (M6-5 şerit yerleşimi) birleşmeli")
+lay = json.load(open(LAYOUT))
+brd = lay["board"]
+M, P, W, L = brd["margin_mm"], brd["road_pitch_mm"], brd["strip_width_mm"], brd["piece_mm"]
+K, OFF, HW = (brd["size_mm"] - 2 * M) / plan["world"]["size_m"], (P - L) / 2, W / 2
 
 strips, leds = [], []
 for r in range(6):
     for c in range(5):
         x0 = M + P * c + OFF
-        strips += [(x0, M + P * r - 5, x0 + 83.33, M + P * r + 5), (M + P * r - 5, x0, M + P * r + 5, x0 + 83.33)]
-for nx, nz, sx, sz in [(20, 20, 1, 1), (580, 20, -1, 1), (20, 580, 1, -1), (580, 580, -1, -1)]:
-    for dz in (17, 28):
-        cx, cz = nx + sx * 22, nz + sz * dz
-        leds.append((cx - 8.35, cz - 5, cx + 8.35, cz + 5))
+        strips += [(x0, M + P * r - HW, x0 + L, M + P * r + HW), (M + P * r - HW, x0, M + P * r + HW, x0 + L)]
+for ch in lay["chains"]:
+    for pc in ch["pieces"]:
+        if pc["kind"] != "store":
+            continue
+        for led in pc["leds"]:  # one LED: led pitch along the strip (east-west) x strip width
+            cx, cz = led["mm"]
+            leds.append((cx - brd["led_pitch_mm"] / 2, cz - HW, cx + brd["led_pitch_mm"] / 2, cz + HW))
 
 
 def gap(points, rects):
@@ -113,7 +129,7 @@ for nx, nz, sx, sz in [(20, 20, 1, 1), (580, 20, -1, 1), (20, 580, 1, -1), (580,
     corner_leds = [r for r in leds if x0 <= (r[0] + r[2]) / 2 <= x0 + size[0] and zmax - size[1] <= (r[1] + r[3]) / 2 <= zmax]
     inside &= len(corner_leds) == 2
     worst_led = min(worst_led, gap(ring, corner_leds))
-ok = open_edges == 0 and vol > 0 and down == 0 and inside and worst_led >= 0.5 and worst_strip >= 4.5
+ok = open_edges == 0 and vol > 0 and down == 0 and inside and worst_led >= MIN_DEPOT_LED and worst_strip >= MIN_DEPOT_STRIP
 ok_all &= ok
 print(f"Depo  {size[0]:4.1f}x{size[1]:4.1f}x{size[2]:4.1f} mm  {vol / 1000:4.1f} cm3  şerit {worst_strip:3.1f}  LED payı {worst_led:3.1f}  "
       f"LED içeride {'evet' if inside else 'HAYIR'}  açık kenar {open_edges}  sarkma {down}  {'TAMAM' if ok else 'SORUN'}")

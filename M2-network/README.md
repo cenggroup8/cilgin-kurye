@@ -97,7 +97,7 @@ Open points for the team:
 | Metrics and board data on to the admin; two minutes of history, the full parameter list and the current state for an admin page that connects again (`snapshot_get`) | `src/broadcast/adminFeed.ts` |
 | Everything in the server: `attachBroadcast({ server, toM1, board })` | `src/broadcast/broadcastHub.ts` |
 | Fake M1: a moving test state 30 times per second in the shape of M1-1 (#78), metrics twice per second, writes down every input | `test/fakes/fakeM1.ts` |
-| Bot phones (up to 8): join, send controls 10 times per second, answer pings (late on purpose if asked), count the states | `test/fakes/botPhone.ts` |
+| Bot phones (up to 8): join, send controls 10 times per second and "Find me", answer pings (late on purpose if asked), send broken messages on purpose (`sendBroken`), count the states | `test/fakes/botPhone.ts` |
 
 How M1 uses it: `hub.publish({ tick, game, board })` after every tick, `hub.metrics(samples)`
 twice per second, and `toM1(measures)` gives M1 the network measurements twice per second.

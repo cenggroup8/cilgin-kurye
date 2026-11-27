@@ -89,4 +89,28 @@ describe("M2-3 with a fake M1 and bot phones", () => {
     expect(snap.board.samples).toHaveLength(1);
     again.close();
   });
+
+  it("broken messages on purpose do not stop the server; \"Find me\" reaches M1", { timeout: 20_000 }, async () => {
+    stack = await startStack();
+    const { m1, hub, server } = stack;
+    bots = await joinBots(server.port, server.gameCode.value, 3, { controlHz: 0 });
+    const [bad, good, huge] = bots as [BotPhone, BotPhone, BotPhone];
+    m1.run(hub);
+    for (const kind of ["not_msgpack", "no_type", "unknown_type", "bad_control"] as const) bad.sendBroken(kind);
+    await waitFor(() => (bad.errors.includes("bad_message") ? true : undefined));
+    huge.sendBroken("huge");
+    await waitFor(() => huge.closeCode ?? undefined);
+    expect(huge.closeCode).toBe(1009); // the 64 KiB limit of M2-1 closes only this link
+
+    good.findMe();
+    await waitFor(() => m1.inputs.find((i) => i.type === "message" && (i.msg as { t?: string }).t === "find_me"));
+    const before = good.states;
+    await sleep(500);
+    expect(good.states).toBeGreaterThan(before + 10); // the others still get every state
+    expect(bad.closeCode).toBeNull(); // a decodable but wrong message does not close the link
+    expect(bad.states).toBeGreaterThan(0);
+    // Until M2-2's checker is in, M1 sees the decodable wrong messages: the fake M1 lists them.
+    const fromBad = m1.inputs.filter((i) => i.type === "message" && i.playerNo === bad.player);
+    expect(fromBad.length).toBe(3);
+  });
 });

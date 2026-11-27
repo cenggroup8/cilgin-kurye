@@ -7,7 +7,13 @@ import { NetemSettings } from "../src/netem/netem.js";
 import { BoardEmu } from "./fakes/boardEmu.js";
 
 const STATE = { ph: 2, tl: 200, p: [[2, 1, 0, 13, 0.4248, 0.1962, 88, 11.2]], dp: [], ob: [[12, 2, 0]], eq: [] };
-const CONFIG = { plan: "0.2.0", bright: 0.6, max_ma: 4000, tones: [], anim: { tail: 2, dp_blink_hz: 1.5 } };
+const CONFIG = {
+  plan: "0.2.0",
+  bright: 0.6,
+  max_ma: 4000,
+  tones: [[80, 160, 255], [0, 60, 220], [90, 255, 90], [0, 150, 40], [200, 110, 255], [110, 0, 200], [255, 230, 80], [210, 140, 0]],
+  anim: { tail: 2, dp_blink_hz: 1.5 },
+};
 
 const round = (x: unknown): unknown =>
   JSON.parse(JSON.stringify(x, (_k, v) => (typeof v === "number" ? Number(v.toPrecision(7)) : v)));

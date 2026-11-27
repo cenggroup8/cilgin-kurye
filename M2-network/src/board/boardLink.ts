@@ -13,6 +13,7 @@ import { type BoardMsg, Deframer, MAX_FRAME, type MsgType, PROTOCOL_VERSION, dec
 import { SeqTracker } from "./seq.js";
 import { NetemQueue, NetemSettings } from "../netem/netem.js";
 import { type WorldBoardState, WORLD_SIZE_M, toBoardState } from "./worldState.js";
+import { type VibrateCommand, checkConfig, checkVibrate } from "./checks.js";
 
 /** Earthquake event for M1 (board_protocol.md, `Q`). */
 export interface QuakeEvent {
@@ -109,6 +110,8 @@ export class BoardLink {
   private readonly unbind: (() => void)[] = [];
 
   private delayMs: number | null = null;
+  /** What was wrong with the last refused config or vibrate command. */
+  lastError: string | null = null;
   private statesSent = 0;
   private badMessages = 0;
   private resends = 0;
@@ -169,14 +172,29 @@ export class BoardLink {
     }
   }
 
-  /** Config for the board (colours, brightness, power limit). Sent on every Hello and on change. */
-  setConfig(d: Record<string, unknown>): void {
+  /**
+   * Config for the board (colours, brightness, power limit). Sent on every Hello and on change.
+   * A config the board would throw away (checks.ts) is not sent: the old one stays and the
+   * answer is false. `lastError` says what was wrong.
+   */
+  setConfig(d: Record<string, unknown>): boolean {
+    const err = checkConfig(d);
+    if (err) {
+      this.lastError = `config: ${err}`;
+      return false;
+    }
     this.config = d;
     if (this.connected) this.sendAcked(this.make("C", d, true));
+    return true;
   }
 
-  /** Vibrate command from M1. False when no board is connected. */
-  vibrate(d: { mask: number; duty: number; ms: number; ramp_ms: number }): boolean {
+  /** Vibrate command from M1. False when no board is connected or the command is out of range. */
+  vibrate(d: VibrateCommand): boolean {
+    const err = checkVibrate(d);
+    if (err) {
+      this.lastError = `vibrate: ${err}`;
+      return false;
+    }
     if (!this.connected) return false;
     this.sendAcked(this.make("V", d, true));
     return true;

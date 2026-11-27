@@ -125,13 +125,17 @@ describe("order numbers", () => {
 });
 
 describe("admin commands", () => {
-  it("an unknown command or bad args get a reply with the id", () => {
+  it("an unknown command or bad args get a reply with the id and the names of M1-5", () => {
     const c = new Checker();
     expect(c.check(admin(), { t: "cmd", id: 4, name: "give_points" })).toEqual({ ok: false, reason: "unknown_command", ref: "cmd", replyId: 4 });
-    expect(c.check(admin(), { t: "cmd", id: 5, name: "quake", args: { mag: 11, zone: 0 } })).toEqual({ ok: false, reason: "out_of_range", ref: "cmd", replyId: 5 });
-    expect(c.check(admin(), { t: "cmd", id: 6, name: "obstacle_add", args: { type: "lava", segment: 1, lane: 0, pos: 0 } })).toMatchObject({ reason: "out_of_range", replyId: 6 });
-    expect(c.check(admin(), { t: "cmd", id: 7, name: "road_close", args: { segment: 60 } })).toMatchObject({ reason: "out_of_range", replyId: 7 });
-    expect(c.check(admin(), { t: "cmd", id: 8, name: "param_set", args: { name: "x" } })).toMatchObject({ reason: "bad_field", replyId: 8 });
+    expect(c.check(admin(), { t: "cmd", id: 5, name: "quake", args: { mag: 11, zone: 0 } })).toEqual({ ok: false, reason: "bad_args", ref: "cmd", replyId: 5 });
+    expect(c.check(admin(), { t: "cmd", id: 6, name: "obstacle_add", args: { type: "lava", segment: 1, lane: 0, pos: 0 } })).toMatchObject({ reason: "bad_args", replyId: 6 });
+    expect(c.check(admin(), { t: "cmd", id: 7, name: "road_close", args: { segment: 60 } })).toMatchObject({ reason: "bad_args", replyId: 7 });
+    expect(c.check(admin(), { t: "cmd", id: 8, name: "param_set", args: { name: "x" } })).toMatchObject({ reason: "bad_args", replyId: 8 });
+  });
+
+  it("a cmd whose args are not a map also gets bad_args", () => {
+    expect(new Checker().check(admin(), { t: "cmd", id: 11, name: "quake", args: [5, 2] })).toMatchObject({ reason: "bad_args", replyId: 11 });
   });
 
   it("a cmd without a usable id gets an error, not a reply", () => {

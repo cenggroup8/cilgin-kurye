@@ -150,7 +150,7 @@ const queue = new InputQueue();
 const inbound = createInbound({ queue, send: (id, m) => server.send(id, m), others: (s, m) => hub.onMessage(s, m) });
 const server = await startM2Server({ events: queue, onMessage: inbound.onMessage, admit: inbound.admit });
 // M1-1: new GameLoop(world, rng, deps, () => queue.take())
-// M2-4: queue.boardEvent({ source, magnitude, zone, confidence }) for an earthquake event
+// M2-4 (#63): quake: (e) => queue.boardEvent(toBoardEvent(e)) for an earthquake event of the board
 ```
 
 Two small changes in the M2-1 code: `wsServer.ts` calls `admit` with the size of every message

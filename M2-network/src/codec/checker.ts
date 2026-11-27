@@ -30,9 +30,15 @@ export interface Checked {
 export type CheckResult =
   | { ok: true; msg: Checked }
   /** Refused: the link gets an answer. `replyId`: a `cmd` whose `id` is usable gets a `reply`. */
-  | { ok: false; reason: Reason | "unknown_command"; ref?: string; replyId?: number }
+  | { ok: false; reason: Reason | CommandError; ref?: string; replyId?: number }
   /** Old or repeated order number: dropped without an answer. */
   | { ok: false; stale: true; ref: string };
+
+/**
+ * Names in `reply.error` for a refused `cmd`. The same names as M1-5 (`admin.ts`), so the admin
+ * page sees one name for one problem, whether M2 or M1-5 refused it (contract "Command errors").
+ */
+export type CommandError = "unknown_command" | "bad_args";
 
 export interface CheckerStats {
   passed: number;
@@ -65,7 +71,7 @@ export class Checker {
     const replyId = t === "cmd" && Number.isSafeInteger(raw.id) && (raw.id as number) >= 0 ? (raw.id as number) : undefined;
 
     const bad = checkFields(raw, spec.fields);
-    if (bad) return { ok: false, reason: bad, ref: t, replyId };
+    if (bad) return { ok: false, reason: replyId !== undefined ? "bad_args" : bad, ref: t, replyId };
     const fields = pick(raw, spec.fields);
 
     if (session.role === "player") {
@@ -88,8 +94,7 @@ export class Checker {
       const argSpec = Object.prototype.hasOwnProperty.call(COMMAND_ARGS, name) ? COMMAND_ARGS[name] : undefined;
       if (!argSpec) return { ok: false, reason: "unknown_command", ref: t, replyId };
       const args = (fields.args ?? {}) as Record<string, unknown>;
-      const badArg = checkFields(args, argSpec);
-      if (badArg) return { ok: false, reason: badArg, ref: t, replyId };
+      if (checkFields(args, argSpec)) return { ok: false, reason: "bad_args", ref: t, replyId };
       fields.args = pick(args, argSpec);
     }
 

@@ -133,7 +133,7 @@ describe("M2-2 in the server", () => {
     expect(await admin.next("params")).toMatchObject({ t: "params" });
     await waitFor(() => (admin.messages.filter((m) => m.t === "reply").length >= 2 ? true : undefined));
     expect(admin.messages.filter((m) => m.t === "reply")).toEqual([
-      { t: "reply", id: 2, ok: false, error: "out_of_range" },
+      { t: "reply", id: 2, ok: false, error: "bad_args" },
       { t: "reply", id: 3, ok: false, error: "unknown_command" },
     ]);
     expect(stack.tick().adminCommands).toEqual([{ id: 1, name: "obstacle_add", args: { type: "road_work", segment: 12, lane: 1, pos: 0.25 } }]);

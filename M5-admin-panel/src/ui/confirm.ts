@@ -23,10 +23,25 @@ export function confirmAction(options: { title: string; text: string; confirm: s
   dialog.setAttribute('aria-labelledby', (title.id = `confirm-${Date.now()}`));
   document.body.append(dialog);
   return new Promise((resolve) => {
-    dialog.addEventListener('close', () => {
-      resolve(dialog.returnValue === 'ok');
+    // Answer at once on the button or Escape; the `close` event is only a fallback, because a
+    // browser may deliver it late (a hidden tab), and the dialog must not stay in the page.
+    let done = false;
+    const finish = (answer: boolean) => {
+      if (done) return;
+      done = true;
+      if (dialog.open) dialog.close(answer ? 'ok' : 'cancel');
       dialog.remove();
-    }, { once: true });
+      resolve(answer);
+    };
+    actions.addEventListener('submit', (event) => {
+      event.preventDefault();
+      finish((event.submitter as HTMLButtonElement | null)?.value === 'ok');
+    });
+    dialog.addEventListener('cancel', (event) => {
+      event.preventDefault();
+      finish(false);
+    });
+    dialog.addEventListener('close', () => finish(dialog.returnValue === 'ok'), { once: true });
     dialog.showModal();
     cancel.focus(); // the safe choice is focused first
   });

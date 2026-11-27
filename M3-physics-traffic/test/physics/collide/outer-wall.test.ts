@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { OUTER_WALL_MARGIN_M } from '../../../src/physics/collide/constants';
-import planJson from '../../fakes/city_plan.json';
+import { OUTER_WALL_MARGIN_M } from '../../../src/physics/collide/constants.js';
+import planJson from '../../fakes/city_plan.json' with { type: 'json' };
 
 describe('outer wall distance', () => {
   it('the inner face stands further out than the road edge, so the roads are all inside', () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BARRIER_THICKNESS_M, BIKE_RADIUS_M } from '../../../src/physics/collide/constants';
+import { BARRIER_THICKNESS_M, BIKE_RADIUS_M } from '../../../src/physics/collide/constants.js';
 
 describe('tunnel guard for the collision constants', () => {
   it('the worst-case move in one substep is below radius + thickness / 2', () => {

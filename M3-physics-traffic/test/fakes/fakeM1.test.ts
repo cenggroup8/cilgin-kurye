@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { BIKE_STAGES, EMPTY_STAGES } from '../../src/physics';
-import type { NpcCarPose } from '../../src/traffic/npc';
-import { CITY_PLAN, m3City } from './cityPlan';
-import { FakeM1, type Scenario } from './fakeM1';
+import { BIKE_STAGES, EMPTY_STAGES } from '../../src/physics/index.js';
+import type { NpcCarPose } from '../../src/traffic/npc/index.js';
+import { CITY_PLAN, m3City } from './cityPlan.js';
+import { FakeM1, type Scenario } from './fakeM1.js';
 
 const ride: Scenario = {
   seed: 11,

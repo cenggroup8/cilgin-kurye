@@ -2,9 +2,9 @@
 // "hiçbir şey duvardan geçmez"). Each step first moves the circle, then finds the
 // contact and resolves it, like one substep of the physics part will do.
 import { describe, expect, it } from 'vitest';
-import { BARRIER_THICKNESS_M, BIKE_RADIUS_M } from '../../../src/physics/collide/constants';
-import { resolveContact, type BikeMotion } from '../../../src/physics/collide/resolve';
-import { circleVsPolygon, type Point } from '../../../src/physics/collide/shapes';
+import { BARRIER_THICKNESS_M, BIKE_RADIUS_M } from '../../../src/physics/collide/constants.js';
+import { resolveContact, type BikeMotion } from '../../../src/physics/collide/resolve.js';
+import { circleVsPolygon, type Point } from '../../../src/physics/collide/shapes.js';
 
 const H = 1 / 60; // one substep (2 per tick at 30 ticks per second)
 const WALL_X = 100;

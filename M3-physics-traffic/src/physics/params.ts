@@ -1,4 +1,4 @@
-import type { PhysicsParams } from './types';
+import type { PhysicsParams } from './types.js';
 
 /** Start values, the same as in the M1 parameter registry (M1-5). */
 export const DEFAULT_PHYSICS_PARAMS: Readonly<PhysicsParams> = {

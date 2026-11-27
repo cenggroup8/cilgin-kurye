@@ -12,10 +12,10 @@ import {
   type BikeState,
   type PhysicsInput,
   type PhysicsWorld,
-} from '../../src/physics';
-import { nextSpeed } from '../../src/physics/bike/model';
-import { BIKE_RADIUS_M } from '../../src/physics/collide/constants';
-import { FakeM1 } from '../fakes/fakeM1';
+} from '../../src/physics/index.js';
+import { nextSpeed } from '../../src/physics/bike/model.js';
+import { BIKE_RADIUS_M } from '../../src/physics/collide/constants.js';
+import { FakeM1 } from '../fakes/fakeM1.js';
 
 const DT = 1 / 30;
 const H = DT / 2; // one substep

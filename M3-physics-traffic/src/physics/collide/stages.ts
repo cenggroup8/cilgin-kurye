@@ -8,13 +8,13 @@
  * take the speed into the shape away. A hit faster than `world.params.fallSpeed`
  * makes it fall.
  */
-import type { SubstepContext } from '../step';
-import type { BikeState, CollisionEvent, HitKind } from '../types';
-import type { PhysicsWorld } from '../world';
-import { BIKE_RADIUS_M, MAX_CONTACTS_PER_BIKE, MIN_IMPACT_MPS, OUTER_WALL_MARGIN_M } from './constants';
-import { judgeImpact } from './fall-judge';
-import { impactSpeedOf, resolveContact, type BikeMotion } from './resolve';
-import { circleVsPolygon, type Circle, type Contact } from './shapes';
+import type { SubstepContext } from '../step.js';
+import type { BikeState, CollisionEvent, HitKind } from '../types.js';
+import type { PhysicsWorld } from '../world.js';
+import { BIKE_RADIUS_M, MAX_CONTACTS_PER_BIKE, MIN_IMPACT_MPS, OUTER_WALL_MARGIN_M } from './constants.js';
+import { judgeImpact } from './fall-judge.js';
+import { impactSpeedOf, resolveContact, type BikeMotion } from './resolve.js';
+import { circleVsPolygon, type Circle, type Contact } from './shapes.js';
 
 export interface Candidate {
   with: HitKind;

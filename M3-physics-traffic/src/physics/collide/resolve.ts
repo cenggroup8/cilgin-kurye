@@ -11,7 +11,7 @@
  *
  * Nothing here changes its input. Every function gives back new objects.
  */
-import type { Contact } from './shapes';
+import type { Contact } from './shapes.js';
 
 export interface BikeMotion {
   x: number;

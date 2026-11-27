@@ -5,11 +5,11 @@
  * PR #62, commit 704997e). When contracts/ is on main, import it from there and
  * delete the copy.
  */
-import { fromContractHeading, fromContractPoint } from '../../src/common/coords';
-import type { Vec2 } from '../../src/common/types';
-import type { RoadGraph } from '../../src/traffic/graph/types';
-import planJson from './city_plan.json';
-import { makeGridGraph } from './fakeRoadGraph';
+import { fromContractHeading, fromContractPoint } from '../../src/common/coords.js';
+import type { Vec2 } from '../../src/common/types.js';
+import type { RoadGraph } from '../../src/traffic/graph/types.js';
+import planJson from './city_plan.json' with { type: 'json' };
+import { makeGridGraph } from './fakeRoadGraph.js';
 
 export interface CityPlan {
   version: string;

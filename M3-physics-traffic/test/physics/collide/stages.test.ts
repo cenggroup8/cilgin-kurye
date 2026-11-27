@@ -9,10 +9,10 @@ import {
   type PhysicsStages,
   type PhysicsWorld,
   type SubstepContext,
-} from '../../../src/physics';
-import { BIKE_RADIUS_M, MAX_CONTACTS_PER_BIKE, OUTER_WALL_MARGIN_M } from '../../../src/physics/collide/constants';
-import { candidatesOf, solveBike } from '../../../src/physics/collide/stages';
-import { FakeM1 } from '../../fakes/fakeM1';
+} from '../../../src/physics/index.js';
+import { BIKE_RADIUS_M, MAX_CONTACTS_PER_BIKE, OUTER_WALL_MARGIN_M } from '../../../src/physics/collide/constants.js';
+import { candidatesOf, solveBike } from '../../../src/physics/collide/stages.js';
+import { FakeM1 } from '../../fakes/fakeM1.js';
 
 const STAGES: PhysicsStages = { ...EMPTY_STAGES, ...COLLIDE_STAGES };
 const FALL = 6; // default physics.fall_speed_mps

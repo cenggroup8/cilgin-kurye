@@ -4,7 +4,7 @@
  * controls, obstacles and earthquake of a scenario, and calls M3 in the same
  * order as M1: first the traffic part, then the physics part.
  */
-import type { Obstacle } from '../../src/common/types';
+import type { Obstacle } from '../../src/common/types.js';
 import {
   addBike,
   BIKE_STAGES,
@@ -17,9 +17,9 @@ import {
   type PhysicsStages,
   type PhysicsWorld,
   type QuakeArea,
-} from '../../src/physics';
-import { NpcTraffic, type CarHit, type NpcCarPose } from '../../src/traffic/npc';
-import { m3City, type M3City } from './cityPlan';
+} from '../../src/physics/index.js';
+import { NpcTraffic, type CarHit, type NpcCarPose } from '../../src/traffic/npc/index.js';
+import { m3City, type M3City } from './cityPlan.js';
 
 export interface Ctl {
   throttle?: number;

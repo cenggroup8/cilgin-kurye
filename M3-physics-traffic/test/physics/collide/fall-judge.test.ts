@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { judgeImpact, relativeNormalSpeed } from '../../../src/physics/collide/fall-judge';
-import { DEFAULT_PHYSICS_PARAMS } from '../../../src/physics';
+import { judgeImpact, relativeNormalSpeed } from '../../../src/physics/collide/fall-judge.js';
+import { DEFAULT_PHYSICS_PARAMS } from '../../../src/physics/index.js';
 
 const FALL = DEFAULT_PHYSICS_PARAMS.fallSpeed; // 6 m/s
 

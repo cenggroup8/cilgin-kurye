@@ -1,7 +1,7 @@
-import { DEFAULT_BIKE_TUNING, type BikeTuning } from './bike/tuning';
-import { DEFAULT_PHYSICS_PARAMS } from './params';
-import type { BikeState, PhysicsParams, Surface } from './types';
-import type { Polygon } from './collide/shapes';
+import { DEFAULT_BIKE_TUNING, type BikeTuning } from './bike/tuning.js';
+import { DEFAULT_PHYSICS_PARAMS } from './params.js';
+import type { BikeState, PhysicsParams, Surface } from './types.js';
+import type { Polygon } from './collide/shapes.js';
 
 /** Gives the ground at a point. The colliders (M3-2) replace the default. */
 export type SurfaceProvider = (x: number, y: number, params: PhysicsParams) => Surface;

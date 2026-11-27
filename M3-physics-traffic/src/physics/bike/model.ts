@@ -8,8 +8,8 @@
  * speed. The next stage (grip and sliding) decides how much of this turn the
  * tyres can really give, and moves the motorcycle.
  */
-import type { Stage } from '../step';
-import type { BikeTuning } from './tuning';
+import type { Stage } from '../step.js';
+import type { BikeTuning } from './tuning.js';
 
 /** Largest front wheel angle at this speed, radians. */
 export function maxWheelAngle(speed: number, tuning: BikeTuning): number {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { NpcTraffic } from '../../../src/traffic/npc';
-import { makeGridGraph } from '../../fakes/fakeRoadGraph';
-import { DT, minCarDistance, minSameLaneGap, player, run } from './helpers';
+import { NpcTraffic } from '../../../src/traffic/npc/index.js';
+import { makeGridGraph } from '../../fakes/fakeRoadGraph.js';
+import { DT, minCarDistance, minSameLaneGap, player, run } from './helpers.js';
 
 const graph = makeGridGraph();
 

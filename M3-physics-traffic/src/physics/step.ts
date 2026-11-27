@@ -8,9 +8,9 @@
  *   wallsAndObstacles, carsAndBikes,
  *   fallCheck                           M3-2 collision solver and fall judge
  */
-import type { CarHit } from '../traffic/npc/types';
-import type { BikeInput, BikeState, PhysicsEvent, PhysicsInput, PhysicsOutput } from './types';
-import type { PhysicsWorld } from './world';
+import type { CarHit } from '../traffic/npc/types.js';
+import type { BikeInput, BikeState, PhysicsEvent, PhysicsInput, PhysicsOutput } from './types.js';
+import type { PhysicsWorld } from './world.js';
 
 /** Small steps keep fast motorcycles from passing through thin walls. */
 export const SUBSTEPS_PER_TICK = 2;

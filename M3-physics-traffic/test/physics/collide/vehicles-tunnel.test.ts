@@ -2,9 +2,9 @@
 // contact looks at one moment of one substep, so a motorcycle that moves more than
 // the thickness of the other thing in one substep can end on the far side.
 import { describe, expect, it } from 'vitest';
-import { addBike, COLLIDE_STAGES, createWorld, EMPTY_STAGES, stepPhysics, type PhysicsStages } from '../../../src/physics';
-import { BIKE_RADIUS_M, NPC_MAX_SPEED_MPS } from '../../../src/physics/collide/constants';
-import type { NpcCarPose } from '../../../src/traffic/npc/types';
+import { addBike, COLLIDE_STAGES, createWorld, EMPTY_STAGES, stepPhysics, type PhysicsStages } from '../../../src/physics/index.js';
+import { BIKE_RADIUS_M, NPC_MAX_SPEED_MPS } from '../../../src/physics/collide/constants.js';
+import type { NpcCarPose } from '../../../src/traffic/npc/types.js';
 
 const H = 1 / 60; // one substep (2 per tick at 30 ticks per second)
 const NPC_HALF_WIDTH = 0.9;

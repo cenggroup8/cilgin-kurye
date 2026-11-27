@@ -10,7 +10,7 @@ import {
   type BikeState,
   type PhysicsInput,
   type PhysicsWorld,
-} from '../../src/physics';
+} from '../../src/physics/index.js';
 
 const DT = 1 / 30;
 const STAGES = { ...EMPTY_STAGES, ...BIKE_STAGES };

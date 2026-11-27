@@ -7,7 +7,7 @@ import {
   type Circle,
   type Contact,
   type Point,
-} from '../../../src/physics/collide/shapes';
+} from '../../../src/physics/collide/shapes.js';
 
 // A square, 10 x 10, corners counter clockwise (x east, y north) and the same square clockwise.
 const SQUARE: Point[] = [{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 10, y: 10 }, { x: 0, y: 10 }];

@@ -18,14 +18,14 @@
  * id, pairs (i, j) with i < j, so the result never depends on the order of the
  * lists that M1 gives.
  */
-import type { CarHit, NpcCarPose } from '../../traffic/npc/types';
-import type { SubstepContext } from '../step';
-import type { BikeState } from '../types';
-import { BIKE_RADIUS_M, CAR_HIT_MIN_MPS, MAX_CONTACTS_PER_BIKE, MIN_IMPACT_MPS } from './constants';
-import { judgeImpact, relativeNormalSpeed } from './fall-judge';
-import { resolveContactMoving, velocityOf, type BikeMotion } from './resolve';
-import { recordCollision } from './stages';
-import { circleVsCircle, circleVsOBB, type Circle, type Obb } from './shapes';
+import type { CarHit, NpcCarPose } from '../../traffic/npc/types.js';
+import type { SubstepContext } from '../step.js';
+import type { BikeState } from '../types.js';
+import { BIKE_RADIUS_M, CAR_HIT_MIN_MPS, MAX_CONTACTS_PER_BIKE, MIN_IMPACT_MPS } from './constants.js';
+import { judgeImpact, relativeNormalSpeed } from './fall-judge.js';
+import { resolveContactMoving, velocityOf, type BikeMotion } from './resolve.js';
+import { recordCollision } from './stages.js';
+import { circleVsCircle, circleVsOBB, type Circle, type Obb } from './shapes.js';
 
 function motionOf(bike: BikeState): BikeMotion {
   return { x: bike.x, y: bike.y, heading: bike.heading, speed: bike.speed, slip: bike.slip };

@@ -9,10 +9,10 @@ import {
   type PhysicsInput,
   type PhysicsStages,
   type PhysicsWorld,
-} from '../../../src/physics';
-import { CAR_HIT_MIN_MPS } from '../../../src/physics/collide/constants';
-import type { NpcCarPose, NpcState } from '../../../src/traffic/npc/types';
-import { FakeM1 } from '../../fakes/fakeM1';
+} from '../../../src/physics/index.js';
+import { CAR_HIT_MIN_MPS } from '../../../src/physics/collide/constants.js';
+import type { NpcCarPose, NpcState } from '../../../src/traffic/npc/types.js';
+import { FakeM1 } from '../../fakes/fakeM1.js';
 
 const STAGES: PhysicsStages = { ...EMPTY_STAGES, ...COLLIDE_STAGES };
 const FALL = 6; // default physics.fall_speed_mps

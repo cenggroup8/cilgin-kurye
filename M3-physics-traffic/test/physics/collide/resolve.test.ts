@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { addBike, BIKE_STAGES, createWorld, EMPTY_STAGES, stepPhysics } from '../../../src/physics';
-import { BIKE_RADIUS_M } from '../../../src/physics/collide/constants';
+import { addBike, BIKE_STAGES, createWorld, EMPTY_STAGES, stepPhysics } from '../../../src/physics/index.js';
+import { BIKE_RADIUS_M } from '../../../src/physics/collide/constants.js';
 import {
   impactSpeedOf,
   PUSH_MARGIN_M,
   resolveContact,
   velocityOf,
   type BikeMotion,
-} from '../../../src/physics/collide/resolve';
-import { circleVsPolygon, type Contact, type Point } from '../../../src/physics/collide/shapes';
+} from '../../../src/physics/collide/resolve.js';
+import { circleVsPolygon, type Contact, type Point } from '../../../src/physics/collide/shapes.js';
 
 const bike = (over: Partial<BikeMotion> = {}): BikeMotion => ({ x: 0, y: 0, heading: 0, speed: 0, slip: 0, ...over });
 const R = Math.SQRT1_2;

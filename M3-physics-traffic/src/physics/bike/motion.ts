@@ -13,8 +13,8 @@
  * negative (small reverse): the sizes use |speed|, and the slide goes to the
  * outside of the real path, so it flips with the sign of the speed.
  */
-import type { Stage } from '../step';
-import { G } from './tuning';
+import type { Stage } from '../step.js';
+import { G } from './tuning.js';
 
 const TWO_PI = 2 * Math.PI;
 

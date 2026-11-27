@@ -105,3 +105,26 @@ export type TeamScores = readonly number[];
  * M1-1 or M2-2 must add it.
  */
 export type Winners = readonly number[];
+
+// ---- Added for the HUD (M4-1, HUD step 1) ----
+
+/**
+ * TAHMİN: everything the HUD needs from one game state, for the player of this
+ * phone. The game state fields are not decided (#35); `hud/hud-source.ts` makes
+ * this frame from the shape of PR #78, and it is the only file to change when
+ * the real messages exist.
+ */
+export interface HudFrame {
+  /** Seconds left in the game. */
+  remainingSeconds: number;
+  /** Points of each team, index = team number. */
+  scores: TeamScores;
+  /** The team of this phone, or null while it is not known. */
+  myTeam: TeamId | null;
+  /** True while this player carries a package (the compass then points to the delivery point). */
+  hasPackage: boolean;
+  /** Seconds this player still waits after a fall. 0 = not waiting. */
+  penaltySeconds: number;
+  /** Ticks (TICKS_PER_SECOND per second) until "Find me" can be used again. 0 = ready. */
+  findMeCooldownTicks: number;
+}

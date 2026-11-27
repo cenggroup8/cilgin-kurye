@@ -34,4 +34,16 @@ export const TEXT = {
     winner: "Winner",
     yours: "Your team",
   },
+  hud: {
+    timeLabel: "Time",
+    penalty: (seconds: number) => `You fell. Wait ${seconds} s`,
+    scoreToast: (points: number) => `+${points}`,
+    connectionLost: "Connection lost. Trying again…",
+    findMe: "Find me",
+    findMeWait: (seconds: number) => `Find me in ${seconds} s`,
+    rotateWarning: "Turn your phone sideways",
+    // The arrow points to the store while the player has no package, and to the delivery point with one.
+    compassPackage: "Store: pick up a package",
+    compassDelivery: "Delivery point",
+  },
 } as const;

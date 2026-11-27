@@ -46,6 +46,7 @@ npm install
 npm test            # all tests
 npm run demo        # start the server; join from a phone with the QR code
 npm run demo:bots   # bot phones show the M2-1 demo points, then the demo ends
+npm run demo:checks # M2-2: bad messages never reach M1 (see below)
 ```
 
 `npm run demo` prints the game code, the phone address and a QR code. The admin page is at
@@ -67,7 +68,7 @@ What M2-1 tells M1 (`PlayerEvents` in `src/session/types.ts`): a player joined w
 a player's link was lost, a lost player came back. M2-2's input queue will carry these to M1;
 until then the tests and the demo use a small recording stand-in for M1.
 
-Draft messages (until M2-2 writes the phone and admin messages into `contracts/`):
+Messages of M2-1 (now in `contracts/messages.md`):
 
 | Direction | Message |
 |---|---|
@@ -116,7 +117,7 @@ state (300/300 in 10 s), the state of the fake M1 is about 2.8 kB, encoding it t
 0.1 ms, and all phones together get about 650 KiB/s. With bots that answer 80 ms late, the
 measured ping is 82–83 ms.
 
-Draft messages of M2-3 (until M2-2 writes them into `contracts/`, #35):
+Messages of M2-3 (now in `contracts/messages.md`):
 
 | Direction | Message |
 |---|---|
@@ -127,6 +128,43 @@ Draft messages of M2-3 (until M2-2 writes them into `contracts/`, #35):
 | Admin → server | `{t:"snapshot_get"}`, answered with `{t:"snapshot", state, params, metrics, board, events}` |
 
 The admin shapes are the ones the admin page of M5-1 (#73) reads.
+
+## M2-2: codec and checker, input queue
+
+The messages of the phone and the admin are in [`contracts/messages.md`](../contracts/messages.md)
+(separate pull request, plan #21 rule 2). The draft tables of M2-1 and M2-3 above follow it.
+
+| Part | Files |
+|---|---|
+| Message tables: every type of the phone and the admin link, its fields and ranges, and which messages may be lost | `src/codec/schema.ts` |
+| MessagePack coding and decoding; JSON text as a readable form for development (`M2_READABLE=1`) | `src/codec/codec.ts` |
+| Limits for each link on the raw bytes, before decoding: largest message, messages and bytes per second | `src/codec/limits.ts` |
+| Checker: type and fields, every value in its range, own player only, old or repeated `seq` dropped; a passed message is rebuilt with only the contract fields and gets the `droppable` mark | `src/codec/checker.ts` |
+| Input queue: checked inputs wait for the next tick, M1 takes them all with `take()` in the shape of M1-1's `TickInput` (#78); joins, lost and returning players too | `src/queue/inputQueue.ts`, `src/queue/types.ts` |
+| The incoming line in the server: limits → codec → checker → queue, M2-3 or a request | `src/codec/inbound.ts` |
+
+How it goes into the server:
+
+```ts
+const queue = new InputQueue();
+const inbound = createInbound({ queue, send: (id, m) => server.send(id, m), others: (s, m) => hub.onMessage(s, m) });
+const server = await startM2Server({ events: queue, onMessage: inbound.onMessage, admit: inbound.admit });
+// M1-1: new GameLoop(world, rng, deps, () => queue.take())
+// M2-4: queue.boardEvent({ source, magnitude, zone, confidence }) for an earthquake event
+```
+
+Two small changes in the M2-1 code: `wsServer.ts` calls `admit` with the size of every message
+before decoding, decodes with the M2-2 codec, and checks that the team of a join is 0–3.
+`server.ts` passes the two options on. Without them it works as before.
+
+```
+npm test                  # all tests
+npm run demo:checks       # fake M1, 6 good bots and 2 links that send every kind of bad message
+M2_READABLE=1 npm run demo   # the server also takes JSON text, for typing messages by hand
+```
+
+`npm run demo:checks` ends with a check list: no bad message reached M1, a flood was cut at the
+limit, and every "Find me" of the good bots reached M1.
 
 ## Team
 

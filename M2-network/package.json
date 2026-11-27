@@ -9,7 +9,8 @@
     "test": "vitest run",
     "demo": "tsx src/demo.ts",
     "demo:bots": "tsx src/demo.ts --bots",
-    "demo:broadcast": "tsx src/demo-broadcast.ts"
+    "demo:broadcast": "tsx src/demo-broadcast.ts",
+    "demo:checks": "tsx src/demo-checks.ts"
   },
   "engines": {
     "node": ">=20"

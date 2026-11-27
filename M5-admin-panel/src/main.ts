@@ -1,15 +1,14 @@
 import './admin.css';
 import { AdminConnection } from './comm/connection.ts';
-import type { AdminState, LogEntry, MetricSample, Parameter } from './comm/protocol.ts';
+import type { AdminState, LogEntry, MetricSample } from './comm/protocol.ts';
+import { bindParams } from './params/paramManager.ts';
 import { bindTopbar, commandLabel } from './topbar/topbar.ts';
 
 const connection = new AdminConnection(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/admin`);
-const params = document.querySelector<HTMLDListElement>('#params')!;
 const map = document.querySelector<HTMLDListElement>('#map')!;
 const metrics = document.querySelector<HTMLDListElement>('#metrics')!;
 const marks = document.querySelector<HTMLElement>('#marks')!;
 const events = document.querySelector<HTMLOListElement>('#events')!;
-const paramValues = new Map<string, Parameter>();
 const metricValues = new Map<string, MetricSample>();
 const logEntries: LogEntry[] = [];
 const clock = new Intl.DateTimeFormat('tr-TR', { timeStyle: 'medium' });
@@ -31,10 +30,6 @@ function showMap(state: AdminState) {
     ['Oyuncular', state.players.length], ['NPC araçlar', state.npcCars.length],
     ['Engeller', state.obstacles.length], ['Teslimat noktaları', state.deliveryPoints.length],
   ]);
-}
-
-function showParams() {
-  showValues(params, Array.from(paramValues.values(), ({ name, label, value }) => [label ?? name, value]));
 }
 
 function showMetrics(samples: readonly MetricSample[]) {
@@ -62,12 +57,10 @@ function addEvents(entries: readonly LogEntry[]) {
 }
 
 bindTopbar(connection, (entry) => addEvents([entry]));
+bindParams(connection, document.querySelector<HTMLElement>('#params')!);
 connection.subscribe((update) => {
   switch (update.t) {
     case 'snapshot':
-      paramValues.clear();
-      for (const param of update.params) paramValues.set(param.name, param);
-      showParams();
       showMap(update.state);
       metricValues.clear();
       showMetrics([...update.metrics, ...update.board.samples]);
@@ -76,19 +69,6 @@ connection.subscribe((update) => {
     case 'state':
       showMap(update.state);
       break;
-    case 'params':
-      paramValues.clear();
-      for (const param of update.list) paramValues.set(param.name, param);
-      showParams();
-      break;
-    case 'param': {
-      const param = paramValues.get(update.name);
-      if (param) {
-        paramValues.set(update.name, { ...param, value: update.value });
-        showParams();
-      }
-      break;
-    }
     case 'metrics':
       showMetrics(update.samples);
       break;

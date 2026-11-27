@@ -1,5 +1,7 @@
 # PC tests for the link part (M6-1). Run from this folder:
 #   make test    build and run
+#   make itest   the link against the real M2-4 server, with checks
+#   make demo    the same, printed live for the 4 December demo (DEMO_SECONDS=20 make demo)
 #   make clean
 CXX ?= c++
 CXXFLAGS ?= -std=c++17 -O2 -Wall -Wextra -Wpedantic
@@ -29,7 +31,14 @@ build/itest_board: itest_board.cpp net_socket.h $(LINK_SRC) $(LINK_HDR)
 	@mkdir -p build
 	$(CXX) $(CXXFLAGS) -o $@ itest_board.cpp $(LINK_SRC) $(SOCKET_LIBS)
 
+demo: build/demo_board
+	cd $(M2) && npx tsx $(CURDIR)/demo_server.mjs
+
+build/demo_board: demo_board.cpp net_socket.h $(LINK_SRC) $(LINK_HDR)
+	@mkdir -p build
+	$(CXX) $(CXXFLAGS) -o $@ demo_board.cpp $(LINK_SRC) $(SOCKET_LIBS)
+
 clean:
 	rm -rf build
 
-.PHONY: test itest clean
+.PHONY: test itest demo clean

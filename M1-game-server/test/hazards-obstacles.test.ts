@@ -1,4 +1,5 @@
 import { expect, it } from "vitest";
+import type { HazardControl } from "../src/admin/admin.js";
 import { OBSTACLE_TYPES, type Obstacle } from "../src/hazards/estimates.js";
 import { ObstacleList } from "../src/hazards/obstacles.js";
 import { FakeClock, FakeParams, TPS } from "./hazards-fakes.js";
@@ -215,12 +216,11 @@ it("the same calls give the same list and version", () => {
   expect(play()).toStrictEqual(play());
 });
 
-it("it has the three calls that HazardControl of PR #61 uses for the list, with the same arguments", () => {
+it("ObstacleList fits the three calls of HazardControl (PR #61), and takes every obstacle type", () => {
   const { list } = setup();
-  const control: { addObstacle: unknown; removeObstacle: unknown; closeRoad: unknown } = list;
-  for (const name of ["addObstacle", "removeObstacle", "closeRoad"] as const) {
-    expect(typeof control[name], name).toBe("function");
-  }
+  // The compiler checks the signatures here; the expect only makes sure that the variable is used.
+  const control: Pick<HazardControl, "addObstacle" | "removeObstacle" | "closeRoad"> = list;
+  expect(control, "ObstacleList has the HazardControl calls").toBe(list);
   // The admin handler passes exactly these four fields, with a type from its own list.
   for (const type of OBSTACLE_TYPES) {
     const r = list.addObstacle({ type, segment: 3, lane: 1, pos: 0.5 });

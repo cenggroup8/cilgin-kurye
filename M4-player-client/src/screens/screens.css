@@ -191,3 +191,71 @@
   background: #b00020;
   text-align: center;
 }
+
+/*
+ * HUD part 2: compass, "Find me" and the turn-your-phone warning. They sit next
+ * to .hud (not inside it), so each one sets its own pointer-events. None of
+ * these classes sets `display`, so [data-hidden="true"] above always wins.
+ */
+.hud-compass {
+  position: fixed;
+  top: 52px;
+  right: 12px;
+  text-align: center;
+  color: #fff;
+  font-family: system-ui, sans-serif;
+  pointer-events: none;
+}
+
+.hud-compass-arrow {
+  width: 44px;
+  height: 44px;
+  margin: 0 auto;
+  background: #fff;
+  -webkit-clip-path: polygon(50% 0, 100% 100%, 50% 72%, 0 100%);
+  clip-path: polygon(50% 0, 100% 100%, 50% 72%, 0 100%);
+}
+
+.hud-compass-label {
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.45);
+  font-size: 0.75rem;
+}
+
+.hud-find-me {
+  position: fixed;
+  top: 52px;
+  left: 12px;
+  min-height: 44px;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 22px;
+  background: #fff;
+  color: #111;
+  font-size: 1rem;
+  font-weight: 700;
+  pointer-events: auto;
+}
+
+.hud-find-me:disabled {
+  background: #888;
+  color: #eee;
+}
+
+.hud-rotate {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+  box-sizing: border-box;
+  padding: 40vh 24px 0;
+  background: rgba(0, 0, 0, 0.88);
+  color: #fff;
+  font-family: system-ui, sans-serif;
+  font-size: 1.5rem;
+  text-align: center;
+  pointer-events: auto;
+}

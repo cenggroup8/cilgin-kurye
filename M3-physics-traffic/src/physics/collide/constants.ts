@@ -69,3 +69,12 @@ export const ACCIDENT_LANE_BLOCK_LENGTH_M = 4.5;
  * that a motorcycle fits through.
  */
 export const ACCIDENT_LANE_BLOCK_WIDTH_M = 3.5;
+
+/** TAHMİN. Length (along the road, metres) of a water puddle. The module document gives no size. */
+export const PUDDLE_LENGTH_M = 8;
+
+/**
+ * TAHMİN. Width (across the road, metres) of a water puddle that has no lane: the road itself,
+ * 2 x 2 lanes of 3.5 m. The sidewalks are not wet.
+ */
+export const PUDDLE_ROAD_WIDTH_M = 14;

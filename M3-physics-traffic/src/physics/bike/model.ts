@@ -107,7 +107,7 @@ export const speedAndSteering: Stage = (ctx) => {
     const brake = clamp(input?.control.brake ?? 0, 0, 1);
     const steer = clamp(input?.control.steer ?? 0, -1, 1);
     const topSpeed = world.params.topSpeed * (input?.speedFactor ?? 1);
-    const surface = world.surfaceAt(bike.x, bike.y, world.params);
+    const surface = world.surfaceAt(bike.x, bike.y, world.params, ctx.input);
 
     const stopped = world.stoppedS.get(bike.id) ?? 0;
     bike.speed = nextSpeed(bike.speed, throttle, brake, topSpeed, surface.speedCap, h, world.tuning, stopped);

@@ -8,6 +8,9 @@ export { judgeImpact, relativeNormalSpeed } from './fall-judge.js';
 export type { Judgement } from './fall-judge.js';
 export { wallsAndObstacles } from './stages.js';
 export { carsAndBikes } from './cars-and-bikes.js';
+export { colliderSurface } from './surface.js';
+export { obstacleSites, obstacleShapes } from './obstacles.js';
+export type { ObstacleSite, ObstacleShape } from './obstacles.js';
 
 /** The stages of M3-2 that exist so far. fallCheck stays empty until the next steps. */
 export const COLLIDE_STAGES: Pick<PhysicsStages, 'wallsAndObstacles' | 'carsAndBikes'> = { wallsAndObstacles, carsAndBikes };

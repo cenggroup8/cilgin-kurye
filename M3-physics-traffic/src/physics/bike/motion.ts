@@ -59,7 +59,7 @@ export const gripAndSliding: Stage = (ctx) => {
   const { world, h } = ctx;
   for (const bike of world.bikes.values()) {
     if (bike.fallen) continue;
-    const surface = world.surfaceAt(bike.x, bike.y, world.params);
+    const surface = world.surfaceAt(bike.x, bike.y, world.params, ctx.input);
     const wanted = ctx.turn.get(bike.id) ?? 0;
     const { turn, slip } = applyGrip(bike.speed, wanted, bike.slip, surface.grip, h);
     bike.slip = slip;

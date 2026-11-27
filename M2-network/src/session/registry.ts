@@ -123,6 +123,15 @@ export class SessionRegistry {
     return this.adminConnId;
   }
 
+  /** Open links of admitted players (M2-3 sends the state to these). */
+  playerConns(): Array<{ connId: number; playerNo: number }> {
+    const out: Array<{ connId: number; playerNo: number }> = [];
+    for (const slot of this.slots.values()) {
+      if (slot.connId !== null) out.push({ connId: slot.connId, playerNo: slot.playerNo });
+    }
+    return out;
+  }
+
   players(): Array<{ playerKey: string; playerNo: number; name: string; connected: boolean }> {
     return [...this.slots.values()]
       .map((s) => ({ playerKey: s.playerKey, playerNo: s.playerNo, name: s.name, connected: s.connId !== null }))

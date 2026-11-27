@@ -27,6 +27,8 @@ export interface WsOptions {
 
 export interface WsHandle {
   send(connId: number, msg: unknown): void;
+  /** Bytes that are already encoded, so one state is encoded once for all phones (M2-3). */
+  sendRaw(connId: number, bytes: Uint8Array): void;
   close(): void;
 }
 
@@ -46,6 +48,11 @@ export function attachWebSockets(http: Server, opts: WsOptions): WsHandle {
   function send(connId: number, msg: unknown): void {
     const ws = links.get(connId);
     if (ws && ws.readyState === ws.OPEN) ws.send(encode(msg));
+  }
+
+  function sendRaw(connId: number, bytes: Uint8Array): void {
+    const ws = links.get(connId);
+    if (ws && ws.readyState === ws.OPEN) ws.send(bytes);
   }
 
   function drop(connId: number, code: number, reason: string): void {
@@ -107,6 +114,7 @@ export function attachWebSockets(http: Server, opts: WsOptions): WsHandle {
 
   return {
     send,
+    sendRaw,
     close() {
       for (const ws of links.values()) ws.terminate();
       links.clear();

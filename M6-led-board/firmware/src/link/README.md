@@ -25,6 +25,14 @@ pio run -t upload
 pio device monitor
 ```
 
+Checked on 28 Nov 2026 (no board yet): `pio run` builds with Arduino core 3.3.12, RAM 14.6 %,
+no warnings in our code. The program uses about 1.05 MB; `huge_app.csv` gives it 3 MB
+(1.25 MB with the default partitions, which would be 82 % full already).
+
+On Windows the linker cannot write to a path with non-ASCII letters (for example
+`Masaüstü`): the build stops with `cannot open map file`. Build from a copy in a plain
+path such as `C:/work/cilgin-kurye`.
+
 ## PC tests
 
 A C++ compiler and `make` (Linux, macOS, or MSYS2 on Windows):

@@ -42,7 +42,7 @@ class ArduinoNet : public Net {
     if (n <= 0) return 0;
     fromHost = udp_.remoteIP().toString().c_str();
     if (static_cast<size_t>(n) > cap) {  // too big for us: drop it
-      udp_.flush();
+      udp_.clear();  // drops the rest of this packet
       return 0;
     }
     return static_cast<size_t>(udp_.read(buf, cap));

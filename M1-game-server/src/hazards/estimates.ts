@@ -10,9 +10,7 @@
 //   - `ClockSource` is the `clockRunning` getter of `Match` in PR #59 (M1-2).
 //   - `ParamSource` is `get(name)` of `ParamRegistry` in PR #61.
 //   - Segment count 60 and the player count 8: `contracts/` (PR #62) and v2.1.
-//   - Lane 0 = the whole road, lanes 1-4 = real lanes: NOT decided. `contracts/`
-//     (board message `ob`) says 0 is the whole road; PR #65 says 0 is the lane next
-//     to the centre line. Asked in the comments of PR #61 and PR #65.
+//   - Lanes: contracts/README.md (PR #62, Lanes). 0 = the whole road; 1 and 2 drive in the direction of the segment (h_r_c east, v_r_c south), 3 and 4 the other way; 1 and 3 are next to the centre line. M3 (PR #65, contract.ts) converts at its own border.
 //   - 30 ticks per second: v2.1 section 5.5 (M1-1 will own the constant).
 //   - The fall event and the stand up request are only a player number. The real
 //     physics messages are not written (issue #29).
@@ -26,7 +24,7 @@ export const PLAYER_COUNT = 8;
 /** Road segments of the city plan, numbered 0-59 (`contracts/README.md`). */
 export const SEGMENT_COUNT = 60;
 
-/** Highest lane number. 0 means the whole road (guess, see above). */
+/** Highest lane number (contracts/README.md, Lanes). 0 means the whole road. */
 export const LANE_MAX = 4;
 
 export const OBSTACLE_TYPES = ["heavy_traffic", "road_work", "accident", "puddle"] as const;

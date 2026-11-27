@@ -39,6 +39,12 @@ export interface AdminFeedOptions {
   /** How much history a reconnecting admin gets (ms). */
   historyMs?: number;
   maxEvents?: number;
+  /**
+   * How long an earthquake stays in the board data (ms). Without an end the admin that
+   * connects again would see a finished earthquake as the current one (review of #84).
+   * Default 20 s, the longest `quake.duration_s` of M1-5.
+   */
+  quakeHoldMs?: number;
   now?: () => number;
 }
 
@@ -49,13 +55,17 @@ export class AdminFeed {
   private readonly metrics: MetricSample[] = [];
   private readonly boardSamples: MetricSample[] = [];
   private readonly events: LogEntry[] = [];
-  private board: Omit<BoardData, "samples"> = { connected: false };
+  private connected = false;
+  private quake?: { mag: number; zone: number };
+  private quakeAt = 0;
+  private readonly quakeHoldMs: number;
   private params: ParamRow[] = [];
   private state: unknown = null;
 
   constructor(private readonly send: (msg: unknown) => void, opts: AdminFeedOptions = {}) {
     this.historyMs = opts.historyMs ?? 120_000;
     this.maxEvents = opts.maxEvents ?? 50;
+    this.quakeHoldMs = opts.quakeHoldMs ?? 20_000;
     this.now = opts.now ?? Date.now;
   }
 
@@ -85,14 +95,27 @@ export class AdminFeed {
     this.send({ t: "metrics", samples });
   }
 
-  /** Board data from M2-4: link state, sensor samples, an earthquake. */
-  addBoard(data: Partial<BoardData>): void {
-    if (data.connected !== undefined) this.board.connected = data.connected;
-    if (data.quake) this.board.quake = data.quake;
+  /**
+   * Board data from M2-4: link state, sensor samples, an earthquake. `quake: null` ends an
+   * earthquake at once; otherwise it ends by itself after `quakeHoldMs`.
+   */
+  addBoard(data: Partial<Omit<BoardData, "quake">> & { quake?: BoardData["quake"] | null }): void {
+    if (data.connected !== undefined) this.connected = data.connected;
+    if (data.quake === null) this.quake = undefined;
+    else if (data.quake) {
+      this.quake = data.quake;
+      this.quakeAt = this.now();
+    }
     const samples = data.samples ?? [];
     this.boardSamples.push(...samples);
     this.trim(this.boardSamples);
-    this.send({ t: "board", board: { ...this.board, samples } });
+    this.send({ t: "board", board: { ...this.boardState(), samples } });
+  }
+
+  /** Link state and the earthquake, if it is still going on. */
+  private boardState(): Omit<BoardData, "samples"> {
+    if (this.quake && this.now() - this.quakeAt > this.quakeHoldMs) this.quake = undefined;
+    return this.quake ? { connected: this.connected, quake: this.quake } : { connected: this.connected };
   }
 
   event(message: string): void {
@@ -111,7 +134,7 @@ export class AdminFeed {
       state: this.state,
       params: this.params,
       metrics: [...this.metrics],
-      board: { ...this.board, samples: [...this.boardSamples] },
+      board: { ...this.boardState(), samples: [...this.boardSamples] },
       events: [...this.events],
     };
   }

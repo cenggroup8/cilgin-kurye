@@ -7,14 +7,38 @@
   <title>Çılgın Kurye Yönetim</title>
   <link rel="stylesheet" href="./main.css">
 </head>
-<body>
+<body class="ck-admin">
   <a class="skip" href="#content">İçeriğe geç</a>
+  <header class="topbar">
+    <a class="brand" href="#/panel" aria-label="Çılgın Kurye, kontrol paneli">
+      <span class="emblem" aria-hidden="true">
+        <svg viewBox="0 0 48 48">
+          <rect class="emblem-grid" x="3" y="3" width="42" height="42" rx="10" />
+          <path class="emblem-road" d="M3 24h42M24 3v42" />
+          <circle class="emblem-led led-a" cx="13.5" cy="24" r="2" /><circle class="emblem-led led-b" cx="34.5" cy="24" r="2" />
+          <circle class="emblem-led led-c" cx="24" cy="13.5" r="2" />
+          <path class="emblem-scooter" d="M11 33h6l4-9h8l3 6h5M17.5 34a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Zm20 0a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0ZM27 18h4l3 6" />
+        </svg>
+      </span>
+      <span class="brand-text"><strong>Çılgın Kurye</strong><small>LED şehir komuta merkezi</small></span>
+    </a>
+    <dl class="match">
+      <div><dt>Durum</dt><dd id="phase">—</dd></div>
+      <div><dt>Kalan süre</dt><dd id="remaining" class="timer">—</dd></div>
+      <div><dt>Oyun kodu</dt><dd id="game-code">—</dd></div>
+    </dl>
+    <p class="mark" id="last-mark" aria-live="polite"></p>
+    <p class="server-pill" id="server-pill" data-state="connecting" role="status">Sunucuya bağlanıyor</p>
+    <div class="match-controls" aria-label="Maç kontrolleri" role="group">
+      <button type="button" data-command="start" disabled>Başlat</button>
+      <button type="button" data-command="pause" disabled>Duraklat</button>
+      <button type="button" data-command="resume" disabled hidden>Devam et</button>
+      <button type="button" data-command="end" disabled>Bitir</button>
+    </div>
+  </header>
+
   <div class="shell">
     <aside class="sidebar">
-      <a class="brand" href="#/panel">
-        <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 22h4l3-8h6l2 4h5" /><circle cx="8" cy="23" r="3.5" /><circle cx="24" cy="23" r="3.5" /><path d="M17 10h4l2 4" /></svg>
-        <span><strong>Çılgın Kurye</strong><small>Yönetim paneli</small></span>
-      </a>
       <nav class="nav" aria-label="Sayfalar">
         <ul>
           <li><a href="#/panel" data-nav="panel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z" /></svg>Kontrol paneli</a></li>
@@ -30,25 +54,14 @@
     </aside>
 
     <div class="main-column">
-      <header class="topbar">
-        <dl class="match">
-          <div><dt>Durum</dt><dd id="phase">—</dd></div>
-          <div><dt>Kalan süre</dt><dd id="remaining">—</dd></div>
-          <div><dt>Oyun kodu</dt><dd id="game-code">—</dd></div>
-        </dl>
-        <p class="mark" id="last-mark" aria-live="polite"></p>
-        <div class="match-controls" aria-label="Maç kontrolleri" role="group">
-          <button type="button" data-command="start" disabled>Başlat</button>
-          <button type="button" data-command="pause" disabled>Duraklat</button>
-          <button type="button" data-command="resume" disabled hidden>Devam et</button>
-          <button type="button" data-command="end" disabled>Bitir</button>
-        </div>
-      </header>
       <p id="connection" class="banner" role="status">Sunucuya bağlanıyor…</p>
 
       <main id="content" tabindex="-1">
         <section data-page="panel" aria-labelledby="h-panel">
-          <h1 id="h-panel" tabindex="-1">Kontrol paneli</h1>
+          <div class="page-head">
+            <h1 id="h-panel" tabindex="-1">Kontrol paneli</h1>
+            <p class="lead">Maçın, kuryelerin, ağın ve LED tahtanın canlı durumu.</p>
+          </div>
           <div class="dash">
             <section class="card strip-card" aria-label="Maç durumu">
               <div id="match-strip" class="match-strip"></div>
@@ -60,13 +73,35 @@
               </div>
               <div class="map-slot" data-map-slot="panel"></div>
             </section>
-            <section class="card" aria-labelledby="h-status">
-              <h2 id="h-status">Bağlantılar ve oyun</h2>
-              <div id="status-tiles" class="tiles"></div>
+            <section class="kpi-row" aria-label="Telemetri">
+              <div id="kpi-tiles" class="kpis"></div>
             </section>
-            <section class="card" aria-labelledby="h-recent">
+            <section class="card entity-card" aria-labelledby="h-entity">
+              <h2 id="h-entity">Kuryeler ve yollar</h2>
+              <div id="entity-status"></div>
+            </section>
+            <section class="card eq-card" aria-labelledby="h-eq">
+              <h2 id="h-eq">Telefon pingleri</h2>
+              <div id="net-eq"></div>
+            </section>
+            <section class="card quake-card" id="quake-alert" aria-labelledby="h-quake-alert">
+              <div class="quake-title">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12h4l2-5 3 10 3-14 3 13 2-4h3" /></svg>
+                <h2 id="h-quake-alert">Deprem</h2>
+              </div>
+              <div class="quake-body"></div>
+            </section>
+            <section class="card quick-card" aria-labelledby="h-quick">
+              <div class="card-head">
+                <h2 id="h-quick">Hızlı ayarlar</h2>
+                <a class="link" href="#/parametreler">Bütün parametreler</a>
+              </div>
+              <div id="quick-controls" class="quicks"></div>
+            </section>
+            <section class="card recent-card" aria-labelledby="h-recent">
               <div class="card-head">
                 <h2 id="h-recent">Son olaylar</h2>
+                <span class="muted" id="event-count"></span>
                 <a class="link" href="#/olaylar">Hepsi</a>
               </div>
               <ol id="recent-events" class="log"></ol>
@@ -75,16 +110,20 @@
         </section>
 
         <section data-page="harita" aria-labelledby="h-harita" hidden>
-          <h1 id="h-harita" tabindex="-1">Canlı harita</h1>
-          <p class="lead">Engel fırçalarıyla yola engel koyun, silgiyle kaldırın; "yolu kapat" ve "oyuncunun önüne" araçları komutu hemen sunucuya gönderir.</p>
+          <div class="page-head">
+            <h1 id="h-harita" tabindex="-1">Canlı harita</h1>
+            <p class="lead">Engel fırçalarıyla yola engel koyun, silgiyle kaldırın; "yolu kapat" ve "oyuncunun önüne" araçları komutu hemen sunucuya gönderir.</p>
+          </div>
           <div class="card map-large">
             <div class="map-slot" data-map-slot="harita"><div id="map"></div></div>
           </div>
         </section>
 
         <section data-page="parametreler" aria-labelledby="h-param" hidden>
-          <h1 id="h-param" tabindex="-1">Parametreler</h1>
-          <p class="lead">Her değişiklik oyun sürerken uygulanır. Sınır dışı değer gönderilmez; sunucunun cevabı alanın altında görünür.</p>
+          <div class="page-head">
+            <h1 id="h-param" tabindex="-1">Parametreler</h1>
+            <p class="lead">Her değişiklik oyun sürerken uygulanır. Sınır dışı değer gönderilmez; sunucunun cevabı alanın altında görünür.</p>
+          </div>
           <div class="toolbar">
             <label class="search">
               <span class="visually-hidden">Parametre ara</span>
@@ -93,19 +132,23 @@
             <p id="param-count" class="muted" aria-live="polite"></p>
             <button type="button" id="param-reset" class="ghost">Başlangıç değerlerine dön</button>
           </div>
-          <div class="card"><div id="params"></div></div>
+          <div class="card params-card"><div id="params"></div></div>
         </section>
 
         <section data-page="ag" aria-labelledby="h-ag" hidden>
-          <h1 id="h-ag" tabindex="-1">Ağ</h1>
-          <p class="lead">Sunucunun her telefon için ölçtüğü değerler. Gecikme, jitter ve kayıp eklemek için <a href="#/parametreler" class="link">Parametreler</a> sayfasındaki Ağ tablosunu kullanın.</p>
+          <div class="page-head">
+            <h1 id="h-ag" tabindex="-1">Ağ</h1>
+            <p class="lead">Sunucunun her telefon için ölçtüğü değerler. Gecikme, jitter ve kayıp eklemek için <a href="#/parametreler" class="link">Parametreler</a> sayfasındaki Ağ tablosunu kullanın.</p>
+          </div>
           <p id="net-board" class="note"></p>
-          <div class="card" id="net-table"></div>
+          <div class="card table-card" id="net-table"></div>
         </section>
 
         <section data-page="metrikler" aria-labelledby="h-metrik" hidden>
-          <h1 id="h-metrik" tabindex="-1">Metrikler</h1>
-          <p class="lead">Sunucunun saniyede iki kez gönderdiği her metriğin son değeri ve son iki dakikadaki eğilimi.</p>
+          <div class="page-head">
+            <h1 id="h-metrik" tabindex="-1">Metrikler</h1>
+            <p class="lead">Sunucunun saniyede iki kez gönderdiği her metriğin son değeri ve son iki dakikadaki eğilimi.</p>
+          </div>
           <div class="toolbar">
             <label class="search">
               <span class="visually-hidden">Metrik ara</span>
@@ -116,14 +159,20 @@
               <select id="metric-group"><option value="">Bütün gruplar</option></select>
             </label>
           </div>
-          <div class="card" id="metric-table"></div>
+          <div class="card table-card" id="metric-table"></div>
         </section>
 
         <section data-page="deprem" aria-labelledby="h-deprem" hidden>
-          <h1 id="h-deprem" tabindex="-1">Deprem</h1>
+          <div class="page-head">
+            <h1 id="h-deprem" tabindex="-1">Deprem</h1>
+            <p class="lead">Deprem bütün oyunculara aynı anda etki eder ve tahtada şok dalgası olarak görünür.</p>
+          </div>
           <div class="quake-grid">
-            <section class="card" aria-labelledby="h-quake-start">
-              <h2 id="h-quake-start">Deprem başlat</h2>
+            <section class="card quake-card" aria-labelledby="h-quake-start">
+              <div class="quake-title">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12h4l2-5 3 10 3-14 3 13 2-4h3" /></svg>
+                <h2 id="h-quake-start">Deprem başlat</h2>
+              </div>
               <form id="quake" class="quake-form">
                 <label>Büyüklük (0–10)<input name="mag" type="number" value="5" min="0" max="10" step="0.1" required></label>
                 <label>Bölge
@@ -148,7 +197,10 @@
         </section>
 
         <section data-page="olaylar" aria-labelledby="h-olay" hidden>
-          <h1 id="h-olay" tabindex="-1">Olay günlüğü</h1>
+          <div class="page-head">
+            <h1 id="h-olay" tabindex="-1">Olay günlüğü</h1>
+            <p class="lead">Komutların cevapları, tahta olayları ve maç akışı, en yenisi üstte.</p>
+          </div>
           <div class="toolbar">
             <label class="search">
               <span class="visually-hidden">Olay ara</span>

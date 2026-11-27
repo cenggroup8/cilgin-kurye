@@ -1,5 +1,5 @@
 {
-  "version": "0.2.0",
+  "version": "0.3.0",
   "status": "draft - frozen when all module proposals are approved",
   "world": {
     "size_m": 500,
@@ -723,6 +723,29 @@
         "x": 18,
         "z": 18,
         "radius_m": 10
+      },
+      "depot": {
+        "footprint": [
+          [
+            10,
+            8.9
+          ],
+          [
+            50,
+            8.9
+          ],
+          [
+            50,
+            50
+          ],
+          [
+            10,
+            50
+          ]
+        ],
+        "height_m": 25.7,
+        "roof": "gable, ridge north-south",
+        "solid": false
       }
     },
     {
@@ -734,6 +757,29 @@
         "x": 482,
         "z": 18,
         "radius_m": 10
+      },
+      "depot": {
+        "footprint": [
+          [
+            450,
+            8.9
+          ],
+          [
+            490,
+            8.9
+          ],
+          [
+            490,
+            50
+          ],
+          [
+            450,
+            50
+          ]
+        ],
+        "height_m": 25.7,
+        "roof": "gable, ridge north-south",
+        "solid": false
       }
     },
     {
@@ -745,6 +791,29 @@
         "x": 18,
         "z": 482,
         "radius_m": 10
+      },
+      "depot": {
+        "footprint": [
+          [
+            10,
+            450
+          ],
+          [
+            50,
+            450
+          ],
+          [
+            50,
+            491.1
+          ],
+          [
+            10,
+            491.1
+          ]
+        ],
+        "height_m": 25.7,
+        "roof": "gable, ridge north-south",
+        "solid": false
       }
     },
     {
@@ -756,6 +825,29 @@
         "x": 482,
         "z": 482,
         "radius_m": 10
+      },
+      "depot": {
+        "footprint": [
+          [
+            450,
+            450
+          ],
+          [
+            490,
+            450
+          ],
+          [
+            490,
+            491.1
+          ],
+          [
+            450,
+            491.1
+          ]
+        ],
+        "height_m": 25.7,
+        "roof": "gable, ridge north-south",
+        "solid": false
       }
     }
   ],
@@ -1125,9 +1217,10 @@
     {
       "id": 0,
       "block": "b_0_0",
+      "kind": "houses",
       "footprint": [
         [
-          30,
+          50,
           10
         ],
         [
@@ -1144,18 +1237,19 @@
         ],
         [
           10,
-          30
+          50
         ],
         [
-          30,
-          30
+          50,
+          50
         ]
       ],
-      "height_m": 12
+      "height_m": 12.8
     },
     {
       "id": 1,
       "block": "b_0_1",
+      "kind": "houses",
       "footprint": [
         [
           110,
@@ -1174,11 +1268,12 @@
           90
         ]
       ],
-      "height_m": 30
+      "height_m": 12.8
     },
     {
       "id": 2,
       "block": "b_0_2",
+      "kind": "apartments",
       "footprint": [
         [
           210,
@@ -1197,11 +1292,12 @@
           90
         ]
       ],
-      "height_m": 18
+      "height_m": 24.8
     },
     {
       "id": 3,
       "block": "b_0_3",
+      "kind": "houses",
       "footprint": [
         [
           310,
@@ -1220,27 +1316,28 @@
           90
         ]
       ],
-      "height_m": 36
+      "height_m": 12.8
     },
     {
       "id": 4,
       "block": "b_0_4",
+      "kind": "houses",
       "footprint": [
         [
           410,
           10
         ],
         [
-          470,
+          450,
           10
         ],
         [
-          470,
-          30
+          450,
+          50
         ],
         [
           490,
-          30
+          50
         ],
         [
           490,
@@ -1251,11 +1348,12 @@
           90
         ]
       ],
-      "height_m": 24
+      "height_m": 12.8
     },
     {
       "id": 5,
       "block": "b_1_0",
+      "kind": "houses",
       "footprint": [
         [
           10,
@@ -1274,11 +1372,12 @@
           190
         ]
       ],
-      "height_m": 24
+      "height_m": 12.8
     },
     {
       "id": 6,
       "block": "b_1_1",
+      "kind": "apartments",
       "footprint": [
         [
           110,
@@ -1297,11 +1396,12 @@
           190
         ]
       ],
-      "height_m": 12
+      "height_m": 25.4
     },
     {
       "id": 7,
       "block": "b_1_2",
+      "kind": "apartments",
       "footprint": [
         [
           210,
@@ -1320,11 +1420,12 @@
           190
         ]
       ],
-      "height_m": 30
+      "height_m": 24.4
     },
     {
       "id": 8,
       "block": "b_1_3",
+      "kind": "apartments",
       "footprint": [
         [
           310,
@@ -1343,11 +1444,12 @@
           190
         ]
       ],
-      "height_m": 18
+      "height_m": 25.3
     },
     {
       "id": 9,
       "block": "b_1_4",
+      "kind": "houses",
       "footprint": [
         [
           410,
@@ -1366,11 +1468,12 @@
           190
         ]
       ],
-      "height_m": 36
+      "height_m": 12.8
     },
     {
       "id": 10,
       "block": "b_2_0",
+      "kind": "apartments",
       "footprint": [
         [
           10,
@@ -1389,11 +1492,12 @@
           290
         ]
       ],
-      "height_m": 36
+      "height_m": 25.8
     },
     {
       "id": 11,
       "block": "b_2_1",
+      "kind": "apartments",
       "footprint": [
         [
           110,
@@ -1412,11 +1516,12 @@
           290
         ]
       ],
-      "height_m": 24
+      "height_m": 24.4
     },
     {
       "id": 12,
       "block": "b_2_2",
+      "kind": "tower",
       "footprint": [
         [
           210,
@@ -1435,11 +1540,12 @@
           290
         ]
       ],
-      "height_m": 12
+      "height_m": 53.6
     },
     {
       "id": 13,
       "block": "b_2_3",
+      "kind": "apartments",
       "footprint": [
         [
           310,
@@ -1458,11 +1564,12 @@
           290
         ]
       ],
-      "height_m": 30
+      "height_m": 26.1
     },
     {
       "id": 14,
       "block": "b_2_4",
+      "kind": "apartments",
       "footprint": [
         [
           410,
@@ -1481,11 +1588,12 @@
           290
         ]
       ],
-      "height_m": 18
+      "height_m": 24.8
     },
     {
       "id": 15,
       "block": "b_3_0",
+      "kind": "houses",
       "footprint": [
         [
           10,
@@ -1504,11 +1612,12 @@
           390
         ]
       ],
-      "height_m": 18
+      "height_m": 12.8
     },
     {
       "id": 16,
       "block": "b_3_1",
+      "kind": "apartments",
       "footprint": [
         [
           110,
@@ -1527,11 +1636,12 @@
           390
         ]
       ],
-      "height_m": 36
+      "height_m": 25.6
     },
     {
       "id": 17,
       "block": "b_3_2",
+      "kind": "apartments",
       "footprint": [
         [
           210,
@@ -1550,11 +1660,12 @@
           390
         ]
       ],
-      "height_m": 24
+      "height_m": 22.8
     },
     {
       "id": 18,
       "block": "b_3_3",
+      "kind": "apartments",
       "footprint": [
         [
           310,
@@ -1573,11 +1684,12 @@
           390
         ]
       ],
-      "height_m": 12
+      "height_m": 24.8
     },
     {
       "id": 19,
       "block": "b_3_4",
+      "kind": "houses",
       "footprint": [
         [
           410,
@@ -1596,11 +1708,12 @@
           390
         ]
       ],
-      "height_m": 30
+      "height_m": 12.8
     },
     {
       "id": 20,
       "block": "b_4_0",
+      "kind": "houses",
       "footprint": [
         [
           10,
@@ -1615,23 +1728,24 @@
           490
         ],
         [
-          30,
+          50,
           490
         ],
         [
-          30,
-          470
+          50,
+          450
         ],
         [
           10,
-          470
+          450
         ]
       ],
-      "height_m": 30
+      "height_m": 12.8
     },
     {
       "id": 21,
       "block": "b_4_1",
+      "kind": "houses",
       "footprint": [
         [
           110,
@@ -1650,11 +1764,12 @@
           490
         ]
       ],
-      "height_m": 18
+      "height_m": 12.8
     },
     {
       "id": 22,
       "block": "b_4_2",
+      "kind": "apartments",
       "footprint": [
         [
           210,
@@ -1673,11 +1788,12 @@
           490
         ]
       ],
-      "height_m": 36
+      "height_m": 23.1
     },
     {
       "id": 23,
       "block": "b_4_3",
+      "kind": "houses",
       "footprint": [
         [
           310,
@@ -1696,11 +1812,12 @@
           490
         ]
       ],
-      "height_m": 24
+      "height_m": 12.8
     },
     {
       "id": 24,
       "block": "b_4_4",
+      "kind": "houses",
       "footprint": [
         [
           410,
@@ -1712,14 +1829,14 @@
         ],
         [
           490,
-          470
+          450
         ],
         [
-          470,
-          470
+          450,
+          450
         ],
         [
-          470,
+          450,
           490
         ],
         [
@@ -1727,7 +1844,7 @@
           490
         ]
       ],
-      "height_m": 12
+      "height_m": 12.8
     }
   ]
 }

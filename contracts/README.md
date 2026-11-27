@@ -66,11 +66,24 @@ on the right. A module that counts lanes in another way converts at its own bord
 
 ## Buildings
 
-`buildings` in `city_plan.json` has one box per block until the 3D model is ready (#22, K8/K9):
-`{ id, block, footprint: [[x, z], ...], height_m }`. The footprint is in metres, corners clockwise
-seen from above. A building stays 10 m from the road centre line (2 lanes of 3.5 m and a 3 m
-sidewalk). In the four corner blocks the store corner (30 m × 30 m) is left free. Heights are
-placeholders (12–36 m). The 3D model file belongs to M5.
+`buildings` in `city_plan.json` has one entry per block:
+`{ id, block, kind, footprint: [[x, z], ...], height_m }`. The footprint is in metres, corners
+clockwise seen from above. A building stays 10 m from the road centre line (2 lanes of 3.5 m and a
+3 m sidewalk). In the four corner blocks the store corner (a quarter of the block, up to 50 m from
+the city corner) is left free for the team depot.
+
+`kind` says what stands on the block, as on the printed board (`tools/print/gen-city.py`, M6-5):
+`houses` (detached houses with gardens, outer ring), `apartments` (4–6 storeys) or `tower` (the
+centre block). `height_m` is the highest point of the block, so a box of the footprint and this
+height holds everything on it. `tools/print/check-buildings.py` checks that each printed block has
+exactly this height (1 m = 1.12 mm on the board).
+
+## Stores and depots
+
+Each entry of `stores` has a `depot`: the team's warehouse in the store corner, printed in white
+PETG for the board so that the store LEDs light it in the team colour (`tools/print/gen-city.py`).
+`{ footprint, height_m, roof, solid: false }`, footprint in metres as for buildings. It is only a
+picture for the board and the 3D city: it is not solid, so the pickup circle stays drivable.
 
 ## Teams
 
@@ -83,5 +96,5 @@ placeholders (12–36 m). The 3D model file belongs to M5.
 
 ## Status
 
-All files are a draft. The buildings in `city_plan.json` are simple boxes for the
-module demo; the real shapes come with the 3D model (#22).
+All files are a draft. `city_plan.json` gives each block its kind and height; the shapes
+of the houses, apartments and the tower are in `tools/print/gen-city.py` (#22).

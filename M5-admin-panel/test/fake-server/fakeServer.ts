@@ -385,6 +385,9 @@ export function attachFakeServer(server: Server, options: FakeServerOptions = {}
     // A second admin login replaces the first one (M2-1, #58).
     active?.close(4001, 'replaced by a new admin login');
     active = link;
+    // ws reports a too big or broken frame as an error and closes the link (1009, 1002);
+    // without a listener Node would throw and stop the fake server.
+    link.on('error', () => {});
     link.on('close', () => { if (active === link) active = undefined; });
     link.on('message', (data, binary) => {
       if (active !== link || !binary || !Buffer.isBuffer(data)) return;

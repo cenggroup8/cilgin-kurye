@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import { createServer } from 'node:http';
 import { test, type TestContext } from 'node:test';
+import { WebSocket } from 'ws';
 import { AdminConnection, type AdminUpdate } from '../../src/comm/connection.ts';
 import { PARAMS } from '../../../M1-game-server/src/admin/param-list.ts';
 import { attachFakeServer, METRICS_MS, STATE_MS, type FakeServerOptions } from './fakeServer.ts';
@@ -106,6 +107,23 @@ test('after a drop the page gets the changed values again; a second admin replac
   await connected(second);
   await replaced;
   assert.deepEqual(await second.command({ name: 'new_code' }), { ok: true });
+});
+
+test('a too big message closes only that link and the fake server keeps running', { timeout: 5000 }, async (t) => {
+  const { connection, fake, url } = await setup(t);
+  await connected(connection);
+  const raw = new WebSocket(url);
+  await once(raw, 'open');
+  // The new link replaces the page's link (one admin), so take the code from the raw one.
+  const closed = once(raw, 'close');
+  raw.send(new Uint8Array(20 * 1024));
+  const [code] = await closed;
+  assert.equal(code, 1009);
+  const again = new AdminConnection(url);
+  t.after(() => again.stop());
+  await connected(again);
+  assert.deepEqual(await again.command({ name: 'new_code' }), { ok: true });
+  assert.ok(fake.commands.length > 0);
 });
 
 test('the recording is the same for the same seed', () => {

@@ -1,13 +1,13 @@
 import "./ui.css";
-import { CityScene, type CityPlan, type SceneCar, type ScenePlayer } from "../src/scene/index.ts";
+import { CityScene, EngineAudio, PLAYER_TONES, TEAM_NAMES, type CameraMode, type CityPlan, type SceneCar, type ScenePlayer } from "../src/scene/index.ts";
 import plan from "@m3/test/fakes/city_plan.json";
 import { FakeM1 } from "@m3/test/fakes/fakeM1.ts";
 import { toContractHeading, toContractPoint } from "@m3/src/common/coords.ts";
 
 const PLAYER = 0;
 const NORTH = Math.PI / 2;
-const STEER_IN = 3.6;
-const STEER_SWAP = 8;
+const STEER_IN = 2.4;
+const STEER_SWAP = 6;
 const STEER_OUT = 6.5;
 const PEDAL_IN = 7;
 const PEDAL_OUT = 12;
@@ -59,7 +59,60 @@ const scene = new CityScene(canvas, plan as unknown as CityPlan);
 const $ = (id: string) => document.getElementById(id)!;
 const kmh = $("kmh");
 const fpsText = $("fps");
+const gearText = $("gear");
+const soundBtn = $("sound");
+const fullBtn = $("full");
+const hint = $("hint");
+const audio = new EngineAudio();
+audio.useSample("./sounds/engine-loop.mp3");
+
+scene.onShift = (_shift, gear) => {
+  gearText.textContent = String(gear);
+  gearText.classList.remove("bump");
+  void gearText.offsetWidth;
+  gearText.classList.add("bump");
+  audio.shift();
+};
+
+const wake = () => audio.start();
+window.addEventListener("pointerdown", wake);
+window.addEventListener("keydown", wake);
+soundBtn.addEventListener("click", () => {
+  audio.start();
+  audio.setMuted(!audio.isMuted);
+  soundBtn.classList.toggle("on", !audio.isMuted);
+});
+
+type FullDoc = Document & { webkitFullscreenEnabled?: boolean; webkitFullscreenElement?: Element | null };
+type FullEl = HTMLElement & { webkitRequestFullscreen?: () => Promise<void> | void };
+const doc = document as FullDoc;
+const standalone =
+  window.matchMedia("(display-mode: fullscreen)").matches ||
+  window.matchMedia("(display-mode: standalone)").matches ||
+  (navigator as Navigator & { standalone?: boolean }).standalone === true;
+if (standalone) fullBtn.style.display = "none";
+let hintTimer = 0;
+fullBtn.addEventListener("click", async () => {
+  const el = document.documentElement as FullEl;
+  if (doc.fullscreenElement || doc.webkitFullscreenElement) {
+    await document.exitFullscreen?.().catch(() => undefined);
+    return;
+  }
+  if (doc.fullscreenEnabled && el.requestFullscreen) {
+    await el.requestFullscreen({ navigationUI: "hide" }).catch(() => undefined);
+    const orientation = screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> };
+    await orientation.lock?.("landscape").catch(() => undefined);
+  } else if (doc.webkitFullscreenEnabled && el.webkitRequestFullscreen) {
+    await el.webkitRequestFullscreen();
+  } else {
+    hint.classList.add("show");
+    clearTimeout(hintTimer);
+    hintTimer = window.setTimeout(() => hint.classList.remove("show"), 5000);
+  }
+});
+document.addEventListener("fullscreenchange", () => fullBtn.classList.toggle("on", !!doc.fullscreenElement));
 const pausedEl = $("paused");
+if (new URLSearchParams(location.search).has("bike")) scene.cameraMode = "showroom";
 const holdButtons = [...document.querySelectorAll<HTMLElement>("[data-hold]")];
 const toolButtons = new Map([...document.querySelectorAll<HTMLElement>("[data-key]")].map((b) => [b.dataset.key!, b]));
 
@@ -83,8 +136,13 @@ document.addEventListener("touchend", (e) => {
 
 function toggle(k: string): void {
   if (k === "c") scene.cameraMode = scene.cameraMode === "chase" ? "overview" : "chase";
+  if (k === "v") scene.cameraMode = scene.cameraMode === "showroom" ? "chase" : "showroom";
   if (k === "n") showCars = !showCars;
-  if (k === "r") reset();
+  if (k === "r") {
+    reset();
+    scene.gearbox.gear = 1;
+    gearText.textContent = "1";
+  }
   if (k === "p") paused = !paused;
 }
 
@@ -115,7 +173,31 @@ for (const b of holdButtons) {
   b.addEventListener("pointercancel", release);
 }
 for (const [key, b] of toolButtons) b.addEventListener("click", () => toggle(key));
-pausedEl.addEventListener("click", () => (paused = false));
+const livery = { team: Math.floor(PLAYER / 2), tone: PLAYER % 2 };
+const liveries = $("liveries");
+PLAYER_TONES.forEach((tones, team) => {
+  const name = document.createElement("span");
+  name.className = "team";
+  name.textContent = TEAM_NAMES[team];
+  liveries.appendChild(name);
+  tones.forEach((color, tone) => {
+    const b = document.createElement("button");
+    b.className = "swatch";
+    b.style.background = color;
+    b.title = `${TEAM_NAMES[team]} ${tone === 0 ? "light" : "dark"}`;
+    b.dataset.team = String(team);
+    b.dataset.tone = String(tone);
+    b.addEventListener("click", () => {
+      livery.team = team;
+      livery.tone = tone;
+    });
+    liveries.appendChild(b);
+  });
+});
+const swatches = [...liveries.querySelectorAll<HTMLElement>(".swatch")];
+$("resume").addEventListener("click", () => (paused = false));
+let cameraBeforePause: CameraMode = "chase";
+let wasPaused = false;
 document.addEventListener("contextmenu", (e) => e.preventDefault());
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -157,7 +239,8 @@ function frame(now: number): void {
   const b = m1.physics.bikes.get(PLAYER)!;
   const me: ScenePlayer = {
     id: PLAYER,
-    team: Math.floor(PLAYER / 2),
+    team: livery.team,
+    tone: livery.tone,
     ...toScene(blend(prevBike, b, t)),
     lean: b.lean,
     speed: b.speed,
@@ -168,7 +251,19 @@ function frame(now: number): void {
     ? cars.map((c) => ({ id: c.id, ...toScene(blend(prevCars.get(c.id) ?? c, c, t)), length: c.length, width: c.width, offroad: c.state === "offroad" }))
     : [];
 
-  scene.update({ self: PLAYER, players: [me], cars: sceneCars }, paused ? 0 : dt);
+  scene.topSpeed = m1.physics.params.topSpeed;
+  if (paused !== wasPaused) {
+    if (paused) {
+      cameraBeforePause = scene.cameraMode === "showroom" ? "chase" : scene.cameraMode;
+      scene.cameraMode = "showroom";
+    } else {
+      scene.cameraMode = cameraBeforePause;
+    }
+    wasPaused = paused;
+  }
+  swatches.forEach((b) => b.classList.toggle("on", Number(b.dataset.team) === livery.team && Number(b.dataset.tone) === livery.tone));
+  scene.update({ self: PLAYER, players: [me], cars: sceneCars }, dt);
+  audio.update(paused ? 0.1 : scene.gearbox.rpm, paused ? 0 : scene.gearbox.load, dt);
   scene.render();
 
   const speed = Math.round(Math.abs(b.speed) * 3.6);

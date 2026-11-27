@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import * as THREE from "three";
-import { BikeModel } from "../../src/scene/bike.ts";
+import { BikeModel, shownLean } from "../../src/scene/bike.ts";
 import { chaseSpot } from "../../src/scene/camera.ts";
 import { CarLayer } from "../../src/scene/cars.ts";
 import { buildCity } from "../../src/scene/city.ts";
-import { forwardOf, roadWidth, yawOf } from "../../src/scene/pose.ts";
+import { forwardOf, playerColor, roadWidth, yawOf } from "../../src/scene/pose.ts";
 import type { CityPlan, ScenePlayer } from "../../src/scene/types.ts";
 import planJson from "./city_plan.json" with { type: "json" };
 
@@ -101,17 +101,48 @@ test("NPC cars use one draw call for any number of cars, up to the capacity", ()
 
 test("the motorcycle leans smoothly to the right and lies down when it falls", () => {
   const bike = new BikeModel(1);
-  const pose: ScenePlayer = { id: 0, team: 1, x: 10, z: 20, heading: 90, lean: 0, speed: 8, sliding: false, fallen: false };
+  const pose: ScenePlayer = { id: 0, team: 1, tone: 0, x: 10, z: 20, heading: 90, lean: 0, speed: 8, sliding: false, fallen: false };
   bike.update(pose, 1 / 60);
   assert.equal(bike.root.position.x, 10);
   assert.equal(bike.root.position.z, 20);
   bike.update({ ...pose, lean: 0.4 }, 1 / 60);
   const first = -bike.body.rotation.z;
-  assert.ok(first > 0 && first < 0.1, `no jump: ${first}`);
+  assert.ok(first > 0 && first < 0.05, `no jump: ${first}`);
   for (let i = 0; i < 120; i++) bike.update({ ...pose, lean: 0.4 }, 1 / 60);
-  close(-bike.body.rotation.z, 0.4, 0.02);
+  close(-bike.body.rotation.z, shownLean(0.4), 0.02);
+  for (let i = 0; i < 120; i++) bike.update({ ...pose, lean: 0.79 }, 1 / 60);
+  assert.ok(-bike.body.rotation.z < 0.43, "a hard turn leans less than 25 degrees");
   const head = new THREE.Vector3(0, 2, 0).applyEuler(bike.body.rotation);
   assert.ok(head.x > 0);
   for (let i = 0; i < 120; i++) bike.update({ ...pose, fallen: true }, 1 / 60);
   assert.ok(Math.abs(bike.body.rotation.z) > 1.2);
+});
+
+test("the scooter is cheap to draw: few meshes, shared shapes per team, real size", () => {
+  const a = new BikeModel(2, 1);
+  const b = new BikeModel(2, 1);
+  const meshes: THREE.Mesh[] = [];
+  a.root.traverse((o) => o instanceof THREE.Mesh && meshes.push(o));
+  assert.ok(meshes.length <= 10, `${meshes.length} meshes`);
+  const other: THREE.Mesh[] = [];
+  b.root.traverse((o) => o instanceof THREE.Mesh && other.push(o));
+  meshes.forEach((m, i) => assert.equal(m.geometry, other[i].geometry));
+  a.update({ id: 0, team: 2, tone: 1, x: 0, z: 0, heading: 0, lean: 0, speed: 0, sliding: false, fallen: false }, 1 / 60);
+  a.root.updateMatrixWorld(true);
+  const size = new THREE.Box3().setFromObject(a.root);
+  close(size.min.y, 0, 0.02);
+  assert.ok(size.max.y > 1.6 && size.max.y < 1.9, `height ${size.max.y}`);
+  const length = size.max.z - size.min.z;
+  assert.ok(length > 1.7 && length < 2.1, `length ${length}`);
+});
+
+test("eight liveries: a light and a dark tone for each team, from the board contract", () => {
+  const seen = new Set<string>();
+  for (let team = 0; team < 4; team++) for (const tone of [0, 1]) seen.add(playerColor(team, tone));
+  assert.equal(seen.size, 8);
+  for (let team = 0; team < 4; team++) {
+    const light = new THREE.Color(playerColor(team, 0)).getHSL({ h: 0, s: 0, l: 0 }).l;
+    const dark = new THREE.Color(playerColor(team, 1)).getHSL({ h: 0, s: 0, l: 0 }).l;
+    assert.ok(light > dark);
+  }
 });

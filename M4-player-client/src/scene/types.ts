@@ -10,6 +10,7 @@ export interface CityPlan {
 export interface ScenePlayer {
   id: number;
   team: number;
+  tone: number;
   x: number;
   z: number;
   heading: number;

@@ -34,6 +34,20 @@ canvas {
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
 }
 .speed small { font-size: 14px; font-weight: 700; margin-left: 4px; opacity: 0.85; }
+.speed .gear {
+  display: inline-block;
+  margin-left: 12px;
+  min-width: 30px;
+  padding: 0 7px;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  font-size: 20px;
+  line-height: 26px;
+  text-align: center;
+  vertical-align: 4px;
+}
+.speed .gear.bump { animation: bump 260ms ease-out; }
+@keyframes bump { 0% { transform: scale(1.35); } 100% { transform: scale(1); } }
 
 .tools {
   top: max(12px, env(safe-area-inset-top));
@@ -79,14 +93,57 @@ canvas {
 .paused {
   inset: 0;
   display: none;
-  place-items: center;
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: 2px;
-  background: rgba(0, 0, 0, 0.25);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  place-items: center end;
+  padding-right: max(24px, env(safe-area-inset-right));
+  background: rgba(0, 0, 0, 0.18);
+}
+.menu {
+  width: min(300px, 86vw);
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(20, 24, 32, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+.menu .title { font-size: 24px; font-weight: 800; letter-spacing: 2px; text-align: center; margin-bottom: 12px; }
+.menu .label { font-size: 12px; opacity: 0.75; margin-bottom: 8px; }
+.liveries { display: grid; grid-template-columns: auto 1fr 1fr; gap: 8px 10px; align-items: center; }
+.liveries .team { font-size: 13px; opacity: 0.9; }
+.swatch {
+  height: 34px;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  padding: 0;
+}
+.swatch.on { border-color: #fff; box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35); }
+.resume {
+  width: 100%;
+  margin-top: 14px;
+  height: 42px;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
 }
 .paused.show { display: grid; }
+
+.hint {
+  left: 50%;
+  top: max(64px, calc(env(safe-area-inset-top) + 52px));
+  transform: translateX(-50%);
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(20, 24, 32, 0.55);
+  font-size: 13px;
+  white-space: nowrap;
+  display: none;
+}
+.hint.show { display: block; }
+#sound:not(.on) .wave { opacity: 0; }
 
 @media (max-height: 440px) {
   .round { width: 92px; height: 92px; }

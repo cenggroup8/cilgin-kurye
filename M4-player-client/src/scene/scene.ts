@@ -4,12 +4,13 @@ import { ChaseCamera } from "./camera.ts";
 import { CarLayer } from "./cars.ts";
 import { buildCity, type CityParts } from "./city.ts";
 import { Effects } from "./effects.ts";
+import { Gearbox, type Shift } from "./gearbox.ts";
 import { forwardOf } from "./pose.ts";
 import type { CityPlan, ScenePlayer, SceneState } from "./types.ts";
 
 const SKY = "#bfe3ff";
 
-export type CameraMode = "chase" | "overview";
+export type CameraMode = "chase" | "overview" | "showroom";
 
 export class CityScene {
   readonly renderer: THREE.WebGLRenderer;
@@ -24,6 +25,11 @@ export class CityScene {
   private readonly size: number;
   private readonly fog = new THREE.Fog(SKY, 160, 520);
   cameraMode: CameraMode = "chase";
+  topSpeed = 15;
+  readonly gearbox = new Gearbox();
+  onShift: ((shift: Shift, gear: number) => void) | null = null;
+  private selfSpeed = 0;
+  private orbit = 0;
 
   constructor(canvas: HTMLCanvasElement, plan: CityPlan) {
     this.size = plan.world.size_m;
@@ -68,9 +74,9 @@ export class CityScene {
     for (const p of state.players) {
       seen.add(p.id);
       let bike = this.bikes.get(p.id);
-      if (!bike || bike.team !== p.team) {
+      if (!bike || bike.team !== p.team || bike.tone !== p.tone) {
         if (bike) this.drop(p.id);
-        bike = new BikeModel(p.team);
+        bike = new BikeModel(p.team, p.tone);
         this.bikes.set(p.id, bike);
         this.scene.add(bike.root);
       }
@@ -82,9 +88,12 @@ export class CityScene {
     this.fx.update(dt);
 
     const self = state.players.find((p) => p.id === state.self);
+    if (self && dt > 0) this.shiftGears(self, dt);
     this.scene.fog = this.cameraMode === "chase" ? this.fog : null;
     const focus = self ?? { x: this.size / 2, z: this.size / 2 };
+    this.orbit += dt * 0.45;
     if (self && this.cameraMode === "chase") this.view.follow(self, dt);
+    else if (self && this.cameraMode === "showroom") this.view.showroom(self, this.orbit, dt);
     else this.view.overview({ x: this.size / 2, z: this.size / 2 }, this.size, dt);
 
     this.sun.position.set(focus.x - 60, 120, focus.z + 40);
@@ -93,6 +102,20 @@ export class CityScene {
 
   render(): void {
     this.renderer.render(this.scene, this.view.camera);
+  }
+
+  private shiftGears(self: ScenePlayer, dt: number): void {
+    const accel = (self.speed - this.selfSpeed) / dt;
+    this.selfSpeed = self.speed;
+    const shift = self.fallen ? null : this.gearbox.update(self.speed, accel, this.topSpeed, dt);
+    if (!shift) return;
+    this.bikes.get(self.id)?.kick(shift);
+    if (this.cameraMode === "chase") this.view.kick(shift);
+    if (shift === "up") {
+      const f = forwardOf(self.heading);
+      for (let i = 0; i < 3; i++) this.fx.puff(self.x - f.x * 1.2 + f.z * 0.2, 0.5, self.z - f.z * 1.2 - f.x * 0.2, 0.16, 0.8, 1.3);
+    }
+    this.onShift?.(shift, this.gearbox.gear);
   }
 
   private emit(p: ScenePlayer, dt: number): void {

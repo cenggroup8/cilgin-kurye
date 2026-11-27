@@ -58,15 +58,21 @@ export function candidatesOf(world: PhysicsWorld): Candidate[] {
   return list.concat(outerWallSides(world));
 }
 
-/** One collision event per player, kind of hit and other thing in a tick: keep the largest impact. */
-function recordCollision(ctx: SubstepContext, player: number, hit: HitKind, impactSpeed: number): void {
+/** One collision event per player, kind of hit and other thing (`other`) in a tick: keep the largest impact. */
+export function recordCollision(
+  ctx: SubstepContext,
+  player: number,
+  hit: HitKind,
+  other: number | null,
+  impactSpeed: number,
+): void {
   for (const e of ctx.events) {
-    if (e.kind === 'collision' && e.player === player && e.with === hit && e.other === null) {
+    if (e.kind === 'collision' && e.player === player && e.with === hit && e.other === other) {
       e.impactSpeed = Math.max(e.impactSpeed, impactSpeed);
       return;
     }
   }
-  const event: CollisionEvent = { kind: 'collision', player, with: hit, other: null, impactSpeed };
+  const event: CollisionEvent = { kind: 'collision', player, with: hit, other, impactSpeed };
   ctx.events.push(event);
 }
 
@@ -107,7 +113,7 @@ export function solveBike(ctx: SubstepContext, bike: BikeState, candidates: Cand
     bike.slip = out.slip;
 
     if (impact <= MIN_IMPACT_MPS) continue;
-    recordCollision(ctx, bike.id, hit.c.with, impact);
+    recordCollision(ctx, bike.id, hit.c.with, null, impact);
     if (judgeImpact(impact, ctx.world.params.fallSpeed) === 'fall') {
       bike.fallen = true;
       bike.speed = 0;

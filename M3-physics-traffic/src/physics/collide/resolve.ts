@@ -86,3 +86,40 @@ export function resolveContact(bike: BikeMotion, contact: Contact): BikeMotion {
     slip: -keepX * sin + keepY * cos,
   };
 }
+
+/**
+ * Like `resolveContact`, but the other thing moves too (an NPC car, another
+ * motorcycle). The speed that is taken away is the part of the RELATIVE velocity
+ * into the other thing: after the contact the motorcycle moves with the other
+ * thing along the normal. `other` is its velocity (m/s). The normal points from
+ * the other thing to this motorcycle.
+ *
+ * `pushShare` is the part of the depth that this motorcycle moves (1 for a car
+ * that does not move, 0.5 for two equal motorcycles); `velocityShare` is the part
+ * of the closing speed that it loses (1 for a car, 0.5 for two equal motorcycles).
+ * Compute the hit speed BEFORE this, with `relativeNormalSpeed`.
+ */
+export function resolveContactMoving(
+  bike: BikeMotion,
+  contact: Contact,
+  other: { vx: number; vy: number },
+  pushShare = 1,
+  velocityShare = 1,
+): BikeMotion {
+  if (!validBike(bike) || !validContact(contact) || !other || !finite(other.vx) || !finite(other.vy)) return { ...bike };
+  const { vx, vy } = velocityOf(bike);
+  const into = (vx - other.vx) * contact.normalX + (vy - other.vy) * contact.normalY;
+  const keepX = into < 0 ? vx - velocityShare * into * contact.normalX : vx;
+  const keepY = into < 0 ? vy - velocityShare * into * contact.normalY : vy;
+
+  const cos = Math.cos(bike.heading);
+  const sin = Math.sin(bike.heading);
+  const push = contact.depth * pushShare + PUSH_MARGIN_M;
+  return {
+    x: bike.x + contact.normalX * push,
+    y: bike.y + contact.normalY * push,
+    heading: bike.heading,
+    speed: keepX * cos + keepY * sin,
+    slip: -keepX * sin + keepY * cos,
+  };
+}

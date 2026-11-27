@@ -41,3 +41,13 @@ export const ACCIDENT_SLOW_RADIUS_M = 15;
 
 /** Speed limit (m/s) inside the slow zone of an accident. */
 export const ACCIDENT_SLOW_SPEED_MPS = 5;
+
+/**
+ * TAHMİN. The smallest hit speed (m/s) that is sent to the traffic part as a
+ * CarHit. A light scrape (below this) must not stop an NPC car for hitStopTime
+ * (2.5 s). To be asked of the owner of M3-4.
+ */
+export const CAR_HIT_MIN_MPS = 1;
+
+/** TAHMİN. Highest speed of an NPC car (m/s): the admin maximum of physics.npc_speed_mps. Only for the tunnel guard tests. */
+export const NPC_MAX_SPEED_MPS = 20;

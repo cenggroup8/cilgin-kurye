@@ -22,17 +22,16 @@ const plan = JSON.parse(readFileSync(root + "contracts/city_plan.json", "utf8"))
 // ---- board parameters (proposal; change here, then run the script) -------------
 const BOARD_MM = 600; // 60 × 60 cm (doc 10.1)
 const MARGIN_MM = 20; // outer roads this far from the edge of the base
-const STRIP_LEDS_PER_M = 60; // WS2812B, 60 LEDs/m (#20)
-const STRIP_WIDTH_MM = 10;
-const MIN_GAP_MM = 24; // free space at a crossing: the other strip (≈ 12 mm) + room for solder pads
-// Stores: 2 single LEDs cut from the strip (#20: 8 store LEDs). The free store
+const STRIP_LEDS_PER_M = 144; // WS2812B, 144 LEDs/m, as bought (5 m reels of 720 LEDs)
+const STRIP_WIDTH_MM = 15; // measured on the strip
+const MIN_GAP_MM = 27; // free space at a crossing: the other strip (15 mm) + about 6 mm on each side for solder pads
+// Stores: a piece of 2 LEDs cut from the strip (#20: 8 store LEDs). The free store
 // corner of the city plan is 30 m × 30 m; on the board, without the road, that is a
-// square of about 22 mm: two single LEDs (16.7 × 10 mm each) fit there one above
-// the other, a straight piece of 4 does not.
+// square of about 22 mm. A piece of 2 LEDs (13.9 × 15 mm) fits there, east-west.
 const STORE_LEDS = 2;
 const STORE_LED_MM = [
-  [22, 17],
-  [22, 28],
+  [18.5, 22],
+  [18.5 + 1000 / STRIP_LEDS_PER_M, 22],
 ]; // centre of each store LED from the corner node, toward the inside of the block
 
 const LINES = plan.grid.lines; // 6 roads in each direction
@@ -219,10 +218,12 @@ function svg(l) {
           prev = led.mm;
         }
         const west = first[0] < W / 2;
-        const tx = r1(first[0] + (west ? 11 : -11));
+        const north = first[1] < W / 2;
+        const tx = r1(first[0] - (west ? half : -half));
         const anchor = west ? "start" : "end";
-        p(`<text x="${tx}" y="${r1(last[1] + 1.2)}" font-size="3.2" fill="${color[ch.name]}" text-anchor="${anchor}">${ch.name}${pc.first} store ${pc.team}</text>`);
-        if (i === 0) p(`<text x="${tx}" y="${r1(first[1] + 1.4)}" font-size="4" font-weight="bold" fill="${color[ch.name]}" text-anchor="${anchor}">◀ DATA ${ch.name} in</text>`);
+        // Store label on the side toward the block, the data label on the other side.
+        p(`<text x="${tx}" y="${r1(first[1] + (north ? 12 : -10))}" font-size="3.2" fill="${color[ch.name]}" text-anchor="${anchor}">${ch.name}${pc.first} store ${pc.team}</text>`);
+        if (i === 0) p(`<text x="${r1(last[0] + (west ? half + 2 : -half - 2))}" y="${r1(first[1] + 1.4)}" font-size="4" font-weight="bold" fill="${color[ch.name]}" text-anchor="${anchor}">◀ DATA ${ch.name} in</text>`);
         prevEnd = prev;
         return;
       }

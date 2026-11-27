@@ -48,7 +48,7 @@ the first `seq` it sends.
 | `error` | `reason` string, `ref` string (optional) | A refused message. `ref` is the `t` of the refused message when it is known |
 | `state` | `seq` integer, `s` map | The frozen game state of tick `seq`, 30 times per second. `s` is M1's game state (#78). Every phone gets the same bytes |
 | `ping` | `id` integer ≥ 1, `st` number | Twice per second. `st` is the server time in ms |
-| `net` | `fps_limit` integer 0–120 | Frame rate limit from the admin. 0 means no limit |
+| `net` | `fps_limit` integer 0–120 | Frame rate limit of this player (admin parameter `net.<p>.fps_limit`). Sent only to the phone of that player: when it joins and when the admin changes the value. 0 means no limit |
 
 ## Admin → server
 
@@ -84,10 +84,10 @@ its answer comes back as `reply`.
 | `params` | `list` array of parameters | Every parameter: `name`, `group`, `label`, `value`, `min`, `max`, `integer`, `owner` (M1-5) |
 | `param` | `name` string, `value` number | A value changed. The admin puts a change mark on every graph |
 | `metrics` | `samples` array of `{name, time, value}` | Twice per second. `time` in ms |
-| `board` | `board` map: `connected` boolean, `samples` array, `quake` `{mag, zone}` (optional) | Board link state, sensor samples and the last earthquake |
+| `board` | `board` map: `connected` boolean, `samples` array, `quake` `{mag, zone}` (optional) | Board link state, sensor samples and the current earthquake. `quake` is missing when no earthquake is going on (it is dropped when the earthquake ends) |
 | `event` | `entry` `{time, message}` | One line for the event log |
 | `log` | `entries` array of `{time, message}` | Answer to `log_get` |
-| `reply` | `id` integer, `ok` boolean, `error` string (when `ok` is false) | Answer to one `cmd` |
+| `reply` | `id` integer, `ok` boolean, `error` string (when `ok` is false) | Answer to one `cmd`. `error` is one of the command errors below |
 | `error` | `reason` string, `ref` string (optional) | A refused admin message that is not a `cmd` with a usable `id` |
 
 ## Error reasons
@@ -104,6 +104,17 @@ its answer comes back as `reply`.
 | `unexpected` | A message that is not allowed now, for example a second `hello` |
 | `bad_hello`, `bad_code`, `full` | The hello was refused; the link is then closed with code 4003 (M2-1) |
 | `bad_join` | The join was refused |
+
+**Command errors** (`reply.error`). A `cmd` gets the same names whether M2 or M1-5 refuses it,
+so the admin page sees one name for one problem:
+
+| `error` | From | When |
+|---|---|---|
+| `unknown_command` | M2 or M1-5 | `name` is not a command of the table above |
+| `bad_args` | M2 or M1-5 | An argument is missing, has the wrong type or is outside its range |
+| `wrong_phase` | M1-5 | The command is not allowed in this phase of the game |
+| `owner_not_connected` | M1-5 | The module that owns the parameter is not connected; nothing was changed |
+| other names | M1-5 and the part it calls | For example `unknown_param`, `bad_value` and `out_of_range` of the parameter registry for `param_set`, or `no_players` and `cannot_pause` of M1-2. The admin page shows the name as it is |
 
 ## Limits for each link
 

@@ -69,6 +69,8 @@ export function bindDashboard(store: AdminStore, root: HTMLElement) {
     clock.textContent = formatClock(state?.timeLeftSeconds);
     phase.textContent = state ? PHASE_LABELS[state.phase] : 'Durum bekleniyor';
     strip.dataset.phase = state?.phase ?? 'none';
+    // The dial turns red in the last 30 seconds of a running match.
+    strip.dataset.urgent = String(state?.phase === 'playing' && state.timeLeftSeconds <= 30);
     const rows = teamRows(store);
     const lit = litDots(rows.map((r) => r.score));
     rows.forEach((row, i) => {

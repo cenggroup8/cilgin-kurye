@@ -9,12 +9,11 @@ export const PHASE_LABELS: Record<Phase, string> = {
 export const TEAM_NAMES = ['Mavi', 'Yeşil', 'Mor', 'Sarı'] as const;
 
 /**
- * Team colours: the LED colours of the board (blue, green, purple, amber). On the dark surface
- * they pass the colour-blind and 3:1 contrast checks of the dataviz validator; green and amber
- * are brighter than its default lightness band, on purpose, and every team mark has its name
- * and score as text next to it.
+ * Team colours: the LED colours of the board (blue, green, purple, yellow). Each one is at
+ * least 3:1 against the dark surface; colour is never the only mark, since every team has its
+ * name and score as text next to it.
  */
-export const TEAM_TONES = ['#2563eb', '#22c55e', '#a855f7', '#f59e0b'] as const;
+export const TEAM_TONES = ['#3498db', '#2ecc71', '#9b59b6', '#f1c40f'] as const;
 
 export const OBSTACLE_LABELS: Readonly<Record<string, string>> = {
   heavy_traffic: 'Yoğun trafik', road_work: 'Yol çalışması', accident: 'Kaza', puddle: 'Su birikintisi',

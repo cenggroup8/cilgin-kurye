@@ -29,6 +29,8 @@ export interface WsHandle {
   send(connId: number, msg: unknown): void;
   /** Bytes that are already encoded, so one state is encoded once for all phones (M2-3). */
   sendRaw(connId: number, bytes: Uint8Array): void;
+  /** Bytes queued on this link and not sent yet (0 for an unknown link). M2-3 skips a slow phone with it. */
+  buffered(connId: number): number;
   close(): void;
 }
 
@@ -53,6 +55,10 @@ export function attachWebSockets(http: Server, opts: WsOptions): WsHandle {
   function sendRaw(connId: number, bytes: Uint8Array): void {
     const ws = links.get(connId);
     if (ws && ws.readyState === ws.OPEN) ws.send(bytes);
+  }
+
+  function buffered(connId: number): number {
+    return links.get(connId)?.bufferedAmount ?? 0;
   }
 
   function drop(connId: number, code: number, reason: string): void {
@@ -119,6 +125,7 @@ export function attachWebSockets(http: Server, opts: WsOptions): WsHandle {
   return {
     send,
     sendRaw,
+    buffered,
     close() {
       for (const ws of links.values()) ws.terminate();
       links.clear();

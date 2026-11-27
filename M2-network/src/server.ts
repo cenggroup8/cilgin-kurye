@@ -38,6 +38,8 @@ export interface M2Server {
   send(connId: number, msg: unknown): void;
   /** Already encoded bytes (M2-3 encodes one state once for all phones). */
   sendRaw(connId: number, bytes: Uint8Array): void;
+  /** Bytes queued on a link and not sent yet. */
+  buffered(connId: number): number;
   close(): Promise<void>;
 }
 
@@ -70,6 +72,7 @@ export async function startM2Server(opts: M2Options): Promise<M2Server> {
     newGameCode: () => gameCode.renew(),
     send: ws.send,
     sendRaw: ws.sendRaw,
+    buffered: ws.buffered,
     close: () =>
       new Promise((ok) => {
         ws.close();

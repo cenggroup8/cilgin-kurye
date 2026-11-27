@@ -27,6 +27,8 @@ export interface BroadcastLinks {
   /** Link of the admin page, if one is open. */
   admin(): number | null;
   sendBytes(connId: number, bytes: Uint8Array): void;
+  /** Bytes still waiting on a link. Optional: without it no phone is ever skipped. */
+  backlog?(connId: number): number;
 }
 
 /** The board link of M2-4 (`BoardLink.setState`). It keeps only the newest state. */
@@ -41,6 +43,12 @@ export interface BroadcasterOptions {
   adminView?: (game: unknown) => unknown;
   board?: BoardSink;
   now?: () => number;
+  /**
+   * A phone whose link still holds more than this many unsent bytes skips the state of this
+   * tick (review of #84): on a bad Wi-Fi its queue would otherwise grow and it would see old
+   * states late. The phone sees the gap in `seq`. Default 64 KiB, about 20 states.
+   */
+  maxBacklogBytes?: number;
 }
 
 export interface BroadcastStats {
@@ -58,6 +66,8 @@ export interface BroadcastStats {
   bytesPerSecond: number;
   /** Time to encode the last phone state, in milliseconds. */
   encodeMs: number;
+  /** States not sent to a phone because its link was too far behind. */
+  skippedSlow: number;
 }
 
 export class StateBroadcaster {
@@ -70,8 +80,9 @@ export class StateBroadcaster {
   private windowBytes = 0;
   private readonly s: BroadcastStats = {
     ticks: 0, stateBytes: 0, adminStateBytes: 0, phoneSends: 0, adminSends: 0,
-    bytesOut: 0, bytesPerSecond: 0, encodeMs: 0,
+    bytesOut: 0, bytesPerSecond: 0, encodeMs: 0, skippedSlow: 0,
   };
+  private readonly maxBacklog: number;
 
   constructor(private readonly links: BroadcastLinks, private readonly opts: BroadcasterOptions = {}) {
     this.tickHz = opts.tickHz ?? 30;
@@ -79,6 +90,7 @@ export class StateBroadcaster {
     this.adminEvery = Math.max(1, Math.round(this.tickHz / adminHz));
     this.adminView = opts.adminView ?? smallAdminState;
     this.now = opts.now ?? Date.now;
+    this.maxBacklog = opts.maxBacklogBytes ?? 64 * 1024;
     this.windowStart = this.now();
   }
 
@@ -90,6 +102,10 @@ export class StateBroadcaster {
     this.s.encodeMs = performance.now() - t0;
     this.s.stateBytes = bytes.byteLength;
     for (const connId of this.links.players()) {
+      if ((this.links.backlog?.(connId) ?? 0) > this.maxBacklog) {
+        this.s.skippedSlow++;
+        continue;
+      }
       this.links.sendBytes(connId, bytes);
       this.s.phoneSends++;
       this.count(bytes.byteLength);

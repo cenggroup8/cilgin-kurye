@@ -31,6 +31,7 @@ export interface HubServer {
   registry: SessionRegistry;
   send(connId: number, msg: unknown): void;
   sendRaw(connId: number, bytes: Uint8Array): void;
+  buffered?(connId: number): number;
 }
 
 export interface HubOptions {
@@ -49,7 +50,8 @@ export interface HubOptions {
 export interface BroadcastHub {
   publish(frozen: FrozenTick): void;
   metrics(samples: MetricSample[]): void;
-  board(data: Partial<BoardData>): void;
+  /** `quake: null` ends an earthquake at once; otherwise it ends by itself (AdminFeed). */
+  board(data: Partial<Omit<BoardData, "quake">> & { quake?: BoardData["quake"] | null }): void;
   params(list: ParamRow[]): void;
   paramChanged(name: string, value: number): void;
   event(message: string): void;
@@ -77,6 +79,7 @@ export function attachBroadcast(opts: HubOptions): BroadcastHub {
       players: () => server.registry.playerConns().map((c) => c.connId),
       admin: () => server.registry.adminConn,
       sendBytes: (connId, bytes) => server.sendRaw(connId, bytes),
+      backlog: server.buffered ? (connId) => server.buffered!(connId) : undefined,
     },
     { adminView, board: opts.board, now },
   );

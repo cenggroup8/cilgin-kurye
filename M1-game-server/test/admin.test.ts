@@ -454,3 +454,14 @@ describe("timing", () => {
     expect(run()).toBe(run());
   });
 });
+
+describe("obstacle parameters (#80)", () => {
+  const byName = new Map(PARAMS.map((p) => [p.name, p]));
+  it("no vague effect for obstacles that have their own parameter", () => {
+    for (const t of ["road_work", "accident", "puddle"]) expect(byName.has(`obstacles.${t}.effect`)).toBe(false);
+  });
+  it("the accident has a speed limit for M3, heavy traffic keeps its strength for M3-4", () => {
+    expect(byName.get("obstacles.accident.speed_mps")).toMatchObject({ min: 2, max: 15, start: 5, owner: "M3" });
+    expect(byName.get("obstacles.heavy_traffic.effect")).toMatchObject({ min: 0, max: 1, owner: "M3" });
+  });
+});

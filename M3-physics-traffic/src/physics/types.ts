@@ -72,7 +72,7 @@ export interface QuakeArea {
   strength: number;
 }
 
-export type HitKind = 'building' | 'wall' | 'barrier' | 'npc' | 'bike';
+export type HitKind = 'building' | 'wall' | 'barrier' | 'obstacle' | 'npc' | 'bike';
 
 export interface CollisionEvent {
   kind: 'collision';

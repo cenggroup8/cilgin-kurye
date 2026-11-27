@@ -1,24 +1,26 @@
 /**
- * The wallsAndObstacles stage of the collision solver (M3-2, step 2). Here it
- * handles buildings and the outer wall. Obstacles (barriers, accidents, puddles)
- * come in a later step.
+ * The wallsAndObstacles stage of the collision solver (M3-2). It handles buildings,
+ * the outer wall and the solid obstacles (road work barrier, accident; see
+ * obstacles.ts). The surface effects (puddle, slow zone of an accident) are a later step.
  *
  * For every motorcycle that has not fallen, in the order of the player number:
  * find all contacts, handle the fastest hit first, push the motorcycle out and
  * take the speed into the shape away. A hit faster than `world.params.fallSpeed`
  * makes it fall.
  */
+import type { Obstacle } from '../../common/types.js';
 import type { SubstepContext } from '../step.js';
 import type { BikeState, CollisionEvent, HitKind } from '../types.js';
 import type { PhysicsWorld } from '../world.js';
 import { BIKE_RADIUS_M, MAX_CONTACTS_PER_BIKE, MIN_IMPACT_MPS, OUTER_WALL_MARGIN_M } from './constants.js';
 import { judgeImpact } from './fall-judge.js';
+import { obstacleShapes } from './obstacles.js';
 import { impactSpeedOf, resolveContact, type BikeMotion } from './resolve.js';
-import { circleVsPolygon, type Circle, type Contact } from './shapes.js';
+import { circleVsOBB, circleVsPolygon, type Circle, type Contact } from './shapes.js';
 
 export interface Candidate {
   with: HitKind;
-  /** Index of the building, or null for the outer wall (the event has `other: null`, see types.ts). */
+  /** Index of the building or id of the obstacle, or null for the outer wall (the event has `other: null`, see types.ts). */
   index: number | null;
   /** Finds the contact for a circle at its current place. */
   test: (c: Circle) => Contact | null;
@@ -49,13 +51,19 @@ function outerWallSides(world: PhysicsWorld): Candidate[] {
   ];
 }
 
-export function candidatesOf(world: PhysicsWorld): Candidate[] {
+/** Buildings, the outer wall and the solid obstacles (road work, accident) of this tick. */
+export function candidatesOf(world: PhysicsWorld, obstacles: readonly Obstacle[] = []): Candidate[] {
   const list: Candidate[] = world.buildings.map((polygon, index) => ({
     with: 'building' as const,
     index,
     test: (c: Circle) => circleVsPolygon(c, polygon),
   }));
-  return list.concat(outerWallSides(world));
+  const solid: Candidate[] = obstacleShapes(obstacles, world.graph).map((shape) => ({
+    with: shape.hit,
+    index: shape.id,
+    test: (c: Circle) => circleVsOBB(c, shape.box),
+  }));
+  return list.concat(outerWallSides(world), solid);
 }
 
 /** One collision event per player, kind of hit and other thing (`other`) in a tick: keep the largest impact. */
@@ -126,9 +134,9 @@ export function solveBike(ctx: SubstepContext, bike: BikeState, candidates: Cand
   return resolved;
 }
 
-/** Buildings and the outer wall. */
+/** Buildings, the outer wall and the solid obstacles. */
 export function wallsAndObstacles(ctx: SubstepContext): void {
-  const candidates = candidatesOf(ctx.world);
+  const candidates = candidatesOf(ctx.world, ctx.input.obstacles);
   if (candidates.length === 0) return;
   const bikes = [...ctx.world.bikes.values()].sort((a, b) => a.id - b.id);
   for (const bike of bikes) {

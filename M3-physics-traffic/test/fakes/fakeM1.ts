@@ -77,6 +77,7 @@ export class FakeM1 {
     // Buildings and the outer wall come from the city plan (x east, y north; the plan's z runs south).
     this.physics.buildings = city.buildings.map((b) => b.polygon);
     this.physics.bounds = { minX: 0, maxX: city.size, minY: -city.size, maxY: 0 };
+    this.physics.graph = city.graph; // where the obstacles stand
     for (const p of scenario.players) {
       const store = city.stores[Math.floor(p / 2)];
       addBike(this.physics, p, { x: store.x, y: store.y, heading: store.heading });

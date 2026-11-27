@@ -2,6 +2,7 @@ import { DEFAULT_BIKE_TUNING, type BikeTuning } from './bike/tuning.js';
 import { DEFAULT_PHYSICS_PARAMS } from './params.js';
 import type { BikeState, PhysicsParams, Surface } from './types.js';
 import type { Polygon } from './collide/shapes.js';
+import type { RoadGraph } from '../traffic/graph/types.js';
 
 /** Gives the ground at a point. The colliders (M3-2) replace the default. */
 export type SurfaceProvider = (x: number, y: number, params: PhysicsParams) => Surface;
@@ -34,6 +35,11 @@ export interface PhysicsWorld {
    * is not in the output of the physics step and not in what the phone gets from the server.
    */
   stoppedS: Map<number, number>;
+  /**
+   * The road graph of the city. The colliders need it to find where an obstacle (road work,
+   * accident) stands. Null: obstacles are not solid (nothing is thrown).
+   */
+  graph: RoadGraph | null;
 }
 
 export function createWorld(
@@ -48,6 +54,7 @@ export function createWorld(
     buildings: [],
     bounds: null,
     stoppedS: new Map(),
+    graph: null,
   };
 }
 

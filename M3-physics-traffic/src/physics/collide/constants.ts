@@ -51,3 +51,21 @@ export const CAR_HIT_MIN_MPS = 1;
 
 /** TAHMİN. Highest speed of an NPC car (m/s): the admin maximum of physics.npc_speed_mps. Only for the tunnel guard tests. */
 export const NPC_MAX_SPEED_MPS = 20;
+
+/**
+ * TAHMİN. Width (across the road, metres) of the barrier of road work and of an accident
+ * that has no lane. 20 m is from building to building: the road is 14 m (2 x 2 lanes of 3.5 m)
+ * and each side has a sidewalk of 3 m (contracts/README.md, Buildings). With 14 m only, a
+ * motorcycle could ride past on the sidewalk. The thickness along the road is BARRIER_THICKNESS_M.
+ */
+export const ROAD_BLOCK_WIDTH_M = 20;
+
+/** TAHMİN. Length (along the lane, metres) of an accident in one lane: the length of an NPC car. */
+export const ACCIDENT_LANE_BLOCK_LENGTH_M = 4.5;
+
+/**
+ * TAHMİN. Width (across the lane, metres) of an accident in one lane: the width of a whole lane
+ * (lane_width_m 3.5), so the lane is really blocked. A car-wide block (1.8 m) would leave a gap
+ * that a motorcycle fits through.
+ */
+export const ACCIDENT_LANE_BLOCK_WIDTH_M = 3.5;

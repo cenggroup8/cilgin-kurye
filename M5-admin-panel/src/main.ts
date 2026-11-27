@@ -2,6 +2,7 @@ import './admin.css';
 import { AdminConnection } from './comm/connection.ts';
 import { initMapManager } from './map/map-manager.ts';
 import { bindParams } from './params/paramManager.ts';
+import { serverError } from './params/paramModel.ts';
 import { bindTopbar, commandLabel } from './topbar/topbar.ts';
 import { confirmAction } from './ui/confirm.ts';
 import { bindDashboard } from './ui/dashboard.ts';
@@ -45,7 +46,7 @@ document.querySelector<HTMLButtonElement>('#param-reset')!.addEventListener('cli
   });
   if (!ok) return;
   const result = await connection.command({ name: 'param_reset' });
-  store.log({ time: Date.now(), message: result.ok ? 'Parametreler başlangıç değerlerine döndü' : `Parametreler sıfırlanamadı: ${result.error}` });
+  store.log({ time: Date.now(), message: result.ok ? 'Parametreler başlangıç değerlerine döndü' : `Parametreler sıfırlanamadı: ${serverError(result.error)}` });
 });
 
 // One map: it moves between the dashboard and the map page, so it keeps its tools and state.

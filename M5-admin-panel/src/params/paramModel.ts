@@ -139,6 +139,11 @@ const SERVER_ERRORS: Readonly<Record<string, string>> = {
   bad_args: 'Sunucu komutu kabul etmedi',
   owner_not_connected: 'Bu parametrenin modülü bağlı değil',
   wrong_phase: 'Bu aşamada değiştirilemez',
+  unknown_command: 'Sunucu bu komutu tanımıyor',
+  // From the M2 check before M1 (contracts/messages.md, "Error reasons").
+  bad_field: 'Komutta eksik ya da hatalı bir alan var',
+  too_big: 'Komut sunucunun sınırından büyük',
+  too_many: 'Çok sık komut gönderildi, biraz bekleyin',
   timeout: 'Sunucu cevap vermedi',
   not_connected: 'Sunucuya bağlı değil',
   disconnected: 'Bağlantı kesildi',

@@ -111,3 +111,83 @@
 .score-row[data-mine="true"] {
   outline: 3px solid #111;
 }
+
+/* HUD on top of the game screen. Only the buttons of the controls take touches. */
+[data-hidden="true"] {
+  display: none;
+}
+
+.hud {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  pointer-events: none;
+  font-family: system-ui, sans-serif;
+  color: #fff;
+}
+
+.hud-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.hud-time {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.hud-scores {
+  display: flex;
+  gap: 6px;
+}
+
+.hud-score {
+  padding: 2px 8px;
+  border-left: 6px solid var(--team-color, #666);
+  background: rgba(0, 0, 0, 0.35);
+  font-size: 0.9rem;
+}
+
+.hud-score[data-mine="true"] {
+  outline: 2px solid #fff;
+}
+
+.hud-penalty {
+  position: absolute;
+  top: 35%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  text-shadow: 0 2px 6px #000;
+}
+
+.hud-toast {
+  position: absolute;
+  top: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 14px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.6);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.hud-connection {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 6px;
+  background: #b00020;
+  text-align: center;
+}

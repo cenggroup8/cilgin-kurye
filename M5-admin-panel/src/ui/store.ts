@@ -186,3 +186,40 @@ export function average(values: readonly (number | undefined)[]): number | undef
   const real = values.filter((v): v is number => v !== undefined && Number.isFinite(v));
   return real.length === 0 ? undefined : real.reduce((a, b) => a + b, 0) / real.length;
 }
+
+/**
+ * The mean of several series at each moment they were all measured, for example the mean
+ * ping of all phones. The server sends them together twice per second, so equal times match.
+ */
+export function averageSeries(store: AdminStore, pattern: RegExp): MetricSample[] {
+  const byTime = new Map<number, number[]>();
+  for (const [name, series] of store.metrics) {
+    if (!pattern.test(name)) continue;
+    for (const s of series.samples) {
+      const list = byTime.get(s.time) ?? [];
+      list.push(s.value);
+      byTime.set(s.time, list);
+    }
+  }
+  return [...byTime.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([time, values]) => ({ name: 'average', time, value: values.reduce((a, b) => a + b, 0) / values.length }));
+}
+
+export interface Couriers {
+  total: number;
+  riding: number;
+  fallen: number;
+  points: number;
+  obstacles: Map<string, number>;
+}
+
+/** Couriers, delivery points and obstacles in the newest state; undefined before the first state. */
+export function couriers(store: AdminStore): Couriers | undefined {
+  const state = store.state;
+  if (!state) return undefined;
+  const fallen = state.players.filter((p) => p.fallen).length;
+  const obstacles = new Map<string, number>();
+  for (const o of state.obstacles) obstacles.set(o.type, (obstacles.get(o.type) ?? 0) + 1);
+  return { total: state.players.length, riding: state.players.length - fallen, fallen, points: state.deliveryPoints.length, obstacles };
+}

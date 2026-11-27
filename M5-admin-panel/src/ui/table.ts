@@ -10,6 +10,8 @@ export interface Column<Row> {
   numeric?: boolean;
   /** Extra content after the text, for example a sparkline. */
   extra?: (row: Row) => Node | undefined;
+  /** Fixed width of the column (CSS length), so a search never moves the columns. */
+  width?: string;
 }
 
 export interface TableView {
@@ -64,6 +66,18 @@ export function createTable<Row>(options: {
   const caption = table.createCaption();
   caption.textContent = options.caption;
   caption.className = 'visually-hidden';
+  // Header and cells share these widths; with `table-layout: fixed` they never change.
+  const colgroup = document.createElement('colgroup');
+  for (const column of columns) {
+    const col = document.createElement('col');
+    if (column.width) col.style.width = column.width;
+    colgroup.append(col);
+  }
+  table.append(colgroup);
+  // The table scrolls inside its own box on narrow screens, never the whole page.
+  const scroll = document.createElement('div');
+  scroll.className = 'table-scroll';
+  scroll.append(table);
   const headRow = table.createTHead().insertRow();
   const sortButtons = new Map<string, HTMLButtonElement>();
   for (const column of columns) {
@@ -108,11 +122,11 @@ export function createTable<Row>(options: {
     }));
     empty.hidden = shown.length > 0;
     empty.textContent = rows.length === 0 ? options.empty : 'Aramaya uyan satır yok. Aramayı değiştirin ya da temizleyin.';
-    table.hidden = shown.length === 0;
+    scroll.hidden = shown.length === 0;
   }
 
   return {
-    element: [table, empty] as const,
+    element: [scroll, empty] as const,
     view,
     setRows(next: readonly Row[]) {
       rows = next;

@@ -7,6 +7,7 @@ import { confirmAction } from './ui/confirm.ts';
 import { bindDashboard } from './ui/dashboard.ts';
 import { formatTime } from './ui/format.ts';
 import { bindEventsPage, bindMetricsPage, bindNetworkPage, bindQuakePage } from './ui/pages.ts';
+import { bindQuickControls } from './ui/quickControls.ts';
 import { startRouter, type Page } from './ui/router.ts';
 import { AdminStore } from './ui/store.ts';
 
@@ -55,6 +56,15 @@ function placeMap(name: Page) {
   if (map.parentElement !== slot) slot.append(map);
 }
 
+bindQuickControls(connection, document.querySelector<HTMLElement>('#quick-controls')!);
+
+// The server pill shows the real state of the admin link, never "online" before the snapshot.
+const serverPill = document.querySelector<HTMLElement>('#server-pill')!;
+const SERVER_TEXT = {
+  connecting: 'Sunucuya bağlanıyor', reconnecting: 'Bağlantı koptu, yeniden deneniyor',
+  connected: 'Sunucu çevrimiçi', replaced: 'Başka yönetici bağlandı',
+} as const;
+
 const lastMark = document.querySelector<HTMLElement>('#last-mark')!;
 const views: Partial<Record<Page, { render(): void }>> = {
   panel: bindDashboard(store, page('panel')),
@@ -70,6 +80,8 @@ const router = startRouter((name) => {
 });
 
 store.subscribe(() => {
+  serverPill.dataset.state = store.status;
+  serverPill.textContent = SERVER_TEXT[store.status];
   lastMark.textContent = store.lastMark
     ? `Son değişiklik ${formatTime(store.lastMark.time)}: ${commandLabel(store.lastMark.name)}` : '';
   // Only the page on screen is drawn.

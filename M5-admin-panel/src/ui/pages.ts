@@ -1,4 +1,5 @@
 import { formatNumber, formatTime, GROUP_LABELS, metricGroup, metricLabel, metricUnit } from './format.ts';
+import { eventItem } from './eventItem.ts';
 import { sparkline } from './sparkline.ts';
 import { playerNet, type AdminStore, type MetricSeries, type PlayerNet } from './store.ts';
 import { createTable } from './table.ts';
@@ -12,12 +13,12 @@ export function bindNetworkPage(store: AdminStore, root: HTMLElement) {
     empty: 'Henüz ölçüm yok. Telefonlar bağlanınca sunucu saniyede iki kez ping ölçer.',
     initialSort: 'player',
     columns: [
-      { key: 'player', label: 'Oyuncu', text: (r) => `Oyuncu ${r.player + 1}`, sort: (r) => r.player },
-      { key: 'ping', label: 'Ping', numeric: true, text: (r) => formatNumber(r.pingMs, 'ms'), sort: (r) => r.pingMs,
+      { key: 'player', label: 'Oyuncu', width: '22%', text: (r) => `Oyuncu ${r.player + 1}`, sort: (r) => r.player },
+      { key: 'ping', label: 'Ping', numeric: true, width: '28%', text: (r) => formatNumber(r.pingMs, 'ms'), sort: (r) => r.pingMs,
         extra: (r) => { const s = store.metrics.get(`net.${r.player}.ping_ms`); return s ? sparkline(s.samples, `Oyuncu ${r.player + 1} ping eğilimi`) : undefined; } },
-      { key: 'jitter', label: 'Jitter', numeric: true, text: (r) => formatNumber(r.jitterMs, 'ms'), sort: (r) => r.jitterMs },
-      { key: 'loss', label: 'Kayıp', numeric: true, text: (r) => formatNumber(r.lossPct, '%'), sort: (r) => r.lossPct },
-      { key: 'fps', label: 'Kare hızı', numeric: true, text: (r) => formatNumber(r.fps, 'fps'), sort: (r) => r.fps },
+      { key: 'jitter', label: 'Jitter', numeric: true, width: '16%', text: (r) => formatNumber(r.jitterMs, 'ms'), sort: (r) => r.jitterMs },
+      { key: 'loss', label: 'Kayıp', numeric: true, width: '16%', text: (r) => formatNumber(r.lossPct, '%'), sort: (r) => r.lossPct },
+      { key: 'fps', label: 'Kare hızı', numeric: true, width: '18%', text: (r) => formatNumber(r.fps, 'fps'), sort: (r) => r.fps },
     ],
   });
   root.querySelector('#net-table')!.append(...table.element);
@@ -42,11 +43,11 @@ export function bindMetricsPage(store: AdminStore, root: HTMLElement) {
     empty: 'Henüz metrik gelmedi. Sunucu metrikleri saniyede iki kez gönderir.',
     initialSort: 'name',
     columns: [
-      { key: 'name', label: 'Metrik', text: (r) => metricLabel(r.name) },
-      { key: 'id', label: 'Ad', text: (r) => r.name },
-      { key: 'value', label: 'Son değer', numeric: true, text: (r) => formatNumber(r.latest.value, metricUnit(r.name)), sort: (r) => r.latest.value,
+      { key: 'name', label: 'Metrik', width: '30%', text: (r) => metricLabel(r.name) },
+      { key: 'id', label: 'Ad', width: '24%', text: (r) => r.name },
+      { key: 'value', label: 'Son değer', numeric: true, width: '30%', text: (r) => formatNumber(r.latest.value, metricUnit(r.name)), sort: (r) => r.latest.value,
         extra: (r) => sparkline(r.samples, `${metricLabel(r.name)} eğilimi`) },
-      { key: 'time', label: 'Zaman', numeric: true, text: (r) => formatTime(r.latest.time), sort: (r) => r.latest.time },
+      { key: 'time', label: 'Zaman', numeric: true, width: '16%', text: (r) => formatTime(r.latest.time), sort: (r) => r.latest.time },
     ],
   });
   root.querySelector('#metric-table')!.append(...table.element);
@@ -105,14 +106,7 @@ export function bindEventsPage(store: AdminStore, root: HTMLElement) {
       list.replaceChildren(li);
       return;
     }
-    list.replaceChildren(...lines.map(({ time, message }) => {
-      const li = document.createElement('li');
-      const t = document.createElement('time');
-      t.dateTime = new Date(time).toISOString();
-      t.textContent = formatTime(time);
-      li.append(t, document.createTextNode(message));
-      return li;
-    }));
+    list.replaceChildren(...lines.map(eventItem));
   }
   return { render };
 }

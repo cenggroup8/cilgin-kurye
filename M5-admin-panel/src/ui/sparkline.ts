@@ -36,3 +36,46 @@ export function sparkPath(samples: readonly MetricSample[], width = W, height = 
   const y = (v: number) => (max === min ? height / 2 : 2 + (1 - (v - min) / span) * (height - 4));
   return samples.map((s, i) => `${i === 0 ? 'M' : 'L'}${x(s.time).toFixed(1)} ${y(s.value).toFixed(1)}`).join(' ');
 }
+
+let gradientId = 0;
+
+/**
+ * The same trend as an area: the line over a soft fill that fades to the bottom. Only drawn
+ * when there are at least two real samples; otherwise the caller shows the plain number.
+ */
+export function areaSparkline(samples: readonly MetricSample[], label: string, width = 160, height = 40): SVGSVGElement | undefined {
+  if (samples.length < 2) return undefined;
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  svg.setAttribute('preserveAspectRatio', 'none');
+  svg.setAttribute('class', 'area-spark');
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', label);
+  const id = `spark-fill-${++gradientId}`;
+  const defs = document.createElementNS(ns, 'defs');
+  const grad = document.createElementNS(ns, 'linearGradient');
+  grad.id = id;
+  grad.setAttribute('x1', '0');
+  grad.setAttribute('x2', '0');
+  grad.setAttribute('y1', '0');
+  grad.setAttribute('y2', '1');
+  for (const [offset, opacity] of [['0', '0.35'], ['1', '0']]) {
+    const stop = document.createElementNS(ns, 'stop');
+    stop.setAttribute('offset', offset!);
+    stop.setAttribute('stop-color', 'currentColor');
+    stop.setAttribute('stop-opacity', opacity!);
+    grad.append(stop);
+  }
+  defs.append(grad);
+  const line = sparkPath(samples, width, height);
+  const area = document.createElementNS(ns, 'path');
+  area.setAttribute('d', `${line} L${width} ${height} L0 ${height} Z`);
+  area.setAttribute('fill', `url(#${id})`);
+  area.setAttribute('class', 'fill');
+  const stroke = document.createElementNS(ns, 'path');
+  stroke.setAttribute('d', line);
+  stroke.setAttribute('class', 'line');
+  svg.append(defs, area, stroke);
+  return svg;
+}

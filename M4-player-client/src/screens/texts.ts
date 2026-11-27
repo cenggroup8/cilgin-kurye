@@ -34,4 +34,10 @@ export const TEXT = {
     winner: "Winner",
     yours: "Your team",
   },
+  hud: {
+    timeLabel: "Time",
+    penalty: (seconds: number) => `You fell. Wait ${seconds} s`,
+    scoreToast: (points: number) => `+${points}`,
+    connectionLost: "Connection lost. Trying again…",
+  },
 } as const;

@@ -40,6 +40,11 @@ let m1: FakeM1;
 let cars: NpcCarPose[] = [];
 const trail: { x: number; y: number; slide: boolean }[] = [];
 
+// TAHMİN: the real time that a fallen motorcycle stays down will come from the penalty rule of M1.
+const FALL_RECOVERY_S = 3;
+/** Tick in which the own motorcycle was first seen fallen, or null while it stands. */
+let fallenAtTick: number | null = null;
+
 function reset(): void {
   const keep = m1?.physics.params;
   m1 = new FakeM1({
@@ -57,6 +62,7 @@ function reset(): void {
   m1.physics.surfaceAt = testGround;
   cars = [];
   trail.length = 0;
+  fallenAtTick = null;
 }
 reset();
 
@@ -97,6 +103,15 @@ window.addEventListener('keyup', (e) => held.delete(e.key.toLowerCase()));
 window.addEventListener('blur', () => held.clear());
 
 function stepOnce(): void {
+  // A fallen motorcycle stands up after FALL_RECOVERY_S: give M1's standUp for it through the scenario events.
+  if (!bike().fallen) {
+    fallenAtTick = null;
+  } else if (fallenAtTick === null) {
+    fallenAtTick = m1.tick;
+  } else if (m1.tick - fallenAtTick >= Math.round(FALL_RECOVERY_S / m1.dt)) {
+    (m1.scenario.events ??= []).push({ at: m1.tick, standUp: [PLAYER] });
+    fallenAtTick = null;
+  }
   cars = m1.step().cars;
   const b = bike();
   trail.push({ x: b.x, y: b.y, slide: b.sliding });

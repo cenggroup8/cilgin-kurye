@@ -71,6 +71,10 @@ answers again but does not use it twice.
 Positions on the board are `u` and `v` from 0 to 1 (`contracts/README.md`,
 Coordinates): `u` grows to the east, `v` grows to the south.
 
+Proposal: M1 gives the board state to M2 in world coordinates (metres and degrees, as in
+`contracts/README.md`). The board link of M2 (M2-4) turns metres into `u` and `v` when it
+encodes the message, so the conversion is in one place (`u = x / size_m`, `v = z / size_m`).
+
 ### `S` Board state
 
 | Field | Meaning | Source |

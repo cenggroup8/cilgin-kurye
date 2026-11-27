@@ -23,6 +23,11 @@ They come with M2-2 (#35) and M1-1 (#29).
 - Heading in degrees, clockwise from north.
 - Board coordinates: `u = x / size_m`, `v = z / size_m` (0 to 1).
 
+Everything that goes from one module to another uses these coordinates, also between
+M1 and M3: a pose is `x`, `z` in metres and `heading` in degrees, clockwise from north
+(0 north, 90 east, 180 south, 270 west). A module may use other axes or radians inside.
+It converts at its own border, in one file (for example `M3-physics-traffic/src/common/coords.ts`).
+
 ## ID rules
 
 The city has a 6 × 6 grid of intersections and 60 road segments.

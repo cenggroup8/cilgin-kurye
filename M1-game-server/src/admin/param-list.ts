@@ -92,7 +92,7 @@ function board(): ParamDef[] {
     ...queues("board", "board", "Board"),
     { name: "board.state_hz", group: "board", min: 10, max: 30, start: 30, integer: true, owner: "M2", label: "Board states per second" },
     { name: "board.brightness", group: "board", min: 0.1, max: 1, start: 0.5, owner: "M6", label: "LED brightness" },
-    { name: "board.max_ma", group: "board", min: 500, max: 4000, start: 2000, integer: true, owner: "M6", label: "LED power limit (mA)" },
+    { name: "board.max_ma", group: "board", min: 1000, max: 10000, start: 8000, integer: true, owner: "M6", label: "LED power limit (mA)" },
   ];
 }
 

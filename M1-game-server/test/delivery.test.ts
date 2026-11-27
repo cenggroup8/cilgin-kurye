@@ -143,6 +143,14 @@ describe("points and delivery", () => {
     expect(d.player(0, 3).hasPackage).toBe(true);
   });
 
+  it("does not deliver while reversing, but does once the reverse speed is small", () => {
+    const { d, point } = picked();
+    const travel = fakeTravel(POSITIONS);
+    expect(d.update(1, [at(0, point.x, point.z, -2.5)], travel)).toEqual([]);
+    expect(d.player(0, 1).hasPackage).toBe(true);
+    expect(d.update(2, [at(0, point.x, point.z, -0.2)], travel)[0]?.type).toBe("delivered");
+  });
+
   it("uses the admin's delivery area size", () => {
     const { d, params, point } = picked();
     params.set("game.delivery_radius_m", 6);

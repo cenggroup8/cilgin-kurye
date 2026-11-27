@@ -32,7 +32,7 @@ export interface PlayerView {
   team: number;
   x: number;
   z: number;
-  /** m/s */
+  /** Forward speed, m/s. Negative while reversing (M3 has a small reverse). */
   speed: number;
   fallen: boolean;
 }

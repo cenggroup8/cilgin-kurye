@@ -127,7 +127,7 @@ export class Deliveries {
 
       const point = this.positions.get(r.candidate)!;
       const radius = this.params.get("game.delivery_radius_m");
-      if (Math.hypot(p.x - point.x, p.z - point.z) <= radius && p.speed < STOP_SPEED_MPS) {
+      if (Math.hypot(p.x - point.x, p.z - point.z) <= radius && Math.abs(p.speed) < STOP_SPEED_MPS) {
         this.teamScores[r.team] += r.points;
         events.push({
           type: "delivered",

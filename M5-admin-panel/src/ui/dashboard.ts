@@ -2,7 +2,7 @@ import { eventItem } from './eventItem.ts';
 import { formatClock, formatNumber, OBSTACLE_LABELS, PHASE_LABELS, TEAM_NAMES, TEAM_TONES } from './format.ts';
 import { icon, type IconName } from './icons.ts';
 import { areaSparkline } from './sparkline.ts';
-import { average, averageSeries, couriers, playerNet, teamRows, type AdminStore } from './store.ts';
+import { average, averageSeries, couriers, playerNet, teamRows, whenChanged, type AdminStore } from './store.ts';
 
 // The dashboard of the command center: the match LED strip, telemetry cards, the couriers,
 // the ping of every phone, the earthquake card and the newest events. Every number comes
@@ -169,7 +169,8 @@ export function bindDashboard(store: AdminStore, root: HTMLElement) {
   function renderEq() {
     const net = playerNet(store);
     if (net.length === 0) {
-      eq.replaceChildren(el('p', 'empty', 'Telefonlar bağlanınca sunucu her birinin pingini saniyede iki kez ölçer.'));
+      eq.replaceChildren(el('p', 'empty', store.synced
+        ? 'Telefonlar bağlanınca sunucu her birinin pingini saniyede iki kez ölçer.' : 'Sunucudan ilk veriler bekleniyor…'));
       return;
     }
     const lit = eqSegments(net.map((n) => n.pingMs));
@@ -188,43 +189,60 @@ export function bindDashboard(store: AdminStore, root: HTMLElement) {
     eq.replaceChildren(bars, el('p', 'eq-scale', 'ms, oyuncu başına. Yeşil 60 ms altı, sarı 150 ms altı, kırmızı üstü.'));
   }
 
-  // ── Earthquake card ──
+  // ── Earthquake card: built once, so a keyboard focus on its link is never lost ──
+  const quakeState = el('p', 'quake-state');
+  const quakeLast = el('p', 'quake-detail');
+  const quakeBoard = el('p', 'quake-detail');
+  const quakeGo = el('a', 'quake-go', 'Deprem paneline git');
+  quakeGo.href = '#/deprem';
+  quake.querySelector('.quake-body')!.replaceChildren(quakeState, quakeLast, quakeBoard, quakeGo);
+  const setText = (e: HTMLElement, text: string) => { if (e.textContent !== text) e.textContent = text; };
+
   function renderQuake() {
     const phaseNow = store.state?.phase;
     const canStart = phaseNow === 'playing' || phaseNow === 'paused';
     const b = store.board;
     const last = b?.quake;
-    quake.dataset.active = last ? 'true' : 'false';
-    const lines: Node[] = [
-      el('p', 'quake-state', canStart ? 'Şu an başlatılabilir' : 'Oyun sürerken ya da duraklatılmışken başlatılabilir'),
-      el('p', 'quake-detail', last
-        ? `Son deprem: büyüklük ${formatNumber(last.mag)}, ${last.zone < 0 ? 'tüm tahta' : `bölge ${last.zone}`}`
-        : 'Bu oturumda deprem olmadı.'),
-      el('p', 'quake-detail', !b ? 'Tahta verisi bekleniyor.' : b.connected ? 'Tahta bağlı: elle vuruş da deprem başlatır.' : 'Tahta bağlı değil.'),
-    ];
-    const go = el('a', 'quake-go', 'Deprem paneline git');
-    go.href = '#/deprem';
-    quake.querySelector('.quake-body')!.replaceChildren(...lines, go);
+    setText(quakeState, !store.state ? 'Durum bekleniyor'
+      : canStart ? 'Şu an başlatılabilir' : 'Oyun sürerken ya da duraklatılmışken başlatılabilir');
+    setText(quakeLast, last
+      ? `Son deprem: büyüklük ${formatNumber(last.mag)}, ${last.zone < 0 ? 'tüm tahta' : `bölge ${last.zone}`}`
+      : 'Bu oturumda deprem olmadı.');
+    setText(quakeBoard, !b ? 'Tahta verisi bekleniyor.' : b.connected ? 'Tahta bağlı: elle vuruş da deprem başlatır.' : 'Tahta bağlı değil.');
   }
 
   function renderRecent() {
     eventCount.textContent = store.events.length > 0 ? `${store.events.length} olay` : '';
     const lines = store.events.slice(0, 6);
     if (lines.length === 0) {
-      recent.replaceChildren(el('li', 'empty', 'Henüz olay yok. Maç başlayınca komutlar ve tahta olayları burada görünür.'));
+      recent.replaceChildren(el('li', 'empty', store.synced
+        ? 'Henüz olay yok. Maç başlayınca komutlar ve tahta olayları burada görünür.' : 'Sunucudan ilk veriler bekleniyor…'));
       return;
     }
     recent.replaceChildren(...lines.map(eventItem));
   }
 
+  // Each part redraws only when its own data changed: a state comes 10 times per second,
+  // metrics twice, events now and then. Counts from the state are part of the key, so the
+  // cards follow a fall or a new obstacle at once without being rebuilt for every move.
+  const v = store.versions;
+  const counts = () => {
+    const c = couriers(store);
+    return c ? `${c.total}/${c.riding}/${c.points}/${[...c.obstacles].join(',')}/${store.state!.npcCars.length}` : '-';
+  };
+  const drawKpis = whenChanged(() => `${v.metrics}|${v.board}|${v.status}|${counts()}`, renderKpis);
+  const drawEntity = whenChanged(counts, renderEntity);
+  const drawEq = whenChanged(() => `${v.metrics}|${store.synced}`, renderEq);
+  const drawRecent = whenChanged(() => `${v.events}|${store.synced}`, renderRecent);
+
   return {
     render() {
-      renderStrip();
-      renderKpis();
-      renderEntity();
-      renderEq();
+      renderStrip(); // only text and lit segments change, no elements are rebuilt
+      drawKpis();
+      drawEntity();
+      drawEq();
       renderQuake();
-      renderRecent();
+      drawRecent();
     },
   };
 }

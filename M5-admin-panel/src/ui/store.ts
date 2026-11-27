@@ -22,6 +22,11 @@ export class AdminStore {
   lastMark?: ChangeMark;
   /** A full snapshot has come since the page opened. */
   synced = false;
+  /**
+   * Grows by one each time that part of the data changes, so a view can skip a redraw when
+   * its own data is the same (a state comes 10 times per second, metrics only twice).
+   */
+  readonly versions = { status: 0, state: 0, metrics: 0, board: 0, events: 0, mark: 0 };
   readonly metrics = new Map<string, MetricSeries>();
   readonly events: LogEntry[] = [];
   private readonly listeners = new Set<() => void>();
@@ -38,6 +43,7 @@ export class AdminStore {
     switch (update.t) {
       case 'connection':
         this.status = update.status;
+        this.versions.status++;
         break;
       case 'snapshot':
         this.state = update.state;
@@ -48,22 +54,32 @@ export class AdminStore {
         this.events.length = 0;
         this.addEvents(update.events);
         this.synced = true;
+        this.versions.state++;
+        this.versions.metrics++;
+        this.versions.board++;
+        this.versions.events++;
         break;
       case 'state':
         this.state = update.state;
+        this.versions.state++;
         break;
       case 'metrics':
         this.addSamples(update.samples);
+        this.versions.metrics++;
         break;
       case 'board':
         this.board = update.board;
         this.addSamples(update.board.samples);
+        this.versions.board++;
+        this.versions.metrics++;
         break;
       case 'event':
         this.addEvents([update.entry]);
+        this.versions.events++;
         break;
       case 'mark':
         this.lastMark = update.mark;
+        this.versions.mark++;
         break;
       default:
         return; // params and param belong to the parameter manager
@@ -74,6 +90,7 @@ export class AdminStore {
   /** A log line made on this page (for example the answer to a command). */
   log(entry: LogEntry): void {
     this.addEvents([entry]);
+    this.versions.events++;
     this.changed();
   }
 
@@ -222,4 +239,18 @@ export function couriers(store: AdminStore): Couriers | undefined {
   const obstacles = new Map<string, number>();
   for (const o of state.obstacles) obstacles.set(o.type, (obstacles.get(o.type) ?? 0) + 1);
   return { total: state.players.length, riding: state.players.length - fallen, fallen, points: state.deliveryPoints.length, obstacles };
+}
+
+/**
+ * Runs `draw` only when `key()` gives something new. Views use it with the store versions,
+ * so a table is not rebuilt (and does not lose hover or focus) when its data did not change.
+ */
+export function whenChanged(key: () => string, draw: () => void): (force?: boolean) => void {
+  let last: string | undefined;
+  return (force = false) => {
+    const next = key();
+    if (!force && next === last) return;
+    last = next;
+    draw();
+  };
 }

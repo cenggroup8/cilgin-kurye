@@ -54,7 +54,8 @@ export function createTable<Row>(options: {
   caption: string;
   columns: Column<Row>[];
   rowKey: (row: Row) => string;
-  empty: string;
+  /** Text when there are no rows; a function, so it can say "still waiting" before the first data. */
+  empty: string | (() => string);
   initialSort: string;
 }) {
   const { columns } = options;
@@ -114,14 +115,19 @@ export function createTable<Row>(options: {
       for (const column of columns) {
         const td = tr.insertCell();
         if (column.numeric) td.classList.add('num');
-        td.textContent = column.text(row);
+        const text = column.text(row);
+        td.textContent = text;
+        // Cells cut with an ellipsis keep their full text as a tooltip.
+        if (text.length > 18) td.title = text;
         const extra = column.extra?.(row);
         if (extra) td.append(extra);
       }
       return tr;
     }));
     empty.hidden = shown.length > 0;
-    empty.textContent = rows.length === 0 ? options.empty : 'Aramaya uyan satır yok. Aramayı değiştirin ya da temizleyin.';
+    empty.textContent = rows.length === 0
+      ? (typeof options.empty === 'function' ? options.empty() : options.empty)
+      : 'Aramaya uyan satır yok. Aramayı değiştirin ya da temizleyin.';
     scroll.hidden = shown.length === 0;
   }
 

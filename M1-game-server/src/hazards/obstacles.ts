@@ -13,7 +13,7 @@ import {
   OBSTACLE_TYPES,
   SEGMENT_COUNT,
   secondsToTicks,
-} from "./estimates.ts";
+} from "./estimates.js";
 import type {
   AddResult,
   ClockSource,
@@ -22,7 +22,7 @@ import type {
   ObstacleType,
   ParamSource,
   Result,
-} from "./estimates.ts";
+} from "./estimates.js";
 
 export interface ObstacleListDeps {
   params: ParamSource;

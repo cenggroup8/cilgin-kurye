@@ -10,8 +10,8 @@
 // One fall gives one penalty: a second fall report for a player who is already
 // waiting (for example the same fall reported by M1 and by M3) is ignored.
 
-import { PENALTY_PARAM, PLAYER_COUNT, secondsToTicks } from "./estimates.ts";
-import type { ClockSource, ParamSource, StandUpRequest } from "./estimates.ts";
+import { PENALTY_PARAM, PLAYER_COUNT, secondsToTicks } from "./estimates.js";
+import type { ClockSource, ParamSource, StandUpRequest } from "./estimates.js";
 
 export interface PenaltiesDeps {
   params: ParamSource;

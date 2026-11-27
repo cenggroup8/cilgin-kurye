@@ -1,5 +1,5 @@
 // Small fake parts for the hazards tests: the clock of M1-2 and the parameters of M1-5.
-import type { ClockSource, ParamSource } from "../src/hazards/estimates.ts";
+import type { ClockSource, ParamSource } from "../src/hazards/estimates.js";
 
 /** Same start values as `param-list.ts` in PR #61 for the names the hazards code reads. */
 const START: Record<string, number> = {

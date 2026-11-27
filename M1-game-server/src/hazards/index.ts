@@ -1,7 +1,7 @@
-export { ObstacleList } from "./obstacles.ts";
-export type { NewObstacle, ObstacleListDeps } from "./obstacles.ts";
-export { Penalties } from "./penalties.ts";
-export type { PenaltiesDeps } from "./penalties.ts";
+export { ObstacleList } from "./obstacles.js";
+export type { NewObstacle, ObstacleListDeps } from "./obstacles.js";
+export { Penalties } from "./penalties.js";
+export type { PenaltiesDeps } from "./penalties.js";
 export type {
   AddResult,
   ClockSource,
@@ -12,4 +12,4 @@ export type {
   Result,
   Rng,
   StandUpRequest,
-} from "./estimates.ts";
+} from "./estimates.js";

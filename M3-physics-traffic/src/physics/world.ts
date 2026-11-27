@@ -1,12 +1,21 @@
 import { DEFAULT_BIKE_TUNING, type BikeTuning } from './bike/tuning';
 import { DEFAULT_PHYSICS_PARAMS } from './params';
 import type { BikeState, PhysicsParams, Surface } from './types';
+import type { Polygon } from './collide/shapes';
 
 /** Gives the ground at a point. The colliders (M3-2) replace the default. */
 export type SurfaceProvider = (x: number, y: number, params: PhysicsParams) => Surface;
 
 /** A normal road everywhere: normal grip, no speed cap. */
 export const normalRoad: SurfaceProvider = (_x, _y, params) => ({ grip: params.grip, speedCap: null });
+
+/** The rectangle of the city in M3 coordinates (x east, y north), metres. */
+export interface WorldBounds {
+  minX: number;
+  maxX: number;
+  minY: number;
+  maxY: number;
+}
 
 /** Everything the physics part keeps between two ticks. */
 export interface PhysicsWorld {
@@ -15,6 +24,10 @@ export interface PhysicsWorld {
   surfaceAt: SurfaceProvider;
   /** Motorcycles by player number. */
   bikes: Map<number, BikeState>;
+  /** Building footprints in M3 coordinates (from the city plan). Empty until the plan is loaded. */
+  buildings: Polygon[];
+  /** The city rectangle. The outer wall stands OUTER_WALL_MARGIN_M outside it. Null: no outer wall. */
+  bounds: WorldBounds | null;
 }
 
 export function createWorld(
@@ -26,6 +39,8 @@ export function createWorld(
     tuning: { ...DEFAULT_BIKE_TUNING, ...tuning },
     surfaceAt: normalRoad,
     bikes: new Map(),
+    buildings: [],
+    bounds: null,
   };
 }
 

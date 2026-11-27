@@ -8,6 +8,7 @@ import type { Obstacle } from '../../src/common/types';
 import {
   addBike,
   BIKE_STAGES,
+  COLLIDE_STAGES,
   createWorld,
   EMPTY_STAGES,
   stepPhysics,
@@ -68,11 +69,14 @@ export class FakeM1 {
 
   constructor(
     readonly scenario: Scenario,
-    private readonly stages: PhysicsStages = { ...EMPTY_STAGES, ...BIKE_STAGES },
+    private readonly stages: PhysicsStages = { ...EMPTY_STAGES, ...BIKE_STAGES, ...COLLIDE_STAGES },
     city: M3City = m3City(),
   ) {
     this.city = city;
     this.physics = createWorld();
+    // Buildings and the outer wall come from the city plan (x east, y north; the plan's z runs south).
+    this.physics.buildings = city.buildings.map((b) => b.polygon);
+    this.physics.bounds = { minX: 0, maxX: city.size, minY: -city.size, maxY: 0 };
     for (const p of scenario.players) {
       const store = city.stores[Math.floor(p / 2)];
       addBike(this.physics, p, { x: store.x, y: store.y, heading: store.heading });

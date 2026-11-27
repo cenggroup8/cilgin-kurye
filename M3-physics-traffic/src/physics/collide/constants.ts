@@ -13,8 +13,28 @@ export const BIKE_RADIUS_M = 0.6;
  */
 export const BARRIER_THICKNESS_M = 1.0;
 
-/** How far the outer wall stands outside the outermost road lines of the city. */
+/**
+ * Distance (metres) from the city rectangle (0 to world.size_m, the outermost
+ * road centre lines) to the INNER face of the outer wall, the face that
+ * motorcycles hit. The wall behind that face has no thickness: it is a half
+ * plane, so nothing gets through however far it is, and the 10 m does NOT
+ * include any thickness. The motorcycle centre can go at most
+ * OUTER_WALL_MARGIN_M - BIKE_RADIUS_M outside the rectangle. The road edge is
+ * lanes_per_direction x lane_width_m = 7 m outside it, so this must be above 7
+ * (outer-wall.test.ts reads both from the city plan).
+ */
 export const OUTER_WALL_MARGIN_M = 10;
+
+/** The smallest speed into a shape (m/s) that counts as a hit. Below it is rounding noise, for example of a scrape along a wall. */
+export const MIN_IMPACT_MPS = 1e-6;
+
+/**
+ * TAHMİN. Most contacts that one motorcycle resolves in one substep. A normal
+ * motorcycle touches at most a few shapes (a corner of two buildings, a wall);
+ * the cap only stops a jam between many shapes from taking unlimited time.
+ * What is left over is found again in the next substep.
+ */
+export const MAX_CONTACTS_PER_BIKE = 8;
 
 /** Radius of the slow zone around an accident. */
 export const ACCIDENT_SLOW_RADIUS_M = 15;

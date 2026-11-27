@@ -7,3 +7,4 @@ export * from './bike';
 export * from './predictor';
 export { SUBSTEPS_PER_TICK, SUBSTEP_ORDER, EMPTY_STAGES, stepPhysics } from './step';
 export type { StageName, Stage, PhysicsStages, SubstepContext } from './step';
+export { COLLIDE_STAGES } from './collide';

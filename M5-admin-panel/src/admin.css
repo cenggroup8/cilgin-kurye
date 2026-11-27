@@ -399,6 +399,10 @@
 .ck-admin .confirm-actions .danger { background: rgba(239, 68, 68, .22); color: #fff; }
 @keyframes ck-pop { from { opacity: 0; transform: translateY(6px) scale(.98); } to { opacity: 1; transform: none; } }
 
+/* ── Link lost: the values are the last known ones, not live ────────────── */
+.ck-admin.is-stale main :is(.dash, .table-card, .log, .quake-grid, .params-card) { opacity: .55; filter: saturate(.35); transition: opacity .2s var(--ease), filter .2s var(--ease); }
+.ck-admin.is-stale .topbar .timer { color: var(--ink-3); text-shadow: none; }
+
 /* ── Responsive ─────────────────────────────────────────────────────────── */
 @media (max-width: 82rem) {
   .ck-admin .dash { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "strip strip" "kpi kpi" "map entity" "map eq" "quake quake" "quick quick" "recent recent"; }

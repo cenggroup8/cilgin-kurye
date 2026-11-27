@@ -19,8 +19,17 @@ export function startRouter(onShow: (page: Page) => void): { current(): Page } {
       section.hidden = section.dataset.page !== page;
     }
     for (const link of document.querySelectorAll<HTMLAnchorElement>('.nav a[data-nav]')) {
-      if (link.dataset.nav === page) link.setAttribute('aria-current', 'page');
-      else link.removeAttribute('aria-current');
+      if (link.dataset.nav === page) {
+        link.setAttribute('aria-current', 'page');
+        // On a phone the page list scrolls sideways; keep the active page in sight.
+        const nav = link.closest<HTMLElement>('.nav');
+        if (nav && nav.scrollWidth > nav.clientWidth) {
+          const offset = link.getBoundingClientRect().left - nav.getBoundingClientRect().left + nav.scrollLeft;
+          nav.scrollTo({ left: offset - (nav.clientWidth - link.offsetWidth) / 2, behavior: 'auto' });
+        }
+      } else {
+        link.removeAttribute('aria-current');
+      }
     }
     const heading = document.querySelector<HTMLElement>(`[data-page="${page}"] h1`);
     if (heading) document.title = `${heading.textContent} | Çılgın Kurye Yönetim`;

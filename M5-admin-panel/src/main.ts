@@ -5,7 +5,7 @@ import { bindParams } from './params/paramManager.ts';
 import { bindTopbar, commandLabel } from './topbar/topbar.ts';
 import { confirmAction } from './ui/confirm.ts';
 import { bindDashboard } from './ui/dashboard.ts';
-import { formatTime } from './ui/format.ts';
+import { formatTime, markLabel } from './ui/format.ts';
 import { bindEventsPage, bindMetricsPage, bindNetworkPage, bindQuakePage } from './ui/pages.ts';
 import { bindQuickControls } from './ui/quickControls.ts';
 import { startRouter, type Page } from './ui/router.ts';
@@ -79,11 +79,20 @@ const router = startRouter((name) => {
   views[name]?.render();
 });
 
+// Live regions are written only when their text really changes; writing the same text again
+// many times per second would make a screen reader read it again.
+function setLive(element: HTMLElement, text: string) {
+  if (element.textContent !== text) element.textContent = text;
+}
+
 store.subscribe(() => {
+  // After a drop the numbers on the page are the last known ones, not live: they are dimmed
+  // until the snapshot of the new link comes (the banner of M5-1 says why).
+  document.body.classList.toggle('is-stale', store.synced && store.status !== 'connected');
   serverPill.dataset.state = store.status;
-  serverPill.textContent = SERVER_TEXT[store.status];
-  lastMark.textContent = store.lastMark
-    ? `Son değişiklik ${formatTime(store.lastMark.time)}: ${commandLabel(store.lastMark.name)}` : '';
+  setLive(serverPill, SERVER_TEXT[store.status]);
+  setLive(lastMark, store.lastMark
+    ? `Son değişiklik ${formatTime(store.lastMark.time)}: ${markLabel(store.lastMark.name, commandLabel)}` : '');
   // Only the page on screen is drawn.
   views[router.current()]?.render();
 });

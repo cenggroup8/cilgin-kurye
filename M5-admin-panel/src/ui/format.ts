@@ -109,3 +109,25 @@ const time = new Intl.DateTimeFormat('tr-TR', { timeStyle: 'medium' });
 export function formatTime(ms: number): string {
   return time.format(ms);
 }
+
+const MARK_LABELS: Readonly<Record<string, string>> = {
+  param_reset: 'Parametreler başlangıç değerlerine döndü',
+  new_code: 'Yeni oyun kodu',
+  reset: 'Oyun sıfırlandı',
+  obstacle_add: 'Engel eklendi',
+  obstacle_remove: 'Engel kaldırıldı',
+  road_close: 'Yol kapatıldı',
+  obstacle_ahead: 'Oyuncunun önüne engel',
+};
+
+/**
+ * Text for a change mark. The match commands keep the labels of the M5-1 top bar
+ * (`commandLabel`); other commands get a Turkish name here, and a changed parameter is shown
+ * by its name, as the parameter list calls it.
+ */
+export function markLabel(name: string, commandLabel: (name: string) => string): string {
+  const fromTopbar = commandLabel(name);
+  if (fromTopbar !== name) return fromTopbar;
+  if (Object.hasOwn(MARK_LABELS, name)) return MARK_LABELS[name]!;
+  return name.includes('.') ? `Parametre ${name}` : name;
+}

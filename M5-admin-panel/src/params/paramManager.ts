@@ -17,9 +17,16 @@ interface Field {
   sending: boolean;
 }
 
-export function bindParams(connection: AdminConnection, root: HTMLElement): () => void {
+export interface ParamsHandle {
+  /** Shows only the parameters whose name or label has every word of the query. */
+  filter(query: string): number;
+  dispose(): void;
+}
+
+export function bindParams(connection: AdminConnection, root: HTMLElement): ParamsHandle {
   const fields = new Map<string, Field>();
   let connected = false;
+  let query = '';
 
   function setNote(field: Field, text: string, kind: 'error' | 'info' | '') {
     field.note.textContent = text;
@@ -122,7 +129,11 @@ export function bindParams(connection: AdminConnection, root: HTMLElement): () =
         td.append(field.input, field.note);
       }
     }
-    return element;
+    // Wide tables (the network table has seven columns) scroll inside their group.
+    const wrap = document.createElement('div');
+    wrap.className = 'param-table-wrap';
+    wrap.append(element);
+    return wrap;
   }
 
   function build(list: readonly Parameter[]) {
@@ -142,6 +153,34 @@ export function bindParams(connection: AdminConnection, root: HTMLElement): () =
     const open = new Set(Array.from(root.querySelectorAll<HTMLDetailsElement>('details[open]'), (d) => d.dataset.group));
     if (open.size > 0) for (const d of sections) d.open = open.has(d.dataset.group);
     root.replaceChildren(...sections);
+    if (query) applyFilter();
+  }
+
+  /**
+   * Hides fields and table rows that do not match; opens the groups that have a match.
+   * A table cell is only emptied (not removed), so the other cells stay under their column.
+   */
+  function applyFilter(): number {
+    const words = foldText(query).split(/\s+/).filter(Boolean);
+    let shown = 0;
+    for (const field of fields.values()) {
+      const text = foldText(`${field.param.name} ${field.param.label ?? ''} ${field.input.getAttribute('aria-label') ?? ''}`);
+      const match = words.every((w) => text.includes(w));
+      const holder = field.input.closest<HTMLElement>('.param-field, td')!;
+      if (holder.tagName === 'TD') holder.toggleAttribute('data-filtered', !match);
+      else holder.hidden = !match;
+      if (match) shown++;
+    }
+    const visible = (e: HTMLElement) => !e.hidden && !e.hasAttribute('data-filtered') && e.childElementCount > 0;
+    for (const row of root.querySelectorAll<HTMLTableRowElement>('.param-table tbody tr')) {
+      row.hidden = ![...row.querySelectorAll<HTMLElement>('td')].some(visible);
+    }
+    for (const details of root.querySelectorAll<HTMLDetailsElement>('.param-group')) {
+      const any = [...details.querySelectorAll<HTMLElement>('.param-field, td')].some(visible);
+      details.hidden = !any;
+      if (words.length > 0 && any) details.open = true;
+    }
+    return shown;
   }
 
   /** A value changed somewhere else: another admin command, `param_reset`, or the server itself. */
@@ -159,7 +198,7 @@ export function bindParams(connection: AdminConnection, root: HTMLElement): () =
     }
   }
 
-  return connection.subscribe((event) => {
+  const unsubscribe = connection.subscribe((event) => {
     switch (event.t) {
       case 'connection':
         connected = event.status === 'connected';
@@ -176,4 +215,16 @@ export function bindParams(connection: AdminConnection, root: HTMLElement): () =
         break;
     }
   });
+
+  return {
+    filter(next: string) {
+      query = next;
+      return applyFilter();
+    },
+    dispose: unsubscribe,
+  };
+}
+
+function foldText(text: string): string {
+  return text.toLocaleLowerCase('tr').normalize('NFD').replace(/\p{M}/gu, '').replace(/ı/g, 'i');
 }

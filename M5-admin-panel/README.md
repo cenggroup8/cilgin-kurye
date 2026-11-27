@@ -93,3 +93,30 @@ The metric names (`score.<team>`, `traffic.*`, `speed.mean_mps`, `falls.total`,
 `net.<p>.ping_ms|jitter_ms|loss_pct|fps`, `board.delay_ms`, `board.loss_pct`,
 `board.accel_g`, `quake.mag`, `delivery.time_s`, `delivery.distance_m`) are provisional
 until M1, M2 and M3 publish their metric lists with #35.
+
+## Page layout (redesign)
+
+One page with a sidebar and seven views; the server connection, the top bar with the match
+controls and the board status stay on every view.
+
+| View | What it shows | Package |
+|---|---|---|
+| Kontrol paneli | Time left and the four teams as LED meters, the live map, the state of every link, the newest events | layout, M5-3 map |
+| Canlı harita | The same map, large, with the obstacle tools | M5-3 |
+| Parametreler | The forms, a search over all parameters, "back to start values" (`param_reset`, asks first) | M5-2 |
+| Ağ | Ping, jitter, loss and frame rate of every phone, sortable | layout |
+| Metrikler | The newest value and trend of every metric, with search and group filter | layout |
+| Deprem | The earthquake form, the board link and the last earthquake | M5-1 form |
+| Olay günlüğü | Every event, with search | layout |
+
+- Only data that the server sends is shown; a value that has not come yet is a dash.
+- `src/ui/store.ts` keeps the state from the messages of `AdminConnection`; only the view on
+  screen is drawn, at most once per frame.
+- "Bitir" and "back to start values" ask in a dialog first (`src/ui/confirm.ts`).
+- Colours: dark navy panels, one LED blue accent, the team colours only on team marks
+  (the hues of the map, stepped for the dark surface and checked with the dataviz palette
+  validator), status colours only for status. Text contrast on the panels is 6:1 or more.
+- Keyboard: a skip link, visible focus, the heading of a view gets the focus when the view
+  changes. Narrow screens get a horizontal page list.
+- The full graphs with change marks and CSV export stay the job of the graph engine (M5-4);
+  the small trend lines here only show the direction of a value.

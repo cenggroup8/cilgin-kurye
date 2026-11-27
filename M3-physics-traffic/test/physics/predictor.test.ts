@@ -148,3 +148,50 @@ describe('correction', () => {
     expect(p.pending).toBe(0);
   });
 });
+
+describe('the world around the motorcycle', () => {
+  const slippery = (y: number) => (y < -3 ? 0.05 : 1);
+
+  function serverRun(ticks: number): BikeState {
+    const world = createWorld();
+    world.surfaceAt = (_x, y, params) => ({ grip: params.grip * slippery(y), speedCap: null });
+    addBike(world, 0, START);
+    for (let t = 0; t < ticks; t++) {
+      stepPhysics(
+        world,
+        { tick: t, dt: DT, bikes: [{ player: 0, speedFactor: 1, control: controlAt(t) }], obstacles: [], npcCars: [], quake: null, fall: [], standUp: [] },
+        STAGES,
+      );
+    }
+    return world.bikes.get(0)!;
+  }
+
+  it('builds its world with setupWorld, so it slides where the server slides', () => {
+    const p = new Predictor(0, START, {
+      setupWorld: (world) => {
+        world.surfaceAt = (_x, y, params) => ({ grip: params.grip * slippery(y), speedCap: null });
+      },
+    });
+    const plain = new Predictor(0, START);
+    for (let t = 0; t < 120; t++) {
+      p.step(controlAt(t));
+      plain.step(controlAt(t));
+    }
+    const server = serverRun(120);
+    expect([p.bike.x, p.bike.y, p.bike.heading]).toEqual([server.x, server.y, server.heading]);
+    expect(plain.bike.x === server.x && plain.bike.y === server.y).toBe(false);
+  });
+
+  it('gives the stages the obstacles and the earthquake area of the last server state', () => {
+    const seen: (number | null)[] = [];
+    const p = new Predictor(0, START, {
+      stages: { ...STAGES, wallsAndObstacles: (ctx) => void seen.push(ctx.input.quake?.radius ?? null) },
+    });
+    p.step(controlAt(0));
+    p.setScene({ quake: { x: 0, y: 0, radius: 40, strength: 6 } });
+    p.step(controlAt(1));
+    p.setScene({ quake: null });
+    p.step(controlAt(2));
+    expect(seen).toEqual([null, null, 40, 40, null, null]);
+  });
+});

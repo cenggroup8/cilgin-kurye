@@ -15,7 +15,7 @@ import { BIKE_STAGES } from '../bike/index.js';
 import { wrapAngle } from '../bike/motion.js';
 import type { BikeTuning } from '../bike/tuning.js';
 import { EMPTY_STAGES, stepPhysics, type PhysicsStages } from '../step.js';
-import type { BikeControl, BikeState, PhysicsParams } from '../types.js';
+import type { BikeControl, BikeState, PhysicsInput, PhysicsParams } from '../types.js';
 import { addBike, createWorld, type PhysicsWorld, type SurfaceProvider } from '../world.js';
 
 export interface PredictorOptions {
@@ -33,7 +33,12 @@ export interface PredictorOptions {
   surfaceAt?: SurfaceProvider;
   /** Stages to run; the motorcycle model by default. */
   stages?: PhysicsStages;
+  /** Called once on the new world, to put in the static colliders (buildings and outer wall of M3-2). */
+  setupWorld?: (world: PhysicsWorld) => void;
 }
+
+/** What the phone last heard from the server about the things around it. */
+export type PredictorScene = Pick<PhysicsInput, 'obstacles' | 'npcCars' | 'quake'>;
 
 /** The pose to draw: the predicted motorcycle plus the part of the last correction not blended away yet. */
 export interface DrawPose {
@@ -62,6 +67,7 @@ export class Predictor {
   private readonly stages: PhysicsStages;
   private history: Entry[] = [];
   private tick = 0;
+  private scene: PredictorScene = { obstacles: [], npcCars: [], quake: null };
   /** What is still to blend away: drawn pose minus predicted pose. */
   private offset = { x: 0, y: 0, heading: 0 };
 
@@ -74,7 +80,13 @@ export class Predictor {
     this.stages = opts.stages ?? { ...EMPTY_STAGES, ...BIKE_STAGES };
     this.world = createWorld(opts.params, opts.tuning);
     if (opts.surfaceAt) this.world.surfaceAt = opts.surfaceAt;
+    opts.setupWorld?.(this.world);
     addBike(this.world, player, start);
+  }
+
+  /** Obstacles, NPC cars and the earthquake area from the last server state; used until the next one. */
+  setScene(scene: Partial<PredictorScene>): void {
+    this.scene = { ...this.scene, ...scene };
   }
 
   /** The predicted motorcycle (without the blend). */
@@ -151,9 +163,9 @@ export class Predictor {
         tick: this.tick++,
         dt: this.dt,
         bikes: [{ player: this.player, speedFactor: e.speedFactor, control: e.control }],
-        obstacles: [],
-        npcCars: [],
-        quake: null,
+        obstacles: this.scene.obstacles,
+        npcCars: this.scene.npcCars,
+        quake: this.scene.quake,
         fall: [],
         standUp: [],
       },

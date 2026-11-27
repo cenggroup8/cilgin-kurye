@@ -42,7 +42,7 @@ export interface BikeState {
   y: number;
   /** Radians, 0 = +x, counter clockwise positive. */
   heading: number;
-  /** Forward speed in m/s. Never negative: there is no reverse. */
+  /** Forward speed in m/s along the heading. Negative (at most reverseMax, see bike/tuning.ts) while reversing. */
   speed: number;
   /** Side speed in m/s while the motorcycle slides out of a turn, positive to the rider's left; 0 otherwise. */
   slip: number;
@@ -72,7 +72,7 @@ export interface QuakeArea {
   strength: number;
 }
 
-export type HitKind = 'building' | 'wall' | 'barrier' | 'npc' | 'bike';
+export type HitKind = 'building' | 'wall' | 'barrier' | 'obstacle' | 'npc' | 'bike';
 
 export interface CollisionEvent {
   kind: 'collision';

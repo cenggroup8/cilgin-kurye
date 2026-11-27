@@ -1,4 +1,5 @@
 /// <reference lib="dom" />
+import { colliderSurface } from '../src/physics/collide/index.js';
 import type { SurfaceProvider } from '../src/physics/index.js';
 import type { NpcCarPose } from '../src/traffic/npc/index.js';
 import { FakeM1, type ScenarioEvent } from '../test/fakes/fakeM1.js';
@@ -64,7 +65,7 @@ function reset(): void {
     }),
   });
   if (keep) m1.physics.params = keep;
-  m1.physics.surfaceAt = testGround;
+  m1.physics.surfaceAt = colliderSurface(m1.physics, testGround);
   cars = [];
   prevCars = new Map();
   prevBike = poseOf(bike());

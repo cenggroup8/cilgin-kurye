@@ -65,15 +65,18 @@ describe('speed', () => {
     expect(bike.heading).toBe(0);
   });
 
-  it('the brake stops the motorcycle and there is no reverse', () => {
+  // The small reverse (reverse.test.ts) starts only after the motorcycle has stood for 0.5 s; here the brake is let go at the reverse threshold (0.05 m/s), so this only tests braking from speed.
+  it('the brake stops a moving motorcycle without going backwards', () => {
     let lastX = 0;
-    let backwards = false;
-    const bike = drive(worldWithBike(15), 30 * 5, () => ({ brake: 1 }), 1, (b) => {
-      if (b.x < lastX) backwards = true;
+    let backwards = 0;
+    // The brake is let go at 0.05 m/s and there is no wait that could end: the motorcycle does not go backwards at all (the limit is only a safety margin).
+    const bike = drive(worldWithBike(15), 30 * 5, (b) => ({ brake: b.speed > 0.05 ? 1 : 0 }), 1, (b) => {
+      backwards = Math.max(backwards, lastX - b.x);
       lastX = b.x;
     });
-    expect(bike.speed).toBe(0);
-    expect(backwards).toBe(false);
+    expect(bike.speed).toBeLessThanOrEqual(0.05);
+    expect(bike.speed).toBeGreaterThanOrEqual(-0.1);
+    expect(backwards).toBeLessThan(0.005);
     // From 15 m/s the full brake needs about one second and about 11 m.
     expect(bike.x).toBeLessThan(15);
   });

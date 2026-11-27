@@ -9,7 +9,9 @@
  * a right turn act the same. The grip of the ground comes from the colliders
  * (M3-2): low on a water puddle, lower in the earthquake area. The slide does not
  * take speed away, so on a puddle the motorcycle slides but does not slow down.
- * When there is grip to spare, the side speed fades away.
+ * When there is grip to spare, the side speed fades away. The speed can be
+ * negative (small reverse): the sizes use |speed|, and the slide goes to the
+ * outside of the real path, so it flips with the sign of the speed.
  */
 import type { Stage } from '../step.js';
 import { G } from './tuning.js';
@@ -39,11 +41,12 @@ export function applyGrip(
   h: number,
 ): { turn: number; slip: number } {
   const limit = grip * G;
-  const needed = speed * Math.abs(wantedTurn);
-  if (needed > limit && speed > 0) {
-    const turn = Math.sign(wantedTurn) * (limit / speed);
-    // The rest pushes the motorcycle out of the turn: to the right in a left turn.
-    const outward = -Math.sign(wantedTurn);
+  const needed = Math.abs(speed) * Math.abs(wantedTurn);
+  if (needed > limit && Math.abs(speed) > 0) {
+    const turn = Math.sign(wantedTurn) * (limit / Math.abs(speed));
+    // The rest pushes the motorcycle out of the turn: to the right in a left turn
+    // when driving forward, to the other side when reversing.
+    const outward = -Math.sign(wantedTurn) * Math.sign(speed);
     return { turn, slip: slip + outward * (needed - limit) * h };
   }
   // Grip to spare pulls the side speed back to zero.
@@ -56,13 +59,13 @@ export const gripAndSliding: Stage = (ctx) => {
   const { world, h } = ctx;
   for (const bike of world.bikes.values()) {
     if (bike.fallen) continue;
-    const surface = world.surfaceAt(bike.x, bike.y, world.params);
+    const surface = world.surfaceAt(bike.x, bike.y, world.params, ctx.input);
     const wanted = ctx.turn.get(bike.id) ?? 0;
     const { turn, slip } = applyGrip(bike.speed, wanted, bike.slip, surface.grip, h);
     bike.slip = slip;
     bike.sliding = Math.abs(slip) > SLIDE_LIMIT;
 
-    // Lean follows the real side acceleration; leaning right is positive and a right turn has turn < 0.
+    // Lean follows the real side acceleration (speed x turn, also right when reversing); leaning right is positive and a right turn has turn < 0.
     const maxLean = world.tuning.maxLean;
     bike.lean = Math.min(maxLean, Math.max(-maxLean, Math.atan((-bike.speed * turn) / G)));
 

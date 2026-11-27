@@ -8,6 +8,7 @@ import type { Obstacle } from '../../src/common/types.js';
 import {
   addBike,
   BIKE_STAGES,
+  COLLIDE_STAGES,
   createWorld,
   EMPTY_STAGES,
   stepPhysics,
@@ -17,6 +18,7 @@ import {
   type PhysicsWorld,
   type QuakeArea,
 } from '../../src/physics/index.js';
+import { colliderSurface } from '../../src/physics/collide/index.js';
 import { NpcTraffic, type CarHit, type NpcCarPose } from '../../src/traffic/npc/index.js';
 import { m3City, type M3City } from './cityPlan.js';
 
@@ -68,11 +70,16 @@ export class FakeM1 {
 
   constructor(
     readonly scenario: Scenario,
-    private readonly stages: PhysicsStages = { ...EMPTY_STAGES, ...BIKE_STAGES },
+    private readonly stages: PhysicsStages = { ...EMPTY_STAGES, ...BIKE_STAGES, ...COLLIDE_STAGES },
     city: M3City = m3City(),
   ) {
     this.city = city;
     this.physics = createWorld();
+    // Buildings and the outer wall come from the city plan (x east, y north; the plan's z runs south).
+    this.physics.buildings = city.buildings.map((b) => b.polygon);
+    this.physics.bounds = { minX: 0, maxX: city.size, minY: -city.size, maxY: 0 };
+    this.physics.graph = city.graph; // where the obstacles stand
+    this.physics.surfaceAt = colliderSurface(this.physics); // puddle, slow zone of an accident, earthquake grip
     for (const p of scenario.players) {
       const store = city.stores[Math.floor(p / 2)];
       addBike(this.physics, p, { x: store.x, y: store.y, heading: store.heading });

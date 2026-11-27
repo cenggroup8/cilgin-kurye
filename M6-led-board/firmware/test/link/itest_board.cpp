@@ -1,5 +1,6 @@
 // Integration test, board side: the link part on real sockets against the
 // real server of M2-4 (itest_server.mjs starts it). Run: make itest
+// At 5 s the server restarts with a new session number; the board must come back by itself.
 #include <chrono>
 #include <cstdio>
 #include <thread>
@@ -26,7 +27,7 @@ int main(int argc, char** argv) {
   bool quakeSent = false;
   int vibrates = 0;
   uint32_t lastStatus = 0, lastSensor = 0;
-  while (now() < 6000) {
+  while (now() < 11000) {
     uint32_t t = now();
     link.poll(t);
     VibrateCmd v;
@@ -64,10 +65,11 @@ int main(int argc, char** argv) {
   };
   std::printf("board side:\n");
   check(link.linkState() == LinkState::Connected, "connected to the M2-4 server");
-  check(st.connects == 1, "one connection");
+  check(st.connects == 2, "two connections: before and after the server restart");
+  check(st.sidChanges >= 1, "the new session number was seen");
   check(link.hasConfig() && link.config().bright > 0.59f && link.config().bright < 0.61f, "config from the server");
-  check(st.statesTaken > 100, "board states arrive (30 per second)");
-  check(link.latestState().timeLeft == 200, "state content");
+  check(st.statesTaken > 200, "board states arrive (30 per second)");
+  check(link.latestState().timeLeft == 199, "state content from the new server");
   check(vibrates == 1, "one vibrate command");
   check(st.badMessages == 0 && st.lateDropped == 0, "no bad or late message");
   std::printf("  states %u, resends %u\n", st.statesTaken, st.resends);

@@ -1,8 +1,8 @@
-﻿// Demo, server side: the M2-4 board link (M2-network) with a tiny fake M1, and the board
+// Demo, server side: the M2-4 board link (M2-network) with a tiny fake M1, and the board
 // program of demo_board.cpp against it. Run: make demo   (DEMO_SECONDS=20 make demo)
 //
-//   fake M1 â†’ setWorldState (metres)  â†’ M2-4 â†’ S lists â†’ board: a motorcycle drives east
-//   board hand hit â†’ Q â†’ M2-4 â†’ fake M1 â†’ earthquake in the state + vibrate â†’ board
+//   fake M1 -> setWorldState (metres)  -> M2-4 -> S lists -> board: a motorcycle drives east
+//   board hand hit -> Q -> M2-4 -> fake M1 -> earthquake in the state + vibrate -> board
 import { spawn } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { resolve } from "node:path";
@@ -22,7 +22,7 @@ const link = new BoardLink({
     quake: (e) => {
       // What M1 does with a hit (v2.1 section 5.5): an earthquake at the centre of the zone, motors on.
       quakesFromBoard++;
-      console.log(`  [server] earthquake event from the board: strength ${e.mag.toFixed(1)}, zone ${e.zone} â†’ earthquake on, motors on`);
+      console.log(`  [server] earthquake event from the board: strength ${e.mag.toFixed(1)}, zone ${e.zone} -> earthquake on, motors on`);
       quake = { x: 250, z: 250, mag: e.mag, start: Date.now() };
       link.vibrate({ mask: 15, duty: e.mag / 10, ms: 2000, ramp_ms: 200 });
     },

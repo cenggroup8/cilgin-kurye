@@ -109,11 +109,17 @@ describe('resolveContact', () => {
     expect(out.x).toBeCloseTo(9.5 - 0.1 - PUSH_MARGIN_M, 12);
   });
 
-  it('keeps the heading and never gives a speed below 0', () => {
-    // A bike that mostly slides sideways into a wall in front of it: forward speed cannot go negative.
-    const out = resolveContact(bike({ heading: 0.3, speed: 0.5, slip: -8 }), { depth: 0.1, normalX: -R, normalY: R });
+  it('keeps the heading and the part of the velocity along the wall (the forward speed may be negative)', () => {
+    // A bike that mostly slides sideways into a wall: what stays is the part along the wall, even if it points backwards.
+    const input = bike({ heading: 0.3, speed: 0.5, slip: -8 });
+    const contact = { depth: 0.1, normalX: -R, normalY: R };
+    const out = resolveContact(input, contact);
     expect(out.heading).toBe(0.3);
-    expect(out.speed).toBeGreaterThanOrEqual(0);
+    const before = velocityOf(input);
+    const into = before.vx * contact.normalX + before.vy * contact.normalY;
+    const after = velocityOf(out);
+    expect(after.vx).toBeCloseTo(before.vx - into * contact.normalX, 9);
+    expect(after.vy).toBeCloseTo(before.vy - into * contact.normalY, 9);
   });
 
   it('does not change its input and gives a new object', () => {

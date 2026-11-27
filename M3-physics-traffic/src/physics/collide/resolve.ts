@@ -4,7 +4,7 @@
  * (a scrape) stays.
  *
  * The motorcycle model keeps the speed as two numbers: `speed` forward along
- * the heading (never negative) and `slip` sideways, positive to the rider's
+ * the heading (negative while reversing) and `slip` sideways, positive to the rider's
  * LEFT (`types.ts` of the physics part, `bike/motion.ts`: the bike moves by
  * `speed * (cos, sin) + slip * (-sin, cos)`). So the velocity is
  *   v = speed * (cos h, sin h) + slip * (-sin h, cos h).
@@ -64,7 +64,9 @@ export function impactSpeedOf(bike: BikeMotion, contact: Contact): number {
  * The motorcycle after the contact: moved out by the depth along the normal,
  * with the speed into the shape taken away (v.n < 0 only). Compute the impact
  * speed BEFORE this, with `impactSpeedOf`, because afterwards it is gone.
- * The new forward speed is never below 0 (there is no reverse).
+ * Reversing works the same: backing into a wall gives a positive impact speed
+ * and the forward speed becomes 0. The new forward speed is not clamped, because
+ * a scrape along a wall can keep a backwards part.
  */
 export function resolveContact(bike: BikeMotion, contact: Contact): BikeMotion {
   if (!validBike(bike) || !validContact(contact)) return { ...bike };
@@ -80,7 +82,7 @@ export function resolveContact(bike: BikeMotion, contact: Contact): BikeMotion {
     x: bike.x + contact.normalX * push,
     y: bike.y + contact.normalY * push,
     heading: bike.heading,
-    speed: Math.max(0, keepX * cos + keepY * sin),
+    speed: keepX * cos + keepY * sin,
     slip: -keepX * sin + keepY * cos,
   };
 }

@@ -1,11 +1,11 @@
 import './admin.css';
 import { AdminConnection } from './comm/connection.ts';
-import type { AdminState, LogEntry, MetricSample } from './comm/protocol.ts';
+import type { LogEntry, MetricSample } from './comm/protocol.ts';
+import { initMapManager } from './map/map-manager.ts';
 import { bindParams } from './params/paramManager.ts';
 import { bindTopbar, commandLabel } from './topbar/topbar.ts';
 
 const connection = new AdminConnection(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/admin`);
-const map = document.querySelector<HTMLDListElement>('#map')!;
 const metrics = document.querySelector<HTMLDListElement>('#metrics')!;
 const marks = document.querySelector<HTMLElement>('#marks')!;
 const events = document.querySelector<HTMLOListElement>('#events')!;
@@ -23,13 +23,6 @@ function showValues(element: HTMLDListElement, values: Iterable<readonly [string
     row.append(key, field);
     return row;
   }));
-}
-
-function showMap(state: AdminState) {
-  showValues(map, [
-    ['Oyuncular', state.players.length], ['NPC araçlar', state.npcCars.length],
-    ['Engeller', state.obstacles.length], ['Teslimat noktaları', state.deliveryPoints.length],
-  ]);
 }
 
 function showMetrics(samples: readonly MetricSample[]) {
@@ -58,16 +51,13 @@ function addEvents(entries: readonly LogEntry[]) {
 
 bindTopbar(connection, (entry) => addEvents([entry]));
 bindParams(connection, document.querySelector<HTMLElement>('#params')!);
+initMapManager(document.querySelector<HTMLElement>('#map')!, connection);
 connection.subscribe((update) => {
   switch (update.t) {
     case 'snapshot':
-      showMap(update.state);
       metricValues.clear();
       showMetrics([...update.metrics, ...update.board.samples]);
       addEvents(update.events);
-      break;
-    case 'state':
-      showMap(update.state);
       break;
     case 'metrics':
       showMetrics(update.samples);

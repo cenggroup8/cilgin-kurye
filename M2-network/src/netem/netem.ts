@@ -80,11 +80,12 @@ export class NetemQueue<T> {
       return;
     }
     const jitter = s.jitterMs > 0 ? (this.random() * 2 - 1) * s.jitterMs : 0;
-    let at = this.scheduler.now() + Math.max(0, s.delayMs + jitter);
+    const now = this.scheduler.now(); // read once, so the wait below is never negative
+    let at = now + Math.max(0, s.delayMs + jitter);
     if (this.opts.ordered) at = Math.max(at, this.lastAt);
     this.lastAt = at;
     this.waiting++;
-    this.scheduler.after(at - this.scheduler.now(), () => {
+    this.scheduler.after(at - now, () => {
       this.waiting--;
       this.stats.delivered++;
       this.deliver(msg);

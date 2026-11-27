@@ -102,6 +102,16 @@ describe("board link with the board emulator", () => {
     expect(emu.vibrateRepeats).toBe(0);
   });
 
+  it("30 states per second really come (not ~21 from the Windows timer steps)", async () => {
+    const { emu } = await setup();
+    await until(() => emu.states.length > 0);
+    const a = emu.states.length;
+    await wait(2000);
+    const perSecond = (emu.states.length - a) / 2;
+    expect(perSecond).toBeGreaterThanOrEqual(28);
+    expect(perSecond).toBeLessThanOrEqual(32);
+  });
+
   it("the admin changes the board state rate", async () => {
     const { link, emu } = await setup();
     await until(() => emu.states.length > 0);

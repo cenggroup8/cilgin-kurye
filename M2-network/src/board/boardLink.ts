@@ -183,13 +183,24 @@ export class BoardLink {
   }
 
   setStateHz(hz: number): void {
-    if (this.stateTimer) clearInterval(this.stateTimer);
-    this.stateTimer = setInterval(() => {
-      if (this.connected && this.state) {
-        this.statesSent++;
-        this.sendUdp(this.make("S", this.state));
+    if (this.stateTimer) clearTimeout(this.stateTimer);
+    // Each state has a fixed due time (start + k × period). A plain setInterval of 33 ms
+    // runs every ~47 ms on Windows (15.6 ms timer steps), which gave ~21 states per second.
+    const period = 1000 / hz;
+    let due = performance.now() + period;
+    const step = () => {
+      const now = performance.now();
+      if (now >= due) {
+        if (this.connected && this.state) {
+          this.statesSent++;
+          this.sendUdp(this.make("S", this.state));
+        }
+        due += period;
+        if (now - due > period) due = now + period; // far behind (the computer slept): no burst
       }
-    }, 1000 / hz);
+      this.stateTimer = setTimeout(step, Math.max(0, due - performance.now()));
+    };
+    this.stateTimer = setTimeout(step, period);
   }
 
   /** Admin parameters of the board link that are not queue values. */
@@ -212,7 +223,7 @@ export class BoardLink {
 
   async close(): Promise<void> {
     for (const t of this.timers) clearInterval(t);
-    if (this.stateTimer) clearInterval(this.stateTimer);
+    if (this.stateTimer) clearTimeout(this.stateTimer);
     for (const u of this.unbind) u();
     this.sock?.destroy();
     this.closeSockets();

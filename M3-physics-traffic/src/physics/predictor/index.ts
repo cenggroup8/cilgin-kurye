@@ -1,2 +1,2 @@
-export { Predictor } from './predictor';
-export type { DrawPose, PredictorOptions } from './predictor';
+export { Predictor } from './predictor.js';
+export type { DrawPose, PredictorOptions } from './predictor.js';

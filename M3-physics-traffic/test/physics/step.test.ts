@@ -9,7 +9,7 @@ import {
   SUBSTEP_ORDER,
   type PhysicsInput,
   type StageName,
-} from '../../src/physics';
+} from '../../src/physics/index.js';
 
 function input(over: Partial<PhysicsInput> = {}): PhysicsInput {
   return { tick: 1, dt: 1 / 30, bikes: [], obstacles: [], npcCars: [], quake: null, fall: [], standUp: [], ...over };

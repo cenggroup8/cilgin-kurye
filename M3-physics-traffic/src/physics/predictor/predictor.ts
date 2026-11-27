@@ -11,12 +11,12 @@
  * larger control number (the number M4-2 sends). Otherwise the predictor cannot
  * tell which controls the server has already used.
  */
-import { BIKE_STAGES } from '../bike';
-import { wrapAngle } from '../bike/motion';
-import type { BikeTuning } from '../bike/tuning';
-import { EMPTY_STAGES, stepPhysics, type PhysicsStages } from '../step';
-import type { BikeControl, BikeState, PhysicsParams } from '../types';
-import { addBike, createWorld, type PhysicsWorld, type SurfaceProvider } from '../world';
+import { BIKE_STAGES } from '../bike/index.js';
+import { wrapAngle } from '../bike/motion.js';
+import type { BikeTuning } from '../bike/tuning.js';
+import { EMPTY_STAGES, stepPhysics, type PhysicsStages } from '../step.js';
+import type { BikeControl, BikeState, PhysicsParams } from '../types.js';
+import { addBike, createWorld, type PhysicsWorld, type SurfaceProvider } from '../world.js';
 
 export interface PredictorOptions {
   /** Tick length, s. The same as the server tick (1/30). */

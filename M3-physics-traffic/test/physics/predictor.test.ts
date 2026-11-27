@@ -8,7 +8,7 @@ import {
   stepPhysics,
   type BikeControl,
   type BikeState,
-} from '../../src/physics';
+} from '../../src/physics/index.js';
 
 const DT = 1 / 30;
 const STAGES = { ...EMPTY_STAGES, ...BIKE_STAGES };

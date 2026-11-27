@@ -9,8 +9,8 @@
  * The M1 <-> M3 physics data is not in contracts/ yet. PhysicsInput and
  * PhysicsOutput below are the M3 proposal for it.
  */
-import type { Obstacle } from '../common/types';
-import type { CarHit, NpcCarPose } from '../traffic/npc/types';
+import type { Obstacle } from '../common/types.js';
+import type { CarHit, NpcCarPose } from '../traffic/npc/types.js';
 
 /** One control record. A phone and a bot send the same record. */
 export interface BikeControl {

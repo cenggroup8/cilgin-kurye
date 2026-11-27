@@ -11,8 +11,8 @@
  * take speed away, so on a puddle the motorcycle slides but does not slow down.
  * When there is grip to spare, the side speed fades away.
  */
-import type { Stage } from '../step';
-import { G } from './tuning';
+import type { Stage } from '../step.js';
+import { G } from './tuning.js';
 
 const TWO_PI = 2 * Math.PI;
 

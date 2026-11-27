@@ -1,6 +1,6 @@
-import type { Obstacle, PlayerPose } from '../../../src/common/types';
-import type { CarHit, NpcCarPose, TrafficOutput, TrafficParams } from '../../../src/traffic/npc';
-import type { NpcTraffic } from '../../../src/traffic/npc';
+import type { Obstacle, PlayerPose } from '../../../src/common/types.js';
+import type { CarHit, NpcCarPose, TrafficOutput, TrafficParams } from '../../../src/traffic/npc/index.js';
+import type { NpcTraffic } from '../../../src/traffic/npc/index.js';
 
 export const DT = 1 / 30;
 

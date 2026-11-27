@@ -12,9 +12,9 @@
  * Locking all cells at once (all or nothing) means no car holds one cell while
  * it waits for another, so the intersection itself cannot lock up.
  */
-import type { Vec2 } from '../../common/types';
-import { lanePoint, turnKind, type EdgeFrame, type TurnKind } from '../graph/laneGeometry';
-import type { RoadGraph } from '../graph/types';
+import type { Vec2 } from '../../common/types.js';
+import { lanePoint, turnKind, type EdgeFrame, type TurnKind } from '../graph/laneGeometry.js';
+import type { RoadGraph } from '../graph/types.js';
 
 const SAMPLES = 24;
 

@@ -4,7 +4,7 @@ import {
   fromContractPoint,
   toContractHeading,
   toContractPoint,
-} from '../../src/common/coords';
+} from '../../src/common/coords.js';
 
 describe('coordinates at the border of M3', () => {
   it('turns south (z) into minus y and back', () => {

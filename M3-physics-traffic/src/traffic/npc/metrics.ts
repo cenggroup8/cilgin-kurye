@@ -2,7 +2,7 @@
  * Traffic metrics for the admin graphs (issue #41, item 9).
  * M1 passes them on to M5 with the other live values.
  */
-import type { TrafficMetrics } from './types';
+import type { TrafficMetrics } from './types.js';
 
 export class TrafficMetricsCounter {
   private stuckRemovals = 0;

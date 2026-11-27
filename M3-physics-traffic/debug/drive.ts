@@ -10,9 +10,9 @@
  *
  * Drawing: x to the east and y to the north (up), like M3 inside.
  */
-import type { SurfaceProvider } from '../src/physics';
-import type { NpcCarPose } from '../src/traffic/npc';
-import { FakeM1 } from '../test/fakes/fakeM1';
+import type { SurfaceProvider } from '../src/physics/index.js';
+import type { NpcCarPose } from '../src/traffic/npc/index.js';
+import { FakeM1 } from '../test/fakes/fakeM1.js';
 
 // ---- test areas that stand in for M3-2 (M3 coordinates) ----
 const PUDDLE = { x0: 130, x1: 165, y0: -7, y1: 0 };

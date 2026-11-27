@@ -15,13 +15,14 @@
  * All randomness comes from one seeded Rng, and cars are always handled in the
  * same order, so the same inputs and seed give exactly the same traffic.
  */
-import { Rng } from '../../common/rng';
-import type { Obstacle, PlayerPose, Vec2 } from '../../common/types';
-import { buildEdgeFrames, lanePoint, turnKind, type EdgeFrame } from '../graph/laneGeometry';
-import type { RoadGraph } from '../graph/types';
-import { DEFAULT_IDM, idmAcceleration, type IdmParams } from './idm';
-import { buildTurnPath, IntersectionLocks, pointOnPath, type TurnPath } from './intersections';
-import { TrafficMetricsCounter } from './metrics';
+import { Rng } from '../../common/rng.js';
+import type { Obstacle, PlayerPose, Vec2 } from '../../common/types.js';
+import { buildEdgeFrames, lanePoint, turnKind, type EdgeFrame } from '../graph/laneGeometry.js';
+import type { RoadGraph } from '../graph/types.js';
+import { DEFAULT_IDM, idmAcceleration, type IdmParams } from './idm.js';
+import { buildTurnPath, IntersectionLocks, pointOnPath, type TurnPath } from './intersections.js';
+import { TrafficMetricsCounter } from './metrics.js';
+import { checkTrafficParams } from './params.js';
 import {
   DEFAULT_TRAFFIC_PARAMS,
   type CarHit,
@@ -30,7 +31,7 @@ import {
   type TrafficInput,
   type TrafficOutput,
   type TrafficParams,
-} from './types';
+} from './types.js';
 
 const CAR_LENGTH = 4.5;
 const CAR_WIDTH = 1.8;
@@ -44,6 +45,8 @@ const OBSTACLE_STUCK_TIMEOUT = 4;
 const STAND_SPEED = 0.3;
 /** A stuck car next to a player waits longer before it disappears, metres. */
 const STUCK_PLAYER_RADIUS = 25;
+/** Longest tick that is simulated in one go, s. */
+const MAX_DT = 0.1;
 const TURN_WEIGHTS = { straight: 3, right: 2, left: 1.5, uturn: 1 } as const;
 
 interface Car {
@@ -94,11 +97,12 @@ export class NpcTraffic {
   private readonly frames: EdgeFrame[];
   private readonly roadEdges: number[][];
   private readonly maxLanes: number;
-  private readonly rng: Rng;
   private readonly idm: IdmParams;
-  private readonly locks: IntersectionLocks;
-  private readonly metrics = new TrafficMetricsCounter();
   private readonly pathCache = new Map<string, TurnPath>();
+  private seed: number;
+  private rng: Rng;
+  private locks: IntersectionLocks;
+  private metrics = new TrafficMetricsCounter();
   private params: TrafficParams;
 
   private cars: Car[] = [];
@@ -121,17 +125,28 @@ export class NpcTraffic {
     this.roadEdges = graph.roads.map(() => []);
     for (const e of graph.edges) this.roadEdges[e.roadId].push(e.id);
     this.maxLanes = Math.max(1, ...graph.roads.map((r) => r.lanesPerDirection));
+    this.seed = opts.seed;
     this.rng = new Rng(opts.seed);
     this.idm = { ...DEFAULT_IDM, ...opts.idm };
-    this.params = { ...DEFAULT_TRAFFIC_PARAMS, ...opts.params };
+    this.params = checkTrafficParams({ ...DEFAULT_TRAFFIC_PARAMS, ...opts.params });
     this.locks = new IntersectionLocks(graph.nodes.length);
   }
 
-  /** One tick. */
+  /**
+   * One tick. While the game is paused, M1 simply does not call step(), so
+   * nothing moves and no timer runs.
+   *
+   * Throws RangeError for a bad dt, bad parameters or an obstacle that does
+   * not fit the road graph. M1 checks these values before, so an error here
+   * means a bug, and it should be loud.
+   */
   step(input: TrafficInput): TrafficOutput {
-    this.dt = input.dt;
+    if (!Number.isFinite(input.dt) || input.dt <= 0) throw new RangeError(`Bad dt: ${input.dt}`);
+    // A very long tick (for example after the server was stopped in a debugger)
+    // is cut, so cars never jump through each other.
+    this.dt = Math.min(input.dt, MAX_DT);
     this.players = input.players;
-    if (input.params) this.params = { ...this.params, ...input.params };
+    if (input.params) this.params = checkTrafficParams({ ...this.params, ...input.params });
 
     this.applyObstacles(input.obstacles);
     this.applyHits(input.carHits);
@@ -146,6 +161,24 @@ export class NpcTraffic {
     this.cars = this.cars.filter((c) => !c.removed);
 
     return this.output();
+  }
+
+  /**
+   * For a new game: removes every car, sets the counters to zero and starts the
+   * random numbers again (with a new seed if one is given). The parameters stay,
+   * like the admin values in M1. The next step() fills the city again.
+   */
+  reset(seed: number = this.seed): void {
+    this.seed = seed;
+    this.rng = new Rng(seed);
+    this.locks = new IntersectionLocks(this.graph.nodes.length);
+    this.metrics = new TrafficMetricsCounter();
+    this.cars = [];
+    this.nextId = 0;
+    this.initialized = false;
+    this.players = [];
+    this.laneIndex.clear();
+    this.incoming.clear();
   }
 
   /** Called by the bot drivers (M3-5) when a bot asks for a new route. */
@@ -166,23 +199,30 @@ export class NpcTraffic {
     this.heavyRoads.clear();
 
     for (const o of obstacles) {
-      if (o.roadId < 0 || o.roadId >= this.graph.roads.length) continue;
+      const ref = this.checkObstacle(o);
       switch (o.type) {
         case 'roadWork': {
           // The whole road is closed; a barrier stands across all its lanes.
           this.closedRoads.add(o.roadId);
           for (const e of this.roadEdges[o.roadId]) {
-            const s = this.obstacleS(o, e);
+            const s = this.obstacleS(o, ref, e);
             for (let l = 0; l < this.frames[e].lanes; l++) this.addLaneObstacle(e, l, s);
           }
           break;
         }
         case 'accident': {
-          // Solid in one lane.
-          const e = o.edgeId ?? this.roadEdges[o.roadId][0];
-          const lane = Math.min(o.lane ?? 0, this.frames[e].lanes - 1);
-          this.addLaneObstacle(e, lane, this.obstacleS(o, e));
-          this.accidentEdges.add(e);
+          if (o.lane === undefined) {
+            // Whole road: solid in every lane of both directions (but not closed for routes).
+            for (const e of this.roadEdges[o.roadId]) {
+              const s = this.obstacleS(o, ref, e);
+              for (let l = 0; l < this.frames[e].lanes; l++) this.addLaneObstacle(e, l, s);
+              this.accidentEdges.add(e);
+            }
+          } else {
+            // Solid in one lane.
+            this.addLaneObstacle(ref, o.lane, this.obstacleS(o, ref, ref));
+            this.accidentEdges.add(ref);
+          }
           break;
         }
         case 'heavyTraffic':
@@ -191,15 +231,40 @@ export class NpcTraffic {
         case 'puddle':
           // Only motorcycles slide; cars are not affected.
           break;
+        default:
+          throw new RangeError(`Unknown obstacle type: ${(o as Obstacle).type}`);
       }
     }
   }
 
-  private obstacleS(o: Obstacle, edge: number): number {
+  /** Checks an obstacle against the road graph and gives the edge its lane and s are measured on. */
+  private checkObstacle(o: Obstacle): number {
+    const road = this.graph.roads[o.roadId];
+    if (!Number.isInteger(o.roadId) || !road) throw new RangeError(`Obstacle ${o.id}: unknown road ${o.roadId}`);
+    const ref = o.edgeId ?? this.forwardEdge(o.roadId);
+    if (!this.roadEdges[o.roadId].includes(ref)) {
+      throw new RangeError(`Obstacle ${o.id}: edge ${o.edgeId} is not on road ${o.roadId}`);
+    }
+    if (o.lane !== undefined && (!Number.isInteger(o.lane) || o.lane < 0 || o.lane >= this.frames[ref].lanes)) {
+      throw new RangeError(`Obstacle ${o.id}: road ${o.roadId} has no lane ${o.lane}`);
+    }
+    if (o.s !== undefined && (!Number.isFinite(o.s) || o.s < 0 || o.s > this.frames[ref].length)) {
+      throw new RangeError(`Obstacle ${o.id}: s ${o.s} is outside the road`);
+    }
+    return ref;
+  }
+
+  /** The edge of a road that goes from road.a to road.b (the direction of the contracts segment). */
+  private forwardEdge(roadId: number): number {
+    const a = this.graph.roads[roadId].a;
+    return this.roadEdges[roadId].find((e) => this.graph.edges[e].from === a)!;
+  }
+
+  /** Position of an obstacle on edge `edge`; `o.s` is measured on edge `ref`. */
+  private obstacleS(o: Obstacle, ref: number, edge: number): number {
     const L = this.frames[edge].length;
     if (o.s === undefined) return L / 2;
-    if (o.edgeId === undefined || o.edgeId === edge) return o.s;
-    return L - o.s; // given on the other direction of the road
+    return edge === ref ? o.s : L - o.s; // the other direction of the same road
   }
 
   private addLaneObstacle(edge: number, lane: number, s: number): void {

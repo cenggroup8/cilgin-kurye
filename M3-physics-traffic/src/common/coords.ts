@@ -10,7 +10,7 @@
  *
  * Changing:  y = -z,   heading_m3 = 90° - heading_contract (in radians).
  */
-import type { Vec2 } from './types';
+import type { Vec2 } from './types.js';
 
 const DEG = Math.PI / 180;
 

@@ -1,0 +1,22 @@
+{
+  "name": "cilgin-kurye-m6-emulators",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "M6-5 PC emulators: server emulator and board emulator for the LED board link",
+  "scripts": {
+    "server": "tsx src/server/cli.ts",
+    "board": "tsx src/board/cli.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.1"
+  }
+}

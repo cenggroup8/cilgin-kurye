@@ -36,6 +36,8 @@ uint32_t usedConfigVersion = 0;
 led::BoardRenderer renderer;
 led::DemoMode demo;
 led::Frame frame;
+uint32_t lastFrameMs = 0;
+constexpr uint32_t kFrameMs = 16;  // 60 frames per second
 
 }  // namespace
 
@@ -76,20 +78,23 @@ void loop() {
 
   // 4. One LED frame (M6-4 draws, M6-3 sends to the strips).
   //    The LED part reads only: link.latestState(), link.config(), link.linkState().
+  // States are taken at once; the frame is drawn at most 60 times per second.
+  const bool drawNow = now - lastFrameMs >= kFrameMs;
+  if (drawNow) lastFrameMs = now;
   if (M6_DEMO) {
     const led::DemoFrame d = demo.step(now);
     if (d.newState) renderer.onState(d.state, now);
     renderer.setWinners(d.winners);
-    renderer.draw(frame, now, link.config(), d.link);
+    if (drawNow) renderer.draw(frame, now, link.config(), d.link);
   } else {
     if (link.stateVersion() != usedStateVersion) {
       usedStateVersion = link.stateVersion();
       renderer.onState(link.latestState(), now);
     }
-    renderer.draw(frame, now, link.config(), link.linkState());
+    if (drawNow) renderer.draw(frame, now, link.config(), link.linkState());
   }
   if (link.configVersion() != usedConfigVersion) usedConfigVersion = link.configVersion();
-  // M6-3: outputStage.send(frame, now);
+  // M6-3: if (drawNow) outputStage.send(frame, now);
 
   // 5. Reports (M6-3 fills the status, M6-1 sends it).
   if (now - lastStatusMs >= 1000) {

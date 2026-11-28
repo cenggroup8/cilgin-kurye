@@ -64,14 +64,15 @@ Rgb BoardRenderer::tone(const BoardConfig& cfg, uint8_t team, uint8_t toneIdx) c
 }
 
 void BoardRenderer::onState(const BoardState& s, uint32_t nowMs) {
-  // Delivery flash: a point that says "delivered just now" and was not flashing yet.
+  // Delivery flash: only when a point turns from waiting (0) to delivered (1). The server may
+  // send `delivered = 1` in many states one after the other; that is still one delivery.
   for (const auto& p : s.points) {
     if (!p.delivered) continue;
-    bool known = false;
-    for (const auto& f : flashes_) {
-      if (f.on && std::fabs(f.u - p.u) < 0.01f && std::fabs(f.v - p.v) < 0.01f && nowMs - f.startMs < 2000) known = true;
+    bool wasDelivered = false;
+    for (const auto& q : state_.points) {
+      if (q.delivered && std::fabs(q.u - p.u) < 0.01f && std::fabs(q.v - p.v) < 0.01f) wasDelivered = true;
     }
-    if (known) continue;
+    if (haveState_ && wasDelivered) continue;
     Flash* slot = &flashes_[0];
     for (auto& f : flashes_) {
       if (!f.on || f.startMs < slot->startMs) slot = &f;

@@ -338,6 +338,32 @@ static void testLayers() {
   r4.draw(f, 1800, cfg, LinkState::Connected);
   CHECK(f[dpl].r < 60, "the flash is short");
 
+  section("delivery flash: delivered = 1 for 2 s is one flash, a new delivery flashes again");
+  {
+    BoardRenderer r6;
+    BoardState s6 = s4;
+    s6.points[0].delivered = 0;
+    r6.onState(s6, 0);
+    s6.points[0].delivered = 1;
+    int flashes = 0;
+    bool lit = false;
+    for (uint32_t now = 100; now < 2100; now += 33) {
+      r6.onState(s6, now);
+      r6.draw(f, now, cfg, LinkState::Connected);
+      const bool bright = f[dpl].r > 200 && f[dpl].g > 200 && f[dpl].b > 200;
+      if (bright && !lit) flashes++;
+      lit = bright;
+    }
+    std::printf("    flashes for one delivery sent for 2 s: %d\n", flashes);
+    CHECK(flashes == 1, "one delivery, one flash");
+    s6.points[0].delivered = 0;
+    r6.onState(s6, 2200);
+    s6.points[0].delivered = 1;
+    r6.onState(s6, 2300);
+    r6.draw(f, 2350, cfg, LinkState::Connected);
+    CHECK(f[dpl].r > 200 && f[dpl].g > 200 && f[dpl].b > 200, "the next delivery at the same place flashes again");
+  }
+
   section("earthquake: a ring grows from the centre and fades");
   BoardRenderer r5;
   BoardState s5;

@@ -60,6 +60,7 @@ for (const b of plan.buildings) {
   const [r, c] = b.block.split("_").slice(1).map(Number);
   check(b.id === 5 * r + c, `building id ${b.block}`);
   check(b.height_m > 0, `building height ${b.block}`);
+  check(["houses", "apartments", "tower"].includes(b.kind), `building kind ${b.block}`);
   let area2 = 0;
   for (let i = 0; i < b.footprint.length; i++) {
     const [x, z] = b.footprint[i];

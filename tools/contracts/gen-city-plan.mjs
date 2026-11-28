@@ -34,11 +34,28 @@ for (let r = 0; r < LINES - 1; r++) {
 segments.sort((p, q) => p.id - q.id);
 
 // Stores sit inside the four corner blocks.
+// depot: the team's warehouse in the store corner, as printed for the board (tools/print/gen-city.py,
+// a quarter of the corner block). It is only a picture: not solid, the pickup area stays drivable.
+const DEPOT_NEAR_M = [10, 8.9]; // from the city corner: across, along the ridge (it reaches 1.1 m nearer the road)
+const DEPOT_FAR_M = 50;
+const DEPOT_HEIGHT_M = 25.7;
+function depot(cornerX, cornerZ) {
+  const sx = cornerX === 0 ? 1 : -1;
+  const sz = cornerZ === 0 ? 1 : -1;
+  const xs = [cornerX + sx * DEPOT_NEAR_M[0], cornerX + sx * DEPOT_FAR_M].sort((p, q) => p - q);
+  const zs = [cornerZ + sz * DEPOT_NEAR_M[1], cornerZ + sz * DEPOT_FAR_M].sort((p, q) => p - q);
+  return {
+    footprint: [[xs[0], zs[0]], [xs[1], zs[0]], [xs[1], zs[1]], [xs[0], zs[1]]],
+    height_m: DEPOT_HEIGHT_M,
+    roof: "gable, ridge north-south",
+    solid: false,
+  };
+}
 const stores = [
-  { team: 0, color: "blue", corner: "NW", node: 0, pickup: { x: 18, z: 18, radius_m: 10 } },
-  { team: 1, color: "green", corner: "NE", node: 5, pickup: { x: 482, z: 18, radius_m: 10 } },
-  { team: 2, color: "purple", corner: "SW", node: 30, pickup: { x: 18, z: 482, radius_m: 10 } },
-  { team: 3, color: "yellow", corner: "SE", node: 35, pickup: { x: 482, z: 482, radius_m: 10 } },
+  { team: 0, color: "blue", corner: "NW", node: 0, pickup: { x: 18, z: 18, radius_m: 10 }, depot: depot(0, 0) },
+  { team: 1, color: "green", corner: "NE", node: 5, pickup: { x: 482, z: 18, radius_m: 10 }, depot: depot(SIZE_M, 0) },
+  { team: 2, color: "purple", corner: "SW", node: 30, pickup: { x: 18, z: 482, radius_m: 10 }, depot: depot(0, SIZE_M) },
+  { team: 3, color: "yellow", corner: "SE", node: 35, pickup: { x: 482, z: 482, radius_m: 10 }, depot: depot(SIZE_M, SIZE_M) },
 ];
 
 // Draft: one delivery candidate at the middle of every segment. Side: E/W for NS roads, N/S for EW roads.
@@ -57,7 +74,7 @@ const candidates = segments.map((s) => ({
 const LANES = 2;
 const LANE_W = 3.5;
 const SETBACK_M = LANES * LANE_W + 3; // 10
-const STORE_CLEAR_M = 30;
+const STORE_CLEAR_M = 50; // a quarter of the corner block, where the depot stands
 
 function blockFootprint(r, c) {
   const x0 = c * PITCH_M + SETBACK_M;
@@ -78,17 +95,36 @@ function blockFootprint(r, c) {
   return [[x0, z0], [x1, z0], [x1, z1], [cx, z1], [cx, cz], [x0, cz]];
 }
 
+// What stands on each block and its highest point, as in the printed board buildings
+// (tools/print/gen-city.py, M6-5): detached houses in the outer ring, apartments inside,
+// one tower in the centre. 1 m = 1.12 mm on the board. tools/print/check-buildings.py
+// checks that every printed block is exactly this high.
+// Index = block id (5r + c).
+const KIND = [
+  "houses", "houses", "apartments", "houses", "houses",
+  "houses", "apartments", "apartments", "apartments", "houses",
+  "apartments", "apartments", "tower", "apartments", "apartments",
+  "houses", "apartments", "apartments", "apartments", "houses",
+  "houses", "houses", "apartments", "houses", "houses",
+];
+const HEIGHT_M = [
+  12.8, 12.8, 24.8, 12.8, 12.8,
+  12.8, 25.4, 24.4, 25.3, 12.8,
+  25.8, 24.4, 53.6, 26.1, 24.8,
+  12.8, 25.6, 22.8, 24.8, 12.8,
+  12.8, 12.8, 23.1, 12.8, 12.8,
+];
+
 const buildings = [];
 for (let r = 0; r < LINES - 1; r++) {
   for (let c = 0; c < LINES - 1; c++) {
-    // Placeholder heights, 12-36 m, so the city does not look flat. Fixed, no random numbers.
-    const height_m = 12 + ((7 * r + 3 * c) % 5) * 6;
-    buildings.push({ id: 5 * r + c, block: `b_${r}_${c}`, footprint: blockFootprint(r, c), height_m });
+    const id = 5 * r + c;
+    buildings.push({ id, block: `b_${r}_${c}`, kind: KIND[id], footprint: blockFootprint(r, c), height_m: HEIGHT_M[id] });
   }
 }
 
 const plan = {
-  version: "0.2.0",
+  version: "0.3.0",
   status: "draft - frozen when all module proposals are approved",
   world: {
     size_m: SIZE_M,

@@ -8,7 +8,10 @@
  * The shapes are the ones the admin page of M5-1 (#73) reads. They are a draft until #35:
  *   {t:"metrics", samples:[{name, time, value}]}
  *   {t:"board", board:{connected, samples, quake?}}
- *   {t:"snapshot", state, params, metrics, board, events}
+ *   {t:"snapshot", state, params, metrics, board, events, marks}
+ *
+ * `marks` (contracts/messages.md, #101): the commands accepted in the history time, at server
+ * time, so the graphs of the admin page draw their change marks again after a page reload.
  */
 
 export interface MetricSample {
@@ -27,6 +30,12 @@ export interface BoardData {
 export interface LogEntry {
   time: number;
   message: string;
+}
+
+/** One accepted command: the parameter's name for `param_set`, the command's name otherwise. */
+export interface ChangeMark {
+  time: number;
+  name: string;
 }
 
 /** One row of the parameter list of M1-5 (`ParamInfo`). */
@@ -62,6 +71,7 @@ export class AdminFeed {
   private readonly quakeHoldMs: number;
   private params: ParamRow[] = [];
   private state: unknown = null;
+  private readonly marks: ChangeMark[] = [];
 
   constructor(private readonly send: (msg: unknown) => void, opts: AdminFeedOptions = {}) {
     this.historyMs = opts.historyMs ?? 120_000;
@@ -119,6 +129,12 @@ export class AdminFeed {
     return this.quake ? { connected: this.connected, quake: this.quake } : { connected: this.connected };
   }
 
+  /** An accepted command, for the change marks of the snapshot. Kept as long as the metrics. */
+  addMark(name: string): void {
+    this.marks.push({ time: this.now(), name });
+    this.trim(this.marks);
+  }
+
   event(message: string): void {
     const entry = { time: this.now(), message };
     this.events.push(entry);
@@ -130,6 +146,7 @@ export class AdminFeed {
   snapshot(): unknown {
     this.trim(this.metrics);
     this.trim(this.boardSamples);
+    this.trim(this.marks);
     return {
       t: "snapshot",
       state: this.state,
@@ -137,10 +154,11 @@ export class AdminFeed {
       metrics: [...this.metrics],
       board: { ...this.boardState(), samples: [...this.boardSamples] },
       events: [...this.events],
+      marks: [...this.marks],
     };
   }
 
-  private trim(samples: MetricSample[]): void {
+  private trim(samples: { time: number }[]): void {
     const from = this.now() - this.historyMs;
     let i = 0;
     while (i < samples.length && samples[i]!.time < from) i++;

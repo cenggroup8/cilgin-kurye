@@ -2,7 +2,7 @@ import type { GameCode } from "../http/gameCode.js";
 import { MAX_PLAYERS, type PlayerEvents, type Session } from "./types.js";
 
 export type HelloResult =
-  | { ok: true; playerNo: number; returning: boolean; replacedConnId?: number }
+  | { ok: true; playerNo: number; returning: boolean; replacedConnId?: number; team?: number }
   | { ok: false; reason: "bad_code" | "full" | "bad_hello" };
 
 /** A player place. It stays with the player key while the link is down. */
@@ -11,6 +11,8 @@ interface Slot {
   playerNo: number;
   name: string;
   connId: number | null;
+  /** The team M1 accepted (`answerJoin`), if any. */
+  team?: number;
 }
 
 /**
@@ -74,7 +76,7 @@ export class SessionRegistry {
       if (name) known.name = name;
       this.bind(session, known);
       if (returning) this.events.returned({ playerKey: key, playerNo: known.playerNo });
-      return { ok: true, playerNo: known.playerNo, returning, replacedConnId };
+      return { ok: true, playerNo: known.playerNo, returning, replacedConnId, team: known.team };
     }
 
     const playerNo = this.freeNumber();
@@ -92,6 +94,18 @@ export class SessionRegistry {
     if (typeof team !== "number" || !Number.isInteger(team)) return false;
     this.events.join({ playerKey: s.playerKey, playerNo: s.playerNo, name: s.name ?? "", team });
     return true;
+  }
+
+  /**
+   * M1's answer to a join. An accepted team is kept with the player place.
+   * Gives the open link of that player, or undefined when the key is unknown or its link is
+   * down (a player that comes back later still gets its accepted team after the welcome).
+   */
+  answerJoin(a: { playerKey: string; ok: boolean; team?: number }): { connId: number; playerNo: number } | undefined {
+    const slot = this.slots.get(a.playerKey);
+    if (!slot) return undefined;
+    if (a.ok) slot.team = a.team;
+    return slot.connId === null ? undefined : { connId: slot.connId, playerNo: slot.playerNo };
   }
 
   /** A link closed. */

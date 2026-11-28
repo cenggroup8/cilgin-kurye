@@ -29,7 +29,7 @@ function admin(name: string, r: { ok: boolean; error?: string }): void {
 }
 
 console.log("Game 1: one human, three bots, pauses, a lost player, early end\n");
-say(`join Ayşe to team 0: ${m.join("key-ayse", "Ayşe", 0).ok ? "ok" : "error"}`);
+say(`join Ayşe to team 0: ${m.join("key-ayse", 0, "Ayşe", 0).ok ? "ok" : "error"}`);
 admin("start with 3 bots", m.start(3));
 say(`roster: ${m.roster.map((p) => `${p.playerNo}:${p.human ? p.name : "bot"}(team ${p.team})`).join(" ")}`);
 until(1);

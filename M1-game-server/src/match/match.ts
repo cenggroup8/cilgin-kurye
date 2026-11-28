@@ -119,20 +119,29 @@ export class Match {
 
   // ---- inputs from M2 (through the loop) ----
 
-  /** A phone joined with a team, or changed its team, in the lobby. */
-  join(playerKey: string, name: string, team: number): Result {
+  /**
+   * A phone joined with a team, or changed its team, in the lobby.
+   *
+   * `playerNo` is the number M2-1 gave this phone in its `hello` (the `welcome`), so the
+   * phone and M1 always mean the same player. M1 only gives numbers to bots.
+   */
+  join(playerKey: string, playerNo: number, name: string, team: number): Result {
     if (this._phase !== "lobby") return fail("not_in_lobby");
     if (!Number.isInteger(team) || team < 0 || team >= TEAMS) return fail("bad_team");
+    if (!Number.isInteger(playerNo) || playerNo < 0 || playerNo >= MAX_PLAYERS) return fail("bad_player");
     const me = this._roster.find((p) => p.playerKey === playerKey);
-    if (me && me.team === team) return OK;
-    if (this.teamSize(team) >= MAX_PER_TEAM) return fail("team_full");
+    const holder = this._roster.find((p) => p.playerNo === playerNo);
+    if (holder && holder !== me) return fail("number_taken");
+    if (me && me.team === team && me.playerNo === playerNo) return OK;
+    if ((!me || me.team !== team) && this.teamSize(team) >= MAX_PER_TEAM) return fail("team_full");
     if (me) {
       me.team = team;
       me.name = name;
+      me.playerNo = playerNo;
+      this.sortRoster();
       return OK;
     }
-    const playerNo = this.freeNumber();
-    if (playerNo === null) return fail("game_full");
+    if (this._roster.length >= MAX_PLAYERS) return fail("game_full");
     this._roster.push({
       playerNo,
       team,
@@ -173,7 +182,7 @@ export class Match {
     if (this._phase !== "lobby") return fail("not_in_lobby");
     if (!Number.isInteger(botCount) || botCount < 0 || botCount > MAX_PLAYERS) return fail("bad_bot_count");
     for (let i = 0; i < botCount; i++) {
-      const playerNo = this.freeNumber();
+      const playerNo = this.freeBotNumber();
       const team = this.smallestTeam();
       if (playerNo === null || team === null) break;
       this._roster.push({
@@ -302,9 +311,14 @@ export class Match {
     return best;
   }
 
-  private freeNumber(): number | null {
+  /**
+   * A free number for a bot, from the top (7, 6, ...). M2-1 gives humans their numbers
+   * from 0 up in the hello, so a phone that said hello but has not joined yet keeps its
+   * number free as long as possible.
+   */
+  private freeBotNumber(): number | null {
     const used = new Set(this._roster.map((p) => p.playerNo));
-    for (let n = 0; n < MAX_PLAYERS; n++) if (!used.has(n)) return n;
+    for (let n = MAX_PLAYERS - 1; n >= 0; n--) if (!used.has(n)) return n;
     return null;
   }
 

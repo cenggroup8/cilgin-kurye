@@ -13,7 +13,7 @@ function run(m: Match, ticks: number, scores: number[] = NO_SCORES): MatchEvent[
 
 function started(bots = 0): Match {
   const m = new Match(SHORT);
-  m.join("human-a", "Ayşe", 0);
+  m.join("human-a", 0, "Ayşe", 0);
   m.start(bots);
   return m;
 }
@@ -21,37 +21,63 @@ function started(bots = 0): Match {
 describe("lobby", () => {
   it("at most 2 players in a team and 8 in total", () => {
     const m = new Match(SHORT);
-    expect(m.join("a", "A", 0)).toEqual({ ok: true });
-    expect(m.join("b", "B", 0)).toEqual({ ok: true });
-    expect(m.join("c", "C", 0)).toEqual({ ok: false, error: "team_full" });
-    for (let i = 0; i < 6; i++) expect(m.join(`p${i}`, "P", 1 + Math.floor(i / 2))).toEqual({ ok: true });
+    expect(m.join("a", 0, "A", 0)).toEqual({ ok: true });
+    expect(m.join("b", 1, "B", 0)).toEqual({ ok: true });
+    expect(m.join("c", 2, "C", 0)).toEqual({ ok: false, error: "team_full" });
+    for (let i = 0; i < 6; i++) expect(m.join(`p${i}`, 2 + i, "P", 1 + Math.floor(i / 2))).toEqual({ ok: true });
     expect(m.roster).toHaveLength(8);
-    expect(m.join("ninth", "N", 3)).toEqual({ ok: false, error: "team_full" });
-    expect(m.join("x", "X", 4)).toEqual({ ok: false, error: "bad_team" });
+    expect(m.join("ninth", 7, "N", 3)).toEqual({ ok: false, error: "number_taken" });
+    expect(m.join("x", 0, "X", 4)).toEqual({ ok: false, error: "bad_team" });
   });
 
   it("a player can change team while there is room", () => {
     const m = new Match(SHORT);
-    m.join("a", "A", 0);
-    expect(m.join("a", "A", 2)).toEqual({ ok: true });
+    m.join("a", 0, "A", 0);
+    expect(m.join("a", 0, "A", 2)).toEqual({ ok: true });
     expect(m.roster[0]).toMatchObject({ playerNo: 0, team: 2 });
+  });
+
+  it("the player number comes from M2, not from M1", () => {
+    const m = new Match(SHORT);
+    // M2 gave 0 to a phone that has not joined yet, so the first to join is number 1.
+    expect(m.join("b", 1, "B", 0)).toEqual({ ok: true });
+    expect(m.join("a", 0, "A", 1)).toEqual({ ok: true });
+    expect(m.roster.map((p) => [p.playerNo, p.playerKey])).toEqual([[0, "a"], [1, "b"]]);
+  });
+
+  it("a number that another player has, or one outside 0–7, is refused", () => {
+    const m = new Match(SHORT);
+    m.join("a", 3, "A", 0);
+    expect(m.join("b", 3, "B", 1)).toEqual({ ok: false, error: "number_taken" });
+    expect(m.join("b", 8, "B", 1)).toEqual({ ok: false, error: "bad_player" });
+    expect(m.join("b", -1, "B", 1)).toEqual({ ok: false, error: "bad_player" });
+    expect(m.join("b", 1.5, "B", 1)).toEqual({ ok: false, error: "bad_player" });
+    expect(m.roster).toHaveLength(1);
+  });
+
+  it("the same key with a new number from M2 moves to that number", () => {
+    const m = new Match(SHORT);
+    m.join("a", 3, "A", 0);
+    expect(m.join("a", 1, "A", 0)).toEqual({ ok: true });
+    expect(m.roster).toEqual([expect.objectContaining({ playerKey: "a", playerNo: 1, team: 0 })]);
   });
 
   it("start fills empty places with the number of bots the admin chose", () => {
     const m = new Match(SHORT);
-    m.join("a", "A", 0);
+    m.join("a", 0, "A", 0);
     m.start(3);
+    // Bots take numbers from the top, so humans that M2 numbered from 0 up keep theirs.
     expect(m.roster.map((p) => [p.playerNo, p.team, p.human])).toEqual([
       [0, 0, true],
-      [1, 1, false],
-      [2, 2, false],
-      [3, 3, false],
+      [5, 3, false],
+      [6, 2, false],
+      [7, 1, false],
     ]);
   });
 
   it("bots never go over 2 per team or 8 in total", () => {
     const m = new Match(SHORT);
-    m.join("a", "A", 0);
+    m.join("a", 0, "A", 0);
     m.start(8);
     expect(m.roster).toHaveLength(8);
     for (let t = 0; t < 4; t++) expect(m.roster.filter((p) => p.team === t)).toHaveLength(2);
@@ -66,7 +92,7 @@ describe("lobby", () => {
 
   it("no join after the start", () => {
     const m = started();
-    expect(m.join("late", "L", 1)).toEqual({ ok: false, error: "not_in_lobby" });
+    expect(m.join("late", 1, "L", 1)).toEqual({ ok: false, error: "not_in_lobby" });
   });
 });
 
@@ -199,8 +225,8 @@ describe("lost players", () => {
 describe("same inputs, same match", () => {
   it("two runs of the same script give the same state", () => {
     const script = (m: Match) => {
-      m.join("a", "A", 0);
-      m.join("b", "B", 1);
+      m.join("a", 0, "A", 0);
+      m.join("b", 1, "B", 1);
       m.start(4);
       run(m, 5);
       m.lost("b");

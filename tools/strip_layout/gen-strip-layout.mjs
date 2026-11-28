@@ -20,11 +20,11 @@ const root = fileURLToPath(new URL("../../", import.meta.url));
 const plan = JSON.parse(readFileSync(root + "contracts/city_plan.json", "utf8"));
 
 // ---- board parameters (proposal; change here, then run the script) -------------
-const BOARD_MM = 600; // 60 × 60 cm (doc 10.1)
-const MARGIN_MM = 20; // outer roads this far from the edge of the base
+const BOARD_MM = 650; // 65 × 65 cm: the printed building plates of #81 are 105 mm
+const MARGIN_MM = 30; // outer roads this far from the edge of the base
 const STRIP_LEDS_PER_M = 144; // WS2812B, 144 LEDs/m, as bought (5 m reels of 720 LEDs)
-const STRIP_WIDTH_MM = 15; // measured on the strip
-const MIN_GAP_MM = 27; // free space at a crossing: the other strip (15 mm) + about 6 mm on each side for solder pads
+const STRIP_WIDTH_MM = 12; // measured on the strip
+const MIN_GAP_MM = 24; // free space at a crossing: the other strip (12 mm) + about 6 mm on each side for solder pads
 // Stores: a piece of 2 LEDs cut from the strip (#20: 8 store LEDs). The free store
 // corner of the city plan is 30 m × 30 m; on the board, without the road, that is a
 // square of about 22 mm. A piece of 2 LEDs (13.9 × 15 mm) fits there, east-west.

@@ -13,3 +13,4 @@ export { loadScooter, scooterTemplate, useScooterTemplate, SCOOTER_NODES, SCOOTE
 export { buildTown, Town } from "./town.ts";
 export { Props } from "./props.ts";
 export { texture, type TextureName } from "./textures.ts";
+export { FrameRate } from "./frame-rate.ts";

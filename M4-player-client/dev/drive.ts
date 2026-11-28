@@ -4,6 +4,7 @@ import {
   blendPlayer,
   CityScene,
   EngineAudio,
+  FrameRate,
   loadScooter,
   PLAYER_TONES,
   SnapshotBuffer,
@@ -322,9 +323,10 @@ function stepOnce(): void {
 
 let last = performance.now();
 let acc = 0;
-let frames = 0;
-let fpsTime = last;
 let shownKmh = -1;
+const frameRate = new FrameRate();
+const capButtons = [...document.querySelectorAll<HTMLElement>("[data-cap]")];
+for (const b of capButtons) b.addEventListener("click", () => (frameRate.limit = Number(b.dataset.cap) || null));
 
 function frame(now: number): void {
   const dt = Math.min(0.1, (now - last) / 1000);
@@ -338,6 +340,11 @@ function frame(now: number): void {
   }
   if (steps === 5) acc = 0;
   const t = paused ? 1 : Math.min(1, acc / m1.dt);
+  const drawDt = frameRate.frame(now, dt);
+  if (drawDt === null) {
+    requestAnimationFrame(frame);
+    return;
+  }
 
   const b = m1.physics.bikes.get(PLAYER)!;
   const me: ScenePlayer = {
@@ -373,11 +380,11 @@ function frame(now: number): void {
       obstacles: obstaclesOn ? DEMO_OBSTACLES : [],
       quake: quakeOn ? QUAKE : null,
     },
-    dt,
+    drawDt,
   );
   toggles.obstacles.classList.toggle("on", obstaclesOn);
   toggles.quake.classList.toggle("on", quakeOn);
-  audio.update(paused ? 0.1 : scene.gearbox.rpm, paused ? 0 : scene.gearbox.load, dt);
+  audio.update(paused ? 0.1 : scene.gearbox.rpm, paused ? 0 : scene.gearbox.load, drawDt);
   scene.render();
 
   const speed = Math.round(Math.abs(b.speed) * 3.6);
@@ -391,12 +398,8 @@ function frame(now: number): void {
   toolButtons.get("p")?.classList.toggle("on", paused);
   pausedEl.classList.toggle("show", paused);
 
-  frames++;
-  if (now - fpsTime >= 500) {
-    fpsText.textContent = `${Math.round((frames * 1000) / (now - fpsTime))} FPS`;
-    frames = 0;
-    fpsTime = now;
-  }
+  fpsText.textContent = frameRate.limit ? `${frameRate.fps} / ${frameRate.limit} FPS` : `${frameRate.fps} FPS`;
+  for (const b of capButtons) b.classList.toggle("on", (Number(b.dataset.cap) || null) === frameRate.limit);
   requestAnimationFrame(frame);
 }
 loadScooter()

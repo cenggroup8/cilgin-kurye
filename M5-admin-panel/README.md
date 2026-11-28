@@ -90,7 +90,7 @@ metrics twice per second, keeps two minutes of metric history for the snapshot a
 reconnect, and a delay or loss set in the network table shows up in the measured ping and loss.
 
 It answers the admin messages of `contracts/messages.md` (#90): `snapshot_get` with one
-`snapshot` (parameters, state, metric history, board data and log), `params_get` with `params`,
+`snapshot` (parameters, state, metric history, board data, log and change marks), `params_get` with `params`,
 `log_get {since?}` with `log`, and every `cmd` with one `reply`. A message it cannot use gets
 `error` with `bad_message`, `unknown_type` or `bad_field`, and the fake server keeps running.
 

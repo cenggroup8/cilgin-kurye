@@ -65,6 +65,8 @@ export interface ReceivedCommand {
 
 /** Contract messages (contracts/messages.md, #90) that the admin page of M5-1 does not read yet. */
 type ContractOnly = { t: 'error'; reason: string; ref?: string } | { t: 'log'; entries: LogEntry[] };
+/** `snapshot.marks` (#101): the accepted commands of the history time, at server time. */
+type ChangeMark = { time: number; name: string };
 
 type Obstacle = AdminState['obstacles'][number];
 
@@ -106,6 +108,7 @@ export function attachFakeServer(server: Server, options: FakeServerOptions = {}
   const metrics: MetricSample[] = [];
   const boardSamples: MetricSample[] = [];
   const events: LogEntry[] = [];
+  const marks: ChangeMark[] = [];
   let sinceMetrics = 0;
 
   const value = (name: string, fallback = 0) => params.get(name)?.value ?? fallback;
@@ -155,7 +158,8 @@ export function attachFakeServer(server: Server, options: FakeServerOptions = {}
     return { connected: boardConnected, samples: boardSamples.slice(-20), ...(quake ? { quake } : {}) };
   }
 
-  function snapshot(): Snapshot {
+  function snapshot(): Snapshot & { marks: ChangeMark[] } {
+    const from = now() - HISTORY_MS;
     return {
       t: 'snapshot',
       state: state(),
@@ -163,6 +167,7 @@ export function attachFakeServer(server: Server, options: FakeServerOptions = {}
       metrics: [...metrics],
       board: { ...board(), samples: [...boardSamples] },
       events: [...events],
+      marks: marks.filter((m) => m.time >= from),
     };
   }
 
@@ -294,8 +299,15 @@ export function attachFakeServer(server: Server, options: FakeServerOptions = {}
 
   function handle(cmd: ReceivedCommand) {
     commands.push(cmd);
-    const reply = (error?: string) => send(error === undefined
-      ? { t: 'reply', id: cmd.id, ok: true } : { t: 'reply', id: cmd.id, ok: false, error });
+    const reply = (error?: string) => {
+      if (error === undefined) {
+        // An accepted command is a change mark (the parameter's name for param_set), as in M2-3.
+        const param = cmd.name === 'param_set' ? cmd.args?.name : undefined;
+        marks.push({ time: now(), name: typeof param === 'string' ? param : cmd.name });
+        if (marks.length > 200) marks.splice(0, marks.length - 200);
+      }
+      send(error === undefined ? { t: 'reply', id: cmd.id, ok: true } : { t: 'reply', id: cmd.id, ok: false, error });
+    };
     const allowed = ALLOWED[cmd.name];
     if (!allowed) return reply('unknown_command');
     if (!allowed.includes(phase)) return reply('wrong_phase');

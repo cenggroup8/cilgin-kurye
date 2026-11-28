@@ -1,0 +1,35 @@
+<!doctype html>
+<!-- Placeholder admin page of M2-1. The real admin panel is M5's work. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Çılgın Kurye admin</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 480px; margin: 24px auto; padding: 0 16px; text-align: center; }
+  #code { font-size: 48px; letter-spacing: 6px; font-weight: bold; }
+  #qr svg { width: 280px; height: 280px; }
+</style>
+</head>
+<body>
+<h1>Join the game</h1>
+<div id="qr"></div>
+<div id="code"></div>
+<p id="url"></p>
+<p id="status">Connecting…</p>
+<script>
+  const $ = (id) => document.getElementById(id);
+  async function showJoin() {
+    const j = await (await fetch("/join")).json();
+    $("code").textContent = j.code;
+    $("url").textContent = j.url;
+    $("qr").innerHTML = await (await fetch("/qr.svg")).text();
+  }
+  showJoin();
+  const ws = new WebSocket(`ws://${location.host}/ws/admin`);
+  ws.onopen = () => ($("status").textContent = "Admin connected");
+  ws.onclose = (e) =>
+    ($("status").textContent = e.code === 4001 ? "Another admin logged in. This page is closed." : "Admin link lost");
+</script>
+</body>
+</html>

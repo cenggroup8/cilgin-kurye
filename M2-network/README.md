@@ -35,8 +35,58 @@ test/
   fakes/       M2-3  fake M1 and bot phones
 ```
 
-The code is not written yet. Each part can be built and tested alone with test data, as the module
-document describes.
+Each part can be built and tested alone with test data, as the module document describes.
+
+## Run and test
+
+Node.js 20 or newer.
+
+```
+npm install
+npm test            # all tests
+npm run demo        # start the server; join from a phone with the QR code
+npm run demo:bots   # bot phones show the M2-1 demo points, then the demo ends
+```
+
+`npm run demo` prints the game code, the phone address and a QR code. The admin page is at
+`http://localhost:8080/admin`. `PORT=9000 npm run demo` uses another port.
+
+## M2-1: web server, join, sessions
+
+| Part | Files |
+|---|---|
+| Six digit game code, new code on request | `src/http/gameCode.ts` |
+| QR code with the address of the main computer and the game code | `src/http/joinInfo.ts` |
+| Pages, 3D models (`/models/`), city plan (`/city_plan.json`), `/join`, `/qr.svg` | `src/http/httpServer.ts` |
+| Placeholder phone and admin pages (the real ones come from M4 and M5) | `src/http/pages/` |
+| Session record, player key, 8 places, one admin | `src/session/registry.ts` |
+| WebSocket links: `/ws` for phones, `/ws/admin` for the admin | `src/session/wsServer.ts` |
+| Starts everything | `src/server.ts` |
+
+What M2-1 tells M1 (`PlayerEvents` in `src/session/types.ts`): a player joined with a team,
+a player's link was lost, a lost player came back. M2-2's input queue will carry these to M1;
+until then the tests and the demo use a small recording stand-in for M1.
+
+Draft messages (until M2-2 writes the phone and admin messages into `contracts/`):
+
+| Direction | Message |
+|---|---|
+| Phone → server | `{t:"hello", key, name, code}` — must be the first message |
+| Phone → server | `{t:"join", team}` |
+| Server → phone | `{t:"welcome", player, returning}` or `{t:"error", reason}` |
+
+Close codes: 4001 another admin logged in, 4002 the same player opened on another page,
+4003 the hello was rejected (`bad_code`, `full`, `bad_hello`).
+
+Open points for the team:
+
+- `contracts/` is not on `main` since the restart. `/city_plan.json` reads
+  `contracts/city_plan.json` and gives 404 until the file is back.
+- A player place stays with its key until M1 frees it (`registry.release`). The document
+  does not say when a lobby place is freed; M1 decides.
+- A key that already joined can come back after the admin makes a new game code.
+- The session number that changes on every server start (document 6.5) belongs to the
+  board link and is not part of M2-1.
 
 ## Team
 

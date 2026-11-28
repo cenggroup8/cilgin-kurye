@@ -13,6 +13,7 @@ import { smallAdminState, StateBroadcaster, type BoardSink, type BroadcastStats,
  *                          last state of every phone
  *   M1 → metrics(samples)  twice per second: all metrics, on to the admin with a short history
  *   M2-4 → board(data)     board link state, sensor samples, earthquakes, on to the admin
+ *   M1 → commandAccepted() an admin command that M1-5 accepted: a change mark for the snapshot
  *   M1-5 → netParam()      frame rate limit of one phone (`net.<p>.fps_limit`), sent to that
  *                          phone as `net {fps_limit}` when it changes and when the phone joins
  *                          or comes back (contracts/messages.md)
@@ -63,6 +64,11 @@ export interface BroadcastHub {
    */
   netParam(name: string, value: number): boolean;
   event(message: string): void;
+  /**
+   * An admin command that M1-5 accepted (its `reply` has `ok: true`). The snapshot gives it
+   * back as a change mark: the parameter's name for `param_set`, the command's name otherwise.
+   */
+  commandAccepted(name: string, args?: Record<string, unknown>): void;
   /** Gives the messages of M2-3 to this part. Returns false for messages of other parts. */
   onMessage(session: Session, msg: unknown): boolean;
   /** Sends a ping to every phone and gives the newest measurements to M1. */
@@ -169,6 +175,9 @@ export function attachBroadcast(opts: HubOptions): BroadcastHub {
     },
     netParam,
     event: (message) => feed.event(message),
+    commandAccepted(name, args) {
+      feed.addMark(name === "param_set" && typeof args?.name === "string" ? args.name : name);
+    },
     onMessage(session, msg) {
       const t = typeof msg === "object" && msg !== null ? (msg as { t?: unknown }).t : undefined;
       if (session.role === "player" && t === "pong") {

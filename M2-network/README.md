@@ -126,7 +126,7 @@ Messages of M2-3 (now in `contracts/messages.md`):
 | Phone → server | `{t:"pong", id, ct, fps, last}` — phone time, frame rate, last state `seq` |
 | Server → phone | `{t:"net", fps_limit}` — frame rate limit of this phone (0–120, 0 = none), from `net.<p>.fps_limit`; sent when it changes and when the phone joins or comes back. M1-1 connects it with `sinks: { M4: (name, value) => hub.netParam(name, value) }` |
 | Server → admin | `{t:"state", state}`, `{t:"metrics", samples}`, `{t:"board", board}`, `{t:"params", list}`, `{t:"param", name, value}`, `{t:"event", entry}` |
-| Admin → server | `{t:"snapshot_get"}`, answered with `{t:"snapshot", state, params, metrics, board, events}` |
+| Admin → server | `{t:"snapshot_get"}`, answered with `{t:"snapshot", state, params, metrics, board, events, marks}`. `marks` are the commands M1-5 accepted in the last two minutes (`{time, name}`, #101); M1-1 reports each one with `hub.commandAccepted(name, args)` when its `reply` is `ok` |
 
 The admin shapes are the ones the admin page of M5-1 (#73) reads.
 

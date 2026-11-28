@@ -11,8 +11,11 @@ export {
 export {
   fromContractObstacle,
   fromContractObstacles,
+  fromContractPlayer,
+  fromContractPlayers,
   toContractCar,
   type ContractNpcCar,
   type ContractObstacle,
+  type ContractPlayer,
   type ContractObstacleType,
 } from './contract.js';

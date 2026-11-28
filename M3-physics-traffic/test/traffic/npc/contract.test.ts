@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
   fromContractObstacle,
   fromContractObstacles,
+  fromContractPlayer,
+  fromContractPlayers,
   heavyTrafficFromEffect,
   NpcTraffic,
   toContractCar,
@@ -88,6 +90,42 @@ describe('toContractCar', () => {
       expect(c.lane).toBeGreaterThanOrEqual(1);
       expect(c.lane).toBeLessThanOrEqual(4);
     }
+  });
+});
+
+describe('fromContractPlayer', () => {
+  const pl = (heading: number, x = 100, z = 50) => ({ id: 1, x, z, heading, speed: 8, fallen: false });
+
+  it('turns contracts x, z and degrees into M3 x, y and radians', () => {
+    expect(fromContractPlayer(pl(90))).toEqual({ id: 1, x: 100, y: -50, heading: 0, speed: 8, fallen: false });
+    expect(fromContractPlayer(pl(0)).heading).toBeCloseTo(Math.PI / 2); // north
+    expect(fromContractPlayer(pl(180)).heading).toBeCloseTo(-Math.PI / 2); // south
+    expect(Math.abs(fromContractPlayer(pl(270)).heading)).toBeCloseTo(Math.PI); // west
+  });
+
+  it('throws on a pose that is not a number', () => {
+    expect(() => fromContractPlayer(pl(NaN))).toThrow(RangeError);
+    expect(() => fromContractPlayer({ ...pl(0), x: Infinity })).toThrow(RangeError);
+  });
+
+  it('cars keep their gap behind a motorcycle that M1 gives in contracts coordinates', () => {
+    // Standing in lane 1 of h_1_1 (east-bound, next to the centre line): 1.75 m south of the centre line.
+    const m1Players = [{ id: 0, x: 150, z: 101.75, heading: 90, speed: 0, fallen: false }];
+    const players = fromContractPlayers(m1Players);
+    const t = new NpcTraffic(g, { seed: 4, params: { carCount: 60, minSpawnDistance: 20 } });
+    let closest = Infinity;
+    run(
+      t,
+      60 * 30,
+      () => ({ players }),
+      (o) => {
+        for (const c of o.cars) {
+          if (c.state === 'offroad') continue;
+          closest = Math.min(closest, Math.hypot(c.x - players[0].x, c.y - players[0].y));
+        }
+      },
+    );
+    expect(closest).toBeGreaterThan(3.3); // car half length 2.25 + motorcycle half length 1.1
   });
 });
 

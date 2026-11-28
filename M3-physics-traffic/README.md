@@ -94,7 +94,7 @@ const traffic = new NpcTraffic(graph, { seed });
 // every tick, before physics:
 const { cars, metrics } = traffic.step({
   dt,                                                  // s, must be > 0; cut to 0.1
-  players,                                             // M3 coordinates
+  players: fromContractPlayers(m1.players),            // x, z, heading in degrees, speed, fallen
   obstacles: fromContractObstacles(m1.obstacles.items, graph), // type 'heavy_traffic', segment, lane 0-4, pos 0-1
   carHits,                                             // from the physics step before
   params: trafficParamChanges(changedAdminValues),     // registry names, see below

@@ -8,13 +8,15 @@
  *   of the segment; 3, 4 the other way; 1 and 3 are next to the centre line.
  *   Inside M3 a lane is (directed edge, index from the centre line), so
  *   lane 1 -> forward edge 0, 2 -> forward 1, 3 -> reverse 0, 4 -> reverse 1.
+ * - Player poses come in contracts coordinates (x east, z south, heading in
+ *   degrees clockwise from north, contracts/README.md "Coordinates").
  * - Cars go out in contracts coordinates (x east, z south, heading in degrees
  *   clockwise from north), with segment and lane in the same numbering.
  *
  * Bad input throws RangeError: M1 has checked it already, so it is a bug.
  */
-import { toContractHeading, toContractPoint } from '../../common/coords.js';
-import type { Obstacle, ObstacleType } from '../../common/types.js';
+import { fromContractHeading, fromContractPoint, toContractHeading, toContractPoint } from '../../common/coords.js';
+import type { Obstacle, ObstacleType, PlayerPose } from '../../common/types.js';
 import type { RoadGraph } from '../graph/types.js';
 import type { NpcCarPose, NpcState } from './types.js';
 
@@ -46,6 +48,18 @@ export interface ContractNpcCar {
   length: number;
   width: number;
   state: NpcState;
+}
+
+/** A motorcycle as M1 gives it (contracts coordinates). */
+export interface ContractPlayer {
+  id: number;
+  x: number;
+  z: number;
+  /** Degrees, clockwise from north. */
+  heading: number;
+  /** m/s */
+  speed: number;
+  fallen: boolean;
 }
 
 const TYPES: Record<ContractObstacleType, ObstacleType> = {
@@ -107,4 +121,15 @@ export function toContractCar(car: NpcCarPose, g: RoadGraph): ContractNpcCar {
     width: car.width,
     state: car.state,
   };
+}
+
+/** M1 player -> M3 player pose (x east, y north, heading in radians, counter clockwise from east). */
+export function fromContractPlayer(p: ContractPlayer): PlayerPose {
+  if (![p.x, p.z, p.heading, p.speed].every(Number.isFinite)) throw new RangeError(`Player ${p.id}: bad pose`);
+  const q = fromContractPoint(p.x, p.z);
+  return { id: p.id, x: q.x, y: q.y, heading: fromContractHeading(p.heading), speed: p.speed, fallen: p.fallen };
+}
+
+export function fromContractPlayers(list: readonly ContractPlayer[]): PlayerPose[] {
+  return list.map(fromContractPlayer);
 }

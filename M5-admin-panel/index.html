@@ -3,62 +3,219 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Çılgın Kurye · Yönetim</title>
+  <meta name="color-scheme" content="dark">
+  <title>Çılgın Kurye Yönetim</title>
   <link rel="stylesheet" href="./main.css">
 </head>
-<body>
+<body class="ck-admin">
+  <a class="skip" href="#content">İçeriğe geç</a>
   <header class="topbar">
-    <h1>Çılgın Kurye</h1>
+    <a class="brand" href="#/panel" aria-label="Çılgın Kurye, kontrol paneli">
+      <span class="emblem" aria-hidden="true">
+        <svg viewBox="0 0 48 48">
+          <rect class="emblem-grid" x="3" y="3" width="42" height="42" rx="10" />
+          <path class="emblem-road" d="M3 24h42M24 3v42" />
+          <circle class="emblem-led led-a" cx="13.5" cy="24" r="2" /><circle class="emblem-led led-b" cx="34.5" cy="24" r="2" />
+          <circle class="emblem-led led-c" cx="24" cy="13.5" r="2" />
+          <path class="emblem-scooter" d="M11 33h6l4-9h8l3 6h5M17.5 34a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Zm20 0a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0ZM27 18h4l3 6" />
+        </svg>
+      </span>
+      <span class="brand-text"><strong>Çılgın Kurye</strong><small>LED şehir komuta merkezi</small></span>
+    </a>
     <dl class="match">
-      <div><dt>Faz</dt><dd id="phase">—</dd></div>
-      <div><dt>Kalan süre</dt><dd id="remaining">—</dd></div>
+      <div><dt>Durum</dt><dd id="phase">—</dd></div>
+      <div><dt>Kalan süre</dt><dd id="remaining" class="timer">—</dd></div>
       <div><dt>Oyun kodu</dt><dd id="game-code">—</dd></div>
     </dl>
-    <span class="board" id="board-status">Tahta bekleniyor</span>
-    <div class="match-controls" aria-label="Maç kontrolleri">
+    <p class="mark" id="last-mark" aria-live="polite"></p>
+    <p class="server-pill" id="server-pill" data-state="connecting" role="status">Sunucuya bağlanıyor</p>
+    <div class="match-controls" aria-label="Maç kontrolleri" role="group">
       <button type="button" data-command="start" disabled>Başlat</button>
       <button type="button" data-command="pause" disabled>Duraklat</button>
       <button type="button" data-command="resume" disabled hidden>Devam et</button>
       <button type="button" data-command="end" disabled>Bitir</button>
     </div>
   </header>
-  <p id="connection" role="status">Sunucuya bağlanıyor…</p>
-  <main>
-    <section class="panel params">
-      <h2>Parametreler</h2>
-      <div id="params"></div>
-    </section>
-    <section class="panel map">
-      <h2>Canlı harita</h2>
-      <dl id="map"></dl>
-    </section>
-    <section class="panel graphs">
-      <h2>Grafikler</h2>
-      <dl id="metrics"></dl>
-      <p id="marks" role="status"></p>
-    </section>
-    <section class="panel quake">
-      <div>
-        <h2>Deprem</h2>
-        <form id="quake">
-          <label>Büyüklük <input name="mag" type="number" value="5" min="0" max="10" step="0.1" required></label>
-          <label>Bölge
-            <select name="zone">
-              <option value="-1">Tüm tahta</option>
-              <option value="0">Kuzeybatı</option><option value="1">Kuzey</option><option value="2">Kuzeydoğu</option>
-              <option value="3">Batı</option><option value="4">Merkez</option><option value="5">Doğu</option>
-              <option value="6">Güneybatı</option><option value="7">Güney</option><option value="8">Güneydoğu</option>
-            </select>
-          </label>
-          <button type="submit" class="quake-button" disabled>Deprem başlat</button>
-        </form>
-      </div>
-      <div>
-        <h2>Olay günlüğü</h2>
-        <ol id="events"></ol>
-      </div>
-    </section>
-  </main>
+
+  <div class="shell">
+    <aside class="sidebar">
+      <nav class="nav" aria-label="Sayfalar">
+        <ul>
+          <li><a href="#/panel" data-nav="panel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z" /></svg>Kontrol paneli</a></li>
+          <li><a href="#/harita" data-nav="harita"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14" /></svg>Canlı harita</a></li>
+          <li><a href="#/parametreler" data-nav="parametreler"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" /><circle cx="16" cy="7" r="2" /><circle cx="10" cy="17" r="2" /></svg>Parametreler</a></li>
+          <li><a href="#/ag" data-nav="ag"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9a15 15 0 0 1 20 0M5 13a10 10 0 0 1 14 0M8.5 16.5a5 5 0 0 1 7 0" /><circle cx="12" cy="20" r="1" /></svg>Ağ</a></li>
+          <li><a href="#/metrikler" data-nav="metrikler"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></svg>Metrikler</a></li>
+          <li><a href="#/deprem" data-nav="deprem"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12h4l2-5 3 10 3-14 3 13 2-4h3" /></svg>Deprem</a></li>
+          <li><a href="#/olaylar" data-nav="olaylar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" /></svg>Olay günlüğü</a></li>
+        </ul>
+      </nav>
+      <p class="board-pill board" id="board-status">Tahta bekleniyor</p>
+    </aside>
+
+    <div class="main-column">
+      <p id="connection" class="banner" role="status">Sunucuya bağlanıyor…</p>
+
+      <main id="content" tabindex="-1">
+        <section data-page="panel" aria-labelledby="h-panel">
+          <div class="page-head">
+            <h1 id="h-panel" tabindex="-1">Kontrol paneli</h1>
+            <p class="lead">Maçın, kuryelerin, ağın ve LED tahtanın canlı durumu.</p>
+          </div>
+          <div class="dash">
+            <section class="card strip-card" aria-label="Maç durumu">
+              <div id="match-strip" class="match-strip"></div>
+            </section>
+            <section class="card map-card" aria-labelledby="h-map-small">
+              <div class="card-head">
+                <h2 id="h-map-small"><span class="h-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14" /></svg></span>Canlı harita</h2>
+                <a class="link" href="#/harita">Büyük göster</a>
+              </div>
+              <div class="map-slot" data-map-slot="panel"></div>
+            </section>
+            <section class="kpi-row" aria-label="Telemetri">
+              <div id="kpi-tiles" class="kpis"></div>
+            </section>
+            <section class="card entity-card" aria-labelledby="h-entity">
+              <h2 id="h-entity"><span class="h-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 17h3l2.5-6h5l2 4H20M7.5 17.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Zm14 0a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0ZM13 7h3l2 4" /></svg></span>Kuryeler ve yollar</h2>
+              <div id="entity-status"></div>
+            </section>
+            <section class="card eq-card" aria-labelledby="h-eq">
+              <h2 id="h-eq"><span class="h-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M2 9a15 15 0 0 1 20 0M5 13a10 10 0 0 1 14 0M8.5 16.5a5 5 0 0 1 7 0" /><circle cx="12" cy="20" r="1" /></svg></span>Telefon pingleri</h2>
+              <div id="net-eq"></div>
+            </section>
+            <section class="card quake-card" id="quake-alert" aria-labelledby="h-quake-alert">
+              <div class="quake-title">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12h4l2-5 3 10 3-14 3 13 2-4h3" /></svg>
+                <h2 id="h-quake-alert">Deprem</h2>
+              </div>
+              <svg class="seismo" viewBox="0 0 240 44" preserveAspectRatio="none" aria-hidden="true">
+                <line x1="0" y1="22" x2="240" y2="22" />
+                <path d="M0 22h46l4-3 4 5 4-9 5 16 5-24 6 30 5-22 4 12 4-6 4 2h40l3-4 4 7 4-10 4 12 4-5h64" />
+              </svg>
+              <div class="quake-body"></div>
+            </section>
+            <section class="card quick-card" aria-labelledby="h-quick">
+              <div class="card-head">
+                <h2 id="h-quick"><span class="h-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" /><circle cx="16" cy="7" r="2" /><circle cx="10" cy="17" r="2" /></svg></span>Hızlı ayarlar</h2>
+                <a class="link" href="#/parametreler">Bütün parametreler</a>
+              </div>
+              <div id="quick-controls" class="quicks"></div>
+            </section>
+            <section class="card recent-card" aria-labelledby="h-recent">
+              <div class="card-head">
+                <h2 id="h-recent"><span class="h-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" /></svg></span>Son olaylar</h2>
+                <span class="muted" id="event-count"></span>
+                <a class="link" href="#/olaylar">Hepsi</a>
+              </div>
+              <ol id="recent-events" class="log"></ol>
+            </section>
+          </div>
+        </section>
+
+        <section data-page="harita" aria-labelledby="h-harita" hidden>
+          <div class="page-head">
+            <h1 id="h-harita" tabindex="-1">Canlı harita</h1>
+            <p class="lead">Engel fırçalarıyla yola engel koyun, silgiyle kaldırın; "yolu kapat" ve "oyuncunun önüne" araçları komutu hemen sunucuya gönderir.</p>
+          </div>
+          <div class="card map-large">
+            <div class="map-slot" data-map-slot="harita"><div id="map"></div></div>
+          </div>
+        </section>
+
+        <section data-page="parametreler" aria-labelledby="h-param" hidden>
+          <div class="page-head">
+            <h1 id="h-param" tabindex="-1">Parametreler</h1>
+            <p class="lead">Her değişiklik oyun sürerken uygulanır. Sınır dışı değer gönderilmez; sunucunun cevabı alanın altında görünür.</p>
+          </div>
+          <div class="toolbar">
+            <label class="search">
+              <span class="visually-hidden">Parametre ara</span>
+              <input id="param-search" type="search" placeholder="Parametre ara: ör. gecikme, puddle, grip" autocomplete="off">
+            </label>
+            <p id="param-count" class="muted" aria-live="polite"></p>
+            <button type="button" id="param-reset" class="ghost">Başlangıç değerlerine dön</button>
+          </div>
+          <div class="card params-card"><div id="params"></div></div>
+        </section>
+
+        <section data-page="ag" aria-labelledby="h-ag" hidden>
+          <div class="page-head">
+            <h1 id="h-ag" tabindex="-1">Ağ</h1>
+            <p class="lead">Sunucunun her telefon için ölçtüğü değerler. Gecikme, jitter ve kayıp eklemek için <a href="#/parametreler" class="link">Parametreler</a> sayfasındaki Ağ tablosunu kullanın.</p>
+          </div>
+          <p id="net-board" class="note"></p>
+          <div class="card table-card" id="net-table"></div>
+        </section>
+
+        <section data-page="metrikler" aria-labelledby="h-metrik" hidden>
+          <div class="page-head">
+            <h1 id="h-metrik" tabindex="-1">Metrikler</h1>
+            <p class="lead">Sunucunun saniyede iki kez gönderdiği her metriğin son değeri ve son iki dakikadaki eğilimi.</p>
+          </div>
+          <div class="toolbar">
+            <label class="search">
+              <span class="visually-hidden">Metrik ara</span>
+              <input id="metric-search" type="search" placeholder="Metrik ara" autocomplete="off">
+            </label>
+            <label class="select">
+              <span class="visually-hidden">Grup</span>
+              <select id="metric-group"><option value="">Bütün gruplar</option></select>
+            </label>
+          </div>
+          <div class="card table-card" id="metric-table"></div>
+        </section>
+
+        <section data-page="deprem" aria-labelledby="h-deprem" hidden>
+          <div class="page-head">
+            <h1 id="h-deprem" tabindex="-1">Deprem</h1>
+            <p class="lead">Deprem bütün oyunculara aynı anda etki eder ve tahtada şok dalgası olarak görünür.</p>
+          </div>
+          <div class="quake-grid">
+            <section class="card quake-card" aria-labelledby="h-quake-start">
+              <div class="quake-title">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12h4l2-5 3 10 3-14 3 13 2-4h3" /></svg>
+                <h2 id="h-quake-start">Deprem başlat</h2>
+              </div>
+              <form id="quake" class="quake-form">
+                <label>Büyüklük (0–10)<input name="mag" type="number" value="5" min="0" max="10" step="0.1" required></label>
+                <label>Bölge
+                  <select name="zone">
+                    <option value="-1">Tüm tahta</option>
+                    <option value="0">Kuzeybatı</option><option value="1">Kuzey</option><option value="2">Kuzeydoğu</option>
+                    <option value="3">Batı</option><option value="4">Merkez</option><option value="5">Doğu</option>
+                    <option value="6">Güneybatı</option><option value="7">Güney</option><option value="8">Güneydoğu</option>
+                  </select>
+                </label>
+                <button type="submit" class="quake-button" disabled>Deprem başlat</button>
+              </form>
+              <p class="muted">Yalnızca oyun sürerken ya da duraklatılmışken başlatılabilir.</p>
+            </section>
+            <section class="card" aria-labelledby="h-quake-board">
+              <h2 id="h-quake-board"><span class="h-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 3h18v18H3zM3 9h18M3 15h18M9 3v18M15 3v18" /></svg></span>Tahta</h2>
+              <p id="quake-board" class="note"></p>
+              <p id="quake-last"></p>
+              <div id="quake-trend" class="trend"></div>
+            </section>
+          </div>
+        </section>
+
+        <section data-page="olaylar" aria-labelledby="h-olay" hidden>
+          <div class="page-head">
+            <h1 id="h-olay" tabindex="-1">Olay günlüğü</h1>
+            <p class="lead">Komutların cevapları, tahta olayları ve maç akışı, en yenisi üstte.</p>
+          </div>
+          <div class="toolbar">
+            <label class="search">
+              <span class="visually-hidden">Olay ara</span>
+              <input id="event-search" type="search" placeholder="Olaylarda ara" autocomplete="off">
+            </label>
+          </div>
+          <div class="card"><ol id="event-list" class="log"></ol></div>
+        </section>
+      </main>
+    </div>
+  </div>
   <script type="module" src="./main.js"></script>
 </body>
 </html>

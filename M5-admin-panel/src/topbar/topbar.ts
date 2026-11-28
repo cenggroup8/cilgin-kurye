@@ -24,7 +24,12 @@ export function commandLabel(name: string): string {
   return Object.hasOwn(labels, name) ? labels[name] : name;
 }
 
-export function bindTopbar(connection: AdminConnection, log: (entry: LogEntry) => void) {
+export interface TopbarOptions {
+  /** Asked before "end", which cannot be taken back. Without it the command goes at once. */
+  confirmEnd?: () => Promise<boolean>;
+}
+
+export function bindTopbar(connection: AdminConnection, log: (entry: LogEntry) => void, options: TopbarOptions = {}) {
   const status = document.querySelector<HTMLElement>('#connection')!;
   const phase = document.querySelector<HTMLElement>('#phase')!;
   const remaining = document.querySelector<HTMLElement>('#remaining')!;
@@ -62,6 +67,7 @@ export function bindTopbar(connection: AdminConnection, log: (entry: LogEntry) =
   }
 
   async function send(command: AdminCommand) {
+    if (command.name === 'end' && options.confirmEnd && !(await options.confirmEnd())) return;
     busy = true;
     updateButtons();
     const response = await connection.command(command);

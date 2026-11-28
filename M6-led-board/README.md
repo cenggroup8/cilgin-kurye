@@ -140,6 +140,35 @@ changes, and step 5 fills `StatusOut` with `outputStage.fps()`, `outputStage.maE
 driver must send chain A on GPIO16 and chain B on GPIO17 at the same time (two RMT channels,
 `hardware/pins_and_power.md`). It goes behind `StripOutput` once the team chooses the library.
 
+## M6-4: motion smoother, layers and effects, demo mode
+
+| Part | Files |
+|---|---|
+| Road graph from the LED map: 36 crossings, 60 roads, the shortest way on the roads, walking on with "straight on" at a crossing | `firmware/src/led/road_graph.h` |
+| Motion smoother: between two states the dot moves along the roads and through the crossings from where it is drawn now, in the measured time between states. With no new state it goes on along its road with its last speed for 1.5 s. A way longer than 0.45 of the board is a jump (new game) | `firmware/src/led/motion_smoother.h` |
+| Layers and effects, phase views, "searching" view | `firmware/src/led/board_renderer.h` |
+| Demo mode: a 59 s game from a script, no server | `firmware/src/led/demo_mode.h` |
+
+Layers from the bottom: roads (dim white, stores in the team colour), obstacles (heavy traffic:
+red dashes that crawl; road work: still red with gaps; accident: fast red blink; puddle: light
+blue), delivery points (blink in the owner colour, white flash when delivered), motorcycles (dot
+and a fading tail of `anim.tail` LEDs; white for 1 s on "Find me"; a fallen dot blinks; two dots
+on one LED take turns every 300 ms), short effects (earthquake ring from the centre, delivery flash).
+
+Phases: lobby (roads breathe), countdown (the board pulses every second, brighter to the start),
+game, pause (the game dimmed, stores pulse), end (a chase in the winner colour; a draw takes turns).
+The board state has no scores, so the winner teams are set with `renderer.setWinners(mask)`;
+until the protocol carries them the end view shows all four teams.
+
+Default player tones (when the config sends none): light/dark = sky blue/deep blue, lime/sea green,
+violet/magenta, yellow/orange. They differ by hue, so a small dot can be named. The "three people
+name all 8 colours" check must be done on the real board.
+
+```
+cd firmware/test/led && make test   # M6-3 and M6-4 PC tests
+# demo mode on the board: add -DM6_DEMO=1 to build_flags in platformio.ini, then pio run
+```
+
 ## Team
 
 Tuğberk Akbulut, Hasan Alperen Elmas, Hasan Hüseyin Özdemir, Muhib Taha Boy, Umutcan Ocak

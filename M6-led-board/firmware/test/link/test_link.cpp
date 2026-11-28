@@ -112,7 +112,7 @@ static void testVectors() {
   decodeFrame(by["ack"].data(), by["ack"].size(), f);
   CHECK(f.t == 'A' && f.seq == 77 && f.d.get("of") && f.d.get("of")->s == "Q", "answer names the type");
 
-  CHECK(hex(encodeHello(1, 1200, "0.4.1", "0.2.0", "board-01")) == hex(by["hello"]), "hello bytes");
+  CHECK(hex(encodeHello(1, 1200, "0.4.1", "0.3.0", "board-01")) == hex(by["hello"]), "hello bytes");
   QuakeOut q;
   q.id = 12; q.motor = false; q.peakG = 3.8f; q.mag = 6.1f; q.u = 0.31f; q.v = 0.72f; q.zone = 6; q.conf = 0.7f;
   CHECK(hex(encodeQuake(77, 123456, q)) == hex(by["quake"]), "quake bytes");
@@ -120,7 +120,7 @@ static void testVectors() {
   CHECK(hex(encodeSensor(9001, 123400, 100, a, 10)) == hex(by["sensor"]), "sensor bytes");
   StatusOut st;
   st.fw = "0.4.1"; st.fps = 60; st.rssi = -52; st.maEst = 1850; st.heap = 182000;
-  CHECK(hex(encodeStatus(310, 310020, st, "0.2.0", 52031)) == hex(by["status"]), "status bytes");
+  CHECK(hex(encodeStatus(310, 310020, st, "0.3.0", 52031)) == hex(by["status"]), "status bytes");
   CHECK(hex(encodePong(620, 310050, 60790, 52031, 9)) == hex(by["pong"]), "pong bytes");
 }
 

@@ -267,7 +267,7 @@ class SimServer {
           c.push(mp::Value::integer(10 * k)).push(mp::Value::integer(20)).push(mp::Value::integer(30));
           tones.push(c);
         }
-        d.set("plan", mp::Value::str("0.2.0")).set("bright", mp::Value::real(0.6)).set("max_ma", mp::Value::integer(4000)).set("tones", tones);
+        d.set("plan", mp::Value::str("0.3.0")).set("bright", mp::Value::real(0.6)).set("max_ma", mp::Value::integer(4000)).set("tones", tones);
         tcp(make('C', d, true));
         break;
       }

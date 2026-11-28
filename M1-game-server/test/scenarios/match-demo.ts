@@ -1,179 +1,61 @@
-// M1-1 demo: senaryoyu çalıştırır, olayları yazar.
-// Run: npx tsx test/scenarios/match-demo.ts
+// M1-2 demo: a scripted match with the real times of the document
+// (3 s countdown, 5 min game, 30 s wait for a lost player).
+// Runs without M2, M3 and the game loop: this script plays their part
+// and calls the match tick by tick, as the loop will do.
+//   npm run demo:match
+import { Match, TICKS_PER_SECOND, type MatchEvent } from "../../src/match/match.js";
 
-import { readFileSync } from "node:fs";
-import { SeededRng } from "../../src/loop/rng.js";
-import { GameLoop } from "../../src/loop/game-loop.js";
-import {
-  noopAdmin,
-  noopDelivery,
-  noopHazards,
-  type PostTickHook,
-  type TickDeps,
-} from "../../src/loop/tick.js";
-import type { TickInput } from "../../src/loop/types.js";
-import {
-  createInitialWorld,
-  COUNTDOWN_TICKS,
-  MATCH_DURATION_TICKS,
-  TICK_RATE,
-  type WorldState,
-} from "../../src/state/world.js";
-import { buildGameState } from "../../src/state/state-builder.js";
-import { GameRecorder, parseRecording } from "../../src/state/recorder.js";
-import { FakeM2, type ScenarioEntry } from "../fakes/fake-m2.js";
-import { createFakeM3 } from "../fakes/fake-m3.js";
+const m = new Match();
+let tick = 0;
+const time = () => `${(tick / TICKS_PER_SECOND).toFixed(1).padStart(6)} s`;
+const say = (text: string) => console.log(`${time()}  ${text}`);
 
-// ── Load scenario ──────────────────────────────────────────────────
-
-const scenarioPath = new URL("five-min.json", import.meta.url);
-const scenarioData = JSON.parse(readFileSync(scenarioPath, "utf-8")) as {
-  seed: number;
-  entries: ScenarioEntry[];
-};
-
-const SEED = scenarioData.seed;
-const fakeM2 = new FakeM2({ entries: scenarioData.entries });
-
-// ── Event logger ───────────────────────────────────────────────────
-
-let lastPhase = "lobby";
-const eventLog: PostTickHook = {
-  afterTick(world: Readonly<WorldState>, input: TickInput) {
-    const t = world.tick;
-    const sec = (world.gameTimeTicks / TICK_RATE).toFixed(1);
-
-    if (world.phase !== lastPhase) {
-      console.log(`[tick ${t}] phase: ${lastPhase} → ${world.phase}`);
-      lastPhase = world.phase;
-    }
-
-    if (input.joins.length > 0) {
-      for (const j of input.joins) {
-        console.log(`[tick ${t}] join: ${j.name} (team ${j.team})`);
-      }
-    }
-
-    if (input.adminCommands.length > 0) {
-      for (const c of input.adminCommands) {
-        console.log(`[tick ${t}] admin: ${c.name} ${c.args ? JSON.stringify(c.args) : ""}`);
-      }
-    }
-
-    if (input.boardEvents.length > 0) {
-      for (const e of input.boardEvents) {
-        console.log(`[tick ${t}] board: ${e.source} magnitude=${e.magnitude} zone=${e.zone}`);
-      }
-    }
-
-    if (input.findMe.length > 0) {
-      for (const f of input.findMe) {
-        console.log(`[tick ${t}] find-me: player ${f.player}`);
-      }
-    }
-
-    // Log game time every 30 seconds
-    if (world.phase === "playing" && world.gameTimeTicks > 0 && world.gameTimeTicks % (30 * TICK_RATE) === 0) {
-      console.log(`[tick ${t}] game time: ${sec}s`);
-    }
-  },
-};
-
-// ── Simple match step ──────────────────────────────────────────────
-
-const simpleMatch = {
-  update(w: WorldState, input: TickInput) {
-    for (const cmd of input.adminCommands) {
-      if (cmd.name === "start" && w.phase === "lobby") {
-        w.phase = "countdown";
-        w.countdownTicks = COUNTDOWN_TICKS;
-      } else if (cmd.name === "pause" && w.phase === "playing") {
-        w.phase = "paused";
-      } else if (cmd.name === "resume" && w.phase === "paused") {
-        w.phase = "playing";
-      } else if (cmd.name === "end" && (w.phase === "playing" || w.phase === "paused")) {
-        w.phase = "ended";
-      }
-    }
-  },
-};
-
-// ── Run ────────────────────────────────────────────────────────────
-
-console.log(`=== M1-1 Demo: seed=${SEED} ===\n`);
-
-const recorder = new GameRecorder(SEED);
-const deps: TickDeps = {
-  admin: noopAdmin,
-  match: simpleMatch,
-  delivery: noopDelivery,
-  hazards: noopHazards,
-  m3: createFakeM3(),
-  hooks: [recorder, eventLog],
-};
-
-const world = createInitialWorld();
-const rng = new SeededRng(SEED);
-const loop = new GameLoop(world, rng, deps);
-
-// Extra margin for pauses (game time stops during pause, but ticks continue)
-const totalTicks = COUNTDOWN_TICKS + MATCH_DURATION_TICKS + 100;
-loop.runSync(totalTicks, (tick) => fakeM2.inputForTick(tick));
-
-const gs = buildGameState(world);
-console.log(`\n=== Final state ===`);
-console.log(`phase: ${gs.phase}`);
-console.log(`ticks: ${world.tick}`);
-console.log(`game time: ${gs.gameTimeSeconds.toFixed(1)}s`);
-console.log(`scores: ${gs.scores.map((s) => `team${s.team}=${s.score}`).join(", ")}`);
-console.log(`recording: ${recorder.lines.length} lines`);
-
-// ── Determinism check ──────────────────────────────────────────────
-
-console.log(`\n=== Determinism check: running again with same seed ===`);
-
-const recorder2 = new GameRecorder(SEED);
-const deps2: TickDeps = { ...deps, hooks: [recorder2] };
-const world2 = createInitialWorld();
-const rng2 = new SeededRng(SEED);
-const fakeM2b = new FakeM2({ entries: scenarioData.entries });
-const loop2 = new GameLoop(world2, rng2, deps2);
-loop2.runSync(totalTicks, (tick) => fakeM2b.inputForTick(tick));
-
-const snap1 = JSON.stringify({ tick: world.tick, phase: world.phase, gt: world.gameTimeTicks, scores: world.scores, controls: world.controls, poses: world.poses });
-const snap2 = JSON.stringify({ tick: world2.tick, phase: world2.phase, gt: world2.gameTimeTicks, scores: world2.scores, controls: world2.controls, poses: world2.poses });
-
-if (snap1 === snap2) {
-  console.log("PASS: identical final state");
-} else {
-  console.error("FAIL: states differ!");
-  process.exitCode = 1;
+function show(e: MatchEvent): void {
+  if (e.type === "phase") say(`phase: ${e.from} → ${e.to}`);
+  if (e.type === "bot_took_over") say(`a bot takes over player ${e.playerNo}`);
+  if (e.type === "player_back") say(`player ${e.playerNo} is back` + (e.fromBot ? ", the bot gives the motorcycle back" : ""));
+  if (e.type === "game_over") say(e.draw ? `draw between teams ${e.winners.join(" and ")}` : `team ${e.winners[0]} wins`);
 }
 
-// ── Replay check ───────────────────────────────────────────────────
-
-console.log(`\n=== Replay check ===`);
-
-const { header, entries } = parseRecording(recorder.toNdjson());
-const world3 = createInitialWorld();
-const rng3 = new SeededRng(header.seed);
-const deps3: TickDeps = { ...deps, hooks: [] };
-const loop3 = new GameLoop(world3, rng3, deps3);
-
-const inputByTick = new Map<number, TickInput>();
-for (const e of entries) inputByTick.set(e.tick, e.input);
-
-loop3.runSync(entries.length, (tick) => {
-  return inputByTick.get(tick + 1) ?? { controls: [], findMe: [], joins: [], disconnects: [], reconnects: [], adminCommands: [], boardEvents: [] };
-});
-
-const snap3 = JSON.stringify({ tick: world3.tick, phase: world3.phase, gt: world3.gameTimeTicks, scores: world3.scores, controls: world3.controls, poses: world3.poses });
-
-if (snap1 === snap3) {
-  console.log("PASS: replay produces identical final state");
-} else {
-  console.error("FAIL: replay state differs!");
-  process.exitCode = 1;
+function until(seconds: number, scores = [0, 0, 0, 0]): void {
+  while (tick < seconds * TICKS_PER_SECOND) {
+    tick++;
+    m.tick(scores).forEach(show);
+  }
 }
 
-console.log("\nDone.");
+function admin(name: string, r: { ok: boolean; error?: string }): void {
+  say(`admin ${name}: ${r.ok ? "ok" : `error (${r.error})`}`);
+}
+
+console.log("Game 1: one human, three bots, pauses, a lost player, early end\n");
+say(`join Ayşe to team 0: ${m.join("key-ayse", 0, "Ayşe", 0).ok ? "ok" : "error"}`);
+admin("start with 3 bots", m.start(3));
+say(`roster: ${m.roster.map((p) => `${p.playerNo}:${p.human ? p.name : "bot"}(team ${p.team})`).join(" ")}`);
+until(1);
+admin("pause in the countdown", m.pause());
+until(5);
+admin("resume (countdown starts again)", m.resume());
+until(20);
+say("Ayşe's link is lost"); m.lost("key-ayse");
+until(35);
+say("Ayşe comes back after 15 s"); m.returned("key-ayse");
+until(60);
+say("Ayşe's link is lost again"); m.lost("key-ayse");
+until(80);
+admin("pause", m.pause());
+until(140);
+say(`after a 60 s pause the game time is ${(m.gameTimeTicks / TICKS_PER_SECOND).toFixed(1)} s, the wait stopped too`);
+admin("resume", m.resume());
+until(100 + 60);
+say("Ayşe comes back"); m.returned("key-ayse");
+until(200);
+admin("end the game early (scores 6, 9, 4, 2)", m.end([6, 9, 4, 2]));
+m.tick([0, 0, 0, 0]).forEach(show);
+
+console.log("\nGame 2: reset, the full 5 minutes, equal points\n");
+tick = 0;
+admin("reset", m.reset());
+m.tick([0, 0, 0, 0]).forEach(show);
+admin("start with 7 bots", m.start(7));
+until(3 + 300, [8, 8, 3, 5]);

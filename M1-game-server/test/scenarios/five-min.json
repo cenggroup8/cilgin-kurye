@@ -5,9 +5,9 @@
     {
       "tick": 0,
       "joins": [
-        { "playerKey": "pk-alice", "name": "Alice", "team": 0 },
-        { "playerKey": "pk-bob", "name": "Bob", "team": 1 },
-        { "playerKey": "pk-carol", "name": "Carol", "team": 2 }
+        { "playerKey": "pk-alice", "playerNo": 0, "name": "Alice", "team": 0 },
+        { "playerKey": "pk-bob", "playerNo": 1, "name": "Bob", "team": 1 },
+        { "playerKey": "pk-carol", "playerNo": 2, "name": "Carol", "team": 2 }
       ]
     },
     {

@@ -18,6 +18,8 @@ export interface FindMeInput {
 
 export interface JoinInput {
   playerKey: string;
+  /** The number M2-1 gave this phone in its welcome (0–7). M1-2 uses it as the player number. */
+  playerNo: number;
   name: string;
   team: number; // 0–3
 }

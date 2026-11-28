@@ -23,6 +23,11 @@ They come with M2-2 (#35) and M1-1 (#29).
 - Heading in degrees, clockwise from north.
 - Board coordinates: `u = x / size_m`, `v = z / size_m` (0 to 1).
 
+Everything that goes from one module to another uses these coordinates, also between
+M1 and M3: a pose is `x`, `z` in metres and `heading` in degrees, clockwise from north
+(0 north, 90 east, 180 south, 270 west). A module may use other axes or radians inside.
+It converts at its own border, in one file (for example `M3-physics-traffic/src/common/coords.ts`).
+
 ## ID rules
 
 The city has a 6 × 6 grid of intersections and 60 road segments.
@@ -34,6 +39,17 @@ IDs come from formulas, so no module needs a lookup table.
 | East–west segment from `n_r_c` to `n_r_(c+1)` | `h_r_c` | `5r + c` (0–29) |
 | North–south segment from `n_r_c` to `n_(r+1)_c` | `v_r_c` | `30 + 6r + c` (30–59) |
 | Block between rows r, r+1 and columns c, c+1 (0–4) | `b_r_c` | `5r + c` (0–24) |
+
+## Zones
+
+The earthquake and the board use 9 zones in a 3 × 3 grid over the 500 m × 500 m city:
+`zone = 3 × row + column`, row 0 in the north, column 0 in the west (`board_protocol.md`).
+The centre of a zone, in metres:
+
+    x = (column + 0.5) × 500 / 3
+    z = (row + 0.5) × 500 / 3
+
+So zone 0 has its centre at about (83.3, 83.3), zone 4 at (250, 250) and zone 8 at about (416.7, 416.7).
 
 ## Lanes
 
@@ -50,11 +66,24 @@ on the right. A module that counts lanes in another way converts at its own bord
 
 ## Buildings
 
-`buildings` in `city_plan.json` has one box per block until the 3D model is ready (#22, K8/K9):
-`{ id, block, footprint: [[x, z], ...], height_m }`. The footprint is in metres, corners clockwise
-seen from above. A building stays 10 m from the road centre line (2 lanes of 3.5 m and a 3 m
-sidewalk). In the four corner blocks the store corner (30 m × 30 m) is left free. Heights are
-placeholders (12–36 m). The 3D model file belongs to M5.
+`buildings` in `city_plan.json` has one entry per block:
+`{ id, block, kind, footprint: [[x, z], ...], height_m }`. The footprint is in metres, corners
+clockwise seen from above. A building stays 10 m from the road centre line (2 lanes of 3.5 m and a
+3 m sidewalk). In the four corner blocks the store corner (a quarter of the block, up to 50 m from
+the city corner) is left free for the team depot.
+
+`kind` says what stands on the block, as on the printed board (`tools/print/gen-city.py`, M6-5):
+`houses` (detached houses with gardens, outer ring), `apartments` (4–6 storeys) or `tower` (the
+centre block). `height_m` is the highest point of the block, so a box of the footprint and this
+height holds everything on it. `tools/print/check-buildings.py` checks that each printed block has
+exactly this height (1 m = 1.12 mm on the board).
+
+## Stores and depots
+
+Each entry of `stores` has a `depot`: the team's warehouse in the store corner, printed in white
+PETG for the board so that the store LEDs light it in the team colour (`tools/print/gen-city.py`).
+`{ footprint, height_m, roof, solid: false }`, footprint in metres as for buildings. It is only a
+picture for the board and the 3D city: it is not solid, so the pickup circle stays drivable.
 
 ## Teams
 
@@ -67,5 +96,5 @@ placeholders (12–36 m). The 3D model file belongs to M5.
 
 ## Status
 
-All files are a draft. The buildings in `city_plan.json` are simple boxes for the
-module demo; the real shapes come with the 3D model (#22).
+All files are a draft. `city_plan.json` gives each block its kind and height; the shapes
+of the houses, apartments and the tower are in `tools/print/gen-city.py` (#22).

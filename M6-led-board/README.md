@@ -42,8 +42,70 @@ Shared scripts in ../tools/ (planned):
   make_led_map  M6-3  builds the LED map from the city plan
 ```
 
-The code is not written yet. Each part can be built and tested alone with test data, as the module
-document describes.
+Each part can be built and tested alone with test data, as the module document describes.
+
+## M6-2 Hit detector and motor controller
+
+Code in `firmware/src/quake/`. It is plain C++17 with no Arduino headers, so the same files
+run in the ESP32 program and in the PC tests.
+
+| File | What it does |
+|---|---|
+| `fixed_rate.h` | Reads the sensor at a fixed rate (200 Hz) without waiting in the main loop |
+| `hit_detector.*` | Filter, room noise threshold, hit window, strength 0–10, zone 0–8, confidence, wait after a hit, one event for motor shaking |
+| `motor_controller.*` | Four motors with a soft start, a strength and time limit, and a stop at once when the link is lost |
+| `sample_batcher.h` | Sensor samples for the seismic graph: 100 per second in groups of 10, short peaks are kept |
+| `calibration.*` | Calibration values and their keys in the board settings (flash, changed over USB) |
+| `quake_unit.h` | Puts the parts together for the main loop. M6-1 gives the link state and sends the events and samples |
+
+How a hit is found:
+
+1. A slow average of each axis is taken away. Gravity and slow tilting go, only the shaking is left.
+   The average follows only quiet samples, never a hit or its ringing.
+2. For the first 3 s after power on the detector only learns the room noise. After that it keeps
+   learning it slowly. The threshold is 6 × the noise, never below 0.15 g.
+3. When the shaking passes the threshold, an 80 ms window starts.
+4. Strength: `5 + 2 · log2(peak / standard peak)`, kept between 0 and 10. The standard hit
+   (2 g by default) is 5, and each doubling adds 2, so strong hits grow slowly.
+5. Zone: the first sideways push of the board (accelerometer) and its tilt (gyroscope) give the side
+   of the hit. The share of the sideways push gives the distance from the centre. Together they give
+   a centre (u, v) on the board and one of the 9 zones (row × 3 + column, 0 is north-west).
+   The confidence is high when the push and the tilt agree and the hit is clearly above the threshold.
+6. After a hit the detector waits 400 ms, so one hit is one event.
+7. While the motors run, and for 0.5 s after they stop, the room noise is not learned and the
+   whole shaking gives only one event with the source `motor`.
+
+Motors: bit i of the vibrate mask is motor i, under zone 0, 2, 6 and 8 (bits 0 to 3).
+Limits by default: strength at most 0.8, time at most 5 s, soft start at least 150 ms.
+
+### Tests on the PC
+
+```bash
+cd M6-led-board/firmware/test
+make test
+```
+
+The tests use a simulated board (`sim_board.h`) with room noise, slow tilting, normal play bumps,
+hand hits at any place and motor shaking. They check:
+
+- 10 minutes of a quiet table and 10 minutes of a noisy table with normal play give no event,
+  and the threshold goes up on the noisy table.
+- 40 hits on each of the 9 zones: every hit is found, each gives exactly one event, and the zone is
+  right or a neighbour. The test prints the table of real zone against found zone.
+- The strength scale, two hits close together, a hit in the middle and the mounting flags.
+- Motor shaking gives one `motor` event, no learning of the noise and no second earthquake.
+- Soft start, limits, the motor mask and the stop on a lost link.
+- The graph groups, the fixed rate and the main loop with all parts together.
+
+The simulated hit follows the same idea as the detector, with random errors in the direction,
+the distance and the strength on top. So the tests show that the code does what the design says.
+The real values (standard peak, edge share, mounting flags) must be set with real hits on the board.
+
+Open points:
+
+- The sensor is not chosen yet. The driver only needs to fill `ImuSample` (g and degrees per second).
+- The pins and the PWM of the motors come with the wiring (M6-5), through `MotorOutput`.
+- The ESP32 build needs C++17 (Arduino ESP32 core 3.x).
 
 ## M6-3: LED map, post processing and output, status and settings
 

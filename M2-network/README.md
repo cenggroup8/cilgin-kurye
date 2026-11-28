@@ -35,8 +35,137 @@ test/
   fakes/       M2-3  fake M1 and bot phones
 ```
 
-The code is not written yet. Each part can be built and tested alone with test data, as the module
-document describes.
+Each part can be built and tested alone with test data, as the module document describes.
+
+## Run and test
+
+Node.js 20 or newer.
+
+```
+npm install
+npm test            # all tests
+npm run demo        # start the server; join from a phone with the QR code
+npm run demo:bots   # bot phones show the M2-1 demo points, then the demo ends
+npm run demo:checks # M2-2: bad messages never reach M1 (see below)
+```
+
+`npm run demo` prints the game code, the phone address and a QR code. The admin page is at
+`http://localhost:8080/admin`. `PORT=9000 npm run demo` uses another port.
+
+## M2-1: web server, join, sessions
+
+| Part | Files |
+|---|---|
+| Six digit game code, new code on request | `src/http/gameCode.ts` |
+| QR code with the address of the main computer and the game code | `src/http/joinInfo.ts` |
+| Pages, 3D models (`/models/`), city plan (`/city_plan.json`), `/join`, `/qr.svg` | `src/http/httpServer.ts` |
+| Placeholder phone and admin pages (the real ones come from M4 and M5) | `src/http/pages/` |
+| Session record, player key, 8 places, one admin | `src/session/registry.ts` |
+| WebSocket links: `/ws` for phones, `/ws/admin` for the admin | `src/session/wsServer.ts` |
+| Starts everything | `src/server.ts` |
+
+What M2-1 tells M1 (`PlayerEvents` in `src/session/types.ts`): a player joined with a team,
+a player's link was lost, a lost player came back. M2-2's input queue will carry these to M1;
+until then the tests and the demo use a small recording stand-in for M1.
+
+Messages of M2-1 (now in `contracts/messages.md`):
+
+| Direction | Message |
+|---|---|
+| Phone → server | `{t:"hello", key, name, code}` — must be the first message |
+| Phone → server | `{t:"join", team}` |
+| Server → phone | `{t:"welcome", player, returning}` or `{t:"error", reason}` |
+
+Close codes: 4001 another admin logged in, 4002 the same player opened on another page,
+4003 the hello was rejected (`bad_code`, `full`, `bad_hello`).
+
+Open points for the team:
+
+- `contracts/` is not on `main` since the restart. `/city_plan.json` reads
+  `contracts/city_plan.json` and gives 404 until the file is back.
+- A player place stays with its key until M1 frees it (`registry.release`). The document
+  does not say when a lobby place is freed; M1 decides.
+- A key that already joined can come back after the admin makes a new game code.
+- The session number that changes on every server start (document 6.5) belongs to the
+  board link and is not part of M2-1.
+
+## M2-3: state broadcaster, ping and metrics
+
+| Part | Files |
+|---|---|
+| State broadcaster: the frozen state of a tick is encoded once and every phone gets the same bytes; a smaller state for the admin 10 times per second; the board state to the board link (M2-4) | `src/broadcast/stateBroadcaster.ts` |
+| Ping twice per second; round trip time, jitter (RFC 3550 smoothing), clock offset, frame rate and the last state of each phone | `src/metrics/pingMeter.ts` |
+| Metrics and board data on to the admin; two minutes of history, the full parameter list and the current state for an admin page that connects again (`snapshot_get`) | `src/broadcast/adminFeed.ts` |
+| Everything in the server: `attachBroadcast({ server, toM1, board })` | `src/broadcast/broadcastHub.ts` |
+| Fake M1: a moving test state 30 times per second in the shape of M1-1 (#78), metrics twice per second, writes down every input | `test/fakes/fakeM1.ts` |
+| Bot phones (up to 8): join, send controls 10 times per second and "Find me", answer pings (late on purpose if asked), send broken messages on purpose (`sendBroken`), count the states | `test/fakes/botPhone.ts` |
+
+How M1 uses it: `hub.publish({ tick, game, board })` after every tick, `hub.metrics(samples)`
+twice per second, and `toM1(measures)` gives M1 the network measurements twice per second.
+Messages after the hello first go to `hub.onMessage()`; it returns `false` for messages
+that belong to other parts.
+
+```
+npm test                                            # all tests
+LONG_RUN_MS=600000 npx vitest run test/m2-3-bots.test.ts   # 8 bot phones for 10 minutes
+npm run demo:broadcast                              # fake M1 + 8 bots for 10 s, with a report
+DEMO_SECONDS=600 PING_DELAY_MS=80 npm run demo:broadcast    # long run, bots answer pings 80 ms late
+```
+
+Measured on a laptop, fake M1 at 30 ticks per second with 8 bots: every phone got every
+state (300/300 in 10 s), the state of the fake M1 is about 2.8 kB, encoding it takes about
+0.1 ms, and all phones together get about 650 KiB/s. With bots that answer 80 ms late, the
+measured ping is 82–83 ms.
+
+Messages of M2-3 (now in `contracts/messages.md`):
+
+| Direction | Message |
+|---|---|
+| Server → phone | `{t:"state", seq, s}` — `seq` is the tick, `s` the frozen game state |
+| Server → phone | `{t:"ping", id, st}` — `st` server time in ms |
+| Phone → server | `{t:"pong", id, ct, fps, last}` — phone time, frame rate, last state `seq` |
+| Server → phone | `{t:"net", fps_limit}` — frame rate limit of this phone (0–120, 0 = none), from `net.<p>.fps_limit`; sent when it changes and when the phone joins or comes back. M1-1 connects it with `sinks: { M4: (name, value) => hub.netParam(name, value) }` |
+| Server → admin | `{t:"state", state}`, `{t:"metrics", samples}`, `{t:"board", board}`, `{t:"params", list}`, `{t:"param", name, value}`, `{t:"event", entry}` |
+| Admin → server | `{t:"snapshot_get"}`, answered with `{t:"snapshot", state, params, metrics, board, events}` |
+
+The admin shapes are the ones the admin page of M5-1 (#73) reads.
+
+## M2-2: codec and checker, input queue
+
+The messages of the phone and the admin are in [`contracts/messages.md`](../contracts/messages.md)
+(separate pull request, plan #21 rule 2). The draft tables of M2-1 and M2-3 above follow it.
+
+| Part | Files |
+|---|---|
+| Message tables: every type of the phone and the admin link, its fields and ranges, and which messages may be lost | `src/codec/schema.ts` |
+| MessagePack coding and decoding; JSON text as a readable form for development (`M2_READABLE=1`) | `src/codec/codec.ts` |
+| Limits for each link on the raw bytes, before decoding: largest message, messages and bytes per second | `src/codec/limits.ts` |
+| Checker: type and fields, every value in its range, own player only, old or repeated `seq` dropped; a passed message is rebuilt with only the contract fields and gets the `droppable` mark | `src/codec/checker.ts` |
+| Input queue: checked inputs wait for the next tick, M1 takes them all with `take()` in the shape of M1-1's `TickInput` (#78); joins, lost and returning players too | `src/queue/inputQueue.ts`, `src/queue/types.ts` |
+| The incoming line in the server: limits → codec → checker → queue, M2-3 or a request | `src/codec/inbound.ts` |
+
+How it goes into the server:
+
+```ts
+const queue = new InputQueue();
+const inbound = createInbound({ queue, send: (id, m) => server.send(id, m), others: (s, m) => hub.onMessage(s, m) });
+const server = await startM2Server({ events: queue, onMessage: inbound.onMessage, admit: inbound.admit });
+// M1-1: new GameLoop(world, rng, deps, () => queue.take())
+// M2-4 (#63): quake: (e) => queue.boardEvent(toBoardEvent(e)) for an earthquake event of the board
+```
+
+Two small changes in the M2-1 code: `wsServer.ts` calls `admit` with the size of every message
+before decoding, decodes with the M2-2 codec, and checks that the team of a join is 0–3.
+`server.ts` passes the two options on. Without them it works as before.
+
+```
+npm test                  # all tests
+npm run demo:checks       # fake M1, 6 good bots and 2 links that send every kind of bad message
+M2_READABLE=1 npm run demo   # the server also takes JSON text, for typing messages by hand
+```
+
+`npm run demo:checks` ends with a check list: no bad message reached M1, a flood was cut at the
+limit, and every "Find me" of the good bots reached M1.
 
 ## Team
 

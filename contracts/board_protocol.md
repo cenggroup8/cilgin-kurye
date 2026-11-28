@@ -71,6 +71,10 @@ answers again but does not use it twice.
 Positions on the board are `u` and `v` from 0 to 1 (`contracts/README.md`,
 Coordinates): `u` grows to the east, `v` grows to the south.
 
+Proposal: M1 gives the board state to M2 in world coordinates (metres and degrees, as in
+`contracts/README.md`). The board link of M2 (M2-4) turns metres into `u` and `v` when it
+encodes the message, so the conversion is in one place (`u = x / size_m`, `v = z / size_m`).
+
 ### `S` Board state
 
 | Field | Meaning | Source |
@@ -121,7 +125,7 @@ Flags of a player, as bits:
 | Place | Value | Meaning |
 | --- | --- | --- |
 | 0 | integer 0–59 | Road segment (`contracts/README.md`, ID rules) |
-| 1 | integer 1–4 | Type: 1 heavy traffic, 2 road work, 3 accident, 4 water puddle |
+| 1 | integer 1–4 | Type: 1 `heavy_traffic`, 2 `road_work`, 3 `accident`, 4 `puddle` (the names M1 uses in the admin commands) |
 | 2 | integer 0–4 | Lane. 0 means the whole road; 1–4 as in `contracts/README.md` (Lanes) |
 
 The board shows an obstacle on the whole road segment (doc 10.2), so the position

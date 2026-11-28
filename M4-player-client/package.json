@@ -1,0 +1,26 @@
+{
+  "name": "@cilgin-kurye/m4-player-client",
+  "version": "0.1.0",
+  "private": true,
+  "description": "M4 Player Client and 3D City",
+  "type": "module",
+  "scripts": {
+    "dev": "node tools/dev.ts",
+    "build": "node tools/build.ts",
+    "test": "node --test \"test/net/*.test.ts\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
+  "dependencies": {
+    "@msgpack/msgpack": "^3.1.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/ws": "^8.18.1",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2",
+    "ws": "^8.23.0"
+  }
+}

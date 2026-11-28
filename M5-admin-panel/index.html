@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Çılgın Kurye · Yönetim</title>
+  <link rel="stylesheet" href="./main.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>Çılgın Kurye</h1>
+    <dl class="match">
+      <div><dt>Faz</dt><dd id="phase">—</dd></div>
+      <div><dt>Kalan süre</dt><dd id="remaining">—</dd></div>
+      <div><dt>Oyun kodu</dt><dd id="game-code">—</dd></div>
+    </dl>
+    <span class="board" id="board-status">Tahta bekleniyor</span>
+    <div class="match-controls" aria-label="Maç kontrolleri">
+      <button type="button" data-command="start" disabled>Başlat</button>
+      <button type="button" data-command="pause" disabled>Duraklat</button>
+      <button type="button" data-command="resume" disabled hidden>Devam et</button>
+      <button type="button" data-command="end" disabled>Bitir</button>
+    </div>
+  </header>
+  <p id="connection" role="status">Sunucuya bağlanıyor…</p>
+  <main>
+    <section class="panel params">
+      <h2>Parametreler</h2>
+      <dl id="params"></dl>
+    </section>
+    <section class="panel map">
+      <h2>Canlı harita</h2>
+      <div id="map"></div>
+    </section>
+    <section class="panel graphs">
+      <h2>Grafikler</h2>
+      <dl id="metrics"></dl>
+      <p id="marks" role="status"></p>
+    </section>
+    <section class="panel quake">
+      <div>
+        <h2>Deprem</h2>
+        <form id="quake">
+          <label>Büyüklük <input name="mag" type="number" value="5" min="0" max="10" step="0.1" required></label>
+          <label>Bölge
+            <select name="zone">
+              <option value="-1">Tüm tahta</option>
+              <option value="0">Kuzeybatı</option><option value="1">Kuzey</option><option value="2">Kuzeydoğu</option>
+              <option value="3">Batı</option><option value="4">Merkez</option><option value="5">Doğu</option>
+              <option value="6">Güneybatı</option><option value="7">Güney</option><option value="8">Güneydoğu</option>
+            </select>
+          </label>
+          <button type="submit" class="quake-button" disabled>Deprem başlat</button>
+        </form>
+      </div>
+      <div>
+        <h2>Olay günlüğü</h2>
+        <ol id="events"></ol>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

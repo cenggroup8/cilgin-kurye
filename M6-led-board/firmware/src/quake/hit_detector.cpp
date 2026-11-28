@@ -79,7 +79,6 @@ bool HitDetector::addSample(const ImuSample& s, QuakeEvent& out) {
         count_ = 0;
         peak_ = 0;
         pushX_ = pushY_ = pushZ_ = tiltX_ = tiltY_ = 0;
-        [[fallthrough]];
       } else {
         // The slow average follows only quiet samples, never a hit or its ringing.
         for (int i = 0; i < 6; i++) base_[i] += gravityAlpha_ * (raw[i] - base_[i]);
@@ -88,6 +87,8 @@ bool HitDetector::addSample(const ImuSample& s, QuakeEvent& out) {
         return false;
       }
     }
+      // A new window: this first sample already belongs to it.
+      [[fallthrough]];
     case Mode::InWindow: {
       peak_ = std::max(peak_, shake);
       if (count_ < t_.pushSamples) {

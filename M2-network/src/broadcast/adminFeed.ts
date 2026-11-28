@@ -20,7 +20,8 @@ export interface MetricSample {
 export interface BoardData {
   connected: boolean;
   samples: MetricSample[];
-  quake?: { mag: number; zone: number };
+  /** `source` is "hand" or "motors" for a board earthquake (M2-4, `BoardFeed`). */
+  quake?: { mag: number; zone: number; source?: string };
 }
 
 export interface LogEntry {
@@ -56,7 +57,7 @@ export class AdminFeed {
   private readonly boardSamples: MetricSample[] = [];
   private readonly events: LogEntry[] = [];
   private connected = false;
-  private quake?: { mag: number; zone: number };
+  private quake?: BoardData["quake"];
   private quakeAt = 0;
   private readonly quakeHoldMs: number;
   private params: ParamRow[] = [];

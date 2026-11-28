@@ -45,6 +45,12 @@ export interface BoardFeedOptions {
   now?: () => number;
   /** How often the link measurements go to the admin (ms). Default 1000. */
   metricsEveryMs?: number;
+  /**
+   * A handler that throws. The board link calls the events inside its socket listener,
+   * so a thrown error would stop the whole server; it is written down instead.
+   * Default `console.error`.
+   */
+  onError?: (err: unknown, where: string) => void;
 }
 
 export const BOARD_SAMPLE = {
@@ -56,6 +62,7 @@ export const BOARD_SAMPLE = {
 export class BoardFeed {
   private readonly now: () => number;
   private readonly everyMs: number;
+  private readonly onError: (err: unknown, where: string) => void;
   private timer: ReturnType<typeof setInterval> | null = null;
 
   constructor(
@@ -64,19 +71,29 @@ export class BoardFeed {
   ) {
     this.now = options.now ?? Date.now;
     this.everyMs = options.metricsEveryMs ?? 1000;
+    this.onError = options.onError ?? ((err, where) => console.error(`board feed: ${where} failed`, err));
   }
 
   /**
    * Board link events that give the board data to the admin and then call `next`
-   * (for example M1's earthquake handler). A handler of `next` that throws does not
-   * stop the admin data, and the other way round.
+   * (for example M1's earthquake handler). Both always run; an error of either one goes
+   * to `onError` and is not thrown, so one broken handler does not end the game.
    */
   events(next: BoardEvents = {}): BoardEvents {
     return {
-      link: (connected) => both(() => this.link(connected), () => next.link?.(connected)),
-      sensor: (e) => both(() => this.sensor(e), () => next.sensor?.(e)),
-      quake: (e) => both(() => this.quake(e), () => next.quake?.(e)),
-      status: (e) => next.status?.(e),
+      link: (connected) => {
+        this.guard("admin link", () => this.link(connected));
+        this.guard("M1 link", () => next.link?.(connected));
+      },
+      sensor: (e) => {
+        this.guard("admin sensor", () => this.sensor(e));
+        this.guard("M1 sensor", () => next.sensor?.(e));
+      },
+      quake: (e) => {
+        this.guard("admin quake", () => this.quake(e));
+        this.guard("M1 quake", () => next.quake?.(e));
+      },
+      status: (e) => this.guard("M1 status", () => next.status?.(e)),
     };
   }
 
@@ -120,7 +137,7 @@ export class BoardFeed {
   /** Sends `link.metrics()` every `metricsEveryMs`. */
   start(link: { metrics(): BoardMetrics }): void {
     this.stop();
-    this.timer = setInterval(() => this.metrics(link.metrics()), this.everyMs);
+    this.timer = setInterval(() => this.guard("admin metrics", () => this.metrics(link.metrics())), this.everyMs);
     this.timer.unref?.();
   }
 
@@ -128,20 +145,12 @@ export class BoardFeed {
     if (this.timer !== null) clearInterval(this.timer);
     this.timer = null;
   }
-}
 
-/** Runs both, even when the first one throws; then throws the first error, if any. */
-function both(admin: () => void, m1: () => void): void {
-  let failed: unknown;
-  try {
-    admin();
-  } catch (err) {
-    failed = err;
+  private guard(where: string, run: () => void): void {
+    try {
+      run();
+    } catch (err) {
+      this.onError(err, where);
+    }
   }
-  try {
-    m1();
-  } catch (err) {
-    failed ??= err;
-  }
-  if (failed !== undefined) throw failed;
 }

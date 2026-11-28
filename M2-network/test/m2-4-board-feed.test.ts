@@ -67,7 +67,7 @@ describe("M2-4 BoardFeed", () => {
     ]);
   });
 
-  it("the events also go to the next handler (M1), and one that throws does not stop the other", () => {
+  it("the events also go to the next handler (M1); one that throws does not stop the other and is not thrown", () => {
     const { sink, calls } = recorder();
     const seen: string[] = [];
     const events = new BoardFeed(sink).events({
@@ -81,16 +81,20 @@ describe("M2-4 BoardFeed", () => {
     expect(seen).toEqual(["link true", "quake hit", "status"]);
     expect(calls).toEqual([{ connected: true }, { quake: { mag: 6.5, zone: 4, source: "hand" } }]);
 
-    // The admin side fails: M1 still gets the earthquake.
+    // The admin side fails: M1 still gets the earthquake, nothing is thrown, the error is written down.
+    const errors: string[] = [];
+    const onError = (err: unknown, where: string) => errors.push(`${where}: ${(err as Error).message}`);
     const toM1: string[] = [];
-    const broken = new BoardFeed({ board: () => { throw new Error("admin away"); } }).events({ quake: (e) => toM1.push(e.src) });
-    expect(() => broken.quake?.(quake("motor"))).toThrow("admin away");
+    const broken = new BoardFeed({ board: () => { throw new Error("admin away"); } }, { onError }).events({ quake: (e) => toM1.push(e.src) });
+    expect(() => broken.quake?.(quake("motor"))).not.toThrow();
     expect(toM1).toEqual(["motor"]);
     // M1 fails: the admin still gets it.
     const r = recorder();
-    const m1Broken = new BoardFeed(r.sink).events({ quake: () => { throw new Error("m1"); } });
-    expect(() => m1Broken.quake?.(quake("hit"))).toThrow("m1");
+    const m1Broken = new BoardFeed(r.sink, { onError }).events({ quake: () => { throw new Error("m1"); }, status: () => { throw new Error("st"); } });
+    expect(() => m1Broken.quake?.(quake("hit"))).not.toThrow();
+    expect(() => m1Broken.status?.({})).not.toThrow();
     expect(r.calls).toEqual([{ quake: { mag: 6.5, zone: 4, source: "hand" } }]);
+    expect(errors).toEqual(["admin quake: admin away", "M1 quake: m1", "M1 status: st"]);
   });
 
   it("M2-3's hub takes the board data as it is", () => {

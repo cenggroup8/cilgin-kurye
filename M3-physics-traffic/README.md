@@ -124,3 +124,24 @@ Abdullatif Yılmaz, Hasan Alperen Elmas, Batuhan Yanar, Selim Barut, Muhib Taha 
 
 - Modules and Requirements v2.1: [PDF](../docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.pdf) · [Markdown](../docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.md)
 - Plan for the 4 December demo: issue #25
+
+## Bots (M3-5)
+
+`src/traffic/bots/` drives the AI bots. `BotFleet` owns the route planner (M3-3) and the bots;
+M1 calls `fleet.update(obstacles, roadSpeeds)` when the obstacles change and
+`bot.tick({ pose, carrying, delivery, neighbours }, dt)` every tick. The answer is the same
+`control` record a phone sends (`seq`, `throttle`, `brake`, `steer`).
+
+- State machine: `toStore` → `pickup` (stands still at the store) → `toDelivery` → `deliver`
+  (stands still at the point, M1 delivers) → `toStore` again.
+- Path following: looks at a point on the lane a little ahead (further when faster), slows
+  before corners and before the goal, keeps a gap to cars in front.
+- Fallen: sends empty controls and goes on in the same state when M1 lifts it.
+- Stuck (standing still before the goal for 2.5 s): asks for a new route; the second time it
+  turns round and leaves the road.
+- New obstacle list: every bot gets a new route when the planner says routes changed.
+- Skill 0–1 (`skillFromLevel`): top speed 7–16 m/s, reaction 0.6–0.05 s, steer noise 0.25–0.01.
+- Metric: `bot.routeChanges`, `fleet.routeChanges()`.
+
+`npm run demo:bots [city_plan.json]` runs it with a fake M1 and no server. Tests use a small
+kinematic motorcycle (`test/traffic/bots/helpers.ts`) until M3-1 is merged.

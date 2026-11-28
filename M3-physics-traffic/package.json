@@ -9,7 +9,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "demo:npc": "tsx debug/npc-demo.ts",
-    "demo:routes": "tsx debug/routes-demo.ts"
+    "demo:routes": "tsx debug/routes-demo.ts",
+    "demo:bots": "tsx debug/bots-demo.ts"
   },
   "engines": {
     "node": ">=20"

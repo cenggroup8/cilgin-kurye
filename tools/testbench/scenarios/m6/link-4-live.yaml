@@ -1,0 +1,10 @@
+module: M6
+title: "M6-1 link, live: rate, loss, vibrate and server restart by hand"
+params: { part: link, state_hz: 30, loss_pct: 0 }
+inputs:
+  - { name: state_hz, type: select, label: "Board states per second", options: [10, 20, 30], start: 30 }
+  - { name: loss_pct, type: slider, label: "State loss (%)", min: 0, max: 60, step: 10 }
+  - { name: phase, type: select, label: "Phase", options: [lobby, countdown, game, pause, end], start: game }
+  - { name: vibrate, type: button, label: "Vibrate all motors" }
+  - { name: restart, type: button, label: "Restart the server" }
+expect: ["board connects", "no bad messages"]

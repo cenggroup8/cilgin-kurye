@@ -131,7 +131,11 @@ export default { create, ready } satisfies AdapterModule;
 `ctx` has `emit(record)`, `now()` (seconds since the start) and `done()` (the adapter has
 finished before the time is over). The module code is imported with a relative path, for
 example `../../../../M2-network/src/board/boardLink.js`. Use free ports (port 0), so two
-adapters can run at the same time. `adapters/m2/index.ts` is a full example.
+adapters can run at the same time. Full examples: `adapters/m2/index.ts` (imports TypeScript),
+`adapters/m6/link.ts` (builds and runs a C++ program, reads its lines, uses a shared fake).
+
+A module with several parts (M6: link, sensor, LEDs) has one adapter that chooses the part
+with `params.part` of the scenario (`adapters/m6/index.ts`); each part is its own file.
 
 For a program (C++ test, `make demo`, a demo script) use the ready command adapter:
 

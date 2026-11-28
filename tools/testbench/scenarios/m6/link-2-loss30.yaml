@@ -1,0 +1,5 @@
+module: M6
+title: "M6-1 link: 30 % of the board states lost, the link stays"
+seconds: 12
+params: { part: link, state_hz: 30, loss_pct: 30 }
+expect: ["board connects", "board takes the states", "earthquake event arrives once", "no bad messages", "board program ends connected"]

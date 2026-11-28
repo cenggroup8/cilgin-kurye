@@ -38,6 +38,7 @@ function stamp(d: Date): string {
 export class Run {
   readonly result: Promise<Result>;
   private t0 = 0;
+  private starting = true;
   private finished = false;
   private timers: NodeJS.Timeout[] = [];
   private checks = new Map<string, CheckRec>();
@@ -54,8 +55,10 @@ export class Run {
     this.result = new Promise<void>((ok) => (this.finish = ok)).then(() => this.end());
   }
 
+  /** Seconds of the scenario. The clock starts when start() of the adapter is over
+   *  (a build before the start does not eat the time of the script). */
   now(): number {
-    return (performance.now() - this.t0) / 1000;
+    return this.starting ? 0 : (performance.now() - this.t0) / 1000;
   }
 
   private write(x: object): void {
@@ -80,15 +83,17 @@ export class Run {
       this.out = createWriteStream(this.file);
       this.write({ kind: "run", module: s.module, scenario: s.name, title: s.title, started: new Date().toISOString(), params: s.params, inputs: s.inputs, expect: s.expect, views: s.views });
     }
-    this.t0 = performance.now();
     const seconds = this.opts.seconds !== undefined ? this.opts.seconds : s.seconds;
     try {
       await this.adapter.start(s, { emit: (r) => this.take(r), done: () => this.finish(), now: () => this.now() });
     } catch (e) {
       this.error = `start: ${(e as Error).message}`;
+      this.starting = false;
       this.finish();
       return;
     }
+    this.t0 = performance.now();
+    this.starting = false;
     for (const step of s.script) {
       this.timers.push(setTimeout(() => this.input(step.input, step.value), Math.max(0, step.at * 1000 - this.now() * 1000)));
     }

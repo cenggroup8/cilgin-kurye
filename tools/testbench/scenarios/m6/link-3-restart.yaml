@@ -1,0 +1,7 @@
+module: M6
+title: "M6-1 link: the server restarts (new session number), the board connects again"
+seconds: 14
+params: { part: link, state_hz: 30 }
+script:
+  - { at: 8, input: restart }
+expect: ["board connects", "board finds the server again after a restart", "board takes the states", "no bad messages", "board program ends connected"]

@@ -148,3 +148,28 @@ test('the CSV file holds exactly the values that the graphs show', { timeout: 10
   }
   assert.equal(csv.filter((r) => r[2] === 'change').length, 1);
 });
+
+test('after a page reload the change lines come back from the snapshot, at the same place', { timeout: 10_000 }, async (t) => {
+  const { connection, fake, model, play } = await setup(t);
+  await connected(connection);
+  play(3_000);
+  await settle();
+  await connection.command({ name: 'param_set', args: { name: 'physics.npc_count', value: 40 } });
+  play(3_000);
+  await settle();
+  const before = model.allMarks().filter((m) => m.kind === 'change');
+  assert.equal(before.length, 1);
+
+  // A reloaded page: a new connection and a new, empty graph model.
+  connection.stop();
+  const again = new AdminConnection(connection['url'] as string);
+  const fresh = new GraphModel();
+  again.subscribe((e) => fresh.apply(e));
+  t.after(() => again.stop());
+  await next(again, (e) => e.t === 'snapshot', () => again.start());
+  await settle();
+  const after = fresh.allMarks().filter((m) => m.kind === 'change');
+  assert.deepEqual(after.map((m) => m.label), ['physics.npc_count']);
+  assert.ok(Math.abs(after[0]!.time - before[0]!.time) < 1_500, 'the line stands where it stood before the reload');
+  void fake;
+});

@@ -1,0 +1,38 @@
+:root {
+  color-scheme: dark;
+  font-family: system-ui, sans-serif;
+  background: #111512;
+  color: #eaf5ec;
+}
+body { margin: 0; }
+main { width: min(46rem, 100% - 2rem); margin: auto; padding-block: 1rem 10rem; }
+h1 { font-size: clamp(1.4rem, 4vw, 2rem); }
+form, dl { display: flex; flex-wrap: wrap; gap: 1rem; align-items: end; }
+label { display: grid; gap: .35rem; }
+input, select, button { font: inherit; border: 1px solid #54735a; border-radius: .6rem; }
+input, select, form button { padding: .65rem; min-height: 2.75rem; box-sizing: border-box; }
+input { width: 8rem; }
+dd { margin: .25rem 0 0; font-variant-numeric: tabular-nums; }
+dt { color: #a1bca9; }
+#controls:not([hidden]) {
+  position: fixed;
+  inset: auto 0 0;
+  display: flex;
+  justify-content: space-between;
+  gap: .6rem;
+  padding: .65rem max(.65rem, env(safe-area-inset-right)) max(.65rem, env(safe-area-inset-bottom)) max(.65rem, env(safe-area-inset-left));
+  background: #111512;
+}
+.pair { display: flex; gap: .35rem; }
+.pair button {
+  width: clamp(3.4rem, 19vw, 6.5rem);
+  height: clamp(3.6rem, 12vh, 6.5rem);
+  background: #21382a;
+  font-weight: 700;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.pair button[data-control="throttle"] { background: #275638; }
+.pair button[data-control="brake"] { background: #59352c; }
+.pair button.held { background: #bfeb91; color: #142111; }

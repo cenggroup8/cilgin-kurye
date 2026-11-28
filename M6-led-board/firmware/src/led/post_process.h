@@ -14,7 +14,7 @@
 
 namespace led {
 
-/** Current model of one WS2812B LED. 728 LEDs at full white give about 44 A (strip_layout.md). */
+/** Current model of one WS2812B LED. 788 LEDs at full white give about 47 A (strip_layout.md). */
 struct PowerModel {
   float maPerChannel = 20.0f;  // one colour at 255
   float idleMa = 1.0f;         // an LED that is off still takes this

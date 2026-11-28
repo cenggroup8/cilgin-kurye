@@ -10,13 +10,13 @@ const read = (p) => JSON.parse(readFileSync(root + p, "utf8"));
 const plan = read("contracts/city_plan.json");
 const layout = () => read("M6-led-board/hardware/strip_layout.json");
 
-test("the strip layout and the city plan give 728 LEDs on 60 roads and 4 stores", () => {
+test("the strip layout and the city plan give 788 LEDs on 60 roads and 4 stores", () => {
   const map = buildMap(plan, layout());
-  assert.equal(map.leds.length, 728);
-  assert.deepEqual(map.chainLeds, [368, 360]);
+  assert.equal(map.leds.length, 788);
+  assert.deepEqual(map.chainLeds, [398, 390]);
   assert.equal(map.segmentInfo.length, 60);
   assert.equal(map.leds.filter((l) => l.store >= 0).length, 8);
-  assert.match(renderHeader(map), /constexpr uint16_t kLedCount = 728;/);
+  assert.match(renderHeader(map), /constexpr uint16_t kLedCount = 788;/);
 });
 
 test("a broken layout is refused with the reason", () => {

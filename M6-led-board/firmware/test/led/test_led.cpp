@@ -47,9 +47,9 @@ static bool same(Rgb a, Rgb b) { return a.r == b.r && a.g == b.g && a.b == b.b; 
 
 static void testMap() {
   section("LED map: every LED once, every road and store, the chains in order");
-  CHECK(kLedCount == 728, "728 LEDs (strip_layout.md)");
-  CHECK(mapdata::kChainLeds[0] == 368 && mapdata::kChainLeds[1] == 360, "chain A 368, chain B 360");
-  CHECK(chainStart(0) == 0 && chainStart(1) == 368, "chain B starts after chain A");
+  CHECK(kLedCount == 788, "788 LEDs (strip_layout.md: 65 cm board, 12 mm strip)");
+  CHECK(mapdata::kChainLeds[0] == 398 && mapdata::kChainLeds[1] == 390, "chain A 398, chain B 390");
+  CHECK(chainStart(0) == 0 && chainStart(1) == 398, "chain B starts after chain A");
   int roads = 0, stores = 0;
   for (uint16_t i = 0; i < kLedCount; i++) {
     const auto& l = mapdata::kLeds[i];
@@ -58,10 +58,10 @@ static void testMap() {
     if (l.store >= 0) stores++;
     CHECK((l.segment >= 0) != (l.store >= 0), "an LED is on a road or in a store");
   }
-  CHECK(roads == 720 && stores == 8, "60 × 12 road LEDs, 4 × 2 store LEDs");
+  CHECK(roads == 780 && stores == 8, "60 × 13 road LEDs, 4 × 2 store LEDs");
   for (uint8_t s = 0; s < 60; s++) {
     const auto& seg = mapdata::kSegments[s];
-    CHECK(seg.count == 12, "12 LEDs per road");
+    CHECK(seg.count == 13, "13 LEDs per road");
     for (uint8_t k = 0; k < seg.count; k++) CHECK(ledSegment(seg.first + k) == s, "segment table points to its LEDs");
     // East-west roads (0–29) are in chain A, north-south roads (30–59) in chain B.
     CHECK(mapdata::kLeds[seg.first].chain == (s < 30 ? 0 : 1), "road in the right chain");
@@ -74,7 +74,7 @@ static void testMap() {
 
 static void testLookups() {
   section("LED map: place on a road and nearest LED to a board place");
-  // t = 0.5 on any road is between LED 5 and 6 of its 12, never at a crossing.
+  // t = 0.5 on any road is the middle LED of its 13, never at a crossing.
   for (uint8_t s = 0; s < 60; s++) {
     const uint16_t led = ledOnSegment(s, 0.5f);
     CHECK(led != kNoLed && ledSegment(led) == s, "LED on the asked road");
@@ -120,7 +120,7 @@ static void testPatterns() {
   CHECK(lit.size() == kLedCount, "in one round every LED was on once");
 
   drawPattern(f, Pattern::Chase, 1000);  // 30 LEDs per second: LED 30 of each chain
-  CHECK(f[30].r == 255 && f[368 + 30].r == 255, "chase: one LED per chain");
+  CHECK(f[30].r == 255 && f[chainStart(1) + 30].r == 255, "chase: one LED per chain");
 
   const auto& s = mapdata::kSegments[35];  // a north-south road wired from b to a (snake)
   CHECK(s.reversed, "segment 35 is wired from node b to node a");
@@ -161,15 +161,15 @@ static void testPower() {
   PostProcessor post;
   Frame white, out;
   white.fill(Rgb{255, 255, 255});
-  CHECK(post.estimateMa(white.data(), kLedCount) > 44000, "full white on 728 LEDs is about 44 A");
+  CHECK(post.estimateMa(white.data(), kLedCount) > 47000, "full white on 788 LEDs is about 47 A");
 
   for (uint16_t limit : {8000, 4000, 2000, 1000}) {
     post.setConfig(1.0f, limit);
     const PostResult r = post.process(white.data(), out.data(), kLedCount);
     CHECK(r.limited && r.maEst <= limit, "estimate under the limit");
-    // One step of the 8-bit values on every channel of every LED is 728 × 3 × 20 / 255 ≈ 171 mA.
-    CHECK(r.maEst + 171 > limit, "and at most one step less: the limit only takes what it must");
-    CHECK(r.maBefore > 40000, "before the limit about 44 A");
+    // One step of the 8-bit values on every channel of every LED is 788 × 3 × 20 / 255 ≈ 186 mA.
+    CHECK(r.maEst + 186 > limit, "and at most one step less: the limit only takes what it must");
+    CHECK(r.maBefore > 47000, "before the limit about 47 A");
   }
 
   // A mixed picture is dimmed by one factor: the ratio of two colours stays.
@@ -182,7 +182,7 @@ static void testPower() {
   const float ratio = static_cast<float>(out[0].g) / out[0].r;
   CHECK(std::fabs(ratio - gamma8(128) / 255.0f) < 0.05f, "red and green keep their ratio");
 
-  post.setConfig(1.0f, 500);  // less than the idle current of 728 LEDs
+  post.setConfig(1.0f, 500);  // less than the idle current of 788 LEDs
   const PostResult dark = post.process(white.data(), out.data(), kLedCount);
   CHECK(dark.powerScale == 0.0f && out[100].r == 0, "below the idle current all LEDs are off");
 }
@@ -198,14 +198,14 @@ static void testOutputStage() {
   Frame game;
   game.fill(Rgb{0, 0, 0});
   game[0] = Rgb{255, 0, 0};    // chain A, LED 0
-  game[368] = Rgb{0, 0, 255};  // chain B, LED 0
+  game[chainStart(1)] = Rgb{0, 0, 255};  // chain B, LED 0
   uint32_t t = 0;
   for (int i = 0; i < 60 * 3; i++, t += 16) stage.send(game, t);  // 3 s at about 60 frames per second
   CHECK(fake.frames == 180, "every frame went out");
-  CHECK(fake.chains.size() == 2 && fake.chains[0].size() == 368 && fake.chains[1].size() == 360, "two chains");
+  CHECK(fake.chains.size() == 2 && fake.chains[0].size() == 398 && fake.chains[1].size() == 390, "two chains");
   CHECK(fake.chains[0][0].r == 255 && fake.chains[1][0].b == 255, "each chain starts with its first LED");
   CHECK(stage.fps() >= 60 && stage.fps() <= 64, "about 60 frames per second");
-  CHECK(stage.maEst() > 700 && stage.maEst() < 800, "two LEDs on: idle current plus 40 mA");
+  CHECK(stage.maEst() == kLedCount + 40u, "two LEDs on: idle current (1 mA each) plus 40 mA");
   CHECK(stage.errors(t).empty(), "no error");
 
   stage.setPattern(Pattern::White, t);

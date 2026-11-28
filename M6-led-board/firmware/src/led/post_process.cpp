@@ -36,7 +36,7 @@ void PostProcessor::setConfig(float bright, uint16_t maxMa) {
 }
 
 uint32_t PostProcessor::estimateMa(const Rgb* frame, uint16_t count) const {
-  uint32_t sum = 0;  // sum of all channel values, at most 728 × 765
+  uint32_t sum = 0;  // sum of all channel values, at most 788 × 765
   for (uint16_t i = 0; i < count; i++) sum += frame[i].r + frame[i].g + frame[i].b;
   return static_cast<uint32_t>(std::lround(sum * model_.maPerChannel / 255.0f + count * model_.idleMa));
 }

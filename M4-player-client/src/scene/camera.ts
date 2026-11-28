@@ -11,11 +11,11 @@ export interface Follow {
 
 export function chaseSpot(t: Follow): { eye: THREE.Vector3; look: THREE.Vector3 } {
   const f = forwardOf(t.heading);
-  const back = 6.2 + Math.min(Math.abs(t.speed), 20) * 0.16;
-  const height = 2.9 + Math.min(Math.abs(t.speed), 20) * 0.045;
+  const back = 3.6 + Math.min(Math.abs(t.speed), 20) * 0.04;
+  const height = 1.95 + Math.min(Math.abs(t.speed), 20) * 0.015;
   return {
     eye: new THREE.Vector3(t.x - f.x * back, height, t.z - f.z * back),
-    look: new THREE.Vector3(t.x + f.x * 5, 1.2, t.z + f.z * 5),
+    look: new THREE.Vector3(t.x + f.x * 3, 1.05, t.z + f.z * 3),
   };
 }
 
@@ -41,7 +41,7 @@ export class ChaseCamera {
       this.look.copy(spot.look);
       this.placed = true;
     } else {
-      this.base.lerp(spot.eye, smoothing(5, dt));
+      this.base.lerp(spot.eye, smoothing(11, dt));
       this.look.lerp(spot.look, smoothing(8, dt));
     }
     const f = forwardOf(target.heading);
@@ -56,7 +56,7 @@ export class ChaseCamera {
     this.camera.position.set(this.base.x - f.x * shake + jx, this.base.y + jy, this.base.z - f.z * shake + jz);
     this.camera.lookAt(this.look.x + jx * 0.4, this.look.y + jy * 0.4, this.look.z + jz * 0.4);
     this.camera.rotateZ((Math.sin(t * 17.3) * 0.6 + Math.sin(t * 27.9 + 0.9) * 0.4) * 0.025 * q);
-    this.setFov(60 + Math.min(Math.abs(target.speed), 22) * 0.28 + shake * 2.5, dt);
+    this.setFov(60 + Math.min(Math.abs(target.speed), 22) * 0.12 + shake * 2, dt);
   }
 
   kick(shift: "up" | "down"): void {

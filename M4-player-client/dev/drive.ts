@@ -4,6 +4,7 @@ import {
   blendPlayer,
   CityScene,
   EngineAudio,
+  loadScooter,
   PLAYER_TONES,
   SnapshotBuffer,
   TEAM_NAMES,
@@ -14,10 +15,14 @@ import {
   type ScenePlayer,
   type SceneQuake,
 } from "../src/scene/index.ts";
-import plan from "@m3/test/fakes/city_plan.json";
 import { FakeM1 } from "@m3/test/fakes/fakeM1.ts";
+import { m3City } from "@m3/test/fakes/cityPlan.ts";
 import { fromContractHeading, fromContractPoint, toContractHeading, toContractPoint } from "@m3/src/common/coords.ts";
 import { fromContractObstacles } from "@m3/src/traffic/npc/contract.ts";
+
+const planResponse = await fetch("./city_plan.json");
+if (!planResponse.ok) throw new Error(await planResponse.text());
+const plan = (await planResponse.json()) as CityPlan;
 
 const PLAYER = 0;
 const NORTH = Math.PI / 2;
@@ -78,7 +83,7 @@ function reset(): void {
     players: [PLAYER],
     npcCars: 30,
     control: () => ({ throttle: input.throttle, brake: input.brake, steer: input.steer }),
-  });
+  }, undefined, m3City(plan as unknown as Parameters<typeof m3City>[0]));
   const b = m1.physics.bikes.get(PLAYER)!;
   b.heading = NORTH;
   const spawn = new URLSearchParams(location.search).get("spawn")?.split(",").map(Number);
@@ -109,7 +114,7 @@ function applyWorld(): void {
 reset();
 
 const canvas = document.getElementById("view") as HTMLCanvasElement;
-const scene = new CityScene(canvas, plan as unknown as CityPlan);
+const scene = new CityScene(canvas, plan);
 const $ = (id: string) => document.getElementById(id)!;
 const kmh = $("kmh");
 const fpsText = $("fps");
@@ -394,4 +399,9 @@ function frame(now: number): void {
   }
   requestAnimationFrame(frame);
 }
-requestAnimationFrame(frame);
+loadScooter()
+  .catch((e) => console.warn("scooter model not loaded, using the built-in one", e))
+  .finally(() => {
+    last = performance.now();
+    requestAnimationFrame(frame);
+  });

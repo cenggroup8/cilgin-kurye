@@ -3,8 +3,13 @@ export interface CityPlan {
   grid: { lines: number; pitch_m: number; lanes_per_direction: number; lane_width_m: number };
   nodes: readonly { id: number; x: number; z: number }[];
   segments: readonly { id: number; a: number; b: number }[];
-  stores: readonly { team: number; color: string; pickup: { x: number; z: number; radius_m: number } }[];
-  buildings: readonly { id: number; footprint: readonly (readonly number[])[]; height_m: number }[];
+  stores: readonly {
+    team: number;
+    color: string;
+    pickup: { x: number; z: number; radius_m: number };
+    depot?: { footprint: readonly (readonly number[])[]; height_m: number };
+  }[];
+  buildings: readonly { id: number; block?: string; kind?: string; footprint: readonly (readonly number[])[]; height_m: number }[];
 }
 
 export interface ScenePlayer {

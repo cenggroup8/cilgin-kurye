@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { groundHeight, LAWN_TOP, SIDEWALK_TOP } from "../../src/scene/city.ts";
 import { ObstacleLayer, placeObstacle } from "../../src/scene/obstacles.ts";
 import { quakeShake } from "../../src/scene/scene.ts";
 import { blendCar, lerpHeading, SnapshotBuffer } from "../../src/scene/snapshots.ts";
@@ -78,4 +79,13 @@ test("the earthquake shakes more near its centre and not at all far away", () =>
   assert.ok(quakeShake(q, 250, 250) <= 0.7 + 1e-9);
   assert.equal(quakeShake(q, 0, 0), 0);
   assert.equal(quakeShake(null, 250, 250), 0);
+});
+
+test("wheels stay on top: road 0, sidewalk and lawn at their own heights", () => {
+  const at = groundHeight(plan);
+  assert.equal(at(50, 0), 0);
+  assert.equal(at(100, 50), 0);
+  assert.equal(at(50, 8), SIDEWALK_TOP);
+  assert.equal(at(18, 18), LAWN_TOP);
+  assert.equal(at(-30, 50), 0);
 });

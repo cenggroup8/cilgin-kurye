@@ -1,0 +1,389 @@
+{
+  "asset": "delivery_scooter",
+  "units": "metres",
+  "up": "+Y",
+  "forward": "-Z",
+  "origin": "ground, midway between wheel contact points",
+  "size": {
+    "length": 1.942,
+    "width": 0.745,
+    "height": 1.708
+  },
+  "wheels": {
+    "radius": 0.27,
+    "rearAxle": [
+      0,
+      0.27,
+      0.65
+    ],
+    "frontAxle": [
+      0,
+      0.27,
+      -0.65
+    ]
+  },
+  "rig": {
+    "Body": "roll around Z (lean, fall)",
+    "Chassis": "pitch around X",
+    "RearWheel": "spin around X",
+    "FrontWheel": "spin around X",
+    "Fork": "steer around Y",
+    "Rider": "lean around X",
+    "Head": "turn around Y"
+  },
+  "nodes": [
+    {
+      "name": "Scooter",
+      "parent": null,
+      "type": "group",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "localPosition": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "Body",
+      "parent": "Scooter",
+      "type": "group",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "localPosition": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "Chassis",
+      "parent": "Body",
+      "type": "group",
+      "pivot": [
+        0,
+        0.27,
+        0.65
+      ],
+      "localPosition": [
+        0,
+        0.27,
+        0.65
+      ]
+    },
+    {
+      "name": "Frame",
+      "parent": "Chassis",
+      "type": "mesh",
+      "pivot": [
+        0,
+        0.27,
+        0.65
+      ],
+      "localPosition": [
+        0,
+        0,
+        0
+      ],
+      "triangles": 1138,
+      "materials": [
+        "TeamPaint",
+        "Atlas"
+      ]
+    },
+    {
+      "name": "TailLight",
+      "parent": "Chassis",
+      "type": "mesh",
+      "pivot": [
+        0,
+        0.27,
+        0.65
+      ],
+      "localPosition": [
+        0,
+        0,
+        0
+      ],
+      "triangles": 28,
+      "materials": [
+        "Lights"
+      ]
+    },
+    {
+      "name": "RearWheel",
+      "parent": "Chassis",
+      "type": "mesh",
+      "pivot": [
+        0,
+        0.27,
+        0.65
+      ],
+      "localPosition": [
+        0,
+        0,
+        0
+      ],
+      "triangles": 356,
+      "materials": [
+        "Atlas"
+      ]
+    },
+    {
+      "name": "Fork",
+      "parent": "Chassis",
+      "type": "group",
+      "pivot": [
+        0,
+        0.98,
+        -0.4
+      ],
+      "localPosition": [
+        0,
+        0.71,
+        -1.05
+      ]
+    },
+    {
+      "name": "ForkMesh",
+      "parent": "Fork",
+      "type": "mesh",
+      "pivot": [
+        0,
+        0.98,
+        -0.4
+      ],
+      "localPosition": [
+        0,
+        0,
+        0
+      ],
+      "triangles": 560,
+      "materials": [
+        "TeamPaint",
+        "Atlas"
+      ]
+    },
+    {
+      "name": "Headlight",
+      "parent": "Fork",
+      "type": "mesh",
+      "pivot": [
+        0,
+        0.98,
+        -0.4
+      ],
+      "localPosition": [
+        0,
+        0,
+        0
+      ],
+      "triangles": 36,
+      "materials": [
+        "Lights"
+      ]
+    },
+    {
+      "name": "FrontWheel",
+      "parent": "Fork",
+      "type": "mesh",
+      "pivot": [
+        0,
+        0.27,
+        -0.65
+      ],
+      "localPosition": [
+        0,
+        -0.71,
+        -0.25
+      ],
+      "triangles": 364,
+      "materials": [
+        "Atlas"
+      ]
+    },
+    {
+      "name": "Rider",
+      "parent": "Chassis",
+      "type": "group",
+      "pivot": [
+        0,
+        0.84,
+        0.3
+      ],
+      "localPosition": [
+        0,
+        0.57,
+        -0.35
+      ]
+    },
+    {
+      "name": "Torso",
+      "parent": "Rider",
+      "type": "mesh",
+      "pivot": [
+        0,
+        0.84,
+        0.3
+      ],
+      "localPosition": [
+        0,
+        0,
+        0
+      ],
+      "triangles": 1080,
+      "materials": [
+        "TeamPaint",
+        "Atlas"
+      ]
+    },
+    {
+      "name": "Head",
+      "parent": "Rider",
+      "type": "mesh",
+      "pivot": [
+        0,
+        1.43,
+        0.13
+      ],
+      "localPosition": [
+        0,
+        0.59,
+        -0.17
+      ],
+      "triangles": 384,
+      "materials": [
+        "TeamPaint",
+        "Atlas"
+      ]
+    }
+  ],
+  "triangles": {
+    "scooter": 2482,
+    "rider": 1464,
+    "total": 3946
+  },
+  "meshCount": 8,
+  "materials": [
+    {
+      "name": "TeamPaint",
+      "type": "flat colour, no texture",
+      "neutral": "#ffffff"
+    },
+    {
+      "name": "Atlas",
+      "type": "baseColor texture",
+      "texture": "scooter_atlas.png",
+      "size": [
+        512,
+        512
+      ],
+      "regions": {
+        "plate": {
+          "x": 0,
+          "y": 128,
+          "w": 256,
+          "h": 128
+        },
+        "refl": {
+          "x": 256,
+          "y": 128,
+          "w": 256,
+          "h": 64
+        },
+        "seam": {
+          "x": 256,
+          "y": 192,
+          "w": 256,
+          "h": 64
+        },
+        "logo": {
+          "x": 0,
+          "y": 256,
+          "w": 256,
+          "h": 256
+        }
+      }
+    },
+    {
+      "name": "Lights",
+      "type": "emissive (atlas)",
+      "meshes": [
+        "Headlight",
+        "TailLight"
+      ],
+      "note": "TailLight is its own mesh for brake brightening"
+    }
+  ],
+  "liveries": [
+    {
+      "id": "neutral",
+      "team": "Neutral",
+      "tone": null,
+      "hex": "#ffffff",
+      "file": "scooter_neutral.glb"
+    },
+    {
+      "id": "blue_light",
+      "team": "Blue",
+      "tone": "light",
+      "hex": "#50a0ff",
+      "file": "scooter_blue_light.glb"
+    },
+    {
+      "id": "blue_dark",
+      "team": "Blue",
+      "tone": "dark",
+      "hex": "#003cdc",
+      "file": "scooter_blue_dark.glb"
+    },
+    {
+      "id": "green_light",
+      "team": "Green",
+      "tone": "light",
+      "hex": "#5aff5a",
+      "file": "scooter_green_light.glb"
+    },
+    {
+      "id": "green_dark",
+      "team": "Green",
+      "tone": "dark",
+      "hex": "#009628",
+      "file": "scooter_green_dark.glb"
+    },
+    {
+      "id": "purple_light",
+      "team": "Purple",
+      "tone": "light",
+      "hex": "#c86eff",
+      "file": "scooter_purple_light.glb"
+    },
+    {
+      "id": "purple_dark",
+      "team": "Purple",
+      "tone": "dark",
+      "hex": "#6e00c8",
+      "file": "scooter_purple_dark.glb"
+    },
+    {
+      "id": "yellow_light",
+      "team": "Yellow",
+      "tone": "light",
+      "hex": "#ffe650",
+      "file": "scooter_yellow_light.glb"
+    },
+    {
+      "id": "yellow_dark",
+      "team": "Yellow",
+      "tone": "dark",
+      "hex": "#d28c00",
+      "file": "scooter_yellow_dark.glb"
+    }
+  ]
+}

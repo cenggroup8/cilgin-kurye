@@ -1,5 +1,8 @@
 import * as THREE from "three";
 import { roadWidth, teamColor } from "./pose.ts";
+import { Props } from "./props.ts";
+import { texture } from "./textures.ts";
+import { buildTown } from "./town.ts";
 import type { CityPlan } from "./types.ts";
 
 export const CITY_COLORS = {
@@ -13,11 +16,6 @@ export const CITY_COLORS = {
   windowLit: "#ffe2a0",
 };
 
-const WARM = ["#e9d8b9", "#f2b880", "#d98c6a", "#c4d7a4", "#9cc5b4", "#f1dd8c", "#d7c6e3", "#e6b8b0"];
-const GLASS = ["#8fb2cc", "#a7bfd1", "#7d9fb8", "#b6c7d6"];
-
-const FLOOR_M = 3.5;
-const WINDOW_STEP_M = 4;
 const CROSSWALK_M = 3;
 const DASH_M = 3;
 const GAP_M = 5;
@@ -25,9 +23,10 @@ const GAP_M = 5;
 export interface CityParts {
   group: THREE.Group;
   buildings: THREE.Mesh[];
-  windows: THREE.InstancedMesh;
   markings: THREE.InstancedMesh[];
   stores: THREE.Group[];
+  props: Props;
+  triangles: number;
 }
 
 export function hash(a: number, b: number, c = 0): number {
@@ -75,41 +74,28 @@ function segmentsOf(plan: CityPlan) {
 
 function buildGround(plan: CityPlan, group: THREE.Group, half: number): void {
   const size = plan.world.size_m;
-  const grass = new THREE.Mesh(new THREE.PlaneGeometry(size + 800, size + 800).rotateX(-Math.PI / 2), material(CITY_COLORS.grass));
+  const outer = size + 800;
+  const grassMap = texture("grass")?.clone() ?? null;
+  if (grassMap) grassMap.repeat.set(outer / 6, outer / 6);
+  const grass = new THREE.Mesh(
+    new THREE.PlaneGeometry(outer, outer).rotateX(-Math.PI / 2),
+    new THREE.MeshStandardMaterial({ color: "#ffffff", map: grassMap, roughness: 1 }),
+  );
   grass.position.set(size / 2, -0.05, size / 2);
   grass.receiveShadow = true;
   grass.name = "grass";
   const pad = half + 4;
-  const asphalt = new THREE.Mesh(new THREE.PlaneGeometry(size + 2 * pad, size + 2 * pad).rotateX(-Math.PI / 2), material(CITY_COLORS.asphalt));
+  const road = size + 2 * pad;
+  const roadMap = texture("asphalt")?.clone() ?? null;
+  if (roadMap) roadMap.repeat.set(road / 5, road / 5);
+  const asphalt = new THREE.Mesh(
+    new THREE.PlaneGeometry(road, road).rotateX(-Math.PI / 2),
+    roadMap ? new THREE.MeshStandardMaterial({ color: "#ffffff", map: roadMap, roughness: 0.95 }) : material(CITY_COLORS.asphalt),
+  );
   asphalt.position.set(size / 2, 0, size / 2);
   asphalt.receiveShadow = true;
   asphalt.name = "asphalt";
   group.add(grass, asphalt);
-}
-
-function buildBlocks(plan: CityPlan, group: THREE.Group, half: number): void {
-  const { xs, zs } = gridLines(plan);
-  const walk: Box[] = [];
-  const lawn: Box[] = [];
-  for (let i = 0; i + 1 < xs.length; i++) {
-    for (let j = 0; j + 1 < zs.length; j++) {
-      const x0 = xs[i] + half;
-      const x1 = xs[i + 1] - half;
-      const z0 = zs[j] + half;
-      const z1 = zs[j + 1] - half;
-      const cx = (x0 + x1) / 2;
-      const cz = (z0 + z1) / 2;
-      walk.push({ x: cx, y: 0.09, z: cz, sx: x1 - x0, sy: 0.18, sz: z1 - z0 });
-      lawn.push({ x: cx, y: 0.1, z: cz, sx: x1 - x0 - 5, sy: 0.2, sz: z1 - z0 - 5 });
-    }
-  }
-  const walks = boxes(walk, material(CITY_COLORS.sidewalk));
-  walks.name = "sidewalks";
-  walks.receiveShadow = true;
-  const lawns = boxes(lawn, material(CITY_COLORS.lawn));
-  lawns.name = "lawns";
-  lawns.receiveShadow = true;
-  group.add(walks, lawns);
 }
 
 function buildMarkings(plan: CityPlan, group: THREE.Group, half: number): THREE.InstancedMesh[] {
@@ -149,75 +135,6 @@ function buildMarkings(plan: CityPlan, group: THREE.Group, half: number): THREE.
   return [y, w];
 }
 
-function buildingColor(id: number, height: number): string {
-  const list = height >= 28 ? GLASS : WARM;
-  return list[Math.floor(hash(id, 3) * list.length)];
-}
-
-function buildBuildings(plan: CityPlan, group: THREE.Group): { meshes: THREE.Mesh[]; windows: THREE.InstancedMesh } {
-  const meshes: THREE.Mesh[] = [];
-  const win: Box[] = [];
-  const winColors: string[] = [];
-  for (const b of plan.buildings) {
-    const pts = b.footprint.map(([x, z]) => new THREE.Vector2(x, -z));
-    const body = new THREE.ExtrudeGeometry(new THREE.Shape(pts), { depth: b.height_m, bevelEnabled: false }).rotateX(-Math.PI / 2);
-    const color = buildingColor(b.id, b.height_m);
-    const mesh = new THREE.Mesh(body, material(color));
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    mesh.name = `building-${b.id}`;
-    const roof = new THREE.Mesh(
-      new THREE.ExtrudeGeometry(new THREE.Shape(pts), { depth: 0.5, bevelEnabled: false }).rotateX(-Math.PI / 2),
-      material(`#${new THREE.Color(color).multiplyScalar(0.78).getHexString()}`),
-    );
-    roof.position.y = b.height_m;
-    mesh.add(roof);
-    meshes.push(mesh);
-    group.add(mesh);
-
-    const cx = b.footprint.reduce((s, p) => s + p[0], 0) / b.footprint.length;
-    const cz = b.footprint.reduce((s, p) => s + p[1], 0) / b.footprint.length;
-    const n = b.footprint.length;
-    for (let i = 0; i < n; i++) {
-      const [ax, az] = b.footprint[i];
-      const [bx, bz] = b.footprint[(i + 1) % n];
-      const len = Math.hypot(bx - ax, bz - az);
-      const ux = (bx - ax) / len;
-      const uz = (bz - az) / len;
-      let nx = uz;
-      let nz = -ux;
-      const mx = (ax + bx) / 2;
-      const mz = (az + bz) / 2;
-      if (nx * (mx - cx) + nz * (mz - cz) < 0) {
-        nx = -nx;
-        nz = -nz;
-      }
-      const yaw = Math.atan2(-uz, ux);
-      const cols = Math.floor(len / WINDOW_STEP_M);
-      const rows = Math.floor((b.height_m - 1.5) / FLOOR_M);
-      for (let c = 0; c < cols; c++) {
-        const along = (c + 0.5) * (len / cols);
-        for (let r = 0; r < rows; r++) {
-          win.push({
-            x: ax + ux * along + nx * 0.06,
-            y: 1.9 + r * FLOOR_M,
-            z: az + uz * along + nz * 0.06,
-            sx: 1.7,
-            sy: 1.5,
-            sz: 0.12,
-            yaw,
-          });
-          winColors.push(hash(b.id, i * 131 + c, r) > 0.7 ? CITY_COLORS.windowLit : CITY_COLORS.window);
-        }
-      }
-    }
-  }
-  const windows = boxes(win, new THREE.MeshStandardMaterial({ roughness: 0.4, metalness: 0.1 }), winColors);
-  windows.name = "windows";
-  group.add(windows);
-  return { meshes, windows };
-}
-
 function buildStore(store: CityPlan["stores"][number], size: number): THREE.Group {
   const g = new THREE.Group();
   g.name = `store-${store.team}`;
@@ -253,15 +170,41 @@ function buildStore(store: CityPlan["stores"][number], size: number): THREE.Grou
   return g;
 }
 
+export const SIDEWALK_TOP = 0.18;
+export const LAWN_TOP = 0.2;
+const LAWN_INSET = 3;
+
+export function groundHeight(plan: CityPlan): (x: number, z: number) => number {
+  const { xs, zs } = gridLines(plan);
+  const half = roadWidth(plan.grid) / 2;
+  const cell = (v: number, lines: number[]) => {
+    for (let i = 0; i + 1 < lines.length; i++) {
+      const lo = lines[i] + half;
+      const hi = lines[i + 1] - half;
+      if (v > lo && v < hi) return Math.min(v - lo, hi - v);
+    }
+    return -1;
+  };
+  return (x, z) => {
+    const dx = cell(x, xs);
+    const dz = cell(z, zs);
+    if (dx < 0 || dz < 0) return 0;
+    return Math.min(dx, dz) > LAWN_INSET ? LAWN_TOP : SIDEWALK_TOP;
+  };
+}
+
 export function buildCity(plan: CityPlan): CityParts {
   const group = new THREE.Group();
   group.name = "city";
   const half = roadWidth(plan.grid) / 2;
   buildGround(plan, group, half);
-  buildBlocks(plan, group, half);
   const markings = buildMarkings(plan, group, half);
-  const { meshes, windows } = buildBuildings(plan, group);
+  const town = buildTown(plan);
+  const meshes = town.meshes();
+  group.add(...meshes);
+  const props = new Props(plan, town.trees, town.benches);
+  group.add(props.group);
   const stores = plan.stores.map((st) => buildStore(st, plan.world.size_m));
   group.add(...stores);
-  return { group, buildings: meshes, windows, markings, stores };
+  return { group, buildings: meshes, markings, stores, props, triangles: town.triangles };
 }

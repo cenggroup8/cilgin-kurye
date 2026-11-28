@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { BikeModel } from "./bike.ts";
 import { ChaseCamera } from "./camera.ts";
 import { CarLayer } from "./cars.ts";
-import { buildCity, type CityParts } from "./city.ts";
+import { buildCity, groundHeight, type CityParts } from "./city.ts";
 import { Effects } from "./effects.ts";
 import { Gearbox, type Shift } from "./gearbox.ts";
 import { ObstacleLayer } from "./obstacles.ts";
@@ -31,6 +31,7 @@ export class CityScene {
   private readonly trails = new Map<number, { rx: number; rz: number; speed: number; dust: number; smoke: number }>();
   private readonly sun: THREE.DirectionalLight;
   private readonly size: number;
+  private readonly groundAt: (x: number, z: number) => number;
   private readonly fog = new THREE.Fog(SKY, 160, 520);
   cameraMode: CameraMode = "chase";
   topSpeed = 15;
@@ -38,13 +39,15 @@ export class CityScene {
   onShift: ((shift: Shift, gear: number) => void) | null = null;
   private selfSpeed = 0;
   private orbit = 0;
+  private clock = 0;
 
   constructor(canvas: HTMLCanvasElement, plan: CityPlan) {
     this.size = plan.world.size_m;
+    this.groundAt = groundHeight(plan);
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
 
@@ -89,12 +92,14 @@ export class CityScene {
         this.bikes.set(p.id, bike);
         this.scene.add(bike.root);
       }
-      bike.update(p, dt);
+      bike.update(p, dt, this.groundAt(p.x, p.z));
       this.emit(p, dt);
     }
     for (const id of [...this.bikes.keys()]) if (!seen.has(id)) this.drop(id);
     this.cars.update(state.cars);
     this.obstacles.update(state.obstacles ?? []);
+    this.clock += dt;
+    this.city.props.update(this.clock);
     this.fx.update(dt);
 
     const self = state.players.find((p) => p.id === state.self);
@@ -118,8 +123,12 @@ export class CityScene {
   private shiftGears(self: ScenePlayer, dt: number): void {
     const accel = (self.speed - this.selfSpeed) / dt;
     this.selfSpeed = self.speed;
-    const shift = self.fallen ? null : this.gearbox.update(self.speed, accel, this.topSpeed, dt);
+    const shift = this.gearbox.update(self.fallen ? 0 : self.speed, self.fallen ? 0 : accel, this.topSpeed, dt);
     if (!shift) return;
+    if (self.fallen) {
+      this.onShift?.(shift, this.gearbox.gear);
+      return;
+    }
     this.bikes.get(self.id)?.kick(shift);
     if (this.cameraMode === "chase") this.view.kick(shift);
     if (shift === "up") {

@@ -27,19 +27,31 @@ test("a model that looks down -z, turned by yawOf, looks along forwardOf", () =>
   }
 });
 
-test("the city has every building of the plan, at its height and on its footprint", () => {
+test("the town stays on the building footprints of the plan and under their heights", () => {
   const city = buildCity(plan);
-  assert.equal(city.buildings.length, plan.buildings.length);
-  plan.buildings.forEach((b, i) => {
-    const box = new THREE.Box3().setFromObject(city.buildings[i]);
-    const xs = b.footprint.map((p) => p[0]);
-    const zs = b.footprint.map((p) => p[1]);
-    close(box.min.x, Math.min(...xs), 1e-6);
-    close(box.max.x, Math.max(...xs), 1e-6);
-    close(box.min.z, Math.min(...zs), 1e-6);
-    close(box.max.z, Math.max(...zs), 1e-6);
-    close(box.max.y, b.height_m + 0.5, 1e-6);
-  });
+  const solid = city.buildings.filter((m) => /town-(houseWall|aptWall|aptShop|glass|roofTile|roofFlat|door)/.test(m.name));
+  assert.ok(solid.length >= 5, solid.map((m) => m.name).join());
+  const inside = (poly: readonly (readonly number[])[], x: number, z: number) => {
+    const xs = poly.map((p) => p[0]);
+    const zs = poly.map((p) => p[1]);
+    return x >= Math.min(...xs) - 1 && x <= Math.max(...xs) + 1 && z >= Math.min(...zs) - 1 && z <= Math.max(...zs) + 1;
+  };
+  const p = new THREE.Vector3();
+  for (const m of solid) {
+    const pos = m.geometry.getAttribute("position");
+    for (let i = 0; i < pos.count; i++) {
+      p.fromBufferAttribute(pos, i);
+      const home = plan.buildings.find((b) => inside(b.footprint, p.x, p.z));
+      assert.ok(home, `${m.name} vertex outside every block at ${p.x.toFixed(1)}, ${p.z.toFixed(1)}`);
+      assert.ok(p.y <= home!.height_m + 0.6, `${m.name} too high in block ${home!.id}: ${p.y}`);
+    }
+  }
+  assert.ok(city.triangles > 1000 && city.triangles < 60000, `${city.triangles} triangles`);
+});
+
+test("the town is a handful of draw calls, one per surface type", () => {
+  const city = buildCity(plan);
+  assert.ok(city.buildings.length <= 14, `${city.buildings.length} meshes`);
 });
 
 test("one store per team at its pickup point", () => {
@@ -66,24 +78,31 @@ test("lane marks stay off the intersections", () => {
   }
 });
 
-test("windows are drawn with one instanced mesh and stay below the roofs", () => {
+test("traffic lights stand at the crossings, lamps along the roads, and the lights change", () => {
   const city = buildCity(plan);
-  assert.ok(city.windows.count > 500);
-  const top = Math.max(...plan.buildings.map((b) => b.height_m));
-  const m = new THREE.Matrix4();
-  const p = new THREE.Vector3();
-  for (let i = 0; i < city.windows.count; i++) {
-    city.windows.getMatrixAt(i, m);
-    p.setFromMatrixPosition(m);
-    assert.ok(p.y > 0 && p.y < top);
-  }
+  assert.ok(city.props.signals.length >= 100);
+  assert.ok(city.props.lamps.length >= 100);
+  const bulbs = city.props.group.getObjectByName("signal-bulbs") as THREE.InstancedMesh;
+  const c = new THREE.Color();
+  const lit = () => {
+    const out: string[] = [];
+    for (let i = 0; i < 6; i++) {
+      bulbs.getColorAt(i, c);
+      out.push(c.getHexString());
+    }
+    return out.join();
+  };
+  city.props.update(1);
+  const first = lit();
+  city.props.update(8);
+  assert.notEqual(lit(), first);
 });
 
 test("the chase camera is behind and above the motorcycle and looks ahead", () => {
   for (const heading of [0, 90, 200]) {
     const f = forwardOf(heading);
     const { eye, look } = chaseSpot({ x: 100, z: 50, heading, speed: 10 });
-    assert.ok((eye.x - 100) * f.x + (eye.z - 50) * f.z < -5);
+    assert.ok((eye.x - 100) * f.x + (eye.z - 50) * f.z < -3);
     assert.ok((look.x - 100) * f.x + (look.z - 50) * f.z > 0);
     assert.ok(eye.y > 2);
   }

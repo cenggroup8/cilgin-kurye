@@ -1,5 +1,5 @@
 export { CityScene, quakeShake, type CameraMode } from "./scene.ts";
-export { buildCity, CITY_COLORS, type CityParts } from "./city.ts";
+export { buildCity, CITY_COLORS, groundHeight, type CityParts } from "./city.ts";
 export { BikeModel, shownLean } from "./bike.ts";
 export { CarLayer } from "./cars.ts";
 export { ChaseCamera, chaseSpot, type Follow } from "./camera.ts";
@@ -9,3 +9,7 @@ export { Gearbox, GEAR_TOPS, type Shift } from "./gearbox.ts";
 export { EngineAudio } from "./engine-audio.ts";
 export { ObstacleLayer, placeObstacle, BARRIER_SPAN_M, PUDDLE_LENGTH_M, type Placement } from "./obstacles.ts";
 export { SnapshotBuffer, blendCar, blendPlayer, lerpHeading, RENDER_DELAY_S } from "./snapshots.ts";
+export { loadScooter, scooterTemplate, useScooterTemplate, SCOOTER_NODES, SCOOTER_URL, TEAM_PAINT } from "./scooter-model.ts";
+export { buildTown, Town } from "./town.ts";
+export { Props } from "./props.ts";
+export { texture, type TextureName } from "./textures.ts";

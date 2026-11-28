@@ -74,7 +74,10 @@ export function commandAdapter(opts: CommandOptions): Adapter {
   return {
     start(s, c) {
       ctx = c;
-      const env: Record<string, string> = { ...process.env, ...opts.env } as Record<string, string>;
+      const env: Record<string, string> = { ...process.env, NO_COLOR: "1", FORCE_COLOR: "0" } as Record<string, string>;
+      // PORT is the setting of the bench page; demos (M2) read PORT too, so it must not reach them.
+      delete env.PORT;
+      Object.assign(env, opts.env);
       for (const [k, v] of Object.entries(s.params)) env[`BENCH_${k.toUpperCase().replace(/[^A-Z0-9]/g, "_")}`] = String(v);
       if (s.seconds !== null) env.BENCH_SECONDS = String(s.seconds);
       child = spawn(opts.cmd, opts.args ?? [], { cwd: opts.cwd, env, stdio: ["pipe", "pipe", "pipe"], detached: true });

@@ -124,6 +124,7 @@ Messages of M2-3 (now in `contracts/messages.md`):
 | Server → phone | `{t:"state", seq, s}` — `seq` is the tick, `s` the frozen game state |
 | Server → phone | `{t:"ping", id, st}` — `st` server time in ms |
 | Phone → server | `{t:"pong", id, ct, fps, last}` — phone time, frame rate, last state `seq` |
+| Server → phone | `{t:"net", fps_limit}` — frame rate limit of this phone (0–120, 0 = none), from `net.<p>.fps_limit`; sent when it changes and when the phone joins or comes back. M1-1 connects it with `sinks: { M4: (name, value) => hub.netParam(name, value) }` |
 | Server → admin | `{t:"state", state}`, `{t:"metrics", samples}`, `{t:"board", board}`, `{t:"params", list}`, `{t:"param", name, value}`, `{t:"event", entry}` |
 | Admin → server | `{t:"snapshot_get"}`, answered with `{t:"snapshot", state, params, metrics, board, events}` |
 

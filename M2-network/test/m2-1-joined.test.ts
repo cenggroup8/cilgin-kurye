@@ -131,6 +131,8 @@ describe("joined and bad_join on the phone", () => {
     const p = await phone();
     await p.hello("key-a", code);
     expect(server.answerJoin({ playerKey: "key-a", ok: true, team: 4 })).toBe(false);
+    // M1-1 gives `{ ok: boolean, team?: number }`: an accepted join without a team is not sent.
+    expect(server.answerJoin({ playerKey: "key-a", ok: true })).toBe(false);
     expect(server.answerJoin({ playerKey: "nobody", ok: true, team: 0 })).toBe(false);
     p.close();
     await waitFor(() => m1.events.find((e) => e.type === "lost"));

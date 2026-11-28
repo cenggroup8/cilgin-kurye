@@ -40,9 +40,12 @@ export interface PlayerEvents {
  * Refused (for example the team is full or the game is not in the lobby): the phone gets
  * `error {reason: "bad_join", ref: "join"}`.
  */
-export type JoinAnswer =
-  | { playerKey: string; ok: true; team: number }
-  | { playerKey: string; ok: false };
+export interface JoinAnswer {
+  playerKey: string;
+  ok: boolean;
+  /** The accepted team (0–3). Needed when `ok` is true. */
+  team?: number;
+}
 
 export const MAX_PLAYERS = 8;
 

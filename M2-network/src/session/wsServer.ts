@@ -86,10 +86,12 @@ export function attachWebSockets(http: Server, opts: WsOptions): WsHandle {
   }
 
   function answerJoin(a: JoinAnswer): boolean {
-    if (a.ok && !(Number.isInteger(a.team) && a.team >= 0 && a.team < TEAM_COLORS.length)) return false;
+    const team = a.team;
+    const okTeam = typeof team === "number" && Number.isInteger(team) && team >= 0 && team < TEAM_COLORS.length;
+    if (a.ok && !okTeam) return false;
     const link = registry.answerJoin(a);
     if (!link || !links.has(link.connId)) return false;
-    if (a.ok) joined(link.connId, link.playerNo, a.team);
+    if (a.ok) joined(link.connId, link.playerNo, team as number);
     else send(link.connId, { t: "error", reason: "bad_join", ref: "join" });
     return true;
   }

@@ -12,8 +12,8 @@ export type WorldObstacleType = "heavy_traffic" | "road_work" | "accident" | "pu
 export interface WorldPlayer {
   no: number;
   team: number;
-  /** 0 light, 1 dark. */
-  tone: 0 | 1;
+  /** 0 light, 1 dark (M1 gives `index % 2`). */
+  tone: number;
   x: number;
   z: number;
   heading: number;
@@ -53,9 +53,9 @@ export interface WorldQuake {
 export interface WorldBoardState {
   phase: WorldPhase;
   timeLeft_s: number;
-  players: WorldPlayer[];
-  deliveries: WorldDelivery[];
-  obstacles: WorldObstacle[];
+  players: readonly WorldPlayer[];
+  deliveries: readonly WorldDelivery[];
+  obstacles: readonly WorldObstacle[];
   /** Null when there is no earthquake. */
   quake: WorldQuake | null;
 }
@@ -80,7 +80,7 @@ export function toBoardState(w: WorldBoardState, sizeM = WORLD_SIZE_M): Record<s
     p: w.players.map((p) => [
       p.no,
       p.team,
-      p.tone,
+      p.tone ? 1 : 0,
       (p.inGame ? FLAG.inGame : 0) |
         (p.fallen ? FLAG.fallen : 0) |
         (p.carrying ? FLAG.carrying : 0) |

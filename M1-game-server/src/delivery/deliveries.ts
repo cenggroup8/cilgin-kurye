@@ -26,9 +26,9 @@ import type {
 
 /** Below this speed a player counts as stopped, m/s. */
 export const STOP_SPEED_MPS = 0.5;
-/** The LED of the player flashes white for this long (module document 8.5). */
+/** The LED of the player flashes white for this long (v2.1, R5). */
 export const FIND_ME_FLASH_S = 1;
-/** Waiting time between two "Find me" presses (decision D8). */
+/** Waiting time between two "Find me" presses. v2.1 asks for a waiting time but gives no length, so 5 s for now. */
 export const FIND_ME_COOLDOWN_S = 5;
 
 interface Rider {
@@ -90,6 +90,8 @@ export class Deliveries {
     for (const r of this.riders.values()) {
       r.candidate = null;
       r.points = 0;
+      r.expectedTime_s = 0;
+      r.pickedAtTick = 0;
       r.findMeUntilTick = 0;
       r.findMeReadyAtTick = 0;
     }

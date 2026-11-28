@@ -143,6 +143,14 @@ describe("points and delivery", () => {
     expect(d.player(0, 3).hasPackage).toBe(true);
   });
 
+  it("reset forgets the package, its points and its expected time", () => {
+    const { d } = picked();
+    d.reset();
+    const after = d.player(0, 0);
+    expect([after.hasPackage, after.points, after.expectedTime_s, after.candidate]).toEqual([false, 0, 0, null]);
+    expect(d.scores()).toEqual([0, 0, 0, 0]);
+  });
+
   it("does not deliver while reversing, but does once the reverse speed is small", () => {
     const { d, point } = picked();
     const travel = fakeTravel(POSITIONS);

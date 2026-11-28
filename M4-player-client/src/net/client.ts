@@ -240,6 +240,7 @@ export class NetClient {
   private onMessage(m: ServerMessage): void {
     switch (m.t) {
       case "welcome": {
+        const knownTeam = this.me?.team ?? null;
         const team = this.me && this.me.player === m.player ? this.me.team : null;
         const color = this.me && this.me.player === m.player ? this.me.color : null;
         this.me = { player: m.player, returning: m.returning, team, color };
@@ -248,6 +249,9 @@ export class NetClient {
         this.lastState = -1;
         this.setState("connected");
         this.emit({ t: "welcome", player: { ...this.me } });
+        // A server that does not know this player any more (it restarted) does not know its
+        // team either: ask for it again. A server that knows it sends `joined` by itself (#94).
+        if (!m.returning && knownTeam !== null) this.join(knownTeam);
         if (this.findMeWaiting && this.send({ t: "find_me" })) this.findMeWaiting = false;
         return;
       }

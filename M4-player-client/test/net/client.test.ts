@@ -182,10 +182,12 @@ describe("coming back (done criteria of #45)", () => {
     await waitFor(() => server.messages("find_me").some((r) => r.player === player));
   });
 
-  it("after a server restart the client joins again with the saved code", async () => {
+  it("after a server restart the client joins again with the saved code and its team", async () => {
     const { c } = client();
     c.hello("p", server.code);
     await connected(c);
+    c.join(3);
+    await waitFor(() => c.player?.team === 3);
     await waitFor(() => c.lastStateSeq > 10);
     const port = server.port;
     await server.stop();
@@ -195,6 +197,9 @@ describe("coming back (done criteria of #45)", () => {
     await connected(c);
     // The new server counts ticks from 1 again; the client takes them.
     await waitFor(() => c.stats.statesIn > 0 && c.lastStateSeq < 100 && c.lastStateSeq > 0);
+    // The new server did not know the player, so the client asked for its team again.
+    await waitFor(() => server.messages("join").some((r) => r.msg.team === 3));
+    await waitFor(() => c.player?.team === 3);
   });
 });
 

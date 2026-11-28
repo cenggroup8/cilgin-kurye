@@ -80,6 +80,8 @@ client.fpsLimit; client.setFps(fps);            // M4-5
 Coming back: a reload sends the same key, so M2 gives the same player. A link that closes, or
 that brings nothing for 3 s (a dead Wi-Fi often does not close the socket), is opened again with
 waits of 0.5 s up to 5 s. A "Find me" pressed while the link is down is sent when it comes back.
+If the server did not know the player any more (`welcome` with `returning: false`, for example
+after a restart), the client sends its team again; a server that knows it sends `joined` by itself.
 After `refused` (wrong code, full game) or `replaced` (the same player opened on another page)
 the client stops.
 

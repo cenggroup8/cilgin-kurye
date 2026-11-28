@@ -44,7 +44,7 @@ the first `seq` it sends.
 | `t` | Fields | Meaning |
 |---|---|---|
 | `welcome` | `player` integer 0–7, `returning` boolean | The hello was accepted. `returning` is true when the key came back to its place |
-| `joined` | `player` integer 0–7, `team` integer 0–3, `color` string | The join was accepted. `color` is the team colour of `README.md` |
+| `joined` | `player` integer 0–7, `team` integer 0–3, `color` string | The join was accepted. `color` is the team colour of `README.md`. Sent after M1 accepts the team, and again right after `welcome` when a returning player already has a team. A refused join gets `error` with `bad_join` |
 | `error` | `reason` string, `ref` string (optional) | A refused message. `ref` is the `t` of the refused message when it is known |
 | `state` | `seq` integer, `s` map | The frozen game state of tick `seq`, 30 times per second. `s` is M1's game state (#78). Every phone gets the same bytes |
 | `ping` | `id` integer ≥ 1, `st` number | Twice per second. `st` is the server time in ms |

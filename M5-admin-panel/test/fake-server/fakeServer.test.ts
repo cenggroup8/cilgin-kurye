@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import { createServer } from 'node:http';
 import { test, type TestContext } from 'node:test';
+import { decode, encode } from '@msgpack/msgpack';
 import { WebSocket } from 'ws';
 import { AdminConnection, type AdminUpdate } from '../../src/comm/connection.ts';
 import { PARAMS } from '../../../M1-game-server/src/admin/param-list.ts';
@@ -124,6 +125,33 @@ test('a too big message closes only that link and the fake server keeps running'
   await connected(again);
   assert.deepEqual(await again.command({ name: 'new_code' }), { ok: true });
   assert.ok(fake.commands.length > 0);
+});
+
+test('refused messages get the contract error and log_get answers with the log (#90)', { timeout: 5000 }, async (t) => {
+  const { connection, url } = await setup(t);
+  await connected(connection);
+  const raw = new WebSocket(url);
+  t.after(() => raw.close());
+  await once(raw, 'open');
+  const answers: any[] = [];
+  raw.on('message', (data) => answers.push(decode(data as Buffer)));
+  const answer = async (bytes: Uint8Array) => {
+    const before = answers.length;
+    raw.send(bytes);
+    while (answers.slice(before).every((a) => a.t === 'state' || a.t === 'metrics' || a.t === 'board')) {
+      await new Promise((ok) => setTimeout(ok, 5));
+    }
+    return answers.slice(before).find((a) => a.t !== 'state' && a.t !== 'metrics' && a.t !== 'board');
+  };
+  assert.deepEqual(await answer(new Uint8Array([0xc1])), { t: 'error', reason: 'bad_message' });
+  assert.deepEqual(await answer(encode([1, 2])), { t: 'error', reason: 'bad_message' });
+  assert.deepEqual(await answer(encode({ t: 'hello' })), { t: 'error', reason: 'unknown_type', ref: 'hello' });
+  assert.deepEqual(await answer(encode({ t: 'cmd', name: 'start' })), { t: 'error', reason: 'bad_field', ref: 'cmd' });
+  const log = await answer(encode({ t: 'log_get' }));
+  assert.equal(log.t, 'log');
+  assert.ok(log.entries.length > 0 && log.entries.every((e: any) => typeof e.time === 'number' && typeof e.message === 'string'));
+  const later = await answer(encode({ t: 'log_get', since: log.entries.at(-1).time }));
+  assert.deepEqual(later, { t: 'log', entries: [] });
 });
 
 test('the recording is the same for the same seed', () => {

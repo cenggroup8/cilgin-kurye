@@ -89,6 +89,11 @@ timers; `step(ms)` moves the game forward. The fake server sends the state 10 ti
 metrics twice per second, keeps two minutes of metric history for the snapshot after a
 reconnect, and a delay or loss set in the network table shows up in the measured ping and loss.
 
+It answers the admin messages of `contracts/messages.md` (#90): `snapshot_get` with one
+`snapshot` (parameters, state, metric history, board data and log), `params_get` with `params`,
+`log_get {since?}` with `log`, and every `cmd` with one `reply`. A message it cannot use gets
+`error` with `bad_message`, `unknown_type` or `bad_field`, and the fake server keeps running.
+
 The metric names (`score.<team>`, `traffic.*`, `speed.mean_mps`, `falls.total`,
 `net.<p>.ping_ms|jitter_ms|loss_pct|fps`, `board.delay_ms`, `board.loss_pct`,
 `board.accel_g`, `quake.mag`, `delivery.time_s`, `delivery.distance_m`) are provisional

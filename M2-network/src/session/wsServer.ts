@@ -1,6 +1,7 @@
 import type { Server } from "node:http";
-import { decode, encode } from "@msgpack/msgpack";
 import { WebSocketServer, type RawData, type WebSocket } from "ws";
+import { Codec } from "../codec/codec.js";
+import { PHONE_IN, checkFields } from "../codec/schema.js";
 import type { SessionRegistry } from "./registry.js";
 import type { Session } from "./types.js";
 
@@ -10,9 +11,9 @@ import type { Session } from "./types.js";
  *   /ws        phones: the first message must be a hello
  *   /ws/admin  admin page: a new link takes the place of the old one
  *
- * Message shapes here are a draft until M2-2 writes the phone and admin
- * messages into contracts/. Messages after the hello go to onMessage,
- * where M2-2's codec and checker take over.
+ * Message shapes: contracts/messages.md (M2-2). Every message first goes through
+ * `admit` (M2-2 limits, on the raw bytes), then it is decoded with the M2-2 codec.
+ * Messages after the hello and the join go to onMessage, where the M2-2 checker takes over.
  */
 export const CLOSE = {
   adminReplaced: 4001,
@@ -23,6 +24,13 @@ export const CLOSE = {
 export interface WsOptions {
   registry: SessionRegistry;
   onMessage?: (session: Session, msg: unknown, bytes: number) => void;
+  /**
+   * M2-2 limits: called with the size of every message before it is decoded, also the
+   * hello. False drops the message (the limiter answers the link itself).
+   */
+  admit?: (session: Session, bytes: number) => boolean;
+  /** M2-2 codec. Default: MessagePack only. With `readable` a link may also speak JSON text. */
+  codec?: Codec;
 }
 
 export interface WsHandle {
@@ -38,6 +46,9 @@ export function attachWebSockets(http: Server, opts: WsOptions): WsHandle {
   const { registry } = opts;
   const wss = new WebSocketServer({ noServer: true, maxPayload: 64 * 1024 });
   const links = new Map<number, WebSocket>();
+  const codec = opts.codec ?? new Codec();
+  /** Links that sent JSON text (readable form) get their answers as JSON text too. */
+  const jsonLinks = new Set<number>();
   let nextId = 1;
 
   http.on("upgrade", (req, socket, head) => {
@@ -49,7 +60,7 @@ export function attachWebSockets(http: Server, opts: WsOptions): WsHandle {
 
   function send(connId: number, msg: unknown): void {
     const ws = links.get(connId);
-    if (ws && ws.readyState === ws.OPEN) ws.send(encode(msg));
+    if (ws && ws.readyState === ws.OPEN) ws.send(codec.encode(msg, jsonLinks.has(connId) ? "json" : "msgpack"));
   }
 
   function sendRaw(connId: number, bytes: Uint8Array): void {
@@ -64,6 +75,7 @@ export function attachWebSockets(http: Server, opts: WsOptions): WsHandle {
   function drop(connId: number, code: number, reason: string): void {
     const ws = links.get(connId);
     links.delete(connId);
+    jsonLinks.delete(connId);
     ws?.close(code, reason);
   }
 
@@ -77,23 +89,27 @@ export function attachWebSockets(http: Server, opts: WsOptions): WsHandle {
     const { replacedAdmin } = registry.open(connId, role);
     if (replacedAdmin !== undefined) drop(replacedAdmin, CLOSE.adminReplaced, "replaced by a new admin login");
 
-    ws.on("message", (data: RawData) => {
-      const bytes = Buffer.isBuffer(data) ? data.length : Buffer.concat(data as Buffer[]).length;
-      let msg: unknown;
-      try {
-        msg = decode(data as Buffer);
-      } catch {
+    ws.on("message", (data: RawData, isBinary: boolean) => {
+      const buf = Buffer.isBuffer(data) ? data : Array.isArray(data) ? Buffer.concat(data) : Buffer.from(data);
+      const bytes = buf.length;
+      const session = registry.get(connId);
+      if (!session) return;
+      // M2-2: too big or too many messages are dropped before they are decoded.
+      if (opts.admit && !opts.admit(session, bytes)) return;
+      const d = codec.decode(buf, !isBinary);
+      if (!d.ok) {
         send(connId, { t: "error", reason: "bad_message" });
         return;
       }
-      const session = registry.get(connId);
-      if (!session) return;
+      if (d.format === "json") jsonLinks.add(connId);
+      const msg = d.msg;
       session.msgsIn++;
       session.bytesIn += bytes;
 
       if (role === "player" && session.playerKey === undefined) return onHello(connId, msg);
       if (role === "player" && isType(msg, "join")) {
-        if (!registry.join(connId, (msg as { team?: unknown }).team)) {
+        // M2-2: the team must be 0–3 (contract); which team is free is M1's decision.
+        if (checkFields(msg as Record<string, unknown>, PHONE_IN.join!.fields) || !registry.join(connId, (msg as { team?: unknown }).team)) {
           send(connId, { t: "error", reason: "bad_join" });
         }
         return;
@@ -102,7 +118,10 @@ export function attachWebSockets(http: Server, opts: WsOptions): WsHandle {
     });
 
     ws.on("close", () => {
-      if (links.get(connId) === ws) links.delete(connId);
+      if (links.get(connId) === ws) {
+        links.delete(connId);
+        jsonLinks.delete(connId);
+      }
       registry.close(connId);
     });
   }

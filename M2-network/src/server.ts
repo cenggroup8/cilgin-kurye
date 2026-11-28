@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { GameCode } from "./http/gameCode.js";
 import { createHttpServer, type StaticPaths } from "./http/httpServer.js";
 import { joinUrl, lanAddress } from "./http/joinInfo.js";
+import { Codec } from "./codec/codec.js";
 import { SessionRegistry } from "./session/registry.js";
 import type { PlayerEvents, Session } from "./session/types.js";
 import { attachWebSockets } from "./session/wsServer.js";
@@ -26,6 +27,10 @@ export interface M2Options {
   events: PlayerEvents;
   /** Other messages after the hello. M2-2 plugs in here. */
   onMessage?: (session: Session, msg: unknown, bytes: number) => void;
+  /** M2-2 limits on the raw bytes of every message (`inbound.admit`). */
+  admit?: (session: Session, bytes: number) => boolean;
+  /** Also take JSON text from a link (readable form, development only). Default: `M2_READABLE=1`. */
+  readable?: boolean;
 }
 
 export interface M2Server {
@@ -56,7 +61,8 @@ export async function startM2Server(opts: M2Options): Promise<M2Server> {
     publicHost,
     publicPort: () => port,
   });
-  const ws = attachWebSockets(http, { registry, onMessage: opts.onMessage });
+  const codec = new Codec({ readable: opts.readable ?? process.env.M2_READABLE === "1" });
+  const ws = attachWebSockets(http, { registry, onMessage: opts.onMessage, admit: opts.admit, codec });
 
   await new Promise<void>((ok, fail) => {
     http.once("error", fail);

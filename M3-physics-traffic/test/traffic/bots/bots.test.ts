@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { BotFleet, skillFromLevel } from '../../../src/traffic/bots/index.js';
 import type { Obstacle } from '../../../src/common/types.js';
+import { NpcTraffic } from '../../../src/traffic/npc/index.js';
 import { gridPlan, runDeliveries, SimBike } from './helpers.js';
 
 const ORDERS = [7, 20, 33, 59];
@@ -134,10 +135,47 @@ describe('bot drivers (M3-5)', () => {
     expect(bot.routeChanges).toBeGreaterThanOrEqual(1);
   });
 
+  it('finishes its deliveries in NPC traffic (M3-4) and does not run into cars in its lane', () => {
+    for (const seed of [1, 2, 3, 4, 5]) {
+      const { fleet, bot, bike } = setup();
+      const traffic = new NpcTraffic(fleet.planner.graph, { seed, params: { carCount: 80 } });
+      let carsSeen = 0;
+      let closest = Infinity;
+      const r = runDeliveries(fleet, bot, bike, ORDERS, {
+        maxSeconds: 900,
+        neighbours: () => {
+          const cars = traffic.step({
+            dt: 1 / 30,
+            players: [{ id: 0, x: bike.x, y: bike.y, heading: bike.heading, speed: bike.speed, fallen: false }],
+            obstacles: [],
+            carHits: [],
+          }).cars.filter((c) => c.state !== 'offroad');
+          carsSeen = Math.max(carsSeen, cars.length);
+          // Running into a car: same direction, same lane, just in front, and the bot is faster.
+          const hx = Math.cos(bike.heading);
+          const hy = Math.sin(bike.heading);
+          for (const c of cars) {
+            if (c.edgeId === null || Math.cos(c.heading - bike.heading) < 0.9) continue;
+            const dx = c.x - bike.x;
+            const dy = c.y - bike.y;
+            const along = dx * hx + dy * hy;
+            if (along > 0 && Math.abs(-dx * hy + dy * hx) < 1.2 && bike.speed > c.speed + 1) {
+              closest = Math.min(closest, along - c.length / 2);
+            }
+          }
+          return cars.map((c) => ({ x: c.x, y: c.y, speed: c.speed, length: c.length }));
+        },
+      });
+      expect(carsSeen).toBeGreaterThan(40);
+      expect(r.deliveries).toBe(ORDERS.length);
+      expect(closest).toBeGreaterThan(1);
+    }
+  });
+
   it('keeps a gap to a slow car in front', () => {
     const { fleet, bot, bike } = setup(1);
     let minGap = Infinity;
-    const car = { x: 0, y: 0, speed: 4 };
+    const car = { x: 0, y: 0, speed: 4, length: 4.5 };
     let placed = false;
     runDeliveries(fleet, bot, bike, [59], {
       maxSeconds: 60,

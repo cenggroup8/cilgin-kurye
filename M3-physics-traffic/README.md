@@ -135,7 +135,12 @@ M1 calls `fleet.update(obstacles, roadSpeeds)` when the obstacles change and
 - State machine: `toStore` → `pickup` (stands still at the store) → `toDelivery` → `deliver`
   (stands still at the point, M1 delivers) → `toStore` again.
 - Path following: looks at a point on the lane a little ahead (further when faster), slows
-  before corners and before the goal, keeps a gap to cars in front.
+  before corners and before the goal.
+- Cars in front: a car (or motorcycle) near the bot's own route, measured along the route, so a
+  car in the next road after a turn counts too. The bot keeps a gap that depends on the car
+  length (`neighbours[].length`) and brakes fully when something stands right in front.
+  Tested in NPC traffic (M3-4, 80 cars, 5 seeds): all deliveries done, no running into a car in
+  the bot's lane.
 - Fallen: sends empty controls and goes on in the same state when M1 lifts it.
 - Stuck (standing still before the goal for 2.5 s): asks for a new route; the second time it
   turns round and leaves the road at the other end by another road.

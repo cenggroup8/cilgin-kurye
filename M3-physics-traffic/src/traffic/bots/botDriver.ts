@@ -49,6 +49,8 @@ export interface BotNeighbour {
   x: number;
   y: number;
   speed: number;
+  /** Length, metres (NPC cars have it). Missing: a motorcycle, about 2 m. */
+  length?: number;
 }
 
 /** Game data of one bot for one tick, from M1. */
@@ -165,6 +167,8 @@ export class BotDriver {
   /** Steer commands waiting for the reaction time, oldest first. */
   private readonly delayed: { t: number; steer: number }[] = [];
   private clock = 0;
+  /** Something is right in front this tick. */
+  private blocked = false;
 
   constructor(
     private readonly fleet: BotFleet,
@@ -233,7 +237,8 @@ export class BotDriver {
     const vTarget = this.targetSpeed(pose, remaining, input.neighbours ?? []);
     const err = vTarget - pose.speed;
     const throttle = err > 0 ? Math.min(1, 0.3 * err + 0.2) : 0;
-    const brake = err < -0.5 ? Math.min(1, -0.25 * err) : 0;
+    // Something stands right in front: full brake, whatever the speed.
+    const brake = this.blocked ? 1 : err < -0.5 ? Math.min(1, -0.25 * err) : 0;
 
     this.watchStuck(pose, remaining > this.fleet.tuning.arriveRadius, dt);
     return this.control(throttle, brake, steer);
@@ -368,20 +373,38 @@ export class BotDriver {
       const turn = this.path.turnAhead(this.progress, ahead);
       if (turn > 0.3) v = Math.min(v, t.cornerSpeed + (this.skill.maxSpeedMps - t.cornerSpeed) * Math.max(0, 1 - turn / (Math.PI / 2)));
     }
-    // Keep a gap to what is in front (a simple car following rule).
-    const hx = Math.cos(pose.heading);
-    const hy = Math.sin(pose.heading);
+    // Keep a gap to what is in front (a simple car following rule). "In front" is measured
+    // along the bot's own route, so a car in the next road after a turn is seen in time.
+    this.blocked = false;
     for (const n of neighbours) {
-      const dx = n.x - pose.x;
-      const dy = n.y - pose.y;
-      const along = dx * hx + dy * hy;
-      const side = Math.abs(-dx * hy + dy * hx);
-      if (along <= 0 || along > 40 || side > 2.5) continue;
-      const gap = along - 5;
+      const ahead = this.aheadOnPath(pose, n);
+      if (ahead === null) continue;
+      const gap = ahead - 2 - (n.length ?? 2) / 2;
       const safe = Math.max(0, n.speed) + Math.sqrt(2 * t.brakeDecel * Math.max(0, gap - 2));
+      if (gap < 2) this.blocked = true;
       v = Math.min(v, gap < 2 ? 0 : safe);
     }
     return Math.max(0, v);
+  }
+
+  /**
+   * Distance along the route to something in the bot's lane in front, or null when it is
+   * not in the way (behind, too far, or beside the route: the other lane or direction).
+   */
+  private aheadOnPath(pose: BotPose, n: BotNeighbour): number | null {
+    const near = Math.hypot(n.x - pose.x, n.y - pose.y);
+    if (near > 45) return null;
+    if (this.path) {
+      const p = this.path.project(n, this.progress, 45);
+      // A long car that crosses the route in an intersection is in the way with its whole body.
+      if (p.offset < 1.2 + (n.length ?? 2) / 2 && p.s > this.progress) return p.s - this.progress;
+    }
+    // Close by and straight in front (also when the route is not known).
+    const hx = Math.cos(pose.heading);
+    const hy = Math.sin(pose.heading);
+    const along = (n.x - pose.x) * hx + (n.y - pose.y) * hy;
+    const side = Math.abs(-(n.x - pose.x) * hy + (n.y - pose.y) * hx);
+    return along > 0 && along < 10 && side < 1.6 ? along : null;
   }
 
   private steerTo(pose: BotPose, target: Vec2, dt: number): number {

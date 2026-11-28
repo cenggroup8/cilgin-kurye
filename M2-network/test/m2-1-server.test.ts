@@ -2,7 +2,7 @@ import { mkdtempSync, writeFileSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { startM2Server, type M2Server } from "../src/server.js";
+import { DEFAULT_PATHS, startM2Server, type M2Server } from "../src/server.js";
 import { RecordingM1, TestLink, waitFor } from "./helpers.js";
 
 let server: M2Server;
@@ -54,6 +54,10 @@ describe("web server and join", () => {
     expect(info.url).toBe(`http://192.168.1.20:${server.port}/?code=${info.code}`);
     const svg = await (await get("/qr.svg")).text();
     expect(svg).toContain("<svg");
+  });
+
+  it("by default the models come from M4-player-client/assets/models", () => {
+    expect(DEFAULT_PATHS.modelsDir.split(/[\\/]/).slice(-3)).toEqual(["M4-player-client", "assets", "models"]);
   });
 
   it("a new game code is used from then on", async () => {

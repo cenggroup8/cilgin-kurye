@@ -14,7 +14,8 @@ const REPO = resolve(HERE, "..", "..");
 
 export const DEFAULT_PATHS: StaticPaths = {
   pagesDir: join(HERE, "http", "pages"),
-  modelsDir: join(REPO, "M4-player-client", "assets"),
+  // M4 keeps its models in assets/models/ (scooter.glb, #87); the page asks for ./models/<file>.
+  modelsDir: join(REPO, "M4-player-client", "assets", "models"),
   cityPlanFile: join(REPO, "contracts", "city_plan.json"),
 };
 

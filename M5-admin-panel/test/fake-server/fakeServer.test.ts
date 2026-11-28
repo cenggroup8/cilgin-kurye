@@ -154,6 +154,21 @@ test('refused messages get the contract error and log_get answers with the log (
   assert.deepEqual(later, { t: 'log', entries: [] });
 });
 
+test('the snapshot gives back the accepted commands as change marks (#101)', { timeout: 5000 }, async (t) => {
+  const { connection, url } = await setup(t);
+  await connected(connection);
+  assert.deepEqual(await connection.command({ name: 'param_set', args: { name: 'physics.grip', value: 0.8 } }), { ok: true });
+  assert.deepEqual(await connection.command({ name: 'param_set', args: { name: 'physics.grip', value: 7 } }), { ok: false, error: 'out_of_range' });
+  assert.deepEqual(await connection.command({ name: 'start' }), { ok: true });
+  // A page that loads again gets them in its first snapshot.
+  const again = new AdminConnection(url);
+  t.after(() => again.stop());
+  const snapshot = await next(again, (e) => e.t === 'snapshot', () => again.start()) as unknown as { marks: { time: number; name: string }[] };
+  assert.deepEqual(snapshot.marks.map((m) => m.name), ['physics.grip', 'start']);
+  assert.ok(snapshot.marks.every((m) => Number.isFinite(m.time)));
+  assert.ok(snapshot.marks[0]!.time <= snapshot.marks[1]!.time);
+});
+
 test('the recording is the same for the same seed', () => {
   assert.deepEqual(makeRecording(7), makeRecording(7));
   assert.notDeepEqual(makeRecording(7).events, makeRecording(8).events);

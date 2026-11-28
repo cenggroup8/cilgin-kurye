@@ -17,7 +17,7 @@ const { BoardLink } = await import(pathToFileURL(m2).href);
 
 const PORT = Number(process.argv[2] ?? 47190);
 const CONFIG = {
-  plan: "0.2.0",
+  plan: "0.3.0",
   bright: 0.6,
   max_ma: 4000,
   tones: Array.from({ length: 8 }, (_, i) => [10 * i, 20, 30]),

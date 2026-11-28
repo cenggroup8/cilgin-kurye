@@ -88,6 +88,47 @@ Open points for the team:
 - The session number that changes on every server start (document 6.5) belongs to the
   board link and is not part of M2-1.
 
+## M2-3: state broadcaster, ping and metrics
+
+| Part | Files |
+|---|---|
+| State broadcaster: the frozen state of a tick is encoded once and every phone gets the same bytes; a smaller state for the admin 10 times per second; the board state to the board link (M2-4) | `src/broadcast/stateBroadcaster.ts` |
+| Ping twice per second; round trip time, jitter (RFC 3550 smoothing), clock offset, frame rate and the last state of each phone | `src/metrics/pingMeter.ts` |
+| Metrics and board data on to the admin; two minutes of history, the full parameter list and the current state for an admin page that connects again (`snapshot_get`) | `src/broadcast/adminFeed.ts` |
+| Everything in the server: `attachBroadcast({ server, toM1, board })` | `src/broadcast/broadcastHub.ts` |
+| Fake M1: a moving test state 30 times per second in the shape of M1-1 (#78), metrics twice per second, writes down every input | `test/fakes/fakeM1.ts` |
+| Bot phones (up to 8): join, send controls 10 times per second and "Find me", answer pings (late on purpose if asked), send broken messages on purpose (`sendBroken`), count the states | `test/fakes/botPhone.ts` |
+
+How M1 uses it: `hub.publish({ tick, game, board })` after every tick, `hub.metrics(samples)`
+twice per second, and `toM1(measures)` gives M1 the network measurements twice per second.
+Messages after the hello first go to `hub.onMessage()`; it returns `false` for messages
+that belong to other parts.
+
+```
+npm test                                            # all tests
+LONG_RUN_MS=600000 npx vitest run test/m2-3-bots.test.ts   # 8 bot phones for 10 minutes
+npm run demo:broadcast                              # fake M1 + 8 bots for 10 s, with a report
+DEMO_SECONDS=600 PING_DELAY_MS=80 npm run demo:broadcast    # long run, bots answer pings 80 ms late
+```
+
+Measured on a laptop, fake M1 at 30 ticks per second with 8 bots: every phone got every
+state (300/300 in 10 s), the state of the fake M1 is about 2.8 kB, encoding it takes about
+0.1 ms, and all phones together get about 650 KiB/s. With bots that answer 80 ms late, the
+measured ping is 82–83 ms.
+
+Draft messages of M2-3 (until M2-2 writes them into `contracts/`, #35):
+
+| Direction | Message |
+|---|---|
+| Server → phone | `{t:"state", seq, s}` — `seq` is the tick, `s` the frozen game state |
+| Server → phone | `{t:"ping", id, st}` — `st` server time in ms |
+| Phone → server | `{t:"pong", id, ct, fps, last}` — phone time, frame rate, last state `seq` |
+| Server → phone | `{t:"net", fps_limit}` — frame rate limit of this phone (0–120, 0 = none), from `net.<p>.fps_limit`; sent when it changes and when the phone joins or comes back. M1-1 connects it with `sinks: { M4: (name, value) => hub.netParam(name, value) }` |
+| Server → admin | `{t:"state", state}`, `{t:"metrics", samples}`, `{t:"board", board}`, `{t:"params", list}`, `{t:"param", name, value}`, `{t:"event", entry}` |
+| Admin → server | `{t:"snapshot_get"}`, answered with `{t:"snapshot", state, params, metrics, board, events}` |
+
+The admin shapes are the ones the admin page of M5-1 (#73) reads.
+
 ## Team
 
 Tuğberk Akbulut, Ayşe Poyraz, Hasan Hüseyin Özdemir, Umutcan Ocak

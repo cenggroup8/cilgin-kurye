@@ -27,6 +27,10 @@ export interface WsOptions {
 
 export interface WsHandle {
   send(connId: number, msg: unknown): void;
+  /** Bytes that are already encoded, so one state is encoded once for all phones (M2-3). */
+  sendRaw(connId: number, bytes: Uint8Array): void;
+  /** Bytes queued on this link and not sent yet (0 for an unknown link). M2-3 skips a slow phone with it. */
+  buffered(connId: number): number;
   close(): void;
 }
 
@@ -48,6 +52,15 @@ export function attachWebSockets(http: Server, opts: WsOptions): WsHandle {
     if (ws && ws.readyState === ws.OPEN) ws.send(encode(msg));
   }
 
+  function sendRaw(connId: number, bytes: Uint8Array): void {
+    const ws = links.get(connId);
+    if (ws && ws.readyState === ws.OPEN) ws.send(bytes);
+  }
+
+  function buffered(connId: number): number {
+    return links.get(connId)?.bufferedAmount ?? 0;
+  }
+
   function drop(connId: number, code: number, reason: string): void {
     const ws = links.get(connId);
     links.delete(connId);
@@ -57,6 +70,10 @@ export function attachWebSockets(http: Server, opts: WsOptions): WsHandle {
   function accept(ws: WebSocket, role: "player" | "admin"): void {
     const connId = nextId++;
     links.set(connId, ws);
+    // A message over maxPayload or a broken frame makes ws emit "error" and then close the
+    // link itself (1009, 1002). Without a listener Node throws the error and the whole server
+    // stops, so one bad phone could end the game for everybody.
+    ws.on("error", () => {});
     const { replacedAdmin } = registry.open(connId, role);
     if (replacedAdmin !== undefined) drop(replacedAdmin, CLOSE.adminReplaced, "replaced by a new admin login");
 
@@ -107,6 +124,8 @@ export function attachWebSockets(http: Server, opts: WsOptions): WsHandle {
 
   return {
     send,
+    sendRaw,
+    buffered,
     close() {
       for (const ws of links.values()) ws.terminate();
       links.clear();

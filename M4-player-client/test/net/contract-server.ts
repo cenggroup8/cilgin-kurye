@@ -39,7 +39,18 @@ export class ContractServer {
     this.wss.on("connection", (ws) => this.accept(ws));
     await new Promise<void>((ok) => this.http!.listen(port, "127.0.0.1", () => ok()));
     this.port = (this.http.address() as AddressInfo).port;
-    this.timers.push(setInterval(() => this.broadcastState(), 1000 / 30));
+    // Fixed step like M1: the timer only wakes the loop, and the loop sends as many states as the
+    // clock asks for. On Windows a timer of 33 ms often runs every 47 ms (15.6 ms steps), which
+    // gave about 23 states per second on a real phone.
+    const start = performance.now();
+    let sent = 0;
+    this.timers.push(setInterval(() => {
+      const due = Math.floor(((performance.now() - start) * 30) / 1000);
+      while (sent < due) {
+        sent++;
+        this.broadcastState();
+      }
+    }, 5));
     this.timers.push(setInterval(() => this.pingAll(), 500));
   }
 

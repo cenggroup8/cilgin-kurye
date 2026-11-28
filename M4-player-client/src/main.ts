@@ -59,6 +59,9 @@ const info = el("pre", { className: "info" });
 const held = new Set<string>();
 let localSeq = 0;
 function publish(): void {
+  // Like the Controls of M4-2 the panel numbers every control, but only while the link is up,
+  // so "gönderilen" counts what really went out.
+  if (client.connection !== "connected") return;
   const c: Control = {
     seq: ++localSeq,
     throttle: held.has("throttle") ? 1 : 0,

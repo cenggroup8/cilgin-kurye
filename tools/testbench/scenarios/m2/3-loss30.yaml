@@ -1,0 +1,10 @@
+module: M2
+title: "30 % loss on both directions: states get lost, commands do not"
+seconds: 12
+params: { delay_ms: 0, loss_pct: 30, expect_loss_pct: [18, 42] }
+script:
+  - { at: 2, input: vibrate }
+  - { at: 3, input: hit, value: 0 }
+  - { at: 5, input: vibrate }
+  - { at: 6, input: hit, value: 8 }
+expect: ["link stays connected", "vibrate arrives once", "earthquake event arrives once", "state loss 18–42 %"]

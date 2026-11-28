@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Çılgın Kurye — test bench</title>
+  <link rel="stylesheet" href="/vendor/uPlot.css">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <div class="brand">Çılgın Kurye <span>test bench</span></div>
+    <div id="now" class="now">Choose a scenario</div>
+    <div class="right">
+      <span id="clock" class="clock"></span>
+      <span id="state" class="pill idle">idle</span>
+      <button id="stop" class="stop" disabled>Stop</button>
+      <span id="conn" class="conn" title="connection to the bench"></span>
+    </div>
+  </header>
+  <div class="layout">
+    <nav id="side">
+      <div id="modules"></div>
+      <h3>Saved runs</h3>
+      <div class="replay-speed">
+        <label>Replay speed
+          <select id="speed"><option value="1">1×</option><option value="2">2×</option><option value="5">5×</option><option value="0">at once</option></select>
+        </label>
+      </div>
+      <div id="runs" class="runs"></div>
+    </nav>
+    <main>
+      <section id="inputs" class="inputs" hidden></section>
+      <section id="error" class="error" hidden></section>
+      <div class="top">
+        <section class="card checks-card">
+          <h2>Checks <span id="verdict"></span></h2>
+          <ul id="checks" class="checks"></ul>
+        </section>
+        <section id="custom" class="custom"></section>
+      </div>
+      <section id="charts" class="charts"></section>
+      <section class="card">
+        <h2>Events</h2>
+        <div id="timeline" class="timeline"></div>
+      </section>
+      <details class="card log-card">
+        <summary>Log <span id="logcount"></span></summary>
+        <pre id="log" class="log"></pre>
+      </details>
+    </main>
+  </div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

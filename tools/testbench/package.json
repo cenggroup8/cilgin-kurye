@@ -1,0 +1,30 @@
+{
+  "name": "cilgin-kurye-testbench",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Test bench: every module alone with fake input, graphs and checks (4 December demo)",
+  "scripts": {
+    "bench": "tsx src/cli.ts",
+    "bench:ui": "tsx src/server.ts",
+    "bench:replay": "tsx src/cli.ts replay",
+    "check-imports": "tsx src/checkImports.ts",
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "tsx": "^4.23.15",
+    "uplot": "^1.6.32",
+    "ws": "^8.23.1",
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.11",
+    "@types/ws": "^8.18.2",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.2"
+  }
+}

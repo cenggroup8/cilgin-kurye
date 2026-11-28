@@ -1,0 +1,8 @@
+module: M2
+title: "80 ms delay, ±20 ms jitter (server → board)"
+seconds: 10
+params: { delay_ms: 80, jitter_ms: 20, loss_pct: 0, expect_delay_ms: [55, 110] }
+script:
+  - { at: 3, input: vibrate }
+  - { at: 4, input: hit, value: 2 }
+expect: ["link stays connected", "vibrate arrives once", "earthquake event arrives once", "measured delay 55–110 ms"]

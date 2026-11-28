@@ -1,0 +1,8 @@
+module: M2
+title: "Clean link: board states, vibrate, hit"
+seconds: 8
+params: { delay_ms: 0, loss_pct: 0, expect_delay_ms: [0, 20], expect_loss_pct: [0, 2] }
+script:
+  - { at: 2, input: vibrate }
+  - { at: 3, input: hit, value: 4 }
+expect: ["fake board connects", "link stays connected", "vibrate arrives once", "earthquake event arrives once"]

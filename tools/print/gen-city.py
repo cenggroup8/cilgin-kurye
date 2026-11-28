@@ -6,8 +6,11 @@
 # whole board (base, LED strips, stores, buildings) as .glb, .usdz, .blend and two
 # preview images into DIR.
 #
-# Board scale as in strip_layout (#75): 1 m = 1.12 mm. Each block is one print: a 1.2 mm
-# plate (the block footprint) with the buildings on it, joined into one closed solid.
+# Board sizes come from strip_layout.json (#75): 65 x 65 cm base, 12 mm strip, 118 mm road
+# pitch. Each block is one print: a 1.2 mm plate that fills the square between the strips
+# (105 x 105 mm, 0.5 mm free on each side) with the buildings on it, joined into one closed
+# solid. The buildings are laid out on the 89.6 mm design block and then widened to the
+# plate; heights stay at 1 m = 1.12 mm, as height_m in city_plan.json.
 # Roofs slope upwards and nothing hangs over empty space, so a block prints standing on
 # its plate with no supports. The store corner of the four corner blocks stays free.
 #
@@ -24,12 +27,24 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 OUT = os.path.join(ROOT, "M6-led-board", "hardware", "print")
 plan = json.load(open(os.path.join(ROOT, "contracts", "city_plan.json")))
 
-K = (600 - 2 * 20) / plan["world"]["size_m"]  # 1.12 mm per metre
+lay = json.load(open(os.path.join(ROOT, "M6-led-board", "hardware", "strip_layout.json")))["board"]
+BOARD, MARGIN, PITCH, STRIP = lay["size_mm"], lay["margin_mm"], lay["road_pitch_mm"], lay["strip_width_mm"]
+CLEAR = 0.5  # free gap between a plate and the strip on each side
+SQ = PITCH - STRIP - 2 * CLEAR  # plate size on the board: 105 mm
+K = 1.12  # mm per metre for heights (and the 89.6 mm design block of an 80 m footprint)
+DESIGN = 80 * K  # 89.6
+F = SQ / DESIGN  # the design block is widened by this to the plate
 PLATE = 1.2  # sidewalk plate
 FLOOR = 3.0 * K  # one storey, 3.36 mm
 SINK = 0.4  # parts reach this far into what they stand on, so the union is clean
 EDGE = 2.4  # free sidewalk between the plate edge and a building
-STORE_CUT = 45.6  # free store corner: a quarter of the block (44.8 mm) for the depot, + 0.8 mm gap
+# Team depot over the store LEDs, mm from the corner node toward the block (#75: store LEDs
+# 18.5 and 25.4 mm across, 22 mm along, each 6.9 x 12 mm). 2.5 mm clear of the strips.
+DEPOT_X = (8.5, 53.3)  # across the ridge
+DEPOT_Z = (8.5, 54.5)  # along the ridge
+DEPOT_WALL, DEPOT_EAVE = 1.2, 6.4
+PLATE0 = STRIP / 2 + CLEAR  # plate corner from the node: 6.5 mm
+STORE_CUT = (DEPOT_Z[1] - PLATE0 + 0.8) / F  # free store corner (design mm): depot + 0.8 mm gap
 
 # What stands on each block (id = 5 row + column, row 0 in the north).
 # Centre: the tallest tower. Inner ring: apartments; on the diagonal (B8, B16) four
@@ -126,7 +141,7 @@ def octagon(cx, cy, w, d, cham, turn=0.0):
 # ---- one block ----------------------------------------------------------------
 def build_block(b, coll):
     xs = [p[0] for p in b["footprint"]]
-    S = (max(xs) - min(xs)) * K  # 89.6
+    S = (max(xs) - min(xs)) * K  # 89.6, widened to SQ at the end
     corner = len(b["footprint"]) > 4
     rng = random.Random(1000 + b["id"])
 
@@ -318,6 +333,9 @@ def build_block(b, coll):
     bpy.data.collections.remove(pc)
     bm = bmesh.new()
     bm.from_mesh(me)
+    for v in bm.verts:  # design block -> plate between the strips
+        v.co.x *= F
+        v.co.y *= F
     bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-4)
     bmesh.ops.dissolve_limit(bm, angle_limit=math.radians(0.5), verts=bm.verts, edges=bm.edges)
     bmesh.ops.triangulate(bm, faces=bm.faces)
@@ -329,13 +347,10 @@ def build_block(b, coll):
 
 
 # ---- team depot (store) -------------------------------------------------------
-# A warehouse over the two store LEDs of a corner, a quarter of the corner block (#75: LED centres 22,17 and
-# 22,28 mm from the corner node, each 16.7 × 10 mm). Hollow with an open bottom, so
-# printed in white or clear PETG it glows in the team colour. The roof is 45°, so its
-# underside prints without supports. The same part goes into all four corners.
-DEPOT_X = (11.2, 56.0)  # from the corner node toward the block, across the ridge: a quarter of the block
-DEPOT_Z = (10.0, 56.0)  # along the ridge (starts 1.2 mm nearer the road so the LEDs fit inside)
-DEPOT_WALL, DEPOT_EAVE = 1.2, 6.4
+# A warehouse over the two store LEDs of a corner (sizes and place: DEPOT_X, DEPOT_Z above).
+# Hollow with an open bottom, so printed in white or clear PETG it glows in the team colour.
+# The roof is 45°, so its underside prints without supports. The same part goes into all
+# four corners.
 
 
 def build_depot(coll):
@@ -430,32 +445,38 @@ if board_dir:
     cB, cS, cM, cK = (bpy.data.collections.new(n) for n in ("Tahta", "LED seritler", "Magazalar", "Binalar"))
     for c in (cB, cS, cM, cK):
         sc.collection.children.link(c)
-    cube("Kontrplak 600x600x9", 300, 300, -4.5, 600, 600, 9, ply, cB)
-    off = (112 - 83.33) / 2
+    cube(f"Kontrplak {BOARD}x{BOARD}x9", BOARD / 2, BOARD / 2, -4.5, BOARD, BOARD, 9, ply, cB)
+    full = json.load(open(os.path.join(ROOT, "M6-led-board", "hardware", "strip_layout.json")))
+    lp, PL = lay["led_pitch_mm"], lay["piece_mm"]
+    off = (PITCH - PL) / 2
     for r in range(6):
         for c in range(5):
-            x0 = 20 + 112 * c + off
-            y = 600 - (20 + 112 * r)
-            cube(f"h_{r}_{c}", x0 + 41.67, y, 0.75, 83.33, 10, 1.5, strip, cS)
-            y0 = 600 - (20 + 112 * c + off)
-            x = 20 + 112 * r
-            cube(f"v_{c}_{r}", x, y0 - 41.67, 0.75, 10, 83.33, 1.5, strip, cS)
-            for k in range(5):
-                cube(f"h_{r}_{c} LED{k}", x0 + 16.67 * (k + 0.5), y, 2, 5, 5, 1, led, cS)
-                cube(f"v_{c}_{r} LED{k}", x, y0 - 16.67 * (k + 0.5), 2, 5, 5, 1, led, cS)
-    for nm, col, nx, nz, sx, sz in [("mavi", (0.18, 0.43, 0.93, 1), 20, 20, 1, 1), ("yesil", (0.12, 0.64, 0.39, 1), 580, 20, -1, 1),
-                                    ("mor", (0.55, 0.36, 0.96, 1), 20, 580, 1, -1), ("sari", (0.95, 0.76, 0.19, 1), 580, 580, -1, -1)]:
-        m = mat("Magaza " + nm, col, 8)
-        for j, dz in enumerate((17, 28)):
-            cube(f"Magaza {nm} LED{j}", nx + sx * 22, 600 - (nz + sz * dz), 1, 16.7, 10, 2, m, cM)
+            x0 = MARGIN + PITCH * c + off
+            cube(f"h_{r}_{c}", x0 + PL / 2, BOARD - (MARGIN + PITCH * r), 0.75, PL, STRIP, 1.5, strip, cS)
+            cube(f"v_{c}_{r}", MARGIN + PITCH * r, BOARD - (x0 + PL / 2), 0.75, STRIP, PL, 1.5, strip, cS)
+    for ch in full["chains"]:
+        for pc in ch["pieces"]:
+            if pc["kind"] == "segment":
+                for k, l in enumerate(pc["leds"]):
+                    cube(f"{pc['name']} LED{k}", l["mm"][0], BOARD - l["mm"][1], 2, 5, 5, 1, led, cS)
+    colors = {"blue": (0.18, 0.43, 0.93, 1), "green": (0.12, 0.64, 0.39, 1), "purple": (0.55, 0.36, 0.96, 1), "yellow": (0.95, 0.76, 0.19, 1)}
+    stores = [pc for ch in full["chains"] for pc in ch["pieces"] if pc["kind"] == "store"]
+    for pc in stores:
+        col = colors.get(pc["color"], (1, 1, 1, 1))
+        m = mat("Magaza " + pc["color"], col, 8)
+        for j, l in enumerate(pc["leds"]):
+            cube(f"Magaza {pc['color']} LED{j}", l["mm"][0], BOARD - l["mm"][1], 1, lp, STRIP, 2, m, cM)
+        nx = MARGIN if "W" in pc["corner"] else BOARD - MARGIN
+        nz = MARGIN if "N" in pc["corner"] else BOARD - MARGIN
+        sx, sz = (1 if nx < BOARD / 2 else -1), (1 if nz < BOARD / 2 else -1)
         # the depot over them, white PETG lit by the LEDs inside
-        glow = mat("Depo " + nm, tuple(0.35 + 0.65 * v for v in col[:3]) + (1,), 1.2)
-        dob = bpy.data.objects.new(f"Depo {nm}", depot.data.copy())
+        glow = mat("Depo " + pc["color"], tuple(0.35 + 0.65 * v for v in col[:3]) + (1,), 1.2)
+        dob = bpy.data.objects.new(f"Depo {pc['color']}", depot.data.copy())
         dob.data.materials.clear()
         dob.data.materials.append(glow)
         x0 = nx + DEPOT_X[0] if sx > 0 else nx - DEPOT_X[1]
         zmax = nz + DEPOT_Z[1] if sz > 0 else nz - DEPOT_Z[0]
-        dob.location = (x0, 600 - zmax, 0)
+        dob.location = (x0, BOARD - zmax, 0)
         cM.objects.link(dob)
     for i, ob in blocks.items():
         b = plan["buildings"][i]
@@ -465,7 +486,8 @@ if board_dir:
             c.objects.unlink(ob)
         cK.objects.link(ob)
         ob.name = f"B{i} {b['block']} {KIND[i]}"
-        ob.location = (20 + min(xs) * K, 600 - (20 + max(zs) * K), 0)
+        r, c = (int(v) for v in b["block"].split("_")[1:])
+        ob.location = (MARGIN + PITCH * c + PLATE0, BOARD - (MARGIN + PITCH * r + PLATE0 + SQ), 0)
         ob.data.materials.append(pla)
     for c in list(bpy.data.collections):
         if c.name.startswith("block") or c.name == "depot":
@@ -489,9 +511,10 @@ if board_dir:
     cam = bpy.data.objects.new("Kamera", bpy.data.cameras.new("Kamera"))
     sc.collection.objects.link(cam)
     sc.camera, cam.data.clip_end = cam, 1e5
-    for name, loc, ortho, res in [("onizleme_aci", (820, -320, 560), None, (1800, 1200)), ("onizleme_ust", (300, 299.99, 1500), 640, (1400, 1400))]:
+    g = BOARD / 600
+    for name, loc, ortho, res in [("onizleme_aci", (820 * g, -320 * g, 560 * g), None, (1800, 1200)), ("onizleme_ust", (BOARD / 2, BOARD / 2 - 0.01, 1500), 640 * g, (1400, 1400))]:
         cam.location = loc
-        cam.rotation_euler = (mathutils.Vector((300, 300, 0)) - cam.location).to_track_quat("-Z", "Y").to_euler()
+        cam.rotation_euler = (mathutils.Vector((BOARD / 2, BOARD / 2, 0)) - cam.location).to_track_quat("-Z", "Y").to_euler()
         cam.data.type = "ORTHO" if ortho else "PERSP"
         if ortho:
             cam.data.ortho_scale = ortho

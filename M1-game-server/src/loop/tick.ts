@@ -128,11 +128,15 @@ export function runTick(
       obstacles: world.obstacles,
       quake: world.quake,
       standUp,
+      falls: [], // M1-4 deprem düşmeleri buraya ekler
     };
     const physOut = deps.m3.physics(physReq);
     for (let i = 0; i < physOut.poses.length && i < world.poses.length; i++) {
       world.poses[i] = physOut.poses[i]!;
     }
+
+    // Falls → world.lastFalls so HazardsStep (M1-4) can process them
+    world.lastFalls = physOut.falls;
 
     // Step 6: Rules (delivery, penalties, obstacles)
     deps.delivery.update(world, findMePlayers, rng);

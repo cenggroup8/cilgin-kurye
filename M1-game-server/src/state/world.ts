@@ -4,6 +4,8 @@
 
 import type {
   DeliveryState,
+  FallEvent,
+  JoinAnswer,
   MergedControl,
   NpcCar,
   ObstacleEntry,
@@ -51,13 +53,19 @@ export interface WorldState {
   // Earthquake (M1-4)
   quake: QuakeState | null;
 
+  // Falls (M1-1 → M1-4: son tick'teki düşmeler)
+  lastFalls: FallEvent[];
+
+  // Join answers (M1-2 → M2: tick sonrası gönderilir)
+  joinAnswers: JoinAnswer[];
+
   // Traffic (M1-1, from M3)
   npcCars: NpcCar[];
   travelTimes: number[][];
 }
 
 export function defaultPose(): Pose {
-  return { x: 0, y: 0, angle: 0, speed: 0, lean: 0, sliding: false, fallen: false };
+  return { x: 0, z: 0, heading: 0, speed: 0, lean: 0, sliding: false, fallen: false };
 }
 
 export function defaultControl(player: number): MergedControl {
@@ -65,7 +73,7 @@ export function defaultControl(player: number): MergedControl {
 }
 
 export function defaultDelivery(): DeliveryState {
-  return { hasPackage: false, targetPoint: -1, targetPoints: 0, compassX: 0, compassY: 0, findMeCooldown: 0 };
+  return { hasPackage: false, targetPoint: -1, targetPoints: 0, compassTarget: { x: 0, z: 0 }, findMeCooldown: 0 };
 }
 
 export function createInitialWorld(): WorldState {
@@ -109,6 +117,8 @@ export function createInitialWorld(): WorldState {
     obstacleVersion: 0,
     nextObstacleId: 1,
     quake: null,
+    lastFalls: [],
+    joinAnswers: [],
     npcCars: [],
     travelTimes: [],
   };

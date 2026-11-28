@@ -64,9 +64,9 @@ export function emptyTickInput(): TickInput {
 
 export interface Pose {
   x: number;
-  y: number;
-  angle: number;   // radyan
-  speed: number;    // m/s
+  z: number;
+  heading: number;  // derece, kuzeyden saat yönü (0 = kuzey, 90 = doğu)
+  speed: number;    // m/s (negatif olabilir: geri)
   lean: number;
   sliding: boolean;
   fallen: boolean;
@@ -74,20 +74,22 @@ export interface Pose {
 
 export interface CollisionEvent {
   player: number;
-  withWhat: "player" | "npc" | "building" | "barrier" | "obstacle";
+  withWhat: "building" | "wall" | "barrier" | "npc" | "bike";
   otherPlayer?: number;
   impactSpeed: number;
 }
 
 export interface FallEvent {
   player: number;
+  cause: "collision" | "quake" | "puddle" | "obstacle";
+  impactSpeed: number;
 }
 
 export interface NpcCar {
   id: number;
   x: number;
-  y: number;
-  angle: number;
+  z: number;
+  heading: number; // derece, kuzeyden saat yönü
   speed: number;
   lane: number;
   size: number;
@@ -119,6 +121,7 @@ export interface PhysicsRequest {
   obstacles: ObstacleEntry[];
   quake: QuakeState | null;
   standUp: number[]; // player slots to stand up
+  falls: number[];   // player slots to force-fall (earthquake etc.)
 }
 
 // ── Ortak tipler (loop ve state arasında paylaşılır) ───────────────
@@ -156,9 +159,10 @@ export interface ObstacleEntry {
 export interface QuakeState {
   active: boolean;
   centerX: number;
-  centerY: number;
+  centerZ: number;
   radius: number;
   magnitude: number;
+  startTick: number;
   endTick: number;
 }
 
@@ -166,12 +170,18 @@ export interface DeliveryState {
   hasPackage: boolean;
   targetPoint: number; // -1 if none
   targetPoints: number;
-  compassX: number;
-  compassY: number;
+  compassTarget: { x: number; z: number };
   findMeCooldown: number; // ticks remaining
 }
 
 export interface TeamScore {
   team: number;
   score: number;
+}
+
+/** M1 → M2: join sonucu, tick bittikten sonra gönderilir. */
+export interface JoinAnswer {
+  playerKey: string;
+  ok: boolean;
+  team?: number;
 }

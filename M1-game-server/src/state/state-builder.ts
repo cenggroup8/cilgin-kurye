@@ -42,37 +42,43 @@ export interface GameState {
   readonly npcCars: readonly Readonly<NpcCar>[];
 }
 
-// ── Board state (M2 → LED board) ──────────────────────────────────
+// ── Board state (M2 → LED board, WorldBoardState uyumlu) ──────────
 
 export interface BoardPlayer {
+  no: number;      // oyuncu slot index (0–7)
   team: number;
-  color: number; // 0 = light, 1 = dark tone
+  tone: number;    // 0 = light, 1 = dark
   x: number;
-  y: number;
+  z: number;
+  heading: number; // derece
+  speed: number;
+  inGame: boolean;
   fallen: boolean;
+  carrying: boolean;
+  bot: boolean;
   findMe: boolean;
 }
 
 export interface BoardDeliveryPoint {
-  team: number;
+  player: number;  // sahip oyuncu slot index
   x: number;
-  y: number;
+  z: number;
+  delivered: boolean;
 }
 
 export interface BoardObstacle {
-  type: string;
   segment: number;
+  type: "heavy_traffic" | "road_work" | "accident" | "puddle";
   lane: number;
-  pos: number;
 }
 
 export interface BoardState {
-  readonly ph: Phase;
-  readonly tl: number; // time left in seconds
-  readonly p: readonly BoardPlayer[];
-  readonly dp: readonly BoardDeliveryPoint[];
-  readonly ob: readonly BoardObstacle[];
-  readonly eq: { active: boolean; cx: number; cy: number; r: number } | null;
+  readonly phase: Phase;
+  readonly timeLeft_s: number;
+  readonly players: readonly BoardPlayer[];
+  readonly deliveries: readonly BoardDeliveryPoint[];
+  readonly obstacles: readonly BoardObstacle[];
+  readonly quake: { x: number; z: number; mag: number; ms: number } | null;
 }
 
 // ── Builder ────────────────────────────────────────────────────────
@@ -108,37 +114,50 @@ export function buildGameState(world: Readonly<WorldState>): GameState {
 }
 
 export function buildBoardState(world: Readonly<WorldState>): BoardState {
-  const tl = Math.max(0, (MATCH_DURATION_TICKS - world.gameTimeTicks) / TICK_RATE);
+  const timeLeft_s = Math.max(0, (MATCH_DURATION_TICKS - world.gameTimeTicks) / TICK_RATE);
 
-  const p: BoardPlayer[] = world.players
+  const players: BoardPlayer[] = world.players
     .filter((pl) => pl.connected || pl.isBot)
     .map((pl) => ({
+      no: pl.index,
       team: pl.team,
-      color: pl.index % 2, // 0 = light, 1 = dark
+      tone: pl.index % 2,
       x: world.poses[pl.index]!.x,
-      y: world.poses[pl.index]!.y,
+      z: world.poses[pl.index]!.z,
+      heading: world.poses[pl.index]!.heading,
+      speed: world.poses[pl.index]!.speed,
+      inGame: pl.connected,
       fallen: world.poses[pl.index]!.fallen,
+      carrying: world.deliveries[pl.index]!.hasPackage,
+      bot: pl.isBot,
       findMe: world.deliveries[pl.index]!.findMeCooldown > 0,
     }));
 
-  const dp: BoardDeliveryPoint[] = world.deliveries
-    .filter((d) => d.targetPoint >= 0)
-    .map((d, i) => ({
-      team: world.players[i]!.team,
-      x: d.compassX,
-      y: d.compassY,
+  // Fix: map ile index al, sonra filtrele — filter sonrası i yanlış oluyordu
+  const deliveries: BoardDeliveryPoint[] = world.deliveries
+    .map((d, i) => ({ d, i }))
+    .filter(({ d }) => d.targetPoint >= 0)
+    .map(({ d, i }) => ({
+      player: i,
+      x: d.compassTarget.x,
+      z: d.compassTarget.z,
+      delivered: false, // M1-3 teslimatı işaretler
     }));
 
-  const ob: BoardObstacle[] = world.obstacles.map((o) => ({
-    type: o.type,
+  const obstacles: BoardObstacle[] = world.obstacles.map((o) => ({
     segment: o.segment,
+    type: o.type,
     lane: o.lane,
-    pos: o.pos,
   }));
 
-  const eq = world.quake
-    ? { active: world.quake.active, cx: world.quake.centerX, cy: world.quake.centerY, r: world.quake.radius }
+  const quake = world.quake
+    ? {
+        x: world.quake.centerX,
+        z: world.quake.centerZ,
+        mag: world.quake.magnitude,
+        ms: (world.tick - world.quake.startTick) * (1000 / TICK_RATE),
+      }
     : null;
 
-  return { ph: world.phase, tl, p, dp, ob, eq };
+  return { phase: world.phase, timeLeft_s, players, deliveries, obstacles, quake };
 }

@@ -15,6 +15,17 @@ namespace sim {
 
 constexpr float kPi = 3.14159265f;
 
+// Random numbers that are the same with every compiler. std::mt19937 gives the
+// same sequence everywhere, but std::normal_distribution and the other
+// distributions do not: libstdc++ (GCC) and libc++ (Clang, macOS) differ.
+inline float uniform01(std::mt19937& g) { return static_cast<float>(g() >> 8) * (1.0f / 16777216.0f); }
+inline float uniformIn(std::mt19937& g, float a, float b) { return a + (b - a) * uniform01(g); }
+inline float normal01(std::mt19937& g) {  // Box-Muller
+  float u1 = (static_cast<float>(g() >> 8) + 1.0f) * (1.0f / 16777217.0f);  // never 0
+  float u2 = uniform01(g);
+  return std::sqrt(-2.0f * std::log(u1)) * std::cos(2.0f * kPi * u2);
+}
+
 struct HitSpec {
   float u = 0.5f, v = 0.5f;  // place on the board, 0..1
   float peakG = 2.0f;        // strongest shaking
@@ -34,7 +45,7 @@ class Board {
   float bumpsPerSecond = 3.0f;
 
   void hit(const HitSpec& h) {
-    std::normal_distribution<float> n(0.0f, 1.0f);
+    auto n = [](std::mt19937& g) { return normal01(g); };
     float du = h.u - 0.5f, dv = h.v - 0.5f;
     float dist = std::hypot(du, dv);
     float r = std::fmin(1.0f, dist / 0.5f);
@@ -58,7 +69,7 @@ class Board {
   void motors(bool on, float g = 1.2f) { motorOn_ = on; motorG_ = g; }
 
   quake::ImuSample next() {
-    std::normal_distribution<float> n(0.0f, 1.0f);
+    auto n = [](std::mt19937& g) { return normal01(g); };
     t_ += dt_;
     quake::ImuSample s;
     // Gravity on a slowly tilting table.
@@ -85,7 +96,7 @@ class Board {
       s.gx += 8.0f * w; s.gy += 6.0f * w;
     }
     if (bumpG > 0) {
-      std::uniform_real_distribution<float> u01(0.0f, 1.0f);
+      auto u01 = [](std::mt19937& g) { return uniform01(g); };
       if (u01(rng_) < bumpsPerSecond * dt_) { bump_ = bumpG * (0.5f + 0.5f * u01(rng_)); bumpT_ = 0; }
       if (bump_ > 0) {
         float w = bump_ * std::exp(-bumpT_ / 0.015f) * std::cos(2 * kPi * 30.0f * bumpT_);

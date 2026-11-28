@@ -1,0 +1,411 @@
+{
+  "about": "Modül demo sayfasının içeriği. Her modül: ne yaptığı, girdi ve çıktıları (v2.1 belgesindeki tablolar), ve sahte veriyle çalışan komutlar. Bir paket yeni bir demo eklerse buraya bir 'runs' satırı eklemesi yeter; sayfa değişmez. Yollar repo köküne göre.",
+  "modules": [
+    {
+      "id": "M1",
+      "name": "Oyun sunucusu ve kurallar",
+      "team": "Berk, Tuğberk, Abdullatif, Selim, Umutcan",
+      "doc": "docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.md (bölüm 5)",
+      "summary": "Tek otorite: oyun döngüsü, maç ve lobi, teslimat ve puan, engeller ve düşme cezası, admin komutları ve parametreler. Oyun durumunu yalnızca M1 değiştirir.",
+      "inputs": [
+        { "data": "Kontroller", "from": "M2, telefonlardan", "content": "gaz ve fren 0–1, direksiyon −1..1, kontrol numarası; \"Beni bul\" olayı" },
+        { "data": "Katılım", "from": "M2, telefonlardan", "content": "oyuncu anahtarı, ad, takım; kopan ve geri gelen oyuncu" },
+        { "data": "Admin komutları", "from": "M2, adminden", "content": "parametre değişikliği, başlat, duraklat, bitir, sıfırla, engel, deprem" },
+        { "data": "Tahta olayları", "from": "M2, tahtadan", "content": "kaynak (el ya da motor), güç 0–10, merkez, bölge, güven" },
+        { "data": "Trafik ve fizik", "from": "M3", "content": "NPC arabalar, bot kontrolleri, süre tablosu, motor pozları, çarpma ve düşme olayları" }
+      ],
+      "outputs": [
+        { "data": "Oyun durumu", "to": "M2 → telefonlar ve admin", "content": "her tick: aşama, süre, puanlar, oyuncular, NPC arabalar, engeller, deprem, pusula hedefi" },
+        { "data": "Tahta durumu", "to": "M2 → tahta", "content": "aşama, oyuncular, teslimat noktaları, engeller, deprem" },
+        { "data": "Metrikler", "to": "M2 → admin", "content": "saniyede iki kez bütün grafik değerleri" },
+        { "data": "Oyun kaydı", "to": "disk", "content": "seed ve her tick'in girdileri" }
+      ],
+      "runs": [
+        {
+          "label": "Maç ve lobi (M1-2)",
+          "cwd": "M1-game-server",
+          "cmd": "npm run demo:match",
+          "needs": ["M1-game-server/test/scenarios/match-demo.ts"],
+          "files": ["M1-game-server/src/match/match.ts", "M1-game-server/test/scenarios/match-demo.ts"],
+          "fake": "Script M2 ve M3'ün yerine geçiyor: oyuncular katılıyor, skorlar veriliyor, bir oyuncu kopup geri geliyor, admin komut gönderiyor. Süreler belgedeki gibi (3 s geri sayım, 5 dk oyun, kopan oyuncu için 30 s).",
+          "expect": "Aşamalar sırayla: lobi → geri sayım → oyun → bitiş. Kopan oyuncuyu bot devralıyor, geri gelince motoru geri veriyor. Sonunda kazanan takım (ya da berabere).",
+          "install": ["M1-game-server"]
+        },
+        {
+          "label": "Admin komutları ve parametreler (M1-5)",
+          "cwd": "M1-game-server",
+          "cmd": "npx tsx test/scenarios/admin-demo.ts",
+          "needs": ["M1-game-server/test/scenarios/admin-demo.ts"],
+          "files": ["M1-game-server/src/admin/admin.ts", "M1-game-server/src/admin/param-list.ts", "M1-game-server/test/scenarios/admin-demo.ts"],
+          "fake": "Sahte maç ve sahte engel listesi; script admin sayfasının yerine komut gönderiyor (iyi ve hatalı değerler).",
+          "expect": "Her komuta tek cevap: geçerli değer kaydedilir ve sahibi modüle gider, hatalı değer \"out_of_range\" gibi bir hatayla reddedilir, yanlış aşamadaki komut \"wrong_phase\" alır.",
+          "install": ["M1-game-server"]
+        },
+        {
+          "label": "M1 testleri: maç, teslimat, engeller, cezalar, admin",
+          "cwd": "M1-game-server",
+          "cmd": "npm test",
+          "needs": ["M1-game-server/package.json"],
+          "files": ["M1-game-server/test/delivery-fakes.ts", "M1-game-server/test/hazards-fakes.ts", "M1-game-server/test/city_plan.json"],
+          "fake": "delivery-fakes.ts: M1-5 parametreleri, M1-1'in seed'li rastgele sayıları, şehir planı ve M3'ün süre tablosu. hazards-fakes.ts: M1-2'nin saati ve M1-5 parametreleri.",
+          "expect": "Bütün testler geçer (Vitest özeti: \"Tests … passed\").",
+          "install": ["M1-game-server"]
+        },
+        {
+          "label": "Ortak sözleşmeler kontrolü (şehir planı ve tahta mesajları)",
+          "cwd": "tools/contracts",
+          "cmd": "npm run check",
+          "needs": ["tools/contracts/check-contracts.mjs"],
+          "files": ["contracts/city_plan.json", "contracts/board_protocol_vectors.json", "tools/contracts/check-contracts.mjs"],
+          "fake": "Sahte veri yok: modüllerin ortak kullandığı dosyalar kontrol ediliyor.",
+          "expect": "\"Contracts OK\": kimlikler ve geometri doğru, binalar yolda değil, 10 örnek mesaj aynı baytlara kodlanıp geri çözülüyor.",
+          "install": ["tools/contracts"]
+        },
+        {
+          "label": "Oyun döngüsü (M1-1)",
+          "cwd": "M1-game-server",
+          "cmd": "npm test",
+          "needs": ["M1-game-server/src/loop/tick.ts"],
+          "pr": "#78",
+          "files": [],
+          "fake": "Sahte M2 ve sahte M3 ile tam bir oyun.",
+          "expect": "Lobiden kazanana tam bir oyun; aynı seed aynı sonucu verir."
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Ağ ve senkronizasyon",
+      "team": "Tuğberk, Ayşe, Hasan Hüseyin, Umutcan",
+      "doc": "docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.md (bölüm 6)",
+      "summary": "Telefon, admin ve tahta bağlantıları; mesajların kodlanması ve kontrolü; oyun durumunun dağıtılması; ping ve ağ gecikme / kayıp ayarı.",
+      "inputs": [
+        { "data": "Telefon mesajları", "from": "M4, WebSocket", "content": "merhaba, katıl, kontroller, \"Beni bul\", ping cevabı" },
+        { "data": "Admin mesajları", "from": "M5, WebSocket", "content": "komutlar, parametre değişiklikleri, istekler" },
+        { "data": "Tahta mesajları", "from": "M6, TCP ve UDP", "content": "deprem olayı, durum raporu, sensör örnekleri, gecikme cevabı" },
+        { "data": "Durum ve metrikler", "from": "M1", "content": "her tick oyun ve tahta durumu, saniyede iki kez metrikler" }
+      ],
+      "outputs": [
+        { "data": "M1'e", "to": "M1", "content": "kontrol edilmiş kontroller, katılımlar, admin komutları, tahta olayları, kopan / dönen oyuncular" },
+        { "data": "Telefonlara", "to": "M4", "content": "saniyede 30 oyun durumu, katılım cevabı, ping" },
+        { "data": "Admine", "to": "M5", "content": "saniyede 10 durum, metrikler, cevaplar, tahta verisi" },
+        { "data": "Tahtaya", "to": "M6", "content": "config ve titreşim (TCP), tahta durumu ve gecikme ölçümü (UDP)" }
+      ],
+      "runs": [
+        {
+          "label": "Web sunucusu ve katılım (M2-1)",
+          "cwd": "M2-network",
+          "cmd": "npm run demo:bots",
+          "needs": ["M2-network/src/demo.ts"],
+          "files": ["M2-network/src/server.ts", "M2-network/test/fakes/fakeM1.ts", "M2-network/test/fakes/botPhone.ts"],
+          "fake": "Gerçek telefon yerine bot telefonlar, M1 yerine sahte M1.",
+          "expect": "Botlar oyun koduyla katılıyor, biri kopuyor ve geri dönüyor; sahte M1 join, lost ve returned olaylarını alıyor; demo kendisi bitiyor.",
+          "install": ["M2-network"]
+        },
+        {
+          "label": "Kodlayıcı, denetleyici ve giriş kuyruğu (M2-2)",
+          "cwd": "M2-network",
+          "cmd": "npm run demo:checks",
+          "needs": ["M2-network/src/demo-checks.ts"],
+          "files": ["M2-network/src/demo-checks.ts", "M2-network/test/m2-2-stack.ts", "M2-network/test/fakes/botPhone.ts"],
+          "fake": "6 normal bot telefon ve her tür bozuk mesajı gönderen 2 bağlantı (MessagePack olmayan, tipsiz, aralık dışı, başka oyuncunun kontrolü, çok büyük, eski sıra numarası, sel).",
+          "expect": "Bozuk mesajların hiçbiri M1'e ulaşmıyor, iyi botların her \"Beni bul\" isteği ulaşıyor; rapor sonunda bütün kontroller geçiyor.",
+          "install": ["M2-network"]
+        },
+        {
+          "label": "Durum dağıtıcı, ping ve metrikler (M2-3)",
+          "cwd": "M2-network",
+          "cmd": "npm run demo:broadcast",
+          "needs": ["M2-network/src/demo-broadcast.ts"],
+          "files": ["M2-network/src/demo-broadcast.ts", "M2-network/test/fakes/fakeM1.ts", "M2-network/test/fakes/botPhone.ts"],
+          "fake": "Sahte M1 oyun durumu üretiyor, 8 bot telefon dinliyor (10 s).",
+          "expect": "Her bot her tick'in durumunu alıyor, kayıp yok; ping ve kare hızı ölçülüyor.",
+          "install": ["M2-network"]
+        },
+        {
+          "label": "Tahta bağlantısı ve ağ emülatörü (M2-4)",
+          "cwd": "M2-network",
+          "cmd": "npm run demo:board",
+          "needs": ["M2-network/src/demo-board.ts"],
+          "files": ["M2-network/src/board/boardLink.ts", "M2-network/src/netem/netem.ts", "M2-network/test/fakes/boardEmu.ts"],
+          "fake": "Gerçek tahta yerine tahta emülatörü; arada eklenen gecikme ve kayıp.",
+          "expect": "Dört adım (temiz → 80 ms gecikme → %30 kayıp → temiz); her adımda titreşim komutu ve el vuruşu tam bir kez ulaşıyor, ölçülen gecikme ve kayıp raporda.",
+          "install": ["M2-network"]
+        },
+        {
+          "label": "M2 testleri",
+          "cwd": "M2-network",
+          "cmd": "npm test",
+          "needs": ["M2-network/package.json"],
+          "files": ["M2-network/test/fakes/"],
+          "fake": "Sahte M1, bot telefonlar, tahta emülatörü, gerçek soketler bu bilgisayarda.",
+          "expect": "Bütün testler geçer (yaklaşık 30 s).",
+          "install": ["M2-network"]
+        }
+      ]
+    },
+    {
+      "id": "M3",
+      "name": "Fizik, trafik ve yapay zekâ",
+      "team": "Abdullatif, Hasan Alperen, Batuhan, Selim, Muhib",
+      "doc": "docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.md (bölüm 7)",
+      "summary": "Motosiklet hareketi, çarpışma ve düşme, engel ve deprem etkisi, telefonda tahmin; rotalar ve süre tablosu, NPC trafiği, botlar. Ağ kodu yok, sadece M1 ile düz veri alışverişi.",
+      "inputs": [
+        { "data": "Şehir planı", "from": "ortak dosya", "content": "yollar, şeritler, kavşaklar, binalar, mağazalar" },
+        { "data": "Kontroller", "from": "M1", "content": "her tick gaz, fren, direksiyon (insan ve bot), hız çarpanı" },
+        { "data": "Oyun verisi", "from": "M1", "content": "oyuncular, engeller (tip, segment, şerit, konum), deprem alanı, düşen motorlar" },
+        { "data": "Parametreler", "from": "M5 → M1", "content": "üst hız, tutuş, düşme hızı, NPC sayısı ve hızı, yoğun trafik etkisi, bot becerisi" }
+      ],
+      "outputs": [
+        { "data": "Pozlar ve olaylar", "to": "M1", "content": "konum, yön, hız, eğim, kayma, düşme; çarpma ve düşme olayları" },
+        { "data": "NPC arabalar", "to": "M1 → M4, M5", "content": "konum, yön, hız, şerit, boyut" },
+        { "data": "Bot kontrolleri ve süre tablosu", "to": "M1", "content": "telefonla aynı kontrol kaydı; her mağazadan her teslimat noktasına saniye" },
+        { "data": "Trafik metrikleri", "to": "M1 → M5", "content": "NPC sayısı, ortalama hız, bot rota değişimi" }
+      ],
+      "runs": [
+        {
+          "label": "NPC trafiği demosu (M3-4)",
+          "cwd": "M3-physics-traffic",
+          "cmd": "npm run demo:npc",
+          "needs": ["M3-physics-traffic/src/traffic/npc/npcTraffic.ts"],
+          "pr": "#65",
+          "files": ["M3-physics-traffic/src/traffic/npc/npcTraffic.ts", "M3-physics-traffic/debug/npc-demo.ts", "M3-physics-traffic/test/fakes/fakeRoadGraph.ts"],
+          "fake": "Sahte 6 × 6 şehir; iki motor mağazalarda bekliyor; admin araba sayısını 60 → 120 → 40 yapıyor; 60. saniyede yol çalışması ve yoğun trafik engeli.",
+          "expect": "Her 5 saniyede araba sayısı ve ortalama hız: sayı birkaç saniyede yeni değere geliyor, yoğun trafik +4 araba ekliyor, sadece kapanan yolda kalan arabalar kaldırılıyor; sonunda şehrin haritası.",
+          "install": ["M3-physics-traffic"]
+        },
+        {
+          "label": "NPC trafiği testleri (M3-4)",
+          "cwd": "M3-physics-traffic",
+          "cmd": "npx vitest run test/traffic/npc",
+          "needs": ["M3-physics-traffic/test/traffic/npc/npcTraffic.test.ts"],
+          "pr": "#65",
+          "files": ["M3-physics-traffic/test/traffic/npc/", "M3-physics-traffic/src/traffic/npc/contract.ts"],
+          "fake": "Sahte yol grafiği, sahte motorlar, M1 biçiminde sahte engeller ve admin parametreleri.",
+          "expect": "35 test geçer: kilitlenmeyen trafik, üst üste binmeyen arabalar, kapalı yola girmeme, M1 sınırındaki çevirmeler.",
+          "install": ["M3-physics-traffic"]
+        },
+        {
+          "label": "Motosiklet modeli ve tahminci (M3-1)",
+          "cwd": "M3-physics-traffic",
+          "cmd": "npm test",
+          "needs": ["M3-physics-traffic/src/physics/bike/model.ts"],
+          "pr": "#69",
+          "files": ["M3-physics-traffic/test/fakes/fakeM1.ts"],
+          "fake": "Sahte M1: senaryolu kontroller ve engeller.",
+          "expect": "Düz gidiş, fren, U dönüşü, kayma ve tahminci testleri geçer."
+        },
+        {
+          "label": "Çarpışma ve düşme (M3-2)",
+          "cwd": "M3-physics-traffic",
+          "cmd": "npm test",
+          "needs": ["M3-physics-traffic/src/physics/collide/colliders.ts"],
+          "pr": "#80",
+          "files": [],
+          "fake": "Sahte binalar, engeller, NPC arabalar.",
+          "expect": "Duvara, arabaya ve motora çarpma; hızlı çarpmada düşme."
+        },
+        {
+          "label": "Yol grafiği ve rota planlayıcı (M3-3)",
+          "cwd": "M3-physics-traffic",
+          "cmd": "npm run demo:routes",
+          "needs": ["M3-physics-traffic/src/traffic/routes/routePlanner.ts"],
+          "pr": "#71",
+          "files": ["contracts/city_plan.json"],
+          "fake": "Şehir planından gerçek grafik, engelsiz.",
+          "expect": "Dört takım için 60 teslimat noktasının süresi."
+        }
+      ]
+    },
+    {
+      "id": "M4",
+      "name": "Oyuncu istemcisi ve 3D şehir",
+      "team": "Abdullatif, Batuhan, Ayşe, Berk, Selim",
+      "doc": "docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.md (bölüm 8)",
+      "summary": "Telefondaki 3D şehir, kontroller, pusula, ekranlar, tahmin ve düzeltme.",
+      "inputs": [
+        { "data": "Sayfa, modeller, şehir planı", "from": "M2, HTTP", "content": "sayfa açılınca program, 3D modeller ve şehir planı" },
+        { "data": "Oyun durumu", "from": "M2 ← M1", "content": "oyuncular, NPC arabalar, engeller, puanlar, pusula hedefi, son kullanılan kontrol numarası" },
+        { "data": "Katılım cevabı, ping, ağ ayarı", "from": "M2", "content": "oyuncu, takım, renk, sunucu saati, kare hızı sınırı" },
+        { "data": "Dokunma", "from": "oyuncu", "content": "butonlar" }
+      ],
+      "outputs": [
+        { "data": "Kontroller", "to": "M2 → M1", "content": "gaz, fren, direksiyon, kontrol numarası" },
+        { "data": "Katılım, \"Beni bul\"", "to": "M2 → M1", "content": "oyuncu anahtarı, ad, oyun kodu, takım" },
+        { "data": "Ping cevabı", "to": "M2", "content": "telefon saati, kare hızı, son alınan durum" }
+      ],
+      "runs": [
+        {
+          "label": "Ekranlar ve HUD (M4-1)",
+          "cwd": "M4-player-client",
+          "cmd": "npm test",
+          "needs": ["M4-player-client/package.json"],
+          "pr": "#66, #68, #79",
+          "files": [],
+          "fake": "Sahte sunucu mesajları.",
+          "expect": "Katılım, lobi, geri sayım, bitiş ekranları ve HUD."
+        },
+        {
+          "label": "Kontroller ve sahte sunucu (M4-2)",
+          "cwd": "M4-player-client",
+          "cmd": "npm test",
+          "needs": ["M4-player-client/package.json"],
+          "pr": "#72",
+          "files": [],
+          "fake": "Sahte sunucu.",
+          "expect": "Telefon sahte sunucuya bağlanır: katıl, sür, pusula."
+        },
+        {
+          "label": "Ağ istemcisi (M4-3), tahmin (M4-4), 3D şehir (M4-5)",
+          "cwd": "M4-player-client",
+          "cmd": "npm test",
+          "needs": ["M4-player-client/src/net/client.ts"],
+          "pr": "#93, #76, #87",
+          "files": [],
+          "fake": "Sahte sunucu, kayıtlı durumlar.",
+          "expect": "Bağlanma ve yeniden bağlanma, tahmin ve düzeltme, şehir sahnesi."
+        }
+      ]
+    },
+    {
+      "id": "M5",
+      "name": "Admin paneli ve izleme",
+      "team": "Batuhan, Hasan Hüseyin, Berk, Ayşe",
+      "doc": "docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.md (bölüm 9)",
+      "summary": "Canlı parametreler, harita ve engel araçları, deprem paneli, grafikler.",
+      "inputs": [
+        { "data": "Oyun durumu", "from": "M1 → M2", "content": "saniyede 10, canlı harita için" },
+        { "data": "Metrikler", "from": "M1 → M2", "content": "puanlar, süreler, hızlar, düşmeler, trafik, ping, kayıp, kare hızı, tahta gecikmesi" },
+        { "data": "Parametreler, cevaplar", "from": "M1 → M2", "content": "her parametre değeri ve sınırlarıyla, her komuta ok ya da hata" },
+        { "data": "Tahta verisi", "from": "M6 → M2", "content": "sensör verisi, tahta durumu, deprem olayları" }
+      ],
+      "outputs": [
+        { "data": "Komutlar", "to": "M2 → M1", "content": "parametre değişikliği, başlat, duraklat, bitir, sıfırla, engel, deprem" },
+        { "data": "Dosyalar", "to": "admin", "content": "grafik verisi CSV, oyun kaydı" }
+      ],
+      "runs": [
+        {
+          "label": "İletişim yöneticisi ve üst çubuk (M5-1)",
+          "cwd": "M5-admin-panel",
+          "cmd": "npm test",
+          "needs": ["M5-admin-panel/package.json"],
+          "pr": "#73",
+          "files": [],
+          "fake": "Sahte sunucu.",
+          "expect": "Bağlanma, snapshot, komut gönderme."
+        },
+        {
+          "label": "Parametre yöneticisi ve kayıtlı oyunlu sahte sunucu (M5-2)",
+          "cwd": "M5-admin-panel",
+          "cmd": "npm run fake-server",
+          "needs": ["M5-admin-panel/test/fake-server/fakeServer.ts"],
+          "pr": "#83",
+          "files": ["M5-admin-panel/test/fake-server/fakeServer.ts"],
+          "fake": "Kayıtlı bir oyunu oynatan sahte sunucu.",
+          "expect": "Formlar M1-5 parametre listesinden kuruluyor; değişiklikler cevap alıyor."
+        },
+        {
+          "label": "Canlı harita (M5-3), grafikler (M5-4)",
+          "cwd": "M5-admin-panel",
+          "cmd": "npm test",
+          "needs": ["M5-admin-panel/src/map/mapManager.ts"],
+          "pr": "#77",
+          "files": [],
+          "fake": "Kayıtlı oyun.",
+          "expect": "Harita ve grafikler canlı güncelleniyor."
+        }
+      ]
+    },
+    {
+      "id": "M6",
+      "name": "LED tahta ve ESP32",
+      "team": "Tuğberk, Hasan Alperen, Hasan Hüseyin, Muhib, Umutcan",
+      "doc": "docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.md (bölüm 10)",
+      "summary": "Fiziksel şehir tahtası ve ESP32 programı: sunucuyla bağlantı, vuruş algılama ve motorlar, LED haritası ve animasyon. PC emülatörleri tahta ile sunucunun birbirini beklemeden test edilmesini sağlar.",
+      "inputs": [
+        { "data": "Tahta durumu", "from": "M2, UDP", "content": "saniyede 10–30: aşama, oyuncular, teslimat noktaları, engeller, deprem" },
+        { "data": "Config, titreşim, gecikme ölçümü", "from": "M2, TCP / UDP", "content": "renkler, parlaklık, güç sınırı; motorlar, güç, süre; sunucu saati" },
+        { "data": "Sensör", "from": "donanım", "content": "ivme ve jiroskop verisi" },
+        { "data": "Şehir planı", "from": "ortak dosya", "content": "derlenirken LED haritasına çevrilir" }
+      ],
+      "outputs": [
+        { "data": "Işık", "to": "LED şeritleri", "content": "her LED'in rengi, saniyede 60 kare" },
+        { "data": "Titreşim", "to": "4 motor", "content": "yumuşak başlangıçlı motor gücü" },
+        { "data": "Deprem olayı", "to": "M2 → M1, M5", "content": "kaynak, güç 0–10, merkez, bölge 0–8, güven" },
+        { "data": "Sensör örnekleri, durum, gecikme cevabı", "to": "M2 → M5", "content": "sismik grafik, fps, Wi-Fi, güç tahmini, hatalar" }
+      ],
+      "runs": [
+        {
+          "label": "Emülatörler: tahta ↔ sunucu (M6-5)",
+          "cwd": "tools/emulators",
+          "cmd": "npm run demo",
+          "needs": ["tools/emulators/src/demo.ts"],
+          "files": ["tools/emulators/src/server/serverEmulator.ts", "tools/emulators/src/board/boardEmulator.ts", "M2-network/src/board/boardLink.ts"],
+          "fake": "Sunucu emülatörü şehir planından sahte bir oyun oynatıyor; tahta emülatörü sahte sensör, vuruş ve durum raporu üretiyor.",
+          "expect": "16 kontrol: bağlanma, config, durumlar, gecikme, sensör, durum raporu; bir vuruş = bir deprem olayı; titreşim = yumuşak başlangıç ve tek motor olayı; %30 kayıpta bağlantı sürüyor; Wi-Fi kesilip gelince yeniden bağlanıyor.",
+          "install": ["M2-network", "tools/emulators"]
+        },
+        {
+          "label": "Emülatör testleri: 10 örnek mesaj (M6-5)",
+          "cwd": "tools/emulators",
+          "cmd": "npm test",
+          "needs": ["tools/emulators/test/vectors.test.ts"],
+          "files": ["contracts/board_protocol_vectors.json", "tools/emulators/test/"],
+          "fake": "Sözleşmedeki 10 örnek mesaj; iki emülatör gerçek soketlerle.",
+          "expect": "32 test geçer: iki taraf da 10 mesajı bayt bayt doğru kodluyor ve çözüyor.",
+          "install": ["M2-network", "tools/emulators"]
+        },
+        {
+          "label": "Şerit düzeni kontrolü (M6-5)",
+          "cwd": ".",
+          "cmd": "node tools/strip_layout/gen-strip-layout.mjs --check",
+          "needs": ["tools/strip_layout/gen-strip-layout.mjs"],
+          "files": ["contracts/city_plan.json", "M6-led-board/hardware/strip_layout.json"],
+          "fake": "Sahte veri yok: şerit düzeni şehir planından üretilip kontrol ediliyor.",
+          "expect": "788 LED, 2 zincir, 60 yolun her birinde bir parça."
+        },
+        {
+          "label": "Bağlantı, kodlayıcı, durum devri (M6-1)",
+          "cwd": "M6-led-board/firmware/test/link",
+          "cmd": "make test",
+          "tool": "make",
+          "needs": ["M6-led-board/firmware/test/link/Makefile"],
+          "files": ["M6-led-board/firmware/src/link/", "M6-led-board/firmware/test/link/sim.h"],
+          "fake": "PC'de sanal saatle simüle edilmiş sunucu; bozuk mesajlar, kayıp, yeniden başlatma.",
+          "expect": "110 kontrol geçer."
+        },
+        {
+          "label": "Vuruş algılama ve motorlar (M6-2)",
+          "cwd": "M6-led-board/firmware/test",
+          "cmd": "make test",
+          "tool": "make",
+          "needs": ["M6-led-board/firmware/test/test_quake.cpp"],
+          "files": ["M6-led-board/firmware/src/quake/", "M6-led-board/firmware/test/sim_board.h"],
+          "fake": "Simüle tahta: sessiz ve gürültülü masa, 9 bölgeye 40'ar vuruş, motor sarsıntısı.",
+          "expect": "1900 kontrol geçer; bölge doğru ya da komşu, motorlar ikinci deprem başlatmıyor."
+        },
+        {
+          "label": "LED haritası, son işlem, güç sınırı (M6-3)",
+          "cwd": "M6-led-board/firmware/test/led",
+          "cmd": "make test",
+          "tool": "make",
+          "needs": ["M6-led-board/firmware/test/led/test_led.cpp"],
+          "files": ["M6-led-board/firmware/src/led/", "M6-led-board/hardware/strip_layout.json"],
+          "fake": "Şerit düzeninden üretilen 788 LED'lik harita, test desenleri.",
+          "expect": "Bütün C++ kontrolleri geçer."
+        },
+        {
+          "label": "Hareket yumuşatıcı, efektler, demo modu (M6-4)",
+          "cwd": "M6-led-board/firmware/test",
+          "cmd": "make test",
+          "tool": "make",
+          "needs": ["M6-led-board/firmware/src/led/motion_smoother.cpp"],
+          "pr": "henüz PR yok",
+          "files": [],
+          "fake": "Kayıtlı tahta durumları.",
+          "expect": "Noktalar yollarda akıyor, her aşamanın görünümü."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Çılgın Kurye: modül demoları</title>
+<style>
+  :root { --bg: #f6f6f3; --card: #fff; --line: #e2e2dc; --text: #1f1f1d; --muted: #6b6b66; --accent: #2457d6; --ok: #15803d; --bad: #b91c1c; --warn: #a16207; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
+  header { padding: 16px 24px; background: var(--card); border-bottom: 1px solid var(--line); }
+  header h1 { margin: 0; font-size: 19px; font-weight: 600; }
+  header p { margin: 4px 0 0; color: var(--muted); }
+  .wrap { display: grid; grid-template-columns: 200px 1fr; gap: 18px; padding: 18px 24px; max-width: 1400px; }
+  nav button { display: block; width: 100%; text-align: left; margin-bottom: 6px; padding: 10px 12px; border: 1px solid var(--line); background: var(--card); border-radius: 8px; font: inherit; cursor: pointer; }
+  nav button b { display: block; font-size: 15px; }
+  nav button span { font-size: 12px; color: var(--muted); }
+  nav button.on { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+  section.card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; }
+  h2 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  h3 { margin: 0 0 8px; font-size: 14px; font-weight: 600; }
+  .muted { color: var(--muted); }
+  .io { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 5px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; }
+  .run { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; background: #fcfcfa; }
+  .run-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .run-head h3 { margin: 0; flex: 1; }
+  .badge { font-size: 12px; padding: 2px 8px; border-radius: 99px; border: 1px solid currentColor; }
+  .ready { color: var(--ok); } .pr { color: var(--warn); } .notool, .missing { color: var(--muted); }
+  .grid { display: grid; grid-template-columns: 130px 1fr; gap: 4px 10px; margin: 10px 0; font-size: 13px; }
+  .grid div:nth-child(odd) { color: var(--muted); }
+  code { font: 12px ui-monospace, Consolas, monospace; background: #efefea; padding: 1px 5px; border-radius: 4px; }
+  button.start { padding: 7px 16px; border: 0; border-radius: 7px; background: var(--accent); color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+  button.start:disabled { background: #b8b8b2; cursor: default; }
+  button.stop { padding: 7px 12px; border: 1px solid var(--line); border-radius: 7px; background: #fff; font: inherit; cursor: pointer; }
+  pre.out { display: none; margin: 10px 0 0; max-height: 420px; overflow: auto; background: #1d1f23; color: #e7e7e2; border-radius: 8px; padding: 10px 12px; font: 12px/1.5 ui-monospace, Consolas, monospace; white-space: pre-wrap; }
+  pre.out .ph { color: #8ab4ff; }
+  .result { font-weight: 600; margin-top: 8px; display: none; }
+  .result.ok { color: var(--ok); } .result.bad { color: var(--bad); }
+  ul.files { margin: 0; padding-left: 16px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Çılgın Kurye: modül demoları</h1>
+  <p>Her modül tek başına, diğer modüllerin yerine sahte veriyle çalışır. Soldan bir modül seç: ne aldığını, ne verdiğini, hangi dosyaları kullandığını ve sahte olarak ne verdiğimizi gör, sonra <b>Başlat</b>'a bas.</p>
+</header>
+<div class="wrap">
+  <nav id="nav"></nav>
+  <main id="main"><p class="muted">Yükleniyor…</p></main>
+</div>
+<script>
+const STATE_TEXT = {
+  ready: "çalıştırılabilir",
+  pr: "PR'da, main'e birleşince çalışır",
+  missing: "dosyalar yok",
+  notool: "bu bilgisayarda araç yok",
+};
+let modules = [];
+let current = null;
+const sources = {};
+
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+async function load() {
+  modules = await (await fetch("/api/modules")).json();
+  const nav = document.getElementById("nav");
+  nav.innerHTML = "";
+  for (const m of modules) {
+    const ready = m.runs.filter((r) => r.status.state === "ready").length;
+    const b = document.createElement("button");
+    b.innerHTML = `<b>${m.id}</b><span>${esc(m.name)}</span><br><span>${ready}/${m.runs.length} demo hazır</span>`;
+    b.onclick = () => show(m.id);
+    b.dataset.id = m.id;
+    nav.appendChild(b);
+  }
+  show(current ?? new URLSearchParams(location.hash.slice(1)).get("m") ?? modules[0].id);
+}
+
+function table(rows, dirLabel) {
+  return `<table><tr><th>Veri</th><th>${dirLabel}</th><th>İçerik</th></tr>${rows
+    .map((r) => `<tr><td><b>${esc(r.data)}</b></td><td>${esc(r.from ?? r.to)}</td><td>${esc(r.content)}</td></tr>`)
+    .join("")}</table>`;
+}
+
+function show(id) {
+  current = id;
+  location.hash = `m=${id}`;
+  for (const b of document.querySelectorAll("nav button")) b.classList.toggle("on", b.dataset.id === id);
+  const m = modules.find((x) => x.id === id);
+  const main = document.getElementById("main");
+  main.innerHTML = `
+    <section class="card">
+      <h2>${m.id}: ${esc(m.name)}</h2>
+      <div class="muted">Ekip: ${esc(m.team)} · Belge: <code>${esc(m.doc)}</code></div>
+      <p style="margin:8px 0 0">${esc(m.summary)}</p>
+    </section>
+    <div class="io">
+      <section class="card"><h3>Girdiler (belgedeki tablo)</h3>${table(m.inputs, "Kimden")}</section>
+      <section class="card"><h3>Çıktılar (belgedeki tablo)</h3>${table(m.outputs, "Kime")}</section>
+    </div>
+    <section class="card"><h3>Sahte veriyle demolar ve testler</h3><div id="runs"></div></section>`;
+  const box = document.getElementById("runs");
+  m.runs.forEach((r, i) => {
+    const st = r.status.state;
+    const div = document.createElement("div");
+    div.className = "run";
+    const note =
+      st === "pr" ? ` (${esc(r.pr)})` : st === "ready" && r.status.install?.length ? " · ilk çalıştırmada paketler kurulur" : "";
+    div.innerHTML = `
+      <div class="run-head">
+        <h3>${esc(r.label)}</h3>
+        <span class="badge ${st}">${STATE_TEXT[st]}${note}</span>
+        <button class="start" ${st === "ready" ? "" : "disabled"}>Başlat</button>
+        <button class="stop" style="display:none">Durdur</button>
+      </div>
+      <div class="grid">
+        <div>Kullandığı dosyalar</div><div>${r.files?.length ? `<ul class="files">${r.files.map((f) => `<li><code>${esc(f)}</code></li>`).join("")}</ul>` : "—"}</div>
+        <div>Sahte olarak verilen</div><div>${esc(r.fake)}</div>
+        <div>Vermesi gereken</div><div>${esc(r.expect)}</div>
+        <div>Komut</div><div><code>${esc(r.cwd === "." ? "" : r.cwd + " $ ")}${esc(r.cmd)}</code>${r.tool ? ` <span class="muted">(gerekli: ${esc(r.tool)})</span>` : ""}</div>
+      </div>
+      <pre class="out"></pre>
+      <div class="result"></div>`;
+    const start = div.querySelector(".start");
+    const stop = div.querySelector(".stop");
+    start.onclick = () => runIt(m.id, i, div);
+    stop.onclick = () => {
+      sources[`${m.id}-${i}`]?.close();
+      finish(div, null, "durduruldu");
+    };
+    box.appendChild(div);
+  });
+}
+
+function runIt(mid, i, div) {
+  const out = div.querySelector(".out");
+  const res = div.querySelector(".result");
+  out.style.display = "block";
+  out.innerHTML = "";
+  res.style.display = "none";
+  div.querySelector(".start").disabled = true;
+  div.querySelector(".stop").style.display = "";
+  const key = `${mid}-${i}`;
+  const es = new EventSource(`/api/run?m=${mid}&r=${i}`);
+  sources[key] = es;
+  const add = (html) => {
+    const atEnd = out.scrollTop + out.clientHeight >= out.scrollHeight - 20;
+    out.insertAdjacentHTML("beforeend", html + "\n");
+    if (atEnd) out.scrollTop = out.scrollHeight;
+  };
+  es.onmessage = (e) => {
+    const m = JSON.parse(e.data);
+    if (m.t === "phase") add(`<span class="ph">▶ ${esc(m.s)}</span>`);
+    else if (m.t === "line") add(esc(m.s));
+    else if (m.t === "end") {
+      es.close();
+      finish(div, m.code, m.why ? STATE_TEXT[m.why] : `${(m.ms / 1000).toFixed(1)} s`);
+    }
+  };
+  es.onerror = () => {
+    es.close();
+    finish(div, null, "bağlantı kesildi");
+  };
+}
+
+function finish(div, code, info) {
+  const res = div.querySelector(".result");
+  res.style.display = "block";
+  res.className = `result ${code === 0 ? "ok" : "bad"}`;
+  res.textContent = code === 0 ? `✓ Başarılı (çıkış kodu 0, ${info})` : `✗ ${code === null ? info : `Hata, çıkış kodu ${code} (${info})`}`;
+  div.querySelector(".start").disabled = false;
+  div.querySelector(".stop").style.display = "none";
+}
+
+load();
+</script>
+</body>
+</html>

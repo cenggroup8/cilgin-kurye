@@ -1,0 +1,13 @@
+{
+  "name": "cilgin-kurye-module-demo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Module demo page: inputs, outputs and fake-data demos of M1-M6",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

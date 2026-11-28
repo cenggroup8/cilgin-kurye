@@ -25,14 +25,14 @@ endif
 M2 = ../../../../M2-network
 
 itest: build/itest_board
-	cd $(M2) && npx tsx $(CURDIR)/itest_server.mjs
+	cd "$(M2)" && npx tsx "$(CURDIR)/itest_server.mjs"
 
 build/itest_board: itest_board.cpp net_socket.h $(LINK_SRC) $(LINK_HDR)
 	@mkdir -p build
 	$(CXX) $(CXXFLAGS) -o $@ itest_board.cpp $(LINK_SRC) $(SOCKET_LIBS)
 
 demo: build/demo_board
-	cd $(M2) && npx tsx $(CURDIR)/demo_server.mjs
+	cd "$(M2)" && npx tsx "$(CURDIR)/demo_server.mjs"
 
 build/demo_board: demo_board.cpp net_socket.h $(LINK_SRC) $(LINK_HDR)
 	@mkdir -p build

@@ -157,7 +157,7 @@ The supply (40 A) has a large margin for the ESP32 (about 0.25 A) and the motors
 ## First test setup (#56: "tek şerit, bir ESP32 ve harici güç")
 
 1. ESP32 on USB alone: load a small program, see it in the serial monitor.
-2. One piece of 12 LEDs: 5 V and ground from the supply (through a fuse), ground also to the
+2. One piece of 13 LEDs: 5 V and ground from the supply (through a fuse), ground also to the
    ESP32 GND, data from GPIO16 through the level shifter. Light the LEDs one by one and in red,
    green, blue (test the order and the colours).
 3. MPU-6050: 3V3, GND, SDA 21, SCL 22. An I2C scan must find 0x68; a tap on the table must make

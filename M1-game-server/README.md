@@ -11,7 +11,7 @@ M1 is the brain of the game. It runs on the main computer and it is the only par
 | **Direction** | **Data** | **From / to** | **Content** |
 |---|---|---|---|
 | In | Controls | M2, from phones | Throttle and brake from 0 to 1, steer from −1 to 1, a control number. “Find me” comes as an event |
-| In | Join | M2, from phones | Player key, name, team. M2 also reports when a player is lost or comes back |
+| In | Join | M2, from phones | Player key, player number (from M2-1's `welcome`), name, team. M2 also reports when a player is lost or comes back |
 | In | Admin commands | M2, from admin | Parameter changes, start, pause, resume, end, reset, new game code, obstacles, earthquake |
 | In | Board events | M2, from board | Source (hand or motors), strength from 0 to 10, zone, confidence |
 | In | Traffic | M3 | NPC cars, bot controls, travel time table |
@@ -37,8 +37,46 @@ test/
 logs/               recorded games (not in git)
 ```
 
-The code is not written yet. Each part can be built and tested alone with test data, as the module
-document describes.
+Each part can be built and tested alone with test data, as the module document describes.
+
+## Run and test
+
+Node.js 20 or newer.
+
+```
+npm install
+npm test            # all tests
+npm run demo:match  # M1-2: a scripted match with the real times, printed second by second
+```
+
+## M1-2: match and lobby (`src/match/match.ts`)
+
+The `Match` class owns the game phase and the roster. It reads no clock and makes no random
+numbers: time comes only from `tick()`, so the same inputs always give the same match.
+
+| Part | What it does |
+|---|---|
+| Phases | lobby → countdown (3 s) → playing (at most 5 min) → ended; paused from countdown or playing |
+| Lobby | `join(key, playerNo, name, team)`: the number is the one M2-1 gave the phone; at most 2 per team, 8 in total; a player may change team while there is room. Bots get the free numbers from the top (7, 6, …) |
+| Bots | `start(botCount)`: fills empty places with up to `botCount` bots, each in the smallest team |
+| Pause | `pause()` / `resume()`: game time and the wait of lost players stop; a pause in the countdown starts the countdown again |
+| End | time runs out or `end(scores)`; the team with the most points wins, equal points give a draw between those teams |
+| Lost players | `lost(key)` / `returned(key)`: the place is kept 30 s, then a bot takes over; the player gets the motorcycle back on return |
+| Reset | `reset()`: back to the lobby, bots leave, humans keep their places |
+
+For the other parts of M1: `canMove` is false in the countdown, `clockRunning` is false in a
+pause (penalties, obstacles and NPC cars stop then), `tick()` returns the events of the tick
+for the game log.
+
+Open points for the team:
+
+- M1-1 (game loop, world state types) is not on `main` yet. `Match` keeps its own roster type;
+  it moves into the world state when M1-1 lands. The `package.json` here is a minimal one so
+  M1-2 can be tested alone; M1-1 may replace it.
+- Player numbers: M2-1 gives each phone its number in the `welcome`, and the join passes it to
+  `Match.join`, so the phone and M1 always mean the same player. M1 numbers only the bots.
+- The document does not say what happens to a player who leaves in the lobby. Here the place
+  stays until reset and the 30 s wait starts with the countdown.
 
 ## Team
 

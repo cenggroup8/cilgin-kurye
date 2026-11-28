@@ -24,7 +24,7 @@ const link = new BoardLink({
 });
 await link.start();
 link.setConfig({
-  plan: "0.3.0",
+  plan: "0.2.0",
   bright: 0.6,
   max_ma: 4000,
   tones: Array.from({ length: 8 }, (_, i) => [10 * i, 20, 30]),

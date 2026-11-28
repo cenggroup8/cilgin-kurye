@@ -79,12 +79,12 @@ its answer comes back as `reply`.
 
 | `t` | Fields | Meaning |
 |---|---|---|
-| `snapshot` | `state`, `params`, `metrics`, `board`, `events` | Everything after a (re)connect, with about two minutes of history |
+| `snapshot` | `state`, `params`, `metrics`, `board`, `events`, `marks` (optional) | Everything after a (re)connect, with about two minutes of history. `marks` is a list of `{time, name}`: the commands accepted in that time, at server time in ms, with the parameter's name for `param_set` and the command's name otherwise, so the graphs draw their change marks again after a page reload |
 | `state` | `state` map | Smaller game state, 10 times per second (shape: `AdminState` in M5-1 #73) |
 | `params` | `list` array of parameters | Every parameter: `name`, `group`, `label`, `value`, `min`, `max`, `integer`, `owner` (M1-5) |
 | `param` | `name` string, `value` number | A value changed. The admin puts a change mark on every graph |
 | `metrics` | `samples` array of `{name, time, value}` | Twice per second. `time` in ms |
-| `board` | `board` map: `connected` boolean, `samples` array, `quake` `{mag, zone}` (optional) | Board link state, sensor samples and the current earthquake. `quake` is missing when no earthquake is going on (it is dropped when the earthquake ends) |
+| `board` | `board` map: `connected` boolean, `samples` array, `quake` `{mag, zone, source}` (optional) | Board link state, sensor samples and the current earthquake. `quake` is missing when no earthquake is going on (it is dropped when the earthquake ends). `source` (optional) says where it came from: `hand` (a hit on the board, `src: hit` in `board_protocol.md`), `motors` (`src: motor`) or `admin` (the earthquake button). Sensor samples of the seismic graph are named `board.accel_g`, one sample per value of `N` with its own time. The board link also gives `board.delay_ms` (only while the board is connected) and `board.loss_pct` once per second |
 | `event` | `entry` `{time, message}` | One line for the event log |
 | `log` | `entries` array of `{time, message}` | Answer to `log_get` |
 | `reply` | `id` integer, `ok` boolean, `error` string (when `ok` is false) | Answer to one `cmd`. `error` is one of the command errors below |

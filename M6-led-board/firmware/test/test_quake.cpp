@@ -11,6 +11,7 @@
 #include "../src/quake/hit_detector.h"
 #include "../src/quake/motor_controller.h"
 #include "../src/quake/motor_shield.h"
+#include "../src/quake/mpu6050.h"
 #include "../src/quake/quake_unit.h"
 #include "../src/quake/sample_batcher.h"
 #include "sim_board.h"
@@ -546,8 +547,145 @@ static void testUnit() {
   CHECK(motorEvents == 1 && hitEvents == 1, "motor %d hit %d", motorEvents, hitEvents);
 }
 
+// ---- MPU-6050 driver ----
+// A sensor on a fake I2C bus: registers in memory, the 14 output bytes come from a sample.
+struct FakeBus : I2cBus {
+  uint8_t reg[128] = {};
+  bool present = true;
+  int failReads = 0;  // the next n reads fail
+  std::vector<std::pair<uint8_t, uint8_t>> writes;
+  FakeBus() { reg[mpu::kWhoAmI] = 0x68; }
+  bool writeReg(uint8_t addr, uint8_t r, uint8_t v) override {
+    if (!present || addr != kMpuAddress) return false;
+    writes.push_back({r, v});
+    reg[r] = v;
+    return true;
+  }
+  bool readRegs(uint8_t addr, uint8_t r, uint8_t* out, int n) override {
+    if (!present || addr != kMpuAddress) return false;
+    if (failReads > 0) { failReads--; return false; }
+    for (int i = 0; i < n; i++) out[i] = reg[r + i];
+    return true;
+  }
+  void put16(uint8_t r, int v) {
+    v = std::max(-32768, std::min(32767, v));
+    reg[r] = uint8_t(uint16_t(v) >> 8);
+    reg[r + 1] = uint8_t(v & 0xFF);
+  }
+  // Raw counts for ±16 g and ±500 dps, as the sensor would give them.
+  void setSample(const ImuSample& s) {
+    put16(0x3B, int(std::lround(s.ax * 2048))), put16(0x3D, int(std::lround(s.ay * 2048)));
+    put16(0x3F, int(std::lround(s.az * 2048)));
+    put16(0x43, int(std::lround(s.gx * 65.5f))), put16(0x45, int(std::lround(s.gy * 65.5f)));
+    put16(0x47, int(std::lround(s.gz * 65.5f)));
+  }
+};
+
+// The sim board seen through the driver: each read takes the next sim sample.
+struct SimThroughBus : MotionSensor {
+  sim::Board& b;
+  FakeBus& bus;
+  Mpu6050& mpu;
+  SimThroughBus(sim::Board& board, FakeBus& fb, Mpu6050& m) : b(board), bus(fb), mpu(m) {}
+  bool read(ImuSample& out) override {
+    bus.setSample(b.next());
+    return mpu.read(out);
+  }
+};
+
+static void testMpu6050() {
+  title("MPU-6050: begin wakes it and sets 200 Hz, filter 2, ±500 dps, ±16 g");
+  FakeBus bus;
+  Mpu6050 mpu(bus);
+  CHECK(mpu.begin() && mpu.ok(), "begin");
+  CHECK(mpu.whoAmI() == 0x68, "id 0x%02X", mpu.whoAmI());
+  CHECK(bus.reg[mpu::kPowerMgmt1] == 0x01, "awake, gyro clock: 0x%02X", bus.reg[mpu::kPowerMgmt1]);
+  CHECK(bus.reg[mpu::kSampleRateDiv] == 4, "200 Hz: div %d", bus.reg[mpu::kSampleRateDiv]);
+  CHECK(bus.reg[mpu::kConfig] == 2, "filter %d", bus.reg[mpu::kConfig]);
+  CHECK(bus.reg[mpu::kGyroConfig] == 0x08, "gyro 0x%02X", bus.reg[mpu::kGyroConfig]);
+  CHECK(bus.reg[mpu::kAccelConfig] == 0x18, "accel 0x%02X", bus.reg[mpu::kAccelConfig]);
+  CHECK(!bus.writes.empty() && bus.writes[0].first == mpu::kPowerMgmt1, "wakes up first");
+
+  title("MPU-6050: raw counts -> g and degrees per second, big-endian, signed");
+  bus.put16(0x3B, 2048);    // +1 g
+  bus.put16(0x3D, -4096);   // -2 g
+  bus.put16(0x3F, 32767);   // top of the range
+  bus.put16(0x41, 1234);    // temperature, not used
+  bus.put16(0x43, 655);     // +10 dps
+  bus.put16(0x45, -6550);   // -100 dps
+  bus.put16(0x47, 0);
+  ImuSample s;
+  CHECK(mpu.read(s), "read");
+  CHECK(s.ax == 1.0f && s.ay == -2.0f, "ax %.4f ay %.4f", s.ax, s.ay);
+  CHECK(std::fabs(s.az - 16.0f) < 0.001f, "az %.4f", s.az);
+  CHECK(std::fabs(s.gx - 10.0f) < 0.001f && std::fabs(s.gy + 100.0f) < 0.001f && s.gz == 0, "gx %.3f gy %.3f gz %.3f", s.gx, s.gy, s.gz);
+
+  title("MPU-6050: no sensor or an unknown id -> begin false, read false, no crash");
+  FakeBus none;
+  none.present = false;
+  Mpu6050 m2(none);
+  CHECK(!m2.begin() && !m2.ok() && m2.whoAmI() == 0, "no answer");
+  CHECK(!m2.read(s), "read false");
+  FakeBus odd;
+  odd.reg[mpu::kWhoAmI] = 0x12;
+  Mpu6050 m3(odd);
+  CHECK(!m3.begin() && m3.whoAmI() == 0x12, "unknown id 0x%02X", m3.whoAmI());
+  CHECK(odd.writes.empty(), "nothing written to an unknown chip");
+  FakeBus clone;
+  clone.reg[mpu::kWhoAmI] = 0x70;
+  Mpu6050 m4(clone);
+  CHECK(m4.begin(), "look-alike 0x70 works");
+
+  title("MPU-6050: a few failed reads are skipped, a lost sensor is tried again about once a second");
+  FakeBus lb;
+  Mpu6050 m5(lb);
+  m5.begin();
+  lb.failReads = 3;
+  int okReads = 0;
+  for (int i = 0; i < 10; i++) okReads += m5.read(s);
+  CHECK(okReads == 7 && m5.ok() && m5.failedReads() == 3, "%d good reads, %u failed", okReads, m5.failedReads());
+  lb.present = false;  // wire pulled
+  for (int i = 0; i < 200; i++) m5.read(s);
+  CHECK(!m5.ok(), "lost after 200 failed reads");
+  const size_t writesBefore = lb.writes.size();
+  lb.present = true;   // wire back
+  int tries = 0;
+  while (!m5.read(s) && tries < 1000) tries++;
+  CHECK(m5.ok() && tries == 199, "back after %d reads", tries);
+  CHECK(lb.writes.size() == writesBefore + 5, "set up again: %zu writes", lb.writes.size() - writesBefore);
+
+  title("MPU-6050: a hit through the driver gives the same event as without it");
+  sim::Board b1(11), b2(11);
+  SimSensor direct(b1);
+  FakeBus hb;
+  Mpu6050 hm(hb);
+  hm.begin();
+  SimThroughBus viaBus(b2, hb, hm);
+  FakeMotors o1, o2;
+  QuakeUnit u1(direct, o1), u2(viaBus, o2);
+  Collect c1, c2;
+  auto keep = [](const QuakeEvent& e, void* ctx) { static_cast<Collect*>(ctx)->events.push_back(e); };
+  u1.onEvent(keep, &c1);
+  u2.onEvent(keep, &c2);
+  uint32_t us = 0;
+  auto loopFor = [&](float seconds) {
+    const uint32_t end = us + uint32_t(seconds * 1e6f);
+    for (; us < end; us += 250) { u1.loop(us, us / 1000, true); u2.loop(us, us / 1000, true); }
+  };
+  loopFor(4);
+  b1.hit({0.85f, 0.15f, 3.0f});
+  b2.hit({0.85f, 0.15f, 3.0f});
+  loopFor(1);
+  CHECK(c1.events.size() == 1 && c2.events.size() == 1, "events %zu / %zu", c1.events.size(), c2.events.size());
+  if (c1.events.size() == 1 && c2.events.size() == 1) {
+    const QuakeEvent &a = c1.events[0], &d = c2.events[0];
+    CHECK(a.zone == d.zone && nearZone(d.zone, 2), "zone %d / %d", a.zone, d.zone);
+    CHECK(std::fabs(a.mag - d.mag) < 0.05f, "strength %.3f / %.3f", a.mag, d.mag);
+  }
+}
+
 int main() {
-  std::printf("M6-2 hit detector, motor controller and motor shield tests\n");
+  std::printf("M6-2 hit detector, motor controller, motor shield and MPU-6050 tests\n");
   testQuietTable();
   testNoisyTable();
   testNineZones();
@@ -563,6 +701,7 @@ int main() {
   testBatcher();
   testFixedRate();
   testUnit();
+  testMpu6050();
   std::printf("\n%d checks, %d failed\n", g_checks, g_failed);
   return g_failed == 0 ? 0 : 1;
 }

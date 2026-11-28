@@ -63,6 +63,9 @@ export interface ReceivedCommand {
   args?: Record<string, unknown>;
 }
 
+/** Contract messages (contracts/messages.md, #90) that the admin page of M5-1 does not read yet. */
+type ContractOnly = { t: 'error'; reason: string; ref?: string } | { t: 'log'; entries: LogEntry[] };
+
 type Obstacle = AdminState['obstacles'][number];
 
 export function m1Params(): Parameter[] {
@@ -163,7 +166,7 @@ export function attachFakeServer(server: Server, options: FakeServerOptions = {}
     };
   }
 
-  function send(message: AdminMessage) {
+  function send(message: AdminMessage | ContractOnly) {
     if (active?.readyState === WebSocket.OPEN) active.send(encode(message));
   }
 
@@ -395,13 +398,20 @@ export function attachFakeServer(server: Server, options: FakeServerOptions = {}
       try {
         message = decode(data);
       } catch {
-        return;
+        return send({ t: 'error', reason: 'bad_message' });
       }
-      if (typeof message !== 'object' || message === null) return;
-      const m = message as { t?: unknown; id?: unknown; name?: unknown; args?: unknown };
+      // Refused messages get the `error` of contracts/messages.md (#90), as the real server does.
+      if (typeof message !== 'object' || message === null || Array.isArray(message)) return send({ t: 'error', reason: 'bad_message' });
+      const m = message as { t?: unknown; id?: unknown; name?: unknown; args?: unknown; since?: unknown };
+      if (typeof m.t !== 'string') return send({ t: 'error', reason: 'bad_message' });
       if (m.t === 'snapshot_get') return send(snapshot());
       if (m.t === 'params_get') return send({ t: 'params', list: [...params.values()] });
-      if (m.t !== 'cmd' || !Number.isSafeInteger(m.id) || typeof m.name !== 'string') return;
+      if (m.t === 'log_get') {
+        const since = typeof m.since === 'number' && Number.isFinite(m.since) ? m.since : -Infinity;
+        return send({ t: 'log', entries: events.filter((e) => e.time > since) });
+      }
+      if (m.t !== 'cmd') return send({ t: 'error', reason: 'unknown_type', ref: m.t });
+      if (!Number.isSafeInteger(m.id) || typeof m.name !== 'string') return send({ t: 'error', reason: 'bad_field', ref: 'cmd' });
       const args = typeof m.args === 'object' && m.args !== null && !Array.isArray(m.args)
         ? m.args as Record<string, unknown> : undefined;
       handle({ id: m.id as number, name: m.name, ...(args ? { args } : {}) });

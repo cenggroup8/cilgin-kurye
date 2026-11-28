@@ -59,3 +59,42 @@ for this package. The shared playback server belongs to M5-2 (#49).
 
 Run `npm test`, `npm run typecheck` and `npm run build` to verify the package.
 The build writes the admin page to `dist/`.
+
+## M5-2: parameter manager and fake server
+
+| Part | Files |
+|---|---|
+| Form layout and checks: groups in page order, one table per group for names like `obstacles.<type>.<field>`, a network table with one row per player and one for the board | `src/params/paramModel.ts` |
+| Forms on the page: a wrong value is shown and not sent, the server's error is shown and the old value stays, a value changed elsewhere updates the form | `src/params/paramManager.ts`, `src/params/params.css` |
+| Fake server: plays a recorded game with metrics, the parameter list and board data; answers every command like M1-5 (#61); can drop the connection | `test/fake-server/fakeServer.ts` |
+| Recorded game (one seed, always the same game) | `test/fake-server/recording.ts` |
+
+The forms are built only from the parameter list. A new parameter in
+`M1-game-server/src/admin/param-list.ts` (M1-5) shows up in the fake server and in the
+forms with no change here. The fake server reads that file, so both use the same names
+and limits.
+
+One command for every M5 package:
+
+```
+npm ci
+npm run fake-server              # http://localhost:5175, the game is already running
+npm run fake-server -- --lobby   # start in the lobby instead
+curl -X POST http://localhost:5175/fake/disconnect   # drop the admin link
+curl -X POST "http://localhost:5175/fake/board?on=0" # board link lost (on=1: back)
+```
+
+In a test, `attachFakeServer(server, { autoplay: false })` gives the same server with no
+timers; `step(ms)` moves the game forward. The fake server sends the state 10 times and the
+metrics twice per second, keeps two minutes of metric history for the snapshot after a
+reconnect, and a delay or loss set in the network table shows up in the measured ping and loss.
+
+It answers the admin messages of `contracts/messages.md` (#90): `snapshot_get` with one
+`snapshot` (parameters, state, metric history, board data, log and change marks), `params_get` with `params`,
+`log_get {since?}` with `log`, and every `cmd` with one `reply`. A message it cannot use gets
+`error` with `bad_message`, `unknown_type` or `bad_field`, and the fake server keeps running.
+
+The metric names (`score.<team>`, `traffic.*`, `speed.mean_mps`, `falls.total`,
+`net.<p>.ping_ms|jitter_ms|loss_pct|fps`, `board.delay_ms`, `board.loss_pct`,
+`board.accel_g`, `quake.mag`, `delivery.time_s`, `delivery.distance_m`) are provisional
+until M1, M2 and M3 publish their metric lists with #35.

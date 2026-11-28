@@ -5,8 +5,9 @@
   "scripts": {
     "build": "node build.ts",
     "demo": "npm run build && node test/comm/demoServer.ts",
-    "test": "node --test test/comm/*.test.ts",
-    "typecheck": "tsc --noEmit"
+    "test": "node --test \"test/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit",
+    "fake-server": "npm run build && node test/fake-server/server.ts"
   },
   "dependencies": {
     "@msgpack/msgpack": "^3.1.3"

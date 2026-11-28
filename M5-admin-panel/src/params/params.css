@@ -1,0 +1,15 @@
+/* Parameter manager (M5-2). */
+#params { display: grid; gap: .5rem; max-height: 70vh; overflow: auto; }
+.param-group { border: 1px solid var(--border); border-radius: .5rem; padding: .35rem .6rem; }
+.param-group > summary { cursor: pointer; font-weight: 650; padding-block: .25rem; }
+.param-field { display: grid; grid-template-columns: minmax(0, 1fr) 6.5rem; align-items: center; gap: .2rem .6rem; padding-block: .35rem; border-bottom: 1px solid var(--border); }
+.param-field > span { color: var(--muted); font-size: .9rem; }
+.param-field input, .param-table input { width: 100%; padding: .3rem .45rem; }
+.param-table { border-collapse: collapse; width: 100%; margin-top: .4rem; font-size: .85rem; }
+.param-table th { color: var(--muted); font-weight: 500; text-align: left; padding: .2rem .3rem; white-space: nowrap; }
+.param-table td { padding: .2rem .3rem; min-width: 4.5rem; vertical-align: top; }
+.param-note { grid-column: 1 / -1; display: block; min-height: 0; font-size: .8rem; }
+.param-note:empty { display: none; }
+.param-note[data-kind="error"] { color: #ffb4a2; }
+.param-note[data-kind="info"] { color: var(--muted); }
+input[aria-invalid="true"] { border-color: #e07a5f; }

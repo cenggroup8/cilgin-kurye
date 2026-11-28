@@ -13,6 +13,9 @@ import { smallAdminState, StateBroadcaster, type BoardSink, type BroadcastStats,
  *                          last state of every phone
  *   M1 → metrics(samples)  twice per second: all metrics, on to the admin with a short history
  *   M2-4 → board(data)     board link state, sensor samples, earthquakes, on to the admin
+ *   M1-5 → netParam()      frame rate limit of one phone (`net.<p>.fps_limit`), sent to that
+ *                          phone as `net {fps_limit}` when it changes and when the phone joins
+ *                          or comes back (contracts/messages.md)
  */
 
 /** One phone's measurements for M1 (plan #24 section 3.2, "Ağ ölçümleri"). */
@@ -54,6 +57,11 @@ export interface BroadcastHub {
   board(data: Partial<Omit<BoardData, "quake">> & { quake?: BoardData["quake"] | null }): void;
   params(list: ParamRow[]): void;
   paramChanged(name: string, value: number): void;
+  /**
+   * A frame rate limit for one phone, for the M4 sink of M1-5. Returns false for any other
+   * parameter name. `paramChanged` and `params` take these names too.
+   */
+  netParam(name: string, value: number): boolean;
   event(message: string): void;
   /** Gives the messages of M2-3 to this part. Returns false for messages of other parts. */
   onMessage(session: Session, msg: unknown): boolean;
@@ -85,6 +93,32 @@ export function attachBroadcast(opts: HubOptions): BroadcastHub {
   );
   let lastTick = -1;
   let lastGame: unknown = null;
+  // Frame rate limit of each player number, and the value each phone link last got.
+  const fpsLimits = new Map<number, number>();
+  const fpsSent = new Map<number, number>();
+
+  function netParam(name: string, value: number): boolean {
+    const m = /^net\.(\d+)\.fps_limit$/.exec(name);
+    if (!m) return false;
+    if (!Number.isInteger(value) || value < 0 || value > 120) return true; // not a contract value
+    fpsLimits.set(Number(m[1]), value);
+    syncNet();
+    return true;
+  }
+
+  /** Sends `net` to every phone whose link has not got its current limit yet. */
+  function syncNet(): void {
+    if (fpsLimits.size === 0) return;
+    const live = new Set<number>();
+    for (const { connId, playerNo } of server.registry.playerConns()) {
+      live.add(connId);
+      const limit = fpsLimits.get(playerNo);
+      if (limit === undefined || fpsSent.get(connId) === limit) continue;
+      fpsSent.set(connId, limit);
+      server.send(connId, { t: "net", fps_limit: limit });
+    }
+    for (const connId of fpsSent.keys()) if (!live.has(connId)) fpsSent.delete(connId);
+  }
 
   function measures(): NetMeasure[] {
     const out: NetMeasure[] = [];
@@ -120,11 +154,20 @@ export function attachBroadcast(opts: HubOptions): BroadcastHub {
       lastTick = frozen.tick;
       lastGame = frozen.game;
       broadcaster.publish(frozen);
+      // A phone that joined or came back since the last tick gets its limit here.
+      syncNet();
     },
     metrics: (samples) => feed.addMetrics(samples),
     board: (data) => feed.addBoard(data),
-    params: (list) => feed.setParams(list),
-    paramChanged: (name, value) => feed.paramChanged(name, value),
+    params(list) {
+      feed.setParams(list);
+      for (const row of list) netParam(row.name, row.value);
+    },
+    paramChanged(name, value) {
+      feed.paramChanged(name, value);
+      netParam(name, value);
+    },
+    netParam,
     event: (message) => feed.event(message),
     onMessage(session, msg) {
       const t = typeof msg === "object" && msg !== null ? (msg as { t?: unknown }).t : undefined;

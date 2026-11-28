@@ -36,7 +36,7 @@ function obstacles(): ParamDef[] {
     // the puddle uses physics.grip_puddle, the accident has a speed limit around it.
     { name: "obstacles.accident.speed_mps", group: "obstacles", min: 2, max: 15, start: 5, owner: "M3", label: "accident: top speed near the accident (m/s)" },
     // Heavy traffic: what it does belongs to the NPC traffic of M3-4 (more or slower cars).
-    { name: "obstacles.heavy_traffic.effect", group: "obstacles", min: 0, max: 1, start: 0.5, owner: "M3", label: "heavy_traffic: strength of the effect (0–1)" },
+    { name: "obstacles.heavy_traffic.effect", group: "obstacles", min: 0, max: 1, start: 0.5, owner: "M3", label: "heavy_traffic: more and slower NPC cars on the road (0–1)" },
   );
 }
 

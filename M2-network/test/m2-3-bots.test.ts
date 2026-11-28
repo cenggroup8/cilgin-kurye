@@ -57,7 +57,9 @@ describe("M2-3 with a fake M1 and bot phones", () => {
     await waitFor(() => (m1.measures.filter((m) => m.length === 2).length >= 5 ? true : undefined), 5000);
     const last = m1.measures.at(-1)!;
     for (const m of last) {
-      expect(m.rttMs).toBeGreaterThanOrEqual(DELAY);
+      // Date.now() has whole milliseconds and setTimeout runs on another clock, so an 80 ms
+      // wait is sometimes measured as 79 ms.
+      expect(m.rttMs).toBeGreaterThanOrEqual(DELAY - 2);
       expect(m.rttMs).toBeLessThan(DELAY + 40);
       expect(m.fps).toBe(42);
       // The bot answers at the end of its delay, so the offset is about half of it.

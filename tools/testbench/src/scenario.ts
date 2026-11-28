@@ -64,6 +64,15 @@ export interface Scenario {
   result: string | null; // what a person must see when it works
   untilExit: boolean; // runs until the command ends (seconds is only a time limit)
   sources: Source[]; // where the data comes from (shown on the page, saved with the run)
+  edit: (SliderInput | SelectInput)[]; // params a person may change before Başlat (bounds included)
+  env: Record<string, string>; // command scenarios: environment variable → param (a knob the demo already reads)
+}
+
+/** A param that was changed for one run (shown on the page, saved with the run). */
+export interface Change {
+  name: string;
+  from: unknown;
+  to: unknown;
 }
 
 /** A file the run uses. role: code (the tested code), fake (fake input), contract, data, test. */
@@ -178,6 +187,13 @@ export async function loadScenario(file: string, id: string, name: string): Prom
   if (seconds !== null && (seconds <= 0 || seconds > 3600)) fail(file, "seconds must be between 0 and 3600");
   const params = (doc.params ?? {}) as Record<string, unknown>;
   const inputs = await Promise.all(((doc.inputs ?? []) as unknown[]).map((x) => input(x, file)));
+  // edit: the same form as a slider or select input; its start value is the value in params.
+  const edit = (await Promise.all(((doc.edit ?? []) as unknown[]).map((x) => input(x, file)))).map((e) => {
+    if (e.type === "button") return fail(file, `edit ${e.name}: only slider or select`);
+    if (e.name in params) e.start = params[e.name] as never;
+    else params[e.name] = e.start;
+    return e;
+  });
   const script = ((doc.script ?? []) as Record<string, unknown>[]).map((s) => {
     if (typeof s?.input !== "string") return fail(file, "every script step needs input:");
     return { at: num(s.at, file, "script at"), input: s.input, value: s.value };
@@ -209,6 +225,8 @@ export async function loadScenario(file: string, id: string, name: string): Prom
     fake: typeof doc.fake === "string" ? doc.fake : null,
     result: typeof doc.result === "string" ? doc.result : null,
     untilExit: run !== null && (doc.seconds === undefined || doc.seconds === null),
+    edit,
+    env: Object.fromEntries(Object.entries((doc.env ?? {}) as Record<string, unknown>).map(([k, v]) => [k, String(v)])),
     sources: ((doc.sources ?? []) as Record<string, unknown>[]).map((x) => {
       if (typeof x?.file !== "string") return fail(file, "every source needs file:");
       const role = String(x.role ?? "code") as Source["role"];
@@ -233,4 +251,29 @@ export function loadAbout(id: string): ModuleAbout | null {
   if (!existsSync(file)) return null;
   const doc = (parse(readFileSync(file, "utf8")) ?? {}) as Partial<ModuleAbout>;
   return { ...doc, inputs: doc.inputs ?? [], outputs: doc.outputs ?? [] };
+}
+
+/**
+ * The scenario with the values a person gave before Başlat. Only params listed in edit:
+ * may change, and only inside their bounds; a page control with the same name starts there.
+ */
+export function withChanges(s: Scenario, values: Record<string, unknown>): { scenario: Scenario; changes: Change[] } | string {
+  const params = { ...s.params };
+  const changes: Change[] = [];
+  for (const [name, raw] of Object.entries(values)) {
+    const e = s.edit.find((x) => x.name === name);
+    if (!e) return `${name} cannot be changed in this scenario`;
+    let v: unknown = raw;
+    if (e.type === "slider") {
+      const n = Number(raw);
+      if (!Number.isFinite(n) || n < e.min || n > e.max) return `${e.label}: ${e.min} … ${e.max}`;
+      v = Math.round(n / e.step) * e.step;
+      v = Math.round((v as number) * 1e6) / 1e6;
+    } else if (!e.options.map(String).includes(String(raw))) return `${e.label}: ${e.options.join(", ")}`;
+    else v = e.options.find((o) => String(o) === String(raw));
+    if (String(v) !== String(params[name])) changes.push({ name, from: params[name], to: v });
+    params[name] = v;
+  }
+  const inputs = s.inputs.map((i) => (i.type !== "button" && i.name in params && changes.some((c) => c.name === i.name) ? { ...i, start: params[i.name] as never } : i));
+  return { scenario: { ...s, params, inputs }, changes };
 }

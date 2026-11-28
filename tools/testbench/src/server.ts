@@ -9,7 +9,7 @@ import { BENCH_DIR, MODULES } from "./modules.js";
 import { provenance } from "./provenance.js";
 import type { Rec } from "./record.js";
 import { RUN_DIR, Run, type Result } from "./runner.js";
-import type { Scenario } from "./scenario.js";
+import { withChanges, type Scenario } from "./scenario.js";
 
 const PORT = Number(process.env.PORT ?? 5173);
 const WEB = join(BENCH_DIR, "web");
@@ -84,7 +84,7 @@ function ended(result: Result | Msg): void {
   setTimeout(() => all({ op: "ended", result, runs: listRuns() }), 60); // after the last batch
 }
 
-async function start(id: string, name: string): Promise<string | null> {
+async function start(id: string, name: string, values: Record<string, unknown>): Promise<string | null> {
   if (busy()) return "a run is going on: stop it first";
   const info = MODULES.find((x) => x.id === id);
   if (!info) return `no module ${id}`;
@@ -92,15 +92,18 @@ async function start(id: string, name: string): Promise<string | null> {
   const e = m.entries.find((x) => x.scenario.name === name);
   if (!e) return `no scenario ${name}`;
   if (e.state !== "ready") return `${m.mod} ${name}: ${e.why}`;
-  const s = e.scenario;
+  const w = withChanges(e.scenario, values);
+  if (typeof w === "string") return w;
+  const s = w.scenario;
   const run = new Run(s, adapterFor(m, s).create(), {
+    changes: w.changes,
     onRec: (r) => {
       cur.history.push(r);
       batch.push(r);
     },
   });
   cur.run = run;
-  begin({ module: s.module, id: s.id, scenario: s.name, title: s.title, seconds: s.untilExit ? null : s.seconds, inputs: s.inputs, expect: s.expect, views: s.views, replay: false, run: s.run, fake: s.fake, result: s.result, provenance: provenance(s) }, s);
+  begin({ module: s.module, id: s.id, scenario: s.name, title: s.title, seconds: s.untilExit ? null : s.seconds, inputs: s.inputs, expect: s.expect, views: s.views, replay: false, run: s.run, fake: s.fake, result: s.result, changes: w.changes, provenance: provenance(s) }, s);
   run.result.then((r) => {
     cur.run = null;
     ended(r);
@@ -117,7 +120,7 @@ function replay(file: string, speed: number): string | null {
   const result = lines.find((l) => l.kind === "result") ?? { passed: false, checks: [], missing: [], error: "the saved run has no result" };
   const recs = lines.filter((l) => l.kind !== "run" && l.kind !== "result") as unknown as Rec[];
   const id = String(head.module ?? "").toLowerCase();
-  begin({ module: head.module, id, scenario: head.scenario, title: head.title, seconds: head.seconds ?? null, inputs: [], expect: head.expect ?? [], views: head.views ?? [], replay: file, run: head.run ?? null, fake: head.fake ?? null, result: head.result ?? null, provenance: head.provenance ?? null, started: head.started ?? null }, null);
+  begin({ module: head.module, id, scenario: head.scenario, title: head.title, seconds: head.seconds ?? null, inputs: [], expect: head.expect ?? [], views: head.views ?? [], replay: file, run: head.run ?? null, fake: head.fake ?? null, result: head.result ?? null, provenance: head.provenance ?? null, changes: head.changes ?? [], started: head.started ?? null }, null);
   const k = speed > 0 ? 1000 / speed : 0;
   const timers = recs.map((r) =>
     setTimeout(() => {
@@ -174,7 +177,7 @@ wss.on("connection", async (ws) => {
           break;
         }
         case "start":
-          err = await start(String(m.id), String(m.scenario));
+          err = await start(String(m.id), String(m.scenario), (m.values ?? {}) as Record<string, unknown>);
           break;
         case "input":
           if (cur.run) cur.run.input(String(m.name), m.value);

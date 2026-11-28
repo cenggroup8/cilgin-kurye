@@ -1,11 +1,16 @@
 module: M2
 title: "Clean link: board states, vibrate, hit"
 seconds: 8
-params: { delay_ms: 0, loss_pct: 0, expect_delay_ms: [0, 20], expect_loss_pct: [0, 2] }
+params: { delay_ms: 0, loss_pct: 0, check_delay: true, check_loss: true }
+edit:
+  - { name: delay_ms, type: slider, label: "Gecikme sunucu → tahta (ms)", min: 0, max: 300, step: 10 }
+  - { name: jitter_ms, type: slider, label: "Jitter (ms)", min: 0, max: 50, step: 10 }
+  - { name: loss_pct, type: slider, label: "Kayıp, iki yönde (%)", min: 0, max: 50, step: 5 }
+  - { name: hit_mag, type: slider, label: "Tahtadaki vuruşun gücü (0–10)", min: 1, max: 10, step: 0.5, start: 5 }
 script:
   - { at: 2, input: vibrate }
   - { at: 3, input: hit, value: 4 }
-expect: ["fake board connects", "link stays connected", "vibrate arrives once", "earthquake event arrives once"]
+expect: ["fake board connects", "link stays connected", "vibrate arrives once", "earthquake event arrives once", "measured delay near the set delay", "state loss near the set loss"]
 fake: "Gerçek tahta yerine M2'nin sahte tahtası (boardEmu). M1 yerine sabit bir sahte oyun durumu: ortada bir bot, 12. yolda yol çalışması."
 result: "Ayarlanan gecikme ölçülen gecikmede görünür; kayıpta durumlar kaybolur ama titreşim ve deprem olayı tam bir kez ulaşır; bağlantı kopmaz."
 sources:

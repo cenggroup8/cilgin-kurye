@@ -5,7 +5,8 @@
 // The board program runs for a fixed time and sends one hand hit at second 5.
 // It prints one line per second; this adapter reads those lines (demo_board.cpp).
 //
-// Params:  state_hz (30), loss_pct (0: board states lost on the way), phase (2)
+// Params:  state_hz (30), loss_pct (0: board states lost on the way), phase (2),
+//          players (1–8) and speed_mps (8): the fake players that drive east
 // Inputs:  vibrate (button), restart (button: server restart), loss_pct, state_hz, phase
 import { spawn, type ChildProcess } from "node:child_process";
 import { join } from "node:path";
@@ -38,6 +39,8 @@ export function createLink(): Adapter {
   let boardEnded: Promise<void> = Promise.resolve();
   let tick: NodeJS.Timeout | null = null;
   let phase = 2;
+  let players = 1;
+  let speed = 8;
   let quake: { start: number; mag: number; u: number; v: number } | null = null;
 
   // For the checks.
@@ -62,8 +65,8 @@ export function createLink(): Adapter {
     return {
       ph: phase,
       tl: 240 - s,
-      // drives east along the road at v = 1/3 (z = 166.7 m), 8 m/s, like make demo
-      players: [{ no: 0, team: 1, tone: 0, flags: 1 | 4 | 8, u: ((50 + 8 * s) % 500) / 500, v: 1 / 3, heading: 90, speed: 8 }],
+      // Fake players (params players, speed_mps): each drives east on its own road, like make demo.
+      players: Array.from({ length: players }, (_, i) => ({ no: i, team: i % 4, tone: (i >> 2) & 1, flags: 1 | 4 | 8, u: ((50 + 37 * i + speed * s) % 500) / 500, v: ((i % 5) + 1) / 6, heading: 90, speed })),
       dp: [[0, 0.8, 0.6667, 0]],
       ob: [[12, 2, 0]],
       eq: q ? [1, q.u, q.v, q.mag, Math.round((s - q.start) * 1000)] : [],
@@ -120,6 +123,8 @@ export function createLink(): Adapter {
     async start(s, c) {
       ctx = c;
       phase = Number(s.params.phase ?? 2);
+      players = Math.max(1, Math.min(8, Math.round(Number(s.params.players ?? 1))));
+      speed = Number(s.params.speed_mps ?? 8);
       ctx.emit({ kind: "log", text: "building the board program (make build/demo_board) …" });
       const code = await run("make", ["build/demo_board"], LINK_DIR, (l) => ctx.emit({ kind: "log", text: `[make] ${l}` }));
       ctx.emit({ kind: "check", name: "board program builds", ok: code === 0, detail: code === 0 ? undefined : `make exit ${code}` });

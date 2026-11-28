@@ -4,8 +4,12 @@
 //
 // Params (scenario file):  delay_ms, jitter_ms              server → board
 //                          loss_pct                        both directions
-//                          expect_delay_ms: [min, max]     check of the measured delay at the end
-//                          expect_loss_pct: [min, max]     check of the state loss at the end
+//                          check_delay: true               measured delay near the set delay (at the end)
+//                          check_loss: true                state loss near the set loss (at the end)
+//                          expect_delay_ms / expect_loss_pct: [min, max]   a fixed range instead
+// The "near" checks follow the set value, so a value changed on the page is checked too:
+//   delay: |measured − set| ≤ 15 ms + 25 % of set + half the jitter
+//   loss:  |measured − set| ≤ 3 points + 40 % of set (+ 8 with jitter: late states are dropped)
 // Inputs: the same three as sliders, "vibrate" (button), "hit" (button, value = zone 0–8).
 import { existsSync } from "node:fs";
 import { join } from "node:path";
@@ -31,6 +35,10 @@ function create(): Adapter {
   const set = { delay_ms: 0, jitter_ms: 0, loss_pct: 0 };
   let expectDelay: Range | null = null;
   let expectLoss: Range | null = null;
+  let checkDelay = false;
+  let checkLoss = false;
+  let hitMag = 5;
+  const quakeMags: number[] = [];
 
   // Counters for the checks.
   let vibratesSent = 0;
@@ -93,6 +101,9 @@ function create(): Adapter {
       set.loss_pct = Number(s.params.loss_pct ?? 0);
       expectDelay = range(s.params.expect_delay_ms);
       expectLoss = range(s.params.expect_loss_pct);
+      checkDelay = s.params.check_delay === true;
+      checkLoss = s.params.check_loss === true;
+      hitMag = Number(s.params.hit_mag ?? 5);
 
       link = new BoardLink({
         port: 0,
@@ -102,6 +113,7 @@ function create(): Adapter {
         events: {
           quake: (e: QuakeEvent) => {
             quakeIds.push(e.id);
+            quakeMags.push(e.mag);
             ctx.emit({ kind: "event", name: "quake_arrived", data: { zone: e.zone, mag: e.mag, src: e.src } });
           },
           link: (up: boolean) => ctx.emit({ kind: "event", name: up ? "board_connected" : "board_lost" }),
@@ -140,9 +152,9 @@ function create(): Adapter {
         }
       } else if (name === "hit") {
         const zone = Math.max(0, Math.min(8, Math.round(Number(value ?? 4))));
-        emu.hit(5, zone);
+        emu.hit(hitMag, zone);
         hitsSent++;
-        ctx.emit({ kind: "event", name: "hit_sent", data: { zone } });
+        ctx.emit({ kind: "event", name: "hit_sent", data: { zone, mag: hitMag } });
       }
     },
 
@@ -165,6 +177,20 @@ function create(): Adapter {
       if (expectDelay) {
         const avg = delays.length ? delays.reduce((a, b) => a + b, 0) / delays.length : NaN;
         ctx.emit({ kind: "check", name: `measured delay ${expectDelay[0]}–${expectDelay[1]} ms`, ok: avg >= expectDelay[0] && avg <= expectDelay[1], detail: `${avg.toFixed(1)} ms` });
+      }
+      if (hitsSent && quakeMags.length) {
+        const off = Math.max(...quakeMags.map((m) => Math.abs(m - hitMag)));
+        ctx.emit({ kind: "check", name: "hit strength arrives unchanged", ok: off < 0.05, detail: `sent ${hitMag}, arrived ${[...new Set(quakeMags.map((m) => m.toFixed(1)))].join(", ")}` });
+      }
+      if (checkDelay) {
+        const avg = delays.length ? delays.reduce((a, b) => a + b, 0) / delays.length : NaN;
+        const tol = 15 + 0.25 * set.delay_ms + set.jitter_ms / 2;
+        ctx.emit({ kind: "check", name: "measured delay near the set delay", ok: Math.abs(avg - set.delay_ms) <= tol, detail: `set ${set.delay_ms} ms, measured ${avg.toFixed(1)} ms (±${tol.toFixed(0)})` });
+      }
+      if (checkLoss) {
+        const loss = lossPct(seqs);
+        const tol = 3 + 0.4 * set.loss_pct + (set.jitter_ms > 0 ? 8 : 0);
+        ctx.emit({ kind: "check", name: "state loss near the set loss", ok: Math.abs(loss - set.loss_pct) <= tol, detail: `set ${set.loss_pct} %, measured ${loss.toFixed(1)} % (±${tol.toFixed(0)})` });
       }
       if (expectLoss) {
         const loss = lossPct(seqs);

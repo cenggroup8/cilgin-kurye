@@ -1,7 +1,13 @@
 module: M6
 title: "M6-1 link: 30 % of the board states lost, the link stays"
 seconds: 12
-params: { part: link, state_hz: 30, loss_pct: 30 }
+params: { part: link, state_hz: 30, loss_pct: 30, phase: 2 }
+edit:
+  - { name: state_hz, type: select, label: "Saniyede tahta durumu", options: [10, 20, 30] }
+  - { name: loss_pct, type: slider, label: "Durum kaybı (%)", min: 0, max: 60, step: 10 }
+  - { name: phase, type: select, label: "Oyun aşaması (0 lobi … 4 bitiş)", options: [0, 1, 2, 3, 4] }
+  - { name: players, type: slider, label: "Sahte oyuncu sayısı", min: 1, max: 8, step: 1, start: 1 }
+  - { name: speed_mps, type: slider, label: "Motor hızı (m/s)", min: 1, max: 20, step: 1, start: 8 }
 expect: ["board connects", "board takes the states", "earthquake event arrives once", "no bad messages", "board program ends connected"]
 fake: "M2 yerine konsolun sahte sunucusu (yalnız contracts/board_protocol.md'den yazıldı, M2 kodu yok). M1 yerine sahte oyun: bir motor doğuya gidiyor; tahtadan vuruş gelince 2 s deprem ve titreşim."
 result: "Tahta sunucuyu bulur, saniyede ~30 durum alır, motor doğuya ilerler (u artar); 5. saniyedeki vuruş tek deprem olayı olur, titreşimler ulaşır, kötü mesaj yoktur."

@@ -87,6 +87,9 @@ export function commandAdapter(opts: CommandOptions): Adapter {
       // PORT is the setting of the bench page; demos (M2) read PORT too, so it must not reach them.
       delete env.PORT;
       Object.assign(env, opts.env);
+      // A knob the demo already reads (for example STEP_SECONDS of demo:board) gets the param
+      // value of this run (scenario env:, values changed on the page included).
+      for (const [k, p] of Object.entries(s.env ?? {})) if (s.params[p] !== undefined) env[k] = String(s.params[p]);
       for (const [k, v] of Object.entries(s.params)) env[`BENCH_${k.toUpperCase().replace(/[^A-Z0-9]/g, "_")}`] = String(v);
       if (s.seconds !== null) env.BENCH_SECONDS = String(s.seconds);
       const shell = opts.args === undefined;

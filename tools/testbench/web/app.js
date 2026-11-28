@@ -42,7 +42,7 @@ function on(m) {
       autoStart();
       break;
     case "about":
-      if (chosen && chosen.id === m.id && chosen.scenario === m.scenario) renderSources($("src-box"), m.provenance);
+      if (chosen && chosen.id === m.id && chosen.scenario === m.scenario) renderSources($("src-box"), m.provenance, null);
       break;
     case "started":
       started(m);
@@ -155,7 +155,7 @@ function table(rows, side) {
 }
 
 /** m: module, s: scenario (or the head of a replay), prov: known provenance (or null: asked) */
-function renderAbout(m, s, prov) {
+function renderAbout(m, s, prov, changes) {
   const box = $("about");
   box.replaceChildren();
   box.hidden = false;
@@ -193,13 +193,62 @@ function renderAbout(m, s, prov) {
     k.append(el("div", "lbl", "Çalışan komut"), el("span", "cmd", `${s.run.cwd} $ ${s.run.cmd}`));
     c.append(k);
   }
+  // The inputs a person may change before Başlat (edit: of the scenario), inside their bounds.
+  const form = new Map();
+  if (s.edit?.length && !head) {
+    const g = el("div", "edit");
+    const top = el("div", "lbl", "Girdiler — Başlat'tan önce değiştirilebilir");
+    g.append(top);
+    const row = el("div", "edit-row");
+    for (const e of s.edit) {
+      const d = el("label", "inp");
+      d.append(el("span", null, e.label));
+      const r = el("div", "row");
+      const start = s.params?.[e.name] ?? e.start;
+      if (e.type === "slider") {
+        const inp = Object.assign(document.createElement("input"), { type: "range", min: e.min, max: e.max, step: e.step, value: start });
+        const o = el("output", null, fmt(Number(start)));
+        inp.oninput = () => {
+          o.textContent = fmt(Number(inp.value));
+          d.classList.toggle("changed", String(Number(inp.value)) !== String(start));
+        };
+        form.set(e.name, () => Number(inp.value));
+        r.append(inp, o, el("span", "range", `${fmt(e.min)} … ${fmt(e.max)}`));
+        d.reset = () => {
+          inp.value = start;
+          inp.oninput();
+        };
+      } else {
+        const sel = document.createElement("select");
+        for (const v of e.options) sel.append(Object.assign(document.createElement("option"), { value: String(v), textContent: String(v) }));
+        sel.value = String(start);
+        sel.onchange = () => d.classList.toggle("changed", sel.value !== String(start));
+        form.set(e.name, () => (typeof e.options[0] === "number" ? Number(sel.value) : sel.value));
+        r.append(sel);
+        d.reset = () => {
+          sel.value = String(start);
+          sel.onchange();
+        };
+      }
+      d.append(r);
+      row.append(d);
+    }
+    g.append(row);
+    const reset = el("button", "link", "varsayılan değerler");
+    reset.onclick = () => row.querySelectorAll(".inp").forEach((x) => x.reset?.());
+    g.append(reset);
+    c.append(g);
+  } else if (s.run && !head) {
+    c.append(el("p", "note", "Bu demonun girdileri kendi dosyasında yazılı; konsol modül koduna dokunmadığı için buradan değiştirilemez. Çalıştırıp çıktısını gösterir."));
+  }
   if (!head) {
     const sr = el("div", "startrow");
     const b = el("button", "start", "Başlat");
     b.disabled = s.state !== "ready";
     b.onclick = () => {
       showError("");
-      send({ op: "start", id: chosen.id, scenario: chosen.scenario });
+      const values = Object.fromEntries([...form].map(([k, get]) => [k, get()]));
+      send({ op: "start", id: chosen.id, scenario: chosen.scenario, values });
     };
     sr.append(b);
     if (s.state !== "ready") sr.append(el("span", "why", `${STATE[s.state] ?? s.state}: ${s.why ?? ""}`));
@@ -211,11 +260,11 @@ function renderAbout(m, s, prov) {
   const src = el("section", "card src");
   src.id = "src-box";
   box.append(src);
-  if (prov) renderSources(src, prov);
+  if (prov) renderSources(src, prov, changes);
   else src.append(el("h2", null, "Veriler nereden geliyor?"), el("p", "empty", "dosyalar okunuyor …"));
 }
 
-function renderSources(box, p) {
+function renderSources(box, p, changes) {
   if (!box) return;
   box.replaceChildren();
   const h = el("h2", null, "Veriler nereden geliyor?");
@@ -251,6 +300,13 @@ function renderSources(box, p) {
     t.append(tr);
   }
   box.append(t);
+  if (changes?.length) {
+    const c = el("div", "changes");
+    c.append(el("b", null, "Bu çalıştırmada değiştirilen girdiler: "));
+    c.append(el("span", null, changes.map((x) => `${x.name} ${x.from} → ${x.to}`).join(" · ")));
+    c.append(el("div", "note", "Senaryo dosyasındaki değer değişmedi; yeni değer yalnız bu çalıştırmada kullanıldı ve kayda yazıldı."));
+    box.append(c);
+  }
   box.append(el("div", "foot", "Her çalıştırma bu listeyle birlikte runs/ klasörüne kaydedilir; kayıt sonradan açıldığında aynı liste görünür."));
 }
 
@@ -278,7 +334,7 @@ async function started(m) {
   renderInputs(m.inputs ?? [], !!m.replay);
   const mod = findModule(m.id);
   const sc = findScenario(m.id, m.scenario) ?? { title: m.title, run: m.run, fake: m.fake, result: m.result, expect: m.expect };
-  renderAbout(mod, { ...sc, fake: m.fake ?? sc.fake, result: m.result ?? sc.result }, m.provenance ?? null);
+  renderAbout(mod, { ...sc, fake: m.fake ?? sc.fake, result: m.result ?? sc.result }, m.provenance ?? null, m.changes);
   markActive();
 
   for (const v of custom) v.end?.();
@@ -332,7 +388,7 @@ function ended(result) {
     head = null;
     const m = findModule(h.id);
     const s = findScenario(h.id, h.scenario);
-    if (m && s) renderAbout(m, s, h.provenance ?? null);
+    if (m && s) renderAbout(m, s, h.provenance ?? null, h.changes);
     head = h;
   }
 }

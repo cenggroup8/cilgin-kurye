@@ -14,3 +14,8 @@ files:
   - M2-network/test/fakes/botPhone.ts
 fake: Sahte M1 oyun durumu üretiyor, 8 bot telefon dinliyor (10 s).
 result: Her bot her tick'in durumunu alıyor, kayıp yok; ping ve kare hızı ölçülüyor.
+params: { demo_seconds: 10, ping_delay_ms: 0 }
+edit:
+  - { name: demo_seconds, type: slider, label: "Süre (s)", min: 5, max: 60, step: 5 }
+  - { name: ping_delay_ms, type: slider, label: "Ping cevabına eklenen gecikme (ms)", min: 0, max: 500, step: 10 }
+env: { DEMO_SECONDS: demo_seconds, PING_DELAY_MS: ping_delay_ms }   # read by src/demo-broadcast.ts

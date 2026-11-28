@@ -15,3 +15,7 @@ files:
 fake: Gerçek tahta yerine tahta emülatörü; arada eklenen gecikme ve kayıp.
 result: Dört adım (temiz → 80 ms gecikme → %30 kayıp → temiz); her adımda titreşim komutu ve el vuruşu tam bir kez
   ulaşıyor, ölçülen gecikme ve kayıp raporda.
+params: { step_seconds: 5 }
+edit:
+  - { name: step_seconds, type: slider, label: "Her adımın süresi (s)", min: 3, max: 30, step: 1 }
+env: { STEP_SECONDS: step_seconds }   # the demo already reads STEP_SECONDS (src/demo-board.ts)

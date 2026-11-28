@@ -16,3 +16,7 @@ fake: 6 normal bot telefon ve her tür bozuk mesajı gönderen 2 bağlantı (Mes
   oyuncunun kontrolü, çok büyük, eski sıra numarası, sel).
 result: Bozuk mesajların hiçbiri M1'e ulaşmıyor, iyi botların her "Beni bul" isteği ulaşıyor; rapor sonunda bütün
   kontroller geçiyor.
+params: { demo_seconds: 10 }
+edit:
+  - { name: demo_seconds, type: slider, label: "Süre (s)", min: 5, max: 60, step: 5 }
+env: { DEMO_SECONDS: demo_seconds }   # read by src/demo-checks.ts

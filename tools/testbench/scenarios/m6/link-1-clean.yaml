@@ -1,7 +1,13 @@
 module: M6
 title: "M6-1 link: board program finds the fake server, 30 states/s, hand hit at 5 s"
 seconds: 12
-params: { part: link, state_hz: 30, loss_pct: 0 }
+params: { part: link, state_hz: 30, loss_pct: 0, phase: 2 }
+edit:
+  - { name: state_hz, type: select, label: "Saniyede tahta durumu", options: [10, 20, 30] }
+  - { name: loss_pct, type: slider, label: "Durum kaybı (%)", min: 0, max: 60, step: 10 }
+  - { name: phase, type: select, label: "Oyun aşaması (0 lobi … 4 bitiş)", options: [0, 1, 2, 3, 4] }
+  - { name: players, type: slider, label: "Sahte oyuncu sayısı", min: 1, max: 8, step: 1, start: 1 }
+  - { name: speed_mps, type: slider, label: "Motor hızı (m/s)", min: 1, max: 20, step: 1, start: 8 }
 script:
   - { at: 8, input: vibrate }
 expect: ["board program builds", "board connects", "board takes the states", "motorcycle drives east (u grows)",

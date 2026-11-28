@@ -4,7 +4,8 @@
 //   npm run bench -- m2 loss30                one scenario (name or a part of it)
 //   npm run bench -- all                      every timed scenario of every ready module
 //   npm run bench -- replay runs/<file>       the checks of a saved run
-// Options: --seconds N (also runs a live scenario), --no-save, --verbose (logs and every metric).
+// Options: --seconds N (also runs a live scenario), --no-save, --verbose (logs and every metric),
+//          --set name=value (a param listed in edit: of the scenario, inside its bounds; repeatable).
 // Exit code 0 only when every scenario that ran has passed.
 import { readFileSync } from "node:fs";
 import type { AdapterModule } from "./adapter.js";
@@ -12,7 +13,7 @@ import { adapterFor, catalog, moduleEntry, type ModuleEntry } from "./catalog.js
 import { MODULES, moduleById } from "./modules.js";
 import type { Rec } from "./record.js";
 import { Run, type Result } from "./runner.js";
-import type { Scenario } from "./scenario.js";
+import { withChanges, type Scenario } from "./scenario.js";
 
 const tty = process.stdout.isTTY;
 const c = (code: string) => (s: string) => (tty ? `\x1b[${code}m${s}\x1b[0m` : s);
@@ -25,12 +26,17 @@ const NO = red("✘");
 
 function args() {
   const a = process.argv.slice(2);
-  const flags = { save: true, verbose: false, seconds: undefined as number | undefined };
+  const flags = { save: true, verbose: false, seconds: undefined as number | undefined, set: {} as Record<string, string> };
   const rest: string[] = [];
   for (let i = 0; i < a.length; i++) {
     if (a[i] === "--no-save") flags.save = false;
     else if (a[i] === "--verbose" || a[i] === "-v") flags.verbose = true;
     else if (a[i] === "--seconds") flags.seconds = Number(a[++i]);
+    else if (a[i] === "--set") {
+      const [k, ...v] = String(a[++i] ?? "").split("=");
+      if (!k || !v.length) throw new Error("--set needs name=value, for example --set loss_pct=50");
+      flags.set[k] = v.join("=");
+    }
     else rest.push(a[i]);
   }
   if (flags.seconds !== undefined && !(flags.seconds > 0)) throw new Error("--seconds needs a number > 0");
@@ -66,7 +72,10 @@ async function runOne(a: AdapterModule, s: Scenario, flags: ReturnType<typeof ar
       if (flags.verbose) console.log(`${t}   ${r.name} = ${fmt(r.value)}${r.unit ? ` ${r.unit}` : ""}`);
     } else if (flags.verbose || r.text.startsWith("bench:")) console.log(`${t} ${grey(r.text)}`);
   };
-  const run = new Run(s, a.create(), { onRec, save: flags.save, seconds: flags.seconds });
+  const w = withChanges(s, flags.set);
+  if (typeof w === "string") throw new Error(`${s.module} ${s.name}: ${w}`);
+  for (const ch of w.changes) console.log(grey(`   changed: ${ch.name} ${ch.from} → ${ch.to}`));
+  const run = new Run(w.scenario, a.create(), { onRec, save: flags.save, seconds: flags.seconds, changes: w.changes });
   const show = flags.verbose
     ? null
     : setInterval(() => {

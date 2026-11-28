@@ -114,6 +114,26 @@ views: [board]            # module views (below), optional
 
 A file name starting with a number keeps the order on the page (`1-clean`, `2-delay80`).
 
+**Inputs a person may change before Başlat** (the teacher makes a value bigger or smaller):
+
+```yaml
+params: { loss_pct: 30, check_loss: true }
+edit:
+  - { name: loss_pct, type: slider, label: "Kayıp (%)", min: 0, max: 50, step: 5 }
+  - { name: state_hz, type: select, label: "Durum / s", options: [10, 20, 30] }
+  - { param: board.max_ma }          # bounds from the M1-5 list
+```
+
+The card shows these as a form. Only these params can change, only inside their bounds
+(the server refuses other values). The scenario file stays as it is; the new values are used
+for that run only and saved with it (`changes`), and "Veriler nereden geliyor?" lists them.
+Checks must follow the value that was set (for example "state loss near the set loss"), not a
+fixed range. Terminal: `npm run bench -- m2 loss30 --set loss_pct=45`.
+
+A command scenario can map a param to an environment variable **that the demo already reads**
+(`env: { STEP_SECONDS: step_seconds }`), so it can be changed without touching the demo.
+Other command demos keep their inputs in their own files: the bench does not change module code.
+
 **An existing demo or test, without an adapter.** A scenario with `run:` only runs a command
 until it ends (5 minutes at most). Its `✓ / ✗` lines are the checks, and its exit code is the
 check "program ends without error":

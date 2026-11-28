@@ -161,3 +161,10 @@ table.t .from { color: var(--ink-2); white-space: nowrap; }
 .scn.st-off { opacity: .55; }
 .scn .tag { font-size: 11px; color: var(--ink-2); margin-left: 4px; }
 @media (max-width: 900px) { .io, .scn-card .row2 { grid-template-columns: 1fr; } }
+
+.edit { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--grid); }
+.edit-row { display: flex; flex-wrap: wrap; gap: 10px 26px; margin: 6px 0; }
+.edit .inp.changed span:first-child { color: var(--accent); font-weight: 600; }
+.edit .range { font-size: 11px; color: var(--ink-2); }
+button.link { border: 0; background: none; color: var(--accent); padding: 0; cursor: pointer; font-size: 12px; }
+.changes { margin-top: 10px; padding: 8px 10px; border: 1px solid var(--accent); border-radius: 8px; font-size: 13px; }

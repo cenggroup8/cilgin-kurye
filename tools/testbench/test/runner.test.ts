@@ -8,7 +8,7 @@ import type { Scenario } from "../src/scenario.js";
 
 const scenario = (over: Partial<Scenario> = {}): Scenario => ({
   module: "M9", id: "m9", name: "t", title: "t", seconds: 0.3, params: {}, inputs: [], script: [], expect: [], views: [], file: "",
-  run: null, install: [], needs: [], pr: null, tool: null, files: [], fake: null, result: null, untilExit: false, sources: [], ...over,
+  run: null, install: [], needs: [], pr: null, tool: null, files: [], fake: null, result: null, untilExit: false, sources: [], edit: [], env: {}, ...over,
 });
 
 function fake(onInput?: (n: string, v: unknown) => void): Adapter {

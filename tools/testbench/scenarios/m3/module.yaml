@@ -1,0 +1,32 @@
+# What the module takes and gives (v2.1 tables), shown on the page. From #108 (Muhib).
+name: Fizik, trafik ve yapay zekâ
+team: Abdullatif, Hasan Alperen, Batuhan, Selim, Muhib
+doc: docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.md (bölüm 7)
+summary: Motosiklet hareketi, çarpışma ve düşme, engel ve deprem etkisi, telefonda tahmin; rotalar ve süre tablosu, NPC
+  trafiği, botlar. Ağ kodu yok, sadece M1 ile düz veri alışverişi.
+inputs:
+  - data: Şehir planı
+    from: ortak dosya
+    content: yollar, şeritler, kavşaklar, binalar, mağazalar
+  - data: Kontroller
+    from: M1
+    content: her tick gaz, fren, direksiyon (insan ve bot), hız çarpanı
+  - data: Oyun verisi
+    from: M1
+    content: oyuncular, engeller (tip, segment, şerit, konum), deprem alanı, düşen motorlar
+  - data: Parametreler
+    from: M5 → M1
+    content: üst hız, tutuş, düşme hızı, NPC sayısı ve hızı, yoğun trafik etkisi, bot becerisi
+outputs:
+  - data: Pozlar ve olaylar
+    to: M1
+    content: konum, yön, hız, eğim, kayma, düşme; çarpma ve düşme olayları
+  - data: NPC arabalar
+    to: M1 → M4, M5
+    content: konum, yön, hız, şerit, boyut
+  - data: Bot kontrolleri ve süre tablosu
+    to: M1
+    content: telefonla aynı kontrol kaydı; her mağazadan her teslimat noktasına saniye
+  - data: Trafik metrikleri
+    to: M1 → M5
+    content: NPC sayısı, ortalama hız, bot rota değişimi

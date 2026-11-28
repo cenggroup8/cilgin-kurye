@@ -1,0 +1,25 @@
+# What the module takes and gives (v2.1 tables), shown on the page. From #108 (Muhib).
+name: Admin paneli ve izleme
+team: Batuhan, Hasan Hüseyin, Berk, Ayşe
+doc: docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.md (bölüm 9)
+summary: Canlı parametreler, harita ve engel araçları, deprem paneli, grafikler.
+inputs:
+  - data: Oyun durumu
+    from: M1 → M2
+    content: saniyede 10, canlı harita için
+  - data: Metrikler
+    from: M1 → M2
+    content: puanlar, süreler, hızlar, düşmeler, trafik, ping, kayıp, kare hızı, tahta gecikmesi
+  - data: Parametreler, cevaplar
+    from: M1 → M2
+    content: her parametre değeri ve sınırlarıyla, her komuta ok ya da hata
+  - data: Tahta verisi
+    from: M6 → M2
+    content: sensör verisi, tahta durumu, deprem olayları
+outputs:
+  - data: Komutlar
+    to: M2 → M1
+    content: parametre değişikliği, başlat, duraklat, bitir, sıfırla, engel, deprem
+  - data: Dosyalar
+    to: admin
+    content: grafik verisi CSV, oyun kaydı

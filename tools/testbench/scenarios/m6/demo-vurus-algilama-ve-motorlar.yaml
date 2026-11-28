@@ -1,0 +1,14 @@
+# An existing demo or test, run as a command. From #108 (Muhib).
+module: M6
+title: Vuruş algılama ve motorlar (M6-2)
+run:
+  cwd: M6-led-board/firmware/test
+  cmd: make test
+needs:
+  - M6-led-board/firmware/test/test_quake.cpp
+files:
+  - M6-led-board/firmware/src/quake/
+  - M6-led-board/firmware/test/sim_board.h
+tool: make
+fake: "Simüle tahta: sessiz ve gürültülü masa, 9 bölgeye 40'ar vuruş, motor sarsıntısı."
+result: 1900 kontrol geçer; bölge doğru ya da komşu, motorlar ikinci deprem başlatmıyor.

@@ -1,0 +1,14 @@
+# An existing demo or test, run as a command. From #108 (Muhib).
+module: M2
+title: M2 testleri
+run:
+  cwd: M2-network
+  cmd: npm test
+install:
+  - M2-network
+needs:
+  - M2-network/package.json
+files:
+  - M2-network/test/fakes/
+fake: Sahte M1, bot telefonlar, tahta emülatörü, gerçek soketler bu bilgisayarda.
+result: Bütün testler geçer (yaklaşık 30 s).

@@ -1,0 +1,13 @@
+# An existing demo or test, run as a command. From #108 (Muhib).
+module: M3
+title: Motosiklet modeli ve tahminci (M3-1)
+run:
+  cwd: M3-physics-traffic
+  cmd: npm test
+needs:
+  - M3-physics-traffic/src/physics/bike/model.ts
+files:
+  - M3-physics-traffic/test/fakes/fakeM1.ts
+pr: "#69"
+fake: "Sahte M1: senaryolu kontroller ve engeller."
+result: Düz gidiş, fren, U dönüşü, kayma ve tahminci testleri geçer.

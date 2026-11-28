@@ -1,0 +1,11 @@
+# An existing demo or test, run as a command. From #108 (Muhib).
+module: M5
+title: İletişim yöneticisi ve üst çubuk (M5-1)
+run:
+  cwd: M5-admin-panel
+  cmd: npm test
+needs:
+  - M5-admin-panel/package.json
+pr: "#73"
+fake: Sahte sunucu.
+result: Bağlanma, snapshot, komut gönderme.

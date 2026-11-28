@@ -1,0 +1,21 @@
+module: M2
+title: "80 ms delay, ±20 ms jitter (server → board)"
+seconds: 10
+params: { delay_ms: 80, jitter_ms: 20, loss_pct: 0, check_delay: true }
+edit:
+  - { name: delay_ms, type: slider, label: "Gecikme sunucu → tahta (ms)", min: 0, max: 300, step: 10 }
+  - { name: jitter_ms, type: slider, label: "Jitter (ms)", min: 0, max: 50, step: 10 }
+  - { name: loss_pct, type: slider, label: "Kayıp, iki yönde (%)", min: 0, max: 50, step: 5 }
+  - { name: hit_mag, type: slider, label: "Tahtadaki vuruşun gücü (0–10)", min: 1, max: 10, step: 0.5, start: 5 }
+script:
+  - { at: 3, input: vibrate }
+  - { at: 4, input: hit, value: 2 }
+expect: ["link stays connected", "vibrate arrives once", "earthquake event arrives once", "measured delay near the set delay"]
+fake: "Gerçek tahta yerine M2'nin sahte tahtası (boardEmu). M1 yerine sabit bir sahte oyun durumu: ortada bir bot, 12. yolda yol çalışması."
+result: "Ayarlanan gecikme ölçülen gecikmede görünür; kayıpta durumlar kaybolur ama titreşim ve deprem olayı tam bir kez ulaşır; bağlantı kopmaz."
+sources:
+  - { file: M2-network/src/board/boardLink.ts, role: code, note: "test edilen kod: M2-4 tahta bağlantısı" }
+  - { file: M2-network/src/board/codec.ts, role: code, note: "mesajların baytları" }
+  - { file: M2-network/src/netem/netem.ts, role: code, note: "gecikme, jitter ve kayıp ekleyen ağ emülatörü" }
+  - { file: M2-network/test/fakes/boardEmu.ts, role: fake, note: "tahtanın yerine geçen sahte tahta" }
+  - { file: contracts/board_protocol.md, role: contract, note: "M2 ile M6 arasındaki mesajlar" }

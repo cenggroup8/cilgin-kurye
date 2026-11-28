@@ -1,0 +1,17 @@
+# An existing demo or test, run as a command. From #108 (Muhib).
+module: M2
+title: Web sunucusu ve katılım (M2-1)
+run:
+  cwd: M2-network
+  cmd: npm run demo:bots
+install:
+  - M2-network
+needs:
+  - M2-network/src/demo.ts
+files:
+  - M2-network/src/server.ts
+  - M2-network/test/fakes/fakeM1.ts
+  - M2-network/test/fakes/botPhone.ts
+fake: Gerçek telefon yerine bot telefonlar, M1 yerine sahte M1.
+result: Botlar oyun koduyla katılıyor, biri kopuyor ve geri dönüyor; sahte M1 join, lost ve returned olaylarını alıyor;
+  demo kendisi bitiyor.

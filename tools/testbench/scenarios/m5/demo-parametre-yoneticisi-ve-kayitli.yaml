@@ -1,0 +1,13 @@
+# An existing demo or test, run as a command. From #108 (Muhib).
+module: M5
+title: Parametre yöneticisi ve kayıtlı oyunlu sahte sunucu (M5-2)
+run:
+  cwd: M5-admin-panel
+  cmd: npm run fake-server
+needs:
+  - M5-admin-panel/test/fake-server/fakeServer.ts
+files:
+  - M5-admin-panel/test/fake-server/fakeServer.ts
+pr: "#83"
+fake: Kayıtlı bir oyunu oynatan sahte sunucu.
+result: Formlar M1-5 parametre listesinden kuruluyor; değişiklikler cevap alıyor.

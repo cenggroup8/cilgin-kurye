@@ -1,0 +1,19 @@
+# An existing demo or test, run as a command. From #108 (Muhib).
+module: M3
+title: NPC trafiği demosu (M3-4)
+run:
+  cwd: M3-physics-traffic
+  cmd: npm run demo:npc
+install:
+  - M3-physics-traffic
+needs:
+  - M3-physics-traffic/src/traffic/npc/npcTraffic.ts
+files:
+  - M3-physics-traffic/src/traffic/npc/npcTraffic.ts
+  - M3-physics-traffic/debug/npc-demo.ts
+  - M3-physics-traffic/test/fakes/fakeRoadGraph.ts
+pr: "#65"
+fake: Sahte 6 × 6 şehir; iki motor mağazalarda bekliyor; admin araba sayısını 60 → 120 → 40 yapıyor; 60. saniyede yol
+  çalışması ve yoğun trafik engeli.
+result: "Her 5 saniyede araba sayısı ve ortalama hız: sayı birkaç saniyede yeni değere geliyor, yoğun trafik +4 araba
+  ekliyor, sadece kapanan yolda kalan arabalar kaldırılıyor; sonunda şehrin haritası."

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Çılgın Kurye — test konsolu</title>
+  <link rel="stylesheet" href="/vendor/uPlot.css">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <div class="brand">Çılgın Kurye <span>test konsolu</span></div>
+    <div id="now" class="now">Soldan bir modül ve senaryo seçin</div>
+    <div class="right">
+      <span id="clock" class="clock"></span>
+      <span id="state" class="pill idle">bekliyor</span>
+      <button id="stop" class="stop" disabled>Durdur</button>
+      <span id="conn" class="conn" title="konsol sunucusuyla bağlantı"></span>
+    </div>
+  </header>
+  <div class="layout">
+    <nav id="side">
+      <div id="modules"></div>
+      <h3>Kayıtlı çalıştırmalar</h3>
+      <div class="replay-speed">
+        <label>Tekrar hızı
+          <select id="speed"><option value="1">1×</option><option value="2">2×</option><option value="5">5×</option><option value="0">hemen</option></select>
+        </label>
+      </div>
+      <div id="runs" class="runs"></div>
+    </nav>
+    <main>
+      <section id="about" class="about" hidden></section>
+      <section id="inputs" class="inputs" hidden></section>
+      <section id="error" class="error" hidden></section>
+      <div id="results" class="results" hidden>
+        <div class="top">
+          <section class="card checks-card">
+            <h2>Kontroller <span id="verdict"></span></h2>
+            <ul id="checks" class="checks"></ul>
+          </section>
+          <section id="custom" class="custom"></section>
+        </div>
+        <section id="charts" class="charts"></section>
+        <section class="card">
+          <h2>Olaylar</h2>
+          <div id="timeline" class="timeline"></div>
+        </section>
+        <details class="card log-card" id="logbox">
+          <summary>Çıktı <span id="logcount"></span></summary>
+          <pre id="log" class="log"></pre>
+        </details>
+      </div>
+    </main>
+  </div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

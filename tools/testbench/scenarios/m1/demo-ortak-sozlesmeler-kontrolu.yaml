@@ -1,0 +1,17 @@
+# An existing demo or test, run as a command. From #108 (Muhib).
+module: M1
+title: Ortak sözleşmeler kontrolü (şehir planı ve tahta mesajları)
+run:
+  cwd: tools/contracts
+  cmd: npm run check
+install:
+  - tools/contracts
+needs:
+  - tools/contracts/check-contracts.mjs
+files:
+  - contracts/city_plan.json
+  - contracts/board_protocol_vectors.json
+  - tools/contracts/check-contracts.mjs
+fake: "Sahte veri yok: modüllerin ortak kullandığı dosyalar kontrol ediliyor."
+result: '"Contracts OK": kimlikler ve geometri doğru, binalar yolda değil, 10 örnek mesaj aynı baytlara kodlanıp geri
+  çözülüyor.'

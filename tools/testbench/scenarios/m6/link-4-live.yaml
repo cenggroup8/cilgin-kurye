@@ -1,0 +1,19 @@
+module: M6
+title: "M6-1 link, live: rate, loss, vibrate and server restart by hand"
+params: { part: link, state_hz: 30, loss_pct: 0, phase: 2 }
+inputs:
+  - { name: state_hz, type: select, label: "Board states per second", options: [10, 20, 30], start: 30 }
+  - { name: loss_pct, type: slider, label: "State loss (%)", min: 0, max: 60, step: 10 }
+  - { name: phase, type: select, label: "Phase", options: [lobby, countdown, game, pause, end], start: game }
+  - { name: vibrate, type: button, label: "Vibrate all motors" }
+  - { name: restart, type: button, label: "Restart the server" }
+expect: ["board connects", "no bad messages"]
+fake: "M2 yerine konsolun sahte sunucusu (yalnız contracts/board_protocol.md'den yazıldı, M2 kodu yok). M1 yerine sahte oyun: bir motor doğuya gidiyor; tahtadan vuruş gelince 2 s deprem ve titreşim."
+result: "Tahta sunucuyu bulur, saniyede ~30 durum alır, motor doğuya ilerler (u artar); 5. saniyedeki vuruş tek deprem olayı olur, titreşimler ulaşır, kötü mesaj yoktur."
+sources:
+  - { file: M6-led-board/firmware/src/link/link.cpp, role: code, note: "test edilen kod: tahta programının bağlantı kısmı (C++)" }
+  - { file: M6-led-board/firmware/src/link/protocol.cpp, role: code, note: "mesajları okuma ve yazma" }
+  - { file: M6-led-board/firmware/test/link/demo_board.cpp, role: test, note: "bağlantı kodunu PC soketleriyle çalıştıran program" }
+  - { file: tools/testbench/fakes/boardServer.ts, role: fake, note: "M2'nin yerine geçen sahte sunucu" }
+  - { file: contracts/board_protocol.md, role: contract, note: "M2 ile M6 arasındaki mesajlar" }
+  - { file: contracts/board_protocol_vectors.json, role: contract, note: "sahte sunucu bu 10 örnekle bayt bayt aynı (test)" }

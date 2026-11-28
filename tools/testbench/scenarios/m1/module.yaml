@@ -1,0 +1,35 @@
+# What the module takes and gives (v2.1 tables), shown on the page. From #108 (Muhib).
+name: Oyun sunucusu ve kurallar
+team: Berk, Tuğberk, Abdullatif, Selim, Umutcan
+doc: docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.md (bölüm 5)
+summary: "Tek otorite: oyun döngüsü, maç ve lobi, teslimat ve puan, engeller ve düşme cezası, admin komutları ve
+  parametreler. Oyun durumunu yalnızca M1 değiştirir."
+inputs:
+  - data: Kontroller
+    from: M2, telefonlardan
+    content: gaz ve fren 0–1, direksiyon −1..1, kontrol numarası; "Beni bul" olayı
+  - data: Katılım
+    from: M2, telefonlardan
+    content: oyuncu anahtarı, ad, takım; kopan ve geri gelen oyuncu
+  - data: Admin komutları
+    from: M2, adminden
+    content: parametre değişikliği, başlat, duraklat, bitir, sıfırla, engel, deprem
+  - data: Tahta olayları
+    from: M2, tahtadan
+    content: kaynak (el ya da motor), güç 0–10, merkez, bölge, güven
+  - data: Trafik ve fizik
+    from: M3
+    content: NPC arabalar, bot kontrolleri, süre tablosu, motor pozları, çarpma ve düşme olayları
+outputs:
+  - data: Oyun durumu
+    to: M2 → telefonlar ve admin
+    content: "her tick: aşama, süre, puanlar, oyuncular, NPC arabalar, engeller, deprem, pusula hedefi"
+  - data: Tahta durumu
+    to: M2 → tahta
+    content: aşama, oyuncular, teslimat noktaları, engeller, deprem
+  - data: Metrikler
+    to: M2 → admin
+    content: saniyede iki kez bütün grafik değerleri
+  - data: Oyun kaydı
+    to: disk
+    content: seed ve her tick'in girdileri

@@ -7,8 +7,10 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit",
-    "demo:npc": "tsx debug/npc-demo.ts"
+    "typecheck": "tsc --noEmit && npm run typecheck:physics",
+    "typecheck:physics": "tsc -p tsconfig.physics.json",
+    "demo:npc": "tsx debug/npc-demo.ts",
+    "debug": "vite debug --port 5173 --strictPort"
   },
   "engines": {
     "node": ">=20"
@@ -17,6 +19,7 @@
     "@types/node": "^26.6.6",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
+    "vite": "^8.4.0",
     "vitest": "^5.1.1"
   }
 }

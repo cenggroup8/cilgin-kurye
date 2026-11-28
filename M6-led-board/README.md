@@ -47,8 +47,8 @@ Each part can be built and tested alone with test data, as the module document d
 ## M6-2 Hit detector and motor controller
 
 Code in `firmware/src/quake/`. It is plain C++17 with no Arduino headers (except
-`shield_pins_arduino.h`, built only for the board), so the same files run in the ESP32 program
-and in the PC tests.
+`shield_pins_arduino.h` and `i2c_arduino.h`, built only for the board), so the same files run in
+the ESP32 program and in the PC tests.
 
 | File | What it does |
 |---|---|
@@ -57,6 +57,8 @@ and in the PC tests.
 | `motor_controller.*` | Four motors with a soft start, a strength and time limit, and a stop at once when the link is lost |
 | `motor_shield.*` | Output to the bought motor shield (2 × L293D + 74HC595): one PWM speed pin per motor, the direction byte `0x27` once at start. Pins as in `hardware/pins_and_power.md` |
 | `shield_pins_arduino.h` | The shield's pin calls on the ESP32 (`pinMode`, `digitalWrite`, `ledcAttach`, `ledcWrite`); the PC tests use a fake |
+| `mpu6050.*` | Motion sensor driver (MPU-6050 on I2C, 0x68): 200 samples per second, ±16 g, ±500 °/s, its own filter at about 94 Hz; tries again about once a second when the sensor does not answer |
+| `i2c_arduino.h` | The sensor's I2C bus on the ESP32 (Wire, GPIO21/22, 400 kHz, short timeout); the PC tests use a fake |
 | `sample_batcher.h` | Sensor samples for the seismic graph: 100 per second in groups of 10, short peaks are kept |
 | `calibration.*` | Calibration values and their keys in the board settings (flash, changed over USB) |
 | `quake_unit.h` | Puts the parts together for the main loop. M6-1 gives the link state and sends the events and samples |

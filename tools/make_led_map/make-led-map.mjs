@@ -1,0 +1,153 @@
+// LED map of the board (M6-3, plan #28 section 3.2 "LED haritası").
+//
+// Reads contracts/city_plan.json and M6-led-board/hardware/strip_layout.json (M6-5) and writes
+//   M6-led-board/firmware/src/led/led_map_data.h   the table that goes into the build:
+//                                                  for every LED its chain, its index in the
+//                                                  chain, its road segment and place t on it
+//                                                  (or its store), and its board place u, v
+//
+// Run:   node tools/make_led_map/make-led-map.mjs          (writes the header)
+//        node tools/make_led_map/make-led-map.mjs --check  (fails if the header is old)
+// Node.js 20 or newer, no packages. Edit the strip layout or the city plan, not the header.
+
+import { readFileSync, writeFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+
+const root = fileURLToPath(new URL("../../", import.meta.url));
+export const OUT = "M6-led-board/firmware/src/led/led_map_data.h";
+
+/** Checks the two inputs against each other and returns the LED table in chain order. */
+export function buildMap(plan, layout) {
+  const errors = [];
+  const segments = new Map(plan.segments.map((s) => [s.id, s]));
+  const stores = new Map(plan.stores.map((s) => [s.team, s]));
+  const leds = [];
+  const seenSegments = new Set();
+  const seenStores = new Set();
+  const segmentInfo = [];
+  const chainLeds = [];
+
+  layout.chains.forEach((chain, c) => {
+    if (chain.id !== c) errors.push(`chain ${chain.name}: id ${chain.id} is not its place ${c}`);
+    let next = 0;
+    for (const piece of chain.pieces) {
+      if (piece.first !== next) errors.push(`chain ${chain.name}: piece starts at ${piece.first}, expected ${next}`);
+      if (piece.leds.length !== piece.count) errors.push(`chain ${chain.name}: piece at ${piece.first} has ${piece.leds.length} LEDs, count ${piece.count}`);
+      const global = leds.length;
+      if (piece.kind === "segment") {
+        const seg = segments.get(piece.segment);
+        if (!seg) errors.push(`unknown segment ${piece.segment}`);
+        else if (seg.name !== piece.name) errors.push(`segment ${piece.segment} is ${seg.name} in the city plan, ${piece.name} in the strip layout`);
+        if (seenSegments.has(piece.segment)) errors.push(`segment ${piece.segment} has two pieces`);
+        seenSegments.add(piece.segment);
+        if (piece.dir !== "a_to_b" && piece.dir !== "b_to_a") errors.push(`segment ${piece.segment}: bad dir ${piece.dir}`);
+        const ts = piece.leds.map((l) => l.t);
+        const rising = ts.every((t, i) => i === 0 || t > ts[i - 1]);
+        const falling = ts.every((t, i) => i === 0 || t < ts[i - 1]);
+        if ((piece.dir === "a_to_b" && !rising) || (piece.dir === "b_to_a" && !falling)) {
+          errors.push(`segment ${piece.segment}: LED order does not follow ${piece.dir}`);
+        }
+        segmentInfo[piece.segment] = { first: global, count: piece.count, reversed: piece.dir === "b_to_a" };
+        piece.leds.forEach((l, k) => {
+          if (!(l.t > 0 && l.t < 1)) errors.push(`segment ${piece.segment}: LED ${k} has t ${l.t}, outside the road`);
+          leds.push({ chain: c, index: piece.first + k, segment: piece.segment, store: -1, t: l.t, u: l.u, v: l.v });
+        });
+      } else if (piece.kind === "store") {
+        if (!stores.has(piece.team)) errors.push(`unknown store of team ${piece.team}`);
+        if (seenStores.has(piece.team)) errors.push(`store ${piece.team} has two pieces`);
+        seenStores.add(piece.team);
+        piece.leds.forEach((l, k) => {
+          leds.push({ chain: c, index: piece.first + k, segment: -1, store: piece.team, t: 0, u: l.u, v: l.v });
+        });
+      } else {
+        errors.push(`chain ${chain.name}: unknown piece kind ${piece.kind}`);
+      }
+      next += piece.count;
+    }
+    if (next !== chain.leds) errors.push(`chain ${chain.name}: ${next} LEDs in the pieces, ${chain.leds} in the header`);
+    chainLeds.push(next);
+  });
+
+  for (const s of plan.segments) if (!seenSegments.has(s.id)) errors.push(`segment ${s.id} (${s.name}) has no LEDs`);
+  for (const s of plan.stores) if (!seenStores.has(s.team)) errors.push(`store of team ${s.team} has no LEDs`);
+  for (const l of leds) if (!(l.u >= 0 && l.u <= 1 && l.v >= 0 && l.v <= 1)) errors.push(`LED ${l.chain}:${l.index} is outside the board`);
+  if (errors.length > 0) throw new Error(`LED map: ${errors.length} problem(s)\n  ${errors.join("\n  ")}`);
+  return { leds, segmentInfo, chainLeds, planVersion: plan.version, layoutVersion: layout.version };
+}
+
+const q16 = (x) => Math.min(65535, Math.max(0, Math.round(x * 65535)));
+const q8 = (x) => Math.min(255, Math.max(0, Math.round(x * 255)));
+
+/** The C++ header. Numbers are stored small: t in 1/255, u and v in 1/65535 of the board. */
+export function renderHeader(map) {
+  const lines = [];
+  lines.push("// GENERATED by tools/make_led_map/make-led-map.mjs (M6-3). Do not edit.");
+  lines.push(`// Inputs: contracts/city_plan.json ${map.planVersion}, M6-led-board/hardware/strip_layout.json ${map.layoutVersion}.`);
+  lines.push("#pragma once");
+  lines.push("#include <cstdint>");
+  lines.push("");
+  lines.push("namespace led {");
+  lines.push("namespace mapdata {");
+  lines.push("");
+  lines.push(`constexpr const char* kPlanVersion = "${map.planVersion}";`);
+  lines.push(`constexpr uint16_t kLedCount = ${map.leds.length};`);
+  lines.push(`constexpr uint8_t kChainCount = ${map.chainLeds.length};`);
+  lines.push(`constexpr uint16_t kChainLeds[kChainCount] = {${map.chainLeds.join(", ")}};`);
+  lines.push(`constexpr uint8_t kSegmentCount = ${map.segmentInfo.length};`);
+  lines.push("");
+  lines.push("/** One LED, in chain order: chain A first, then chain B. */");
+  lines.push("struct LedRow {");
+  lines.push("  uint8_t chain;     // 0 = A, 1 = B");
+  lines.push("  uint16_t index;    // index in its chain");
+  lines.push("  int8_t segment;    // road segment 0-59, or -1 for a store LED");
+  lines.push("  int8_t store;      // team 0-3 of a store LED, or -1");
+  lines.push("  uint8_t t;         // place on the segment from node a (0) to node b (255)");
+  lines.push("  uint16_t u, v;     // board place, 0-65535 = 0-1, east and south");
+  lines.push("};");
+  lines.push("");
+  lines.push("constexpr LedRow kLeds[kLedCount] = {");
+  for (const l of map.leds) {
+    lines.push(`    {${l.chain}, ${l.index}, ${l.segment}, ${l.store}, ${q8(l.t)}, ${q16(l.u)}, ${q16(l.v)}},`);
+  }
+  lines.push("};");
+  lines.push("");
+  lines.push("/** The LEDs of one road segment: `count` LEDs from `first` (index in kLeds). */");
+  lines.push("struct SegmentRow {");
+  lines.push("  uint16_t first;");
+  lines.push("  uint8_t count;");
+  lines.push("  bool reversed;     // true: the LED index grows from node b to node a");
+  lines.push("};");
+  lines.push("");
+  lines.push("constexpr SegmentRow kSegments[kSegmentCount] = {");
+  map.segmentInfo.forEach((s) => lines.push(`    {${s.first}, ${s.count}, ${s.reversed}},`));
+  lines.push("};");
+  lines.push("");
+  lines.push("}  // namespace mapdata");
+  lines.push("}  // namespace led");
+  lines.push("");
+  return lines.join("\n");
+}
+
+function main() {
+  const plan = JSON.parse(readFileSync(root + "contracts/city_plan.json", "utf8"));
+  const layout = JSON.parse(readFileSync(root + "M6-led-board/hardware/strip_layout.json", "utf8"));
+  const header = renderHeader(buildMap(plan, layout));
+  if (process.argv.includes("--check")) {
+    let old = "";
+    try {
+      old = readFileSync(root + OUT, "utf8");
+    } catch {
+      // missing counts as old
+    }
+    if (old.replace(/\r\n/g, "\n") !== header) {
+      console.error(`${OUT} is old. Run: node tools/make_led_map/make-led-map.mjs`);
+      process.exit(1);
+    }
+    console.log(`${OUT} is up to date.`);
+    return;
+  }
+  writeFileSync(root + OUT, header);
+  console.log(`Wrote ${OUT}`);
+}
+
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) main();

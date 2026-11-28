@@ -107,6 +107,39 @@ Open points:
 - The pins and the PWM of the motors come with the wiring (M6-5), through `MotorOutput`.
 - The ESP32 build needs C++17 (Arduino ESP32 core 3.x).
 
+## M6-3: LED map, post processing and output, status and settings
+
+| Part | Files |
+|---|---|
+| LED map script: from `contracts/city_plan.json` and `hardware/strip_layout.json` (M6-5) to the table that goes into the build; checks that every road and store has its LEDs, the chains have no gap and the LEDs follow the wiring direction | `../tools/make_led_map/make-led-map.mjs` → `firmware/src/led/led_map_data.h` |
+| LED map for the drawing code (M6-4): the LED at a place on a road, the road LED nearest to a board place, the store LEDs | `firmware/src/led/led_map.h` |
+| Test patterns: pieces one by one with the data end in red, a chase along each chain, one road from node a (red) to node b (blue), all white | `firmware/src/led/test_pattern.h` |
+| Post processing: colour correction for the eye (gamma 2.2), brightness of the config, power limit (the whole frame is dimmed by one factor when it would need more than `max_ma`) | `firmware/src/led/post_process.h` |
+| Output stage: mixed frame of M6-4 → post processing → the two chains; frame report (`fps`, `ma_est`, `err`) for the status message | `firmware/src/led/output_stage.h`, `firmware/src/sys/frame_stats.h` |
+| Settings in flash (Wi-Fi, backup server, M6-2 calibration values) and the USB console | `firmware/src/sys/settings.h`, `firmware/src/sys/settings_nvs.h` |
+| Where the colours leave the program; the driver is not written yet (see below) | `firmware/src/led/strip_output.h` |
+
+```
+node tools/make_led_map/make-led-map.mjs           # from the repository root: writes the header
+node tools/make_led_map/make-led-map.mjs --check   # fails if the header is older than its inputs
+node --test tools/make_led_map/make-led-map.test.mjs
+cd firmware/test/led && make test                  # PC tests (g++ or clang, C++17)
+```
+
+The USB commands (115200 baud): `show`, `set wifi_ssid <name>`, `set wifi_pass <password>`,
+`set backup_host <address>`, `set cal.<name> <number>`, `save`, `reset`, `restart`,
+`test <off|pieces|chase|segment|white> [segment]`. A changed Wi-Fi name is used after
+`save` and `restart`, with no new build.
+
+In the main loop (once M6-1, #64, is in): step 4 ends with `outputStage.send(frame, millis())`,
+the config goes in with `outputStage.setConfig(cfg.bright, cfg.maxMa)` when its version
+changes, and step 5 fills `StatusOut` with `outputStage.fps()`, `outputStage.maEst()` and
+`outputStage.errors(millis())`.
+
+**Not done yet: the strip driver.** The project documents do not name an LED library. The
+driver must send chain A on GPIO16 and chain B on GPIO17 at the same time (two RMT channels,
+`hardware/pins_and_power.md`). It goes behind `StripOutput` once the team chooses the library.
+
 ## Team
 
 Tuğberk Akbulut, Hasan Alperen Elmas, Hasan Hüseyin Özdemir, Muhib Taha Boy, Umutcan Ocak

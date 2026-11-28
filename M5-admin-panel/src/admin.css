@@ -1,78 +1,79 @@
-/* Çılgın Kurye admin panel: the command center of the LED city board.
+/* Çılgın Kurye admin panel: the arcade command center of the LED city board.
    Every rule is scoped under .ck-admin (the class of this page's body), so nothing here can
-   reach another page of the project. Colours carry meaning:
-     electric blue  active page, primary action, sliders
-     neon cyan      live map, trend lines, focus rings
-     emerald        online, riding, success
-     amber          waiting, warning
-     crimson        earthquake, critical, lost link
-     purple         delivery points, game flow
-   Teams keep the colours of their LEDs on the board: blue, green, purple, yellow.
-   Surfaces are smoked glass over an obsidian grid, like the acrylic over the LED city.
-   Text contrast on the panels: primary 16.8:1, secondary 11.8:1, tertiary 6.8:1. */
+   reach another page of the project.
+
+   Colour has one job each:
+     team colours   Mavi #3498DB, Yeşil #2ECC71, Mor #9B59B6, Sarı #F1C40F, only for teams
+     blue / cyan    active page, primary controls, live measurements
+     emerald        online, riding, success        amber / yellow    waiting, warning
+     coral / red    earthquake, lost link, end     purple / magenta  game flow, events
+   Cards are solid modules on a navy base; each has one accent (--accent) for its LED strip,
+   its icon key and its live values. */
 
 .ck-admin {
-  --bg: #040710;
-  --bg-2: #050811;
-  --glass: rgba(10, 16, 28, .72);
-  --glass-edge: rgba(56, 189, 248, .16);
-  --side: #020408;
-  --passive: #64748b;      /* icons of the other pages */
-  --passive-ink: #7c8aa0;  /* their labels: #64748b is 4.3:1 on the sidebar, below AA for text */
-  --map-bg: #080c14;
+  --bg: #080d19;
+  --bg-2: #0d1424;
+  --raised: #131d31;
+  --panel: #18243a;
+  --edge: rgba(148, 163, 184, .14);
+  --edge-2: rgba(148, 163, 184, .24);
+  --ink: #f8fafc;
+  --ink-2: #cbd5e1;
+  --ink-3: #94a3b8;
+  --blue: #3678ff;
+  --cyan: #14d9f5;
+  --teal: #20d9c2;
+  --emerald: #23d18b;
+  --purple: #a879ff;
+  --magenta: #ed70c5;
+  --yellow: #ffd166;
+  --orange: #ff9b54;
+  --coral: #ff6b72;
+  --ok: #10b981;
+  --warn: #f59e0b;
+  --bad: #ef4444;
+  --info: #38bdf8;
+  --red-ink: #fca5a5;
   --team-blue: #3498db;
   --team-green: #2ecc71;
   --team-purple: #9b59b6;
   --team-yellow: #f1c40f;
-  --surface: #0e192e;
-  --surface-2: #111f36;
-  --surface-3: #14233d;
-  --ink: #f8fafc;
-  --ink-2: #cbd5e1;
-  --ink-3: #94a3b8;
-  --blue: #1d63ff;
-  --blue-2: #2563eb;
-  --cyan: #00d2ff;
-  --cyan-2: #38bdf8;
-  --green: #10b981;
-  --green-2: #22c55e;
-  --amber: #f59e0b;
-  --red: #ef4444;
-  --red-2: #dc2626;
-  --red-ink: #fca5a5;
-  --purple: #a855f7;
-  --line: rgba(56, 189, 248, .28);
-  --line-soft: rgba(56, 189, 248, .14);
-  --glow-blue: 0 0 16px rgba(29, 99, 255, .45);
-  --glow-cyan: 0 0 18px rgba(0, 210, 255, .22);
-  --glow-red: 0 0 22px rgba(239, 68, 68, .35);
-  --inner: inset 0 1px 0 rgba(255, 255, 255, .04), inset 0 0 24px rgba(0, 0, 0, .25);
+  --map-bg: #080c14;
   --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px;
-  --r-s: 8px; --r-m: 12px; --r-l: 16px;
+  --r-s: 10px; --r-m: 14px; --r-l: 18px;
   --font: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
-  --font-display: "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --display: "Bahnschrift", "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, sans-serif;
   --mono: "Cascadia Mono", "JetBrains Mono", "SF Mono", Consolas, "Liberation Mono", monospace;
   --ease: cubic-bezier(.2, .7, .2, 1);
+  --lift: inset 0 1px 0 rgba(255, 255, 255, .04), 0 10px 24px -18px rgba(0, 0, 0, .9);
+  /* The four teams side by side: the signature stripe of the game. */
+  --team-stripe: linear-gradient(90deg, var(--team-blue) 0 25%, var(--team-green) 0 50%, var(--team-purple) 0 75%, var(--team-yellow) 0);
+  /* Older names, still used by the parameter manager (params.css). */
+  --line: var(--edge-2);
+  --line-soft: var(--edge);
+  --cyan-2: var(--cyan);
+  --red: var(--bad);
 
   margin: 0;
   min-height: 100vh;
   color-scheme: dark;
   font: 15px/1.5 var(--font);
   color: var(--ink);
-  /* Obsidian with the faint street grid of the board under it. */
+  /* Navy with the faint street grid of the board and a few unlit LEDs on it. */
   background:
-    radial-gradient(1200px 600px at 85% -10%, rgba(29, 99, 255, .12), transparent 60%),
-    radial-gradient(900px 500px at -10% 110%, rgba(0, 210, 255, .06), transparent 60%),
-    linear-gradient(rgba(56, 189, 248, .035) 1px, transparent 1px) 0 0 / 40px 40px,
-    linear-gradient(90deg, rgba(56, 189, 248, .035) 1px, transparent 1px) 0 0 / 40px 40px,
+    radial-gradient(circle at 1px 1px, rgba(20, 217, 245, .08) 1.2px, transparent 1.6px) 0 0 / 120px 120px,
+    linear-gradient(rgba(148, 163, 184, .035) 1px, transparent 1px) 0 0 / 40px 40px,
+    linear-gradient(90deg, rgba(148, 163, 184, .035) 1px, transparent 1px) 0 0 / 40px 40px,
+    radial-gradient(1100px 520px at 90% -10%, rgba(54, 120, 255, .12), transparent 60%),
+    radial-gradient(800px 480px at -5% 105%, rgba(168, 121, 255, .08), transparent 60%),
     var(--bg);
   background-attachment: fixed;
 }
 .ck-admin *, .ck-admin *::before, .ck-admin *::after { box-sizing: border-box; }
 .ck-admin :where(h1, h2, h3, p, ol, ul, dl, dd) { margin: 0; }
-.ck-admin h1 { font: 650 1.75rem/1.15 var(--font-display); letter-spacing: -.01em; }
-.ck-admin h2 { font: 600 1.02rem/1.3 var(--font); color: var(--ink); }
-.ck-admin h3 { font: 500 .84rem/1.3 var(--font); color: var(--ink-2); }
+.ck-admin h1 { font: 700 1.9rem/1.1 var(--display); letter-spacing: -.01em; }
+.ck-admin h2 { font: 650 1.05rem/1.25 var(--display); color: var(--ink); letter-spacing: .005em; }
+.ck-admin h3 { font: 600 .84rem/1.3 var(--font); color: var(--ink-2); }
 .ck-admin a { color: inherit; }
 .ck-admin :where(button, input, select) { font: inherit; color: inherit; }
 .ck-admin :focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
@@ -82,389 +83,427 @@
 .ck-admin .skip:focus { top: var(--s3); }
 .ck-admin .muted { color: var(--ink-3); font-size: .86rem; }
 .ck-admin .lead { color: var(--ink-3); max-width: 72ch; }
-.ck-admin .link { color: var(--cyan-2); text-decoration: none; font-size: .86rem; }
-.ck-admin .link:hover { color: var(--cyan); text-decoration: underline; }
+.ck-admin .link { color: var(--cyan); text-decoration: none; font-size: .86rem; font-weight: 600; border-radius: 6px; }
+.ck-admin .link:hover { color: #7eeafb; text-decoration: underline; text-underline-offset: 3px; }
 .ck-admin .icon { width: 1.15rem; height: 1.15rem; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
-/* ── Header ─────────────────────────────────────────────────────────────── */
+/* ── Header: the game command bar ───────────────────────────────────────── */
 .ck-admin .topbar {
   position: sticky; top: 0; z-index: 10;
   display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s5);
-  padding: var(--s3) var(--s5);
-  background: var(--glass);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--line-soft);
-  box-shadow: 0 1px 0 rgba(0, 210, 255, .06), 0 8px 24px rgba(0, 0, 0, .35);
+  padding: 10px var(--s5) 12px;
+  background: rgba(13, 20, 36, .92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--edge);
 }
-.ck-admin .brand { display: flex; align-items: center; gap: var(--s3); text-decoration: none; margin-right: var(--s2); }
-.ck-admin .emblem { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; }
+/* The four teams run along the bottom edge of the bar. */
+.ck-admin .topbar::after { content: ""; position: absolute; inset: auto 0 0 0; height: 2px; background: var(--team-stripe); opacity: .85; }
+.ck-admin .brand { display: flex; align-items: center; gap: var(--s3); text-decoration: none; margin-right: var(--s2); border-radius: var(--r-s); }
+.ck-admin .emblem { display: grid; place-items: center; width: 2.8rem; height: 2.8rem; padding: 3px; border-radius: 13px; background: linear-gradient(145deg, #1d2b47, #0d1424); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 0 0 1px var(--edge-2); }
 .ck-admin .emblem svg { width: 100%; height: 100%; overflow: visible; }
-.ck-admin .emblem-grid { fill: var(--surface-2); stroke: var(--line); stroke-width: 1.5; }
-.ck-admin .emblem-road { stroke: rgba(0, 210, 255, .35); stroke-width: 1.5; stroke-dasharray: 2 2.5; fill: none; }
+.ck-admin .emblem-grid { fill: #0d1424; stroke: rgba(20, 217, 245, .35); stroke-width: 1.5; }
+.ck-admin .emblem-road { stroke: rgba(255, 209, 102, .45); stroke-width: 1.5; stroke-dasharray: 2 2.5; fill: none; }
 .ck-admin .emblem-led { filter: drop-shadow(0 0 3px currentColor); }
-.ck-admin .led-a { fill: var(--green-2); color: var(--green-2); }
-.ck-admin .led-b { fill: var(--purple); color: var(--purple); }
-.ck-admin .led-c { fill: var(--amber); color: var(--amber); }
-.ck-admin .emblem-scooter { fill: none; stroke: var(--cyan); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 4px rgba(0, 210, 255, .6)); }
-.ck-admin .brand-text strong { display: block; font: 700 1.12rem/1.15 var(--font-display); letter-spacing: .01em; }
-.ck-admin .brand-text small { color: var(--cyan-2); font-size: .78rem; }
-.ck-admin .match { display: flex; gap: var(--s5); padding: var(--s1) var(--s4); border-left: 1px solid var(--line-soft); }
-.ck-admin .match dt { color: var(--ink-3); font-size: .74rem; }
-.ck-admin .match dd { font: 600 .95rem/1.4 var(--mono); font-variant-numeric: tabular-nums; }
-.ck-admin .match .timer { color: var(--cyan); text-shadow: 0 0 10px rgba(0, 210, 255, .45); }
+.ck-admin .led-a { fill: var(--team-green); color: var(--team-green); }
+.ck-admin .led-b { fill: var(--team-purple); color: var(--team-purple); }
+.ck-admin .led-c { fill: var(--team-yellow); color: var(--team-yellow); }
+.ck-admin .emblem-scooter { fill: none; stroke: var(--cyan); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 4px rgba(20, 217, 245, .55)); }
+.ck-admin .brand-text strong { display: block; font: 700 1.2rem/1.1 var(--display); letter-spacing: .01em; }
+.ck-admin .brand-text small { color: var(--teal); font-size: .76rem; font-weight: 600; }
+.ck-admin .match { display: flex; gap: 6px; padding: 0; }
+.ck-admin .match > div { padding: 4px 12px 5px; border-radius: var(--r-s); background: var(--bg); box-shadow: inset 0 0 0 1px var(--edge); }
+.ck-admin .match dt { color: var(--ink-3); font-size: .7rem; font-weight: 600; }
+.ck-admin .match dd { font: 600 .95rem/1.3 var(--mono); font-variant-numeric: tabular-nums; }
+.ck-admin .match .timer { color: var(--cyan); font-size: 1.05rem; text-shadow: 0 0 10px rgba(20, 217, 245, .45); }
 .ck-admin .mark { flex: 1; min-width: 10rem; color: var(--ink-3); font: .8rem/1.4 var(--mono); }
 
 .ck-admin .server-pill {
   display: inline-flex; align-items: center; gap: var(--s2);
-  padding: 6px var(--s3); border-radius: 999px; font-size: .84rem; font-weight: 600;
+  padding: 6px 12px; border-radius: 999px; font-size: .82rem; font-weight: 650;
   border: 1px solid rgba(245, 158, 11, .45); background: rgba(245, 158, 11, .1); color: #fde68a;
 }
-.ck-admin .server-pill::before { content: ""; width: .55rem; height: .55rem; border-radius: 50%; background: var(--amber); box-shadow: 0 0 8px var(--amber); }
-.ck-admin .server-pill[data-state="connected"] { border-color: rgba(34, 197, 94, .5); background: rgba(16, 185, 129, .12); color: #bbf7d0; }
-.ck-admin .server-pill[data-state="connected"]::before { background: var(--green-2); box-shadow: 0 0 8px var(--green-2); animation: ck-pulse 2.4s ease-in-out infinite; }
+.ck-admin .server-pill::before { content: ""; width: .55rem; height: .55rem; border-radius: 50%; background: var(--warn); box-shadow: 0 0 8px var(--warn); }
+.ck-admin .server-pill[data-state="connected"] { border-color: rgba(16, 185, 129, .5); background: rgba(16, 185, 129, .12); color: #a7f3d0; }
+.ck-admin .server-pill[data-state="connected"]::before { background: var(--emerald); box-shadow: 0 0 8px var(--emerald); animation: ck-pulse 2.4s ease-in-out infinite; }
 .ck-admin .server-pill:is([data-state="reconnecting"], [data-state="replaced"]) { border-color: rgba(239, 68, 68, .55); background: rgba(239, 68, 68, .12); color: var(--red-ink); }
-.ck-admin .server-pill:is([data-state="reconnecting"], [data-state="replaced"])::before { background: var(--red); box-shadow: 0 0 8px var(--red); }
+.ck-admin .server-pill:is([data-state="reconnecting"], [data-state="replaced"])::before { background: var(--bad); box-shadow: 0 0 8px var(--bad); }
 @keyframes ck-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
 
 .ck-admin .match-controls { display: flex; flex-wrap: wrap; gap: var(--s2); }
 .ck-admin .banner { margin: var(--s4) var(--s5) 0; padding: var(--s3) var(--s4); border: 1px solid rgba(245, 158, 11, .45); background: rgba(245, 158, 11, .1); color: #fde68a; border-radius: var(--r-s); }
 
 /* ── Shell and sidebar ──────────────────────────────────────────────────── */
-.ck-admin .shell { display: grid; grid-template-columns: 15.5rem minmax(0, 1fr); min-height: calc(100vh - 4.5rem); }
+.ck-admin .shell { display: grid; grid-template-columns: 15.5rem minmax(0, 1fr); min-height: calc(100vh - 4.6rem); }
 .ck-admin .sidebar {
-  position: sticky; top: 4.5rem; align-self: start; height: calc(100vh - 4.5rem);
+  position: sticky; top: 4.6rem; align-self: start; height: calc(100vh - 4.6rem);
   display: flex; flex-direction: column; gap: var(--s4); padding: var(--s5) var(--s3);
-  background: var(--side);
-  border-right: 1px solid var(--line-soft);
+  background: linear-gradient(180deg, #0b1120, #080d19);
+  border-right: 1px solid var(--edge);
 }
-.ck-admin .nav ul { list-style: none; padding: 0; display: grid; gap: var(--s1); }
+.ck-admin .nav ul { list-style: none; padding: 0; display: grid; gap: 4px; }
 .ck-admin .nav a {
-  display: flex; align-items: center; gap: var(--s3); padding: 10px var(--s3);
-  border-radius: var(--r-s); color: var(--passive-ink); text-decoration: none; font-weight: 500;
-  border: 1px solid transparent;
-  transition: background .18s var(--ease), color .18s var(--ease), border-color .18s var(--ease), box-shadow .18s var(--ease);
+  position: relative; display: flex; align-items: center; gap: var(--s3); padding: 7px 10px;
+  border-radius: var(--r-s); color: var(--ink-3); text-decoration: none; font-weight: 600;
+  transition: background .16s var(--ease), color .16s var(--ease);
 }
-.ck-admin .nav a svg { width: 1.15rem; height: 1.15rem; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.ck-admin .nav a:not([aria-current]) svg { color: var(--passive); }
-.ck-admin .nav a:hover { color: var(--ink-2); background: rgba(56, 189, 248, .06); }
-/* The page on screen: a lit strip on the left edge, like one row of the board switched on. */
-.ck-admin .nav a[aria-current="page"] {
-  color: #fff;
-  background: linear-gradient(90deg, rgba(29, 99, 255, .32), rgba(0, 210, 255, .06) 70%, transparent);
-  box-shadow: inset 3px 0 0 var(--cyan), -6px 0 14px -6px var(--cyan);
+/* Every page icon sits in its own small key. */
+.ck-admin .nav a svg {
+  width: 2rem; height: 2rem; padding: 7px; flex: none; border-radius: 9px;
+  fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round;
+  background: var(--raised); box-shadow: inset 0 0 0 1px var(--edge); color: #7c8aa0;
+  transition: background .16s var(--ease), color .16s var(--ease), box-shadow .16s var(--ease);
 }
-.ck-admin .nav a[aria-current="page"] svg { color: var(--cyan); filter: drop-shadow(0 0 4px rgba(0, 210, 255, .6)); }
+.ck-admin .nav a:hover { color: var(--ink); background: rgba(148, 163, 184, .07); }
+.ck-admin .nav a:hover svg { color: var(--cyan); }
+/* The page on screen: a lit strip on the left edge and a lit key. */
+.ck-admin .nav a[aria-current="page"] { color: #fff; background: linear-gradient(90deg, rgba(54, 120, 255, .26), rgba(20, 217, 245, .05) 75%, transparent); }
+.ck-admin .nav a[aria-current="page"]::before { content: ""; position: absolute; left: -12px; top: 8px; bottom: 8px; width: 3px; border-radius: 0 3px 3px 0; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+.ck-admin .nav a[aria-current="page"] svg { color: #fff; background: linear-gradient(145deg, var(--blue), #2456c8); box-shadow: 0 0 14px rgba(54, 120, 255, .45), inset 0 1px 0 rgba(255, 255, 255, .25); }
 .ck-admin .board-pill {
   margin-top: auto; display: flex; align-items: center; gap: var(--s2);
-  padding: 10px var(--s3); border: 1px solid var(--line-soft); border-radius: var(--r-s);
-  background: var(--bg-2); color: var(--ink-3); font: .8rem/1.4 var(--mono);
+  padding: 10px 12px; border-radius: var(--r-m);
+  background: var(--raised); box-shadow: inset 0 0 0 1px var(--edge); color: var(--ink-3); font: .8rem/1.4 var(--mono);
 }
-.ck-admin .board-pill::before { content: ""; width: .6rem; height: .6rem; border-radius: 50%; background: var(--ink-3); flex: none; }
-.ck-admin .board-pill.online { color: var(--ink); border-color: rgba(34, 197, 94, .4); }
-.ck-admin .board-pill.online::before { background: var(--green-2); box-shadow: 0 0 8px var(--green-2); }
+.ck-admin .board-pill::before { content: ""; width: .6rem; height: .6rem; border-radius: 50%; background: #475569; flex: none; }
+.ck-admin .board-pill.online { color: var(--ink); box-shadow: inset 0 0 0 1px rgba(35, 209, 139, .4); }
+.ck-admin .board-pill.online::before { background: var(--emerald); box-shadow: 0 0 8px var(--emerald); }
 
 .ck-admin .main-column { min-width: 0; display: flex; flex-direction: column; }
-.ck-admin main { padding: var(--s5) var(--s5) var(--s6); outline: none; }
-.ck-admin .page-head { display: grid; gap: var(--s1); margin-bottom: var(--s5); }
+.ck-admin main { width: 100%; max-width: 1720px; padding: var(--s5) var(--s5) var(--s6); outline: none; }
+.ck-admin .page-head { display: grid; gap: 6px; margin-bottom: var(--s5); }
+/* A short four-team stripe under every page title. */
+.ck-admin .page-head h1::after { content: ""; display: block; width: 4.5rem; height: 4px; margin-top: 10px; border-radius: 4px; background: var(--team-stripe); }
 .ck-admin section[data-page] h1:focus { outline: none; }
 
-/* ── Controls ───────────────────────────────────────────────────────────── */
+/* ── Controls: keys you can press ───────────────────────────────────────── */
 .ck-admin button {
-  cursor: pointer; min-height: 2.5rem; padding: var(--s2) var(--s4);
-  border: 1px solid rgba(56, 189, 248, .35); border-radius: var(--r-s);
-  background: var(--surface-3); color: var(--ink); font-weight: 500;
-  transition: border-color .15s var(--ease), box-shadow .15s var(--ease), background .15s var(--ease);
+  --key: var(--panel);
+  --key-edge: #0b1220;
+  cursor: pointer; min-height: 2.5rem; padding: 7px var(--s4) 6px;
+  border: 1px solid var(--edge-2); border-bottom: 3px solid var(--key-edge);
+  border-radius: var(--r-s);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--key) 92%, #fff), var(--key));
+  color: var(--ink); font-weight: 600;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07);
+  transition: transform .08s var(--ease), border-color .15s var(--ease), box-shadow .15s var(--ease), filter .15s var(--ease);
 }
-.ck-admin button:hover:not(:disabled) { border-color: var(--cyan-2); box-shadow: var(--glow-cyan); }
-/* Match buttons: start is the green "go", pause stays dark, end is dark red. */
-.ck-admin button[data-command="start"], .ck-admin button[data-command="resume"] { background: rgba(46, 204, 113, .1); border-color: var(--team-green); color: #c8f7da; font-weight: 650; box-shadow: 0 0 14px rgba(46, 204, 113, .25); }
-.ck-admin button[data-command="start"]:hover:not(:disabled), .ck-admin button[data-command="resume"]:hover:not(:disabled) { background: rgba(46, 204, 113, .2); border-color: #5fe39a; box-shadow: 0 0 22px rgba(46, 204, 113, .45); }
-.ck-admin button[data-command="pause"] { background: var(--bg-2); border-color: rgba(148, 163, 184, .35); }
-.ck-admin button[data-command="end"] { background: #1c0709; }
-.ck-admin button[data-command="end"], .ck-admin .danger { border-color: rgba(239, 68, 68, .6); color: var(--red-ink); }
-.ck-admin button[data-command="end"]:hover:not(:disabled), .ck-admin .danger:hover:not(:disabled) { box-shadow: var(--glow-red); border-color: var(--red); }
-/* Disabled is plainly off: no colour, no glow, no hover. The real `disabled` attribute stays. */
+.ck-admin button:hover:not(:disabled) { filter: brightness(1.12); transform: translateY(-1px); }
+.ck-admin button:active:not(:disabled) { transform: translateY(2px); filter: brightness(.95); }
+.ck-admin button[data-command="start"], .ck-admin button[data-command="resume"] { --key: #12805a; --key-edge: #0a4a34; border-color: rgba(35, 209, 139, .6); border-bottom-color: var(--key-edge); color: #fff; font-weight: 700; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2), 0 0 16px -4px rgba(35, 209, 139, .6); }
+.ck-admin button[data-command="pause"] { --key: #24324d; --key-edge: #121b2c; }
+.ck-admin button[data-command="end"] { --key: #6b1a24; --key-edge: #3a0b12; border-color: rgba(255, 107, 114, .55); border-bottom-color: var(--key-edge); color: #ffd7da; }
+.ck-admin .danger { --key: #8a1f2b; --key-edge: #4a0d15; border-color: rgba(255, 107, 114, .6); border-bottom-color: var(--key-edge); color: #fff; }
+/* Disabled is plainly off: no colour, no glow, no depth. The real `disabled` attribute stays. */
 .ck-admin button:disabled,
 .ck-admin button[data-command]:disabled {
-  cursor: not-allowed; background: rgba(20, 35, 61, .55); border-color: rgba(148, 163, 184, .18);
-  color: rgba(148, 163, 184, .7); box-shadow: none; font-weight: 500;
+  cursor: not-allowed; background: rgba(24, 36, 58, .55); border-color: rgba(148, 163, 184, .16); border-bottom-color: rgba(148, 163, 184, .16);
+  color: rgba(148, 163, 184, .65); box-shadow: none; font-weight: 600; filter: none; transform: none;
 }
-.ck-admin button.ghost { background: transparent; }
-.ck-admin .quake-button { min-height: 3rem; padding: var(--s2) var(--s5); background: linear-gradient(180deg, #e53935, #b71c1c); border-color: #ff6b6b; color: #fff; font-weight: 700; font-size: 1.02rem; box-shadow: 0 0 0 3px rgba(239, 68, 68, .18), 0 6px 18px rgba(183, 28, 28, .45), inset 0 1px 0 rgba(255, 255, 255, .25); }
-.ck-admin .quake-button:hover:not(:disabled) { filter: brightness(1.1); box-shadow: 0 0 0 4px rgba(239, 68, 68, .28), 0 0 26px rgba(239, 68, 68, .55); }
+.ck-admin button.ghost { --key: var(--bg-2); }
+.ck-admin .quake-button { --key: #d92f3c; --key-edge: #7c121c; min-height: 3rem; padding-inline: var(--s5); border-color: #ff8a90; border-bottom-color: var(--key-edge); color: #fff; font-weight: 700; font-size: 1.02rem; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 0 0 3px rgba(239, 68, 68, .16), 0 8px 22px -8px rgba(239, 68, 68, .7); }
 .ck-admin :where(input:not([type="range"]), select) {
   min-height: 2.5rem; padding: var(--s2) var(--s3);
-  border: 1px solid rgba(56, 189, 248, .3); border-radius: var(--r-s);
-  background: var(--bg-2); color: var(--ink);
+  border: 1px solid var(--edge-2); border-radius: var(--r-s);
+  background: var(--bg); color: var(--ink);
   transition: border-color .15s var(--ease), box-shadow .15s var(--ease);
 }
-.ck-admin :where(input:not([type="range"]), select):hover { border-color: rgba(56, 189, 248, .55); }
-.ck-admin :where(input:not([type="range"]), select):focus-visible { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0, 210, 255, .25); }
-.ck-admin input::placeholder { color: rgba(148, 163, 184, .75); }
-.ck-admin input[type="search"] { width: min(28rem, 100%); padding-left: 2.2rem; background: var(--bg-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2338bdf8' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat .7rem 50% / 1rem; }
+.ck-admin :where(input:not([type="range"]), select):hover { border-color: rgba(20, 217, 245, .45); }
+.ck-admin :where(input:not([type="range"]), select):focus-visible { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(20, 217, 245, .22); }
+.ck-admin input::placeholder { color: rgba(148, 163, 184, .7); }
+.ck-admin input[type="search"] { width: min(28rem, 100%); padding-left: 2.3rem; background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2314d9f5' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat .75rem 50% / 1rem; }
 .ck-admin .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s4); margin-bottom: var(--s4); }
 .ck-admin .toolbar .search { flex: 1 1 18rem; max-width: 28rem; }
 .ck-admin .toolbar .ghost { margin-left: auto; }
 
-/* ── Cards ──────────────────────────────────────────────────────────────── */
+/* ── Cards: control modules ─────────────────────────────────────────────── */
 .ck-admin .card {
+  --accent: var(--cyan);
   position: relative;
-  background: var(--glass);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-edge);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 5%, var(--raised)), #101829 85%);
+  border: 1px solid var(--edge);
   border-radius: var(--r-l);
-  padding: var(--s4) var(--s5);
-  box-shadow: var(--inner), var(--glow-cyan);
+  padding: var(--s4) var(--s5) var(--s5);
+  box-shadow: var(--lift);
 }
+/* The LED strip of the module: its accent, fading out to the right. */
+.ck-admin .card::before { content: ""; position: absolute; left: 18px; right: 40%; top: -1px; height: 3px; border-radius: 0 0 3px 3px; background: linear-gradient(90deg, var(--accent), transparent); }
 .ck-admin .card > h2, .ck-admin .card-head { margin-bottom: var(--s4); }
-.ck-admin .card-head { display: flex; align-items: baseline; gap: var(--s3); }
+.ck-admin .card-head { display: flex; align-items: center; gap: var(--s3); }
 .ck-admin .card-head h2 { margin: 0; margin-right: auto; }
+.ck-admin .card h2 { display: flex; align-items: center; gap: 10px; }
+.ck-admin .h-icon { display: grid; place-items: center; width: 1.9rem; height: 1.9rem; flex: none; border-radius: 9px; color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent); }
+.ck-admin .h-icon svg { width: 1.05rem; height: 1.05rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .ck-admin .empty { display: block; color: var(--ink-3); padding: var(--s3) 0; }
 .ck-admin .note { margin-bottom: var(--s4); color: var(--ink-3); }
-.ck-admin .note[data-tone="good"] { color: var(--green-2); }
+.ck-admin .note[data-tone="good"] { color: var(--emerald); }
 .ck-admin .note[data-tone="bad"] { color: var(--red-ink); }
 
 /* ── Dashboard grid ─────────────────────────────────────────────────────── */
 .ck-admin .dash {
   display: grid; gap: var(--s4);
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.25fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr);
   grid-template-areas:
     "strip  strip  map"
     "kpi    kpi    map"
     "entity eq     quake"
     "quick  quick  recent";
 }
-.ck-admin .strip-card { grid-area: strip; }
-.ck-admin .map-card { grid-area: map; }
+.ck-admin .strip-card { grid-area: strip; --accent: var(--blue); }
+.ck-admin .map-card { grid-area: map; --accent: var(--teal); }
 .ck-admin .kpi-row { grid-area: kpi; }
-.ck-admin .entity-card { grid-area: entity; }
-.ck-admin .eq-card { grid-area: eq; }
+.ck-admin .entity-card { grid-area: entity; --accent: var(--emerald); }
+.ck-admin .eq-card { grid-area: eq; --accent: var(--cyan); }
 .ck-admin .dash .quake-card { grid-area: quake; }
-.ck-admin .quick-card { grid-area: quick; }
-.ck-admin .recent-card { grid-area: recent; }
+.ck-admin .quick-card { grid-area: quick; --accent: var(--blue); }
+.ck-admin .recent-card { grid-area: recent; --accent: var(--purple); }
 
-/* Match LED strip: the loudest thing on the page. */
-.ck-admin .strip-card { background: linear-gradient(135deg, rgba(29, 99, 255, .14), var(--glass) 45%); border-color: rgba(56, 189, 248, .34); }
+/* Match: the scoreboard of the game, the loudest thing on the page. */
+.ck-admin .strip-card { padding: var(--s5); background: radial-gradient(420px 260px at 8% 30%, rgba(54, 120, 255, .16), transparent 70%), linear-gradient(180deg, #152140, #0f1829); border-color: rgba(54, 120, 255, .3); }
+.ck-admin .strip-card::before { right: 18px; height: 4px; background: var(--team-stripe); }
 .ck-admin .match-strip { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--s5); align-items: center; }
-.ck-admin .clock-box { display: grid; justify-items: center; gap: var(--s2); padding-right: var(--s5); border-right: 1px solid var(--line-soft); }
-.ck-admin .clock-label { color: var(--ink-3); font: .74rem/1.2 var(--mono); }
-/* The ring is a dial of 60 ticks. It does not show progress: the server sends the time left,
-   not the length of the match, so a filled arc would be a guess. */
+.ck-admin .clock-box { display: grid; justify-items: center; gap: var(--s2); padding-right: var(--s5); border-right: 1px dashed var(--edge-2); }
+.ck-admin .clock-label { color: var(--ink-3); font: 600 .74rem/1.2 var(--font); }
+/* The dial: 60 ticks and a sweep that turns while the match runs. It shows no progress,
+   because the server sends the time left, not the length of the match. */
 .ck-admin .clock {
   --ring: var(--cyan);
   position: relative; display: grid; place-items: center; width: 10.5rem; aspect-ratio: 1; border-radius: 50%;
-  font: 650 2.5rem/1 var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -.02em; color: var(--ink);
-  background: radial-gradient(circle, rgba(0, 210, 255, .07), transparent 68%);
-  box-shadow: inset 0 0 0 1px rgba(56, 189, 248, .14);
+  font: 700 2.55rem/1 var(--display); font-variant-numeric: tabular-nums; letter-spacing: .02em; color: var(--ink);
+  background: radial-gradient(circle, #16244a 0, #0d1630 62%, transparent 63%);
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, .16);
 }
 .ck-admin .clock::before {
   content: ""; position: absolute; inset: 0; border-radius: 50%;
   background: repeating-conic-gradient(var(--ring) 0 1.2deg, transparent 1.2deg 6deg);
   -webkit-mask: radial-gradient(circle, transparent calc(70% - 9px), #000 calc(70% - 8px));
   mask: radial-gradient(circle, transparent calc(70% - 9px), #000 calc(70% - 8px));
-  opacity: .5;
+  opacity: .45;
 }
-.ck-admin .match-strip[data-phase="playing"] .clock { text-shadow: 0 0 22px rgba(0, 210, 255, .55); box-shadow: inset 0 0 0 1px rgba(0, 210, 255, .3), 0 0 26px rgba(0, 210, 255, .18); }
-.ck-admin .match-strip[data-phase="playing"] .clock::before { opacity: .85; }
+.ck-admin .clock::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%; opacity: 0;
+  background: conic-gradient(from 0deg, transparent 0 290deg, color-mix(in srgb, var(--ring) 75%, transparent) 360deg);
+  -webkit-mask: radial-gradient(circle, transparent calc(70% - 9px), #000 calc(70% - 8px));
+  mask: radial-gradient(circle, transparent calc(70% - 9px), #000 calc(70% - 8px));
+}
+.ck-admin .match-strip[data-phase="playing"] .clock { text-shadow: 0 0 22px rgba(20, 217, 245, .5); box-shadow: inset 0 0 0 1px rgba(20, 217, 245, .3), 0 0 32px -6px rgba(20, 217, 245, .35); }
+.ck-admin .match-strip[data-phase="playing"] .clock::before { opacity: .8; }
+.ck-admin .match-strip[data-phase="playing"] .clock::after { opacity: 1; animation: ck-sweep 4s linear infinite; }
+@keyframes ck-sweep { to { transform: rotate(360deg); } }
 /* Last 30 seconds of a running match: the dial turns red. */
-.ck-admin .match-strip[data-urgent="true"] .clock { --ring: var(--red); color: #fecaca; text-shadow: 0 0 22px rgba(239, 68, 68, .6); box-shadow: inset 0 0 0 1px rgba(239, 68, 68, .45), 0 0 28px rgba(239, 68, 68, .3); }
-.ck-admin .match-strip[data-phase="paused"] .clock { --ring: var(--amber); }
-.ck-admin .match-strip[data-phase="paused"] .clock { color: var(--amber); text-shadow: 0 0 18px rgba(245, 158, 11, .45); }
-.ck-admin .match-strip[data-phase="ended"] .clock { --ring: var(--passive); color: var(--ink-3); }
-.ck-admin .phase-chip { display: inline-block; padding: 3px var(--s3); border-radius: 999px; font-size: .8rem; font-weight: 600; background: rgba(56, 189, 248, .12); color: var(--cyan-2); border: 1px solid var(--line); }
-.ck-admin .match-strip[data-phase="playing"] .phase-chip { background: rgba(16, 185, 129, .14); color: #bbf7d0; border-color: rgba(34, 197, 94, .45); }
-.ck-admin .match-strip[data-phase="paused"] .phase-chip { background: rgba(245, 158, 11, .14); color: #fde68a; border-color: rgba(245, 158, 11, .45); }
-.ck-admin .teams { list-style: none; padding: 0; display: grid; gap: var(--s3); }
-.ck-admin .team-head { display: flex; justify-content: space-between; gap: var(--s4); }
-.ck-admin .team-name { font-weight: 650; }
-.ck-admin .team-name::before { content: ""; display: inline-block; width: .6rem; height: .6rem; margin-right: var(--s2); border-radius: 2px; background: var(--team); box-shadow: 0 0 8px var(--team); vertical-align: .05em; }
-.ck-admin .team-score { font: 650 1.05rem/1.2 var(--mono); font-variant-numeric: tabular-nums; color: #fff; }
-.ck-admin .team-meta { color: var(--ink-3); font: .74rem/1.4 var(--mono); }
-.ck-admin .led-meter { display: grid; grid-template-columns: repeat(30, minmax(0, 1fr)); gap: 3px; margin: 6px 0 3px; padding: 4px; border-radius: 6px; background: #020408; box-shadow: inset 0 0 0 1px rgba(56, 189, 248, .12); }
-.ck-admin .led { height: 9px; border-radius: 2px; background: #0f1828; }
-.ck-admin .led.on { background: var(--team); box-shadow: 0 0 6px color-mix(in srgb, var(--team) 75%, transparent); transition: background .3s var(--ease); }
+.ck-admin .match-strip[data-urgent="true"] .clock { --ring: var(--bad); color: #fecaca; text-shadow: 0 0 22px rgba(239, 68, 68, .6); box-shadow: inset 0 0 0 1px rgba(239, 68, 68, .45), 0 0 32px -6px rgba(239, 68, 68, .5); }
+.ck-admin .match-strip[data-phase="paused"] .clock { --ring: var(--yellow); color: var(--yellow); }
+.ck-admin .match-strip[data-phase="ended"] .clock { --ring: #64748b; color: var(--ink-3); }
+.ck-admin .phase-chip { display: inline-block; padding: 3px 12px; border-radius: 999px; font-size: .8rem; font-weight: 700; background: rgba(20, 217, 245, .1); color: var(--cyan); box-shadow: inset 0 0 0 1px rgba(20, 217, 245, .35); }
+.ck-admin .match-strip[data-phase="playing"] .phase-chip { background: rgba(35, 209, 139, .14); color: #a7f3d0; box-shadow: inset 0 0 0 1px rgba(35, 209, 139, .45); }
+.ck-admin .match-strip[data-phase="paused"] .phase-chip { background: rgba(255, 209, 102, .14); color: #fde68a; box-shadow: inset 0 0 0 1px rgba(255, 209, 102, .45); }
+/* One lane per team, in its own colour. */
+.ck-admin .teams { list-style: none; padding: 0; display: grid; gap: 10px; }
+.ck-admin .team { padding: 8px 12px 6px 14px; border-radius: var(--r-m); background: linear-gradient(90deg, color-mix(in srgb, var(--team) 13%, transparent), rgba(13, 20, 36, .4) 60%); box-shadow: inset 3px 0 0 var(--team), inset 0 0 0 1px color-mix(in srgb, var(--team) 18%, transparent); }
+.ck-admin .team-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s4); }
+.ck-admin .team-name { font: 700 .98rem/1.3 var(--display); }
+.ck-admin .team-name::before { content: ""; display: inline-block; width: .7rem; height: .7rem; margin-right: var(--s2); border-radius: 3px; background: var(--team); box-shadow: 0 0 8px var(--team); vertical-align: .02em; }
+.ck-admin .team-score { font: 700 1.35rem/1.1 var(--display); font-variant-numeric: tabular-nums; color: #fff; letter-spacing: .02em; }
+.ck-admin .team-meta { color: var(--ink-3); font: .72rem/1.4 var(--mono); }
+.ck-admin .led-meter { display: grid; grid-template-columns: repeat(30, minmax(0, 1fr)); gap: 3px; margin: 6px 0 4px; }
+.ck-admin .led { height: 10px; border-radius: 3px; background: rgba(148, 163, 184, .1); }
+.ck-admin .led.on { background: var(--team); box-shadow: 0 0 7px color-mix(in srgb, var(--team) 70%, transparent); transition: background .3s var(--ease); }
 
-/* Telemetry cards */
+/* Telemetry: four modules, each with its own colour. */
 .ck-admin .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s4); height: 100%; }
 .ck-admin .kpi {
   --accent: var(--cyan);
   position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 2px;
   padding: var(--s4); border-radius: var(--r-l);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 9%, transparent), transparent 70%), var(--glass);
-  backdrop-filter: blur(12px);
-  border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
-  box-shadow: var(--inner), 0 0 18px color-mix(in srgb, var(--accent) 16%, transparent);
-  transition: transform .18s var(--ease), box-shadow .18s var(--ease);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 16%, var(--raised)), #101829 70%);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  box-shadow: var(--lift);
+  transition: transform .18s var(--ease), border-color .18s var(--ease);
 }
-.ck-admin .kpi:hover { transform: translateY(-2px); box-shadow: var(--inner), 0 0 24px color-mix(in srgb, var(--accent) 28%, transparent); }
-.ck-admin .kpi::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 2px; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
-.ck-admin .kpi.tone-blue { --accent: var(--blue-2); }
+.ck-admin .kpi:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--accent) 55%, transparent); }
+.ck-admin .kpi.tone-blue { --accent: var(--blue); }
 .ck-admin .kpi.tone-cyan { --accent: var(--cyan); }
-.ck-admin .kpi.tone-green { --accent: var(--green-2); }
-.ck-admin .kpi.tone-amber { --accent: var(--amber); }
-.ck-admin .kpi.tone-red { --accent: var(--red); }
+.ck-admin .kpi.tone-green { --accent: var(--emerald); }
+.ck-admin .kpi.tone-amber { --accent: var(--warn); }
+.ck-admin .kpi.tone-red { --accent: var(--bad); }
 .ck-admin .kpi.tone-purple { --accent: var(--purple); }
-.ck-admin .kpi-head { display: flex; align-items: center; gap: var(--s2); color: var(--accent); }
+.ck-admin .kpi-head { display: flex; align-items: center; gap: 10px; }
+.ck-admin .kpi-head .icon { width: 2rem; height: 2rem; padding: 6px; border-radius: 9px; color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 38%, transparent); }
 .ck-admin .kpi-head h3 { color: var(--ink-2); }
-.ck-admin .kpi-value { font: 650 1.55rem/1.2 var(--mono); font-variant-numeric: tabular-nums; margin-top: var(--s2); color: #fff; }
+.ck-admin .kpi-value { font: 700 1.7rem/1.15 var(--display); font-variant-numeric: tabular-nums; margin-top: var(--s2); color: #fff; letter-spacing: .01em; }
 .ck-admin .kpi-detail { color: var(--ink-3); font: .74rem/1.4 var(--mono); }
 .ck-admin .kpi .area-spark { width: 100%; height: 40px; margin-top: auto; padding-top: var(--s2); color: var(--accent); }
 .ck-admin .area-spark .line { fill: none; stroke: currentColor; stroke-width: 2; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
-.ck-admin .kpi-bar { height: 8px; margin-top: auto; border-radius: 999px; background: #050a14; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(56, 189, 248, .14); }
-.ck-admin .kpi-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--green), var(--green-2)); box-shadow: 0 0 10px rgba(34, 197, 94, .6); transition: width .4s var(--ease); }
+.ck-admin .kpi-bar { height: 10px; margin-top: auto; border-radius: 999px; background: rgba(8, 13, 25, .8); overflow: hidden; box-shadow: inset 0 0 0 1px var(--edge); }
+.ck-admin .kpi-bar span { display: block; height: 100%; border-radius: inherit; background: repeating-linear-gradient(90deg, var(--accent) 0 10px, color-mix(in srgb, var(--accent) 70%, #000) 10px 12px); box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 60%, transparent); transition: width .4s var(--ease); }
 
 /* Couriers and roads */
 .ck-admin .status-list { list-style: none; padding: 0; display: grid; gap: var(--s2); }
-.ck-admin .status-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--s3); padding: 10px var(--s3); border-radius: var(--r-s); background: var(--bg-2); border: 1px solid var(--line-soft); }
+.ck-admin .status-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--s3); padding: 8px 10px 8px 12px; border-radius: var(--r-s); background: rgba(8, 13, 25, .55); box-shadow: inset 0 0 0 1px var(--edge); }
 .ck-admin .status-row .dot { width: .65rem; height: .65rem; border-radius: 50%; background: var(--c); box-shadow: 0 0 8px var(--c); }
-.ck-admin .status-row.tone-green { --c: var(--green-2); }
-.ck-admin .status-row.tone-red { --c: var(--red); }
+.ck-admin .status-row.tone-green { --c: var(--emerald); }
+.ck-admin .status-row.tone-red { --c: var(--coral); }
 .ck-admin .status-row.tone-purple { --c: var(--purple); }
-.ck-admin .status-row.tone-amber { --c: var(--amber); }
+.ck-admin .status-row.tone-amber { --c: var(--warn); }
 .ck-admin .status-label { color: var(--ink-2); }
-.ck-admin .status-value { font: 650 1.05rem/1 var(--mono); font-variant-numeric: tabular-nums; }
+.ck-admin .status-value { min-width: 2.4rem; padding: 3px 8px; border-radius: 8px; text-align: center; font: 700 1.05rem/1.1 var(--display); font-variant-numeric: tabular-nums; color: #fff; background: color-mix(in srgb, var(--c) 18%, transparent); }
 .ck-admin .chips { display: flex; flex-wrap: wrap; gap: var(--s2); margin-top: var(--s3); }
-.ck-admin .chip { padding: 2px var(--s2); border-radius: 999px; font-size: .76rem; color: #fde68a; background: rgba(245, 158, 11, .12); border: 1px solid rgba(245, 158, 11, .35); }
+.ck-admin .chip { padding: 3px 10px; border-radius: 999px; font-size: .76rem; font-weight: 600; color: #fde68a; background: rgba(245, 158, 11, .12); box-shadow: inset 0 0 0 1px rgba(245, 158, 11, .35); }
 
 /* Ping equaliser */
-.ck-admin .eq { list-style: none; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: var(--s2); align-items: end; }
-.ck-admin .eq-bar { display: grid; justify-items: center; gap: 4px; --c: var(--green-2); }
-.ck-admin .eq-bar[data-level="warn"] { --c: var(--amber); }
-.ck-admin .eq-bar[data-level="bad"] { --c: var(--red); }
+.ck-admin .eq { list-style: none; padding: 10px 8px 8px; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: var(--s2); align-items: end; border-radius: var(--r-m); background: rgba(8, 13, 25, .6); box-shadow: inset 0 0 0 1px var(--edge); }
+.ck-admin .eq-bar { display: grid; justify-items: center; gap: 5px; --c: var(--emerald); }
+.ck-admin .eq-bar[data-level="warn"] { --c: var(--warn); }
+.ck-admin .eq-bar[data-level="bad"] { --c: var(--bad); }
 .ck-admin .eq-col { display: grid; gap: 3px; width: 100%; max-width: 1.6rem; }
-.ck-admin .seg { height: 6px; border-radius: 2px; background: #121d33; }
+.ck-admin .seg { height: 6px; border-radius: 2px; background: rgba(148, 163, 184, .1); transition: background .25s var(--ease); }
 .ck-admin .seg.on { background: var(--c); box-shadow: 0 0 6px color-mix(in srgb, var(--c) 70%, transparent); }
-.ck-admin .eq-value { font: .72rem/1.2 var(--mono); font-variant-numeric: tabular-nums; color: var(--ink-2); }
-.ck-admin .eq-label { font-size: .74rem; color: var(--ink-3); }
+.ck-admin .eq-value { font: 600 .72rem/1.2 var(--mono); font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.ck-admin .eq-label { font: 600 .7rem/1.2 var(--mono); color: var(--ink-3); }
 .ck-admin .eq-scale { margin-top: var(--s3); color: var(--ink-3); font: .72rem/1.4 var(--mono); }
 
-/* Earthquake emergency card */
+/* Earthquake: the one red module on the page. */
 .ck-admin .quake-card {
-  border-color: rgba(239, 68, 68, .55);
-  background: linear-gradient(160deg, rgba(220, 38, 38, .2), transparent 55%), var(--glass);
-  box-shadow: var(--inner), var(--glow-red);
-  overflow: hidden; padding-top: calc(var(--s4) + 8px);
+  --accent: var(--bad);
+  border-color: rgba(239, 68, 68, .45);
+  background: radial-gradient(360px 200px at 100% 0%, rgba(239, 68, 68, .18), transparent 70%), linear-gradient(180deg, #2a1220, #140f1f 70%);
+  overflow: hidden; padding-top: calc(var(--s4) + 10px);
 }
-/* Hazard tape along the top edge. */
-.ck-admin .quake-card::before {
-  content: ""; position: absolute; inset: 0 0 auto 0; height: 8px;
-  background: repeating-linear-gradient(-45deg, var(--team-yellow) 0 10px, #0a0a0a 10px 20px);
-  opacity: .9;
-}
-.ck-admin .seismo { display: block; width: 100%; height: 44px; margin-bottom: var(--s3); color: var(--red); }
-.ck-admin .seismo path { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 4px rgba(239, 68, 68, .7)); }
-.ck-admin .seismo line { stroke: rgba(239, 68, 68, .22); stroke-width: 1; vector-effect: non-scaling-stroke; }
-.ck-admin .quake-card[data-active="true"] { border-color: var(--red); }
-.ck-admin .quake-title { display: flex; align-items: center; gap: var(--s2); margin-bottom: var(--s3); color: var(--red); }
-.ck-admin .quake-title svg { width: 1.4rem; height: 1.4rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 6px rgba(239, 68, 68, .7)); }
+.ck-admin .quake-card::before { left: 0; right: 0; top: 0; height: 7px; border-radius: 0; background: repeating-linear-gradient(-45deg, var(--team-yellow) 0 10px, #151515 10px 20px); opacity: .9; }
+.ck-admin .quake-card[data-active="true"] { border-color: var(--bad); }
+.ck-admin .quake-title { display: flex; align-items: center; gap: 10px; margin-bottom: var(--s3); color: var(--coral); }
+.ck-admin .quake-title svg { width: 1.9rem; height: 1.9rem; padding: 5px; border-radius: 9px; background: rgba(239, 68, 68, .16); box-shadow: inset 0 0 0 1px rgba(239, 68, 68, .4); fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .ck-admin .quake-title h2 { color: #fff; }
+.ck-admin .seismo { display: block; width: 100%; height: 46px; margin-bottom: var(--s3); color: var(--coral); border-radius: 8px; background: repeating-linear-gradient(90deg, rgba(255, 107, 114, .07) 0 1px, transparent 1px 24px); }
+.ck-admin .seismo path { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 4px rgba(255, 107, 114, .7)); }
+.ck-admin .seismo line { stroke: rgba(255, 107, 114, .25); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .ck-admin .quake-body { display: grid; gap: var(--s2); }
-.ck-admin .quake-state { font-weight: 650; color: var(--red-ink); }
+.ck-admin .quake-state { font-weight: 700; color: var(--red-ink); }
 .ck-admin .quake-detail { color: var(--ink-2); font-size: .88rem; }
-.ck-admin .quake-go { display: block; margin-top: var(--s3); padding: var(--s3) var(--s4); border-radius: var(--r-m); text-align: center; text-decoration: none; font-weight: 700; font-size: 1.02rem; color: #fff; background: linear-gradient(180deg, #e53935, #b71c1c); border: 1px solid #ff6b6b; box-shadow: 0 0 0 3px rgba(239, 68, 68, .18), 0 6px 18px rgba(183, 28, 28, .45), inset 0 1px 0 rgba(255, 255, 255, .25); transition: filter .15s var(--ease), box-shadow .15s var(--ease); }
-.ck-admin .quake-go:hover { filter: brightness(1.1); box-shadow: 0 0 0 4px rgba(239, 68, 68, .28), 0 0 26px rgba(239, 68, 68, .55), inset 0 1px 0 rgba(255, 255, 255, .25); }
+.ck-admin .quake-go {
+  display: block; margin-top: var(--s3); padding: 11px var(--s4) 9px; border-radius: var(--r-m); text-align: center; text-decoration: none;
+  font: 700 1.02rem/1.3 var(--display); color: #fff; letter-spacing: .01em;
+  background: linear-gradient(180deg, #ef4450, #c62533); border: 1px solid #ff8a90; border-bottom: 3px solid #7c121c;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 0 0 3px rgba(239, 68, 68, .14), 0 10px 24px -10px rgba(239, 68, 68, .8);
+  transition: transform .08s var(--ease), filter .15s var(--ease);
+}
+.ck-admin .quake-go:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.ck-admin .quake-go:active { transform: translateY(2px); }
 
-/* Quick controls */
+/* Quick settings: adjustment modules */
 .ck-admin .quicks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s4); }
-.ck-admin .quick { display: grid; gap: var(--s2); padding: var(--s3) var(--s4); border-radius: var(--r-m); background: var(--bg-2); border: 1px solid var(--line-soft); }
+.ck-admin .quick { display: grid; gap: var(--s2); padding: var(--s3) var(--s4); border-radius: var(--r-m); background: rgba(8, 13, 25, .55); box-shadow: inset 0 0 0 1px var(--edge); transition: box-shadow .15s var(--ease); }
+.ck-admin .quick:hover, .ck-admin .quick:focus-within { box-shadow: inset 0 0 0 1px rgba(54, 120, 255, .45); }
 .ck-admin .quick-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s2); }
-.ck-admin .quick-head label { color: var(--ink-2); font-weight: 500; }
-.ck-admin .quick-value { font: 650 1.05rem/1 var(--mono); font-variant-numeric: tabular-nums; color: #fff; }
-.ck-admin .quick-value .unit { margin-left: 4px; font: 500 .76rem/1 var(--font); color: var(--ink-3); }
-.ck-admin .quick-range { display: flex; justify-content: space-between; font: .7rem/1.4 var(--mono); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.ck-admin .quick-head label { color: var(--ink-2); font-weight: 600; }
+.ck-admin .quick-value { padding: 2px 8px; border-radius: 8px; background: rgba(54, 120, 255, .14); font: 700 1.05rem/1.2 var(--display); font-variant-numeric: tabular-nums; color: #fff; white-space: nowrap; }
+.ck-admin .quick-value .unit { margin-left: 4px; font: 500 .74rem/1 var(--font); color: var(--ink-3); }
+.ck-admin .quick-range { display: flex; justify-content: space-between; font: .7rem/1.4 var(--mono); color: var(--ink-3); }
 .ck-admin .quick-note { min-height: 1em; font-size: .78rem; color: var(--red-ink); }
 .ck-admin .quick-note:empty { display: none; }
-.ck-admin input[type="range"] {
-  --fill: 50%;
-  appearance: none; width: 100%; height: 1.75rem; margin: 0; background: transparent; cursor: pointer;
-}
-.ck-admin input[type="range"]::-webkit-slider-runnable-track { height: 8px; border-radius: 999px; background: linear-gradient(90deg, var(--blue) 0, var(--cyan) var(--fill), #172540 var(--fill)); box-shadow: inset 0 0 0 1px rgba(56, 189, 248, .2); }
-.ck-admin input[type="range"]::-moz-range-track { height: 8px; border-radius: 999px; background: #172540; }
+.ck-admin input[type="range"] { --fill: 50%; appearance: none; width: 100%; height: 1.75rem; margin: 0; background: transparent; cursor: pointer; }
+.ck-admin input[type="range"]::-webkit-slider-runnable-track { height: 8px; border-radius: 999px; background: linear-gradient(90deg, var(--blue) 0, var(--cyan) var(--fill), rgba(148, 163, 184, .14) var(--fill)); box-shadow: inset 0 0 0 1px rgba(148, 163, 184, .12); }
+.ck-admin input[type="range"]::-moz-range-track { height: 8px; border-radius: 999px; background: rgba(148, 163, 184, .14); }
 .ck-admin input[type="range"]::-moz-range-progress { height: 8px; border-radius: 999px; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
-.ck-admin input[type="range"]::-webkit-slider-thumb { appearance: none; width: 20px; height: 20px; margin-top: -6px; border-radius: 50%; background: #fff; border: 3px solid var(--blue); box-shadow: 0 0 12px rgba(0, 210, 255, .6); }
-.ck-admin input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 3px solid var(--blue); box-shadow: 0 0 12px rgba(0, 210, 255, .6); }
+.ck-admin input[type="range"]::-webkit-slider-thumb { appearance: none; width: 20px; height: 20px; margin-top: -6px; border-radius: 50%; background: #fff; border: 4px solid var(--blue); box-shadow: 0 0 0 3px rgba(54, 120, 255, .2), 0 2px 6px rgba(0, 0, 0, .5); transition: transform .12s var(--ease); }
+.ck-admin input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.12); }
+.ck-admin input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 4px solid var(--blue); box-shadow: 0 0 0 3px rgba(54, 120, 255, .2); }
 .ck-admin input[type="range"]:focus-visible { outline: none; }
-.ck-admin input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px rgba(0, 210, 255, .35), 0 0 12px rgba(0, 210, 255, .6); }
+.ck-admin input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px rgba(20, 217, 245, .4); }
 .ck-admin input[type="range"]:disabled { cursor: not-allowed; opacity: .45; }
 
-/* Event log */
-.ck-admin .log { list-style: none; padding: 0; display: grid; gap: var(--s1); max-height: 62vh; overflow: auto; }
-.ck-admin .log li { --c: var(--cyan-2); display: grid; grid-template-columns: 5.6rem 6.6rem minmax(0, 1fr); align-items: baseline; gap: var(--s3); padding: var(--s2) var(--s3); border-radius: var(--r-s); border-left: 3px solid var(--c); background: rgba(5, 8, 17, .7); }
-.ck-admin .log li[data-tone="success"] { --c: var(--green-2); }
-.ck-admin .log li[data-tone="warn"] { --c: var(--amber); }
-.ck-admin .log li[data-tone="critical"] { --c: var(--red); }
-.ck-admin .log li[data-tone="special"] { --c: var(--purple); }
+/* Event log: a timeline with a coloured mark per kind */
+.ck-admin .log { position: relative; list-style: none; padding: 0 0 0 18px; display: grid; gap: 6px; max-height: 62vh; overflow: auto; }
+.ck-admin .log::before { content: ""; position: absolute; left: 5px; top: 6px; bottom: 6px; width: 2px; border-radius: 2px; background: linear-gradient(180deg, rgba(168, 121, 255, .45), rgba(148, 163, 184, .08)); }
+.ck-admin .log li { --c: var(--info); position: relative; display: grid; grid-template-columns: 5.6rem 6.6rem minmax(0, 1fr); align-items: baseline; gap: var(--s3); padding: 8px var(--s3); border-radius: var(--r-s); background: rgba(8, 13, 25, .55); box-shadow: inset 0 0 0 1px var(--edge); }
+.ck-admin .log li::before { content: ""; position: absolute; left: -17px; top: 14px; width: 10px; height: 10px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 3px var(--bg), 0 0 8px var(--c); }
+.ck-admin .log li[data-tone="success"] { --c: var(--emerald); }
+.ck-admin .log li[data-tone="warn"] { --c: var(--warn); }
+.ck-admin .log li[data-tone="critical"] { --c: var(--bad); }
+.ck-admin .log li[data-tone="special"] { --c: var(--magenta); }
 .ck-admin .log time { color: var(--ink-3); font: .78rem/1.5 var(--mono); }
-.ck-admin .log .tone { justify-self: start; padding: 1px var(--s2); border-radius: 999px; font-size: .72rem; font-weight: 600; color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); border: 1px solid color-mix(in srgb, var(--c) 40%, transparent); }
+.ck-admin .log .tone { justify-self: start; padding: 1px var(--s2); border-radius: 999px; font-size: .72rem; font-weight: 700; color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 40%, transparent); }
 .ck-admin .log .msg { color: var(--ink-2); overflow-wrap: anywhere; }
-.ck-admin .log li.empty { display: block; border-left-color: transparent; background: none; }
+.ck-admin .log li.empty { display: block; background: none; box-shadow: none; }
+.ck-admin .log li.empty::before { display: none; }
 .ck-admin .recent-card .log { max-height: 17rem; }
 .ck-admin .recent-card .log li { grid-template-columns: 5.2rem minmax(0, 1fr); }
 .ck-admin .recent-card .log .tone { display: none; }
 
 /* ── Tables ─────────────────────────────────────────────────────────────── */
 .ck-admin .table-card { padding: 0; overflow: hidden; }
+.ck-admin .table-card::before { z-index: 2; }
 /* The scrollbar keeps its space, so fewer rows after a search never widen the columns. */
 .ck-admin .table-scroll { max-height: 66vh; overflow: auto; scrollbar-gutter: stable; }
 .ck-admin .data-table { width: 100%; min-width: 40rem; table-layout: fixed; border-collapse: separate; border-spacing: 0; font-size: .9rem; }
-.ck-admin .data-table th { position: sticky; top: 0; z-index: 1; text-align: left; font-weight: 600; color: var(--ink-2); background: #0a1120; border-bottom: 1px solid var(--line); padding: 0; }
+.ck-admin .data-table th { position: sticky; top: 0; z-index: 1; text-align: left; font-weight: 700; color: var(--ink-2); background: #111a2e; border-bottom: 1px solid var(--edge-2); padding: 0; }
 .ck-admin .data-table th.num, .ck-admin .data-table td.num { text-align: right; }
 .ck-admin .data-table td.num { font-family: var(--mono); font-size: .84rem; }
-.ck-admin .data-table .sort { width: 100%; min-height: 2.6rem; padding: 10px var(--s4); border: 0; border-radius: 0; background: none; text-align: inherit; color: inherit; box-shadow: none; }
-.ck-admin .data-table .sort:hover { color: var(--cyan); box-shadow: none; }
+.ck-admin .data-table .sort { width: 100%; min-height: 2.6rem; padding: 10px var(--s4); border: 0; border-radius: 0; background: none; text-align: inherit; color: inherit; box-shadow: none; font-weight: 700; }
+.ck-admin .data-table .sort:hover:not(:disabled) { color: var(--cyan); filter: none; transform: none; }
+.ck-admin .data-table .sort:active:not(:disabled) { transform: none; }
 .ck-admin .data-table th[aria-sort] .sort { color: var(--cyan); }
 .ck-admin .data-table th[aria-sort="ascending"] .sort::after { content: " ↑"; }
 .ck-admin .data-table th[aria-sort="descending"] .sort::after { content: " ↓"; }
-.ck-admin .data-table td { padding: 10px var(--s4); border-bottom: 1px solid var(--line-soft); font-variant-numeric: tabular-nums; vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ck-admin .data-table td { padding: 10px var(--s4); border-bottom: 1px solid var(--edge); font-variant-numeric: tabular-nums; vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ck-admin .data-table tbody tr { transition: background .12s var(--ease); }
-.ck-admin .data-table tbody tr:hover { background: rgba(56, 189, 248, .07); }
+.ck-admin .data-table tbody tr:nth-child(even) { background: rgba(148, 163, 184, .025); }
+.ck-admin .data-table tbody tr:hover { background: rgba(20, 217, 245, .06); }
 .ck-admin .data-table td.num .spark { margin-left: var(--s3); vertical-align: middle; }
 .ck-admin .table-card .empty { padding: var(--s4) var(--s5); }
-.ck-admin .spark { width: 96px; height: 24px; fill: none; stroke: var(--cyan); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; filter: drop-shadow(0 0 3px rgba(0, 210, 255, .5)); }
+.ck-admin .spark { width: 96px; height: 24px; fill: none; stroke: var(--cyan); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; filter: drop-shadow(0 0 3px rgba(20, 217, 245, .5)); }
 
-/* ── Map (M5-3): only the frame and toolbar look; the canvas draws itself ── */
+/* ── Map (M5-3): only the board frame and the toolbar; the canvas draws itself ── */
 .ck-admin #map { display: flex; flex-direction: column; gap: var(--s3); }
+/* The canvas sits in the bezel of the physical board: a dark frame and a lit edge. */
 .ck-admin .map-canvas {
   width: 100%; aspect-ratio: 1; cursor: crosshair; border-radius: var(--r-m);
   background: var(--map-bg);
-  border: 1px solid rgba(0, 210, 255, .45);
-  box-shadow: 0 0 0 4px rgba(0, 210, 255, .06), 0 0 26px rgba(0, 210, 255, .25), inset 0 0 40px rgba(0, 0, 0, .5);
+  border: 1px solid rgba(32, 217, 194, .5);
+  box-shadow: 0 0 0 6px #0a1120, 0 0 0 7px rgba(148, 163, 184, .18), 0 0 30px -4px rgba(32, 217, 194, .35), inset 0 0 40px rgba(0, 0, 0, .5);
 }
 .ck-admin .map-slot { position: relative; }
-.ck-admin .map-large .map-canvas { max-height: 76vh; max-width: 76vh; margin: 0 auto; }
-.ck-admin .map-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px; border-radius: var(--r-m); background: var(--bg-2); border: 1px solid var(--line-soft); }
-.ck-admin .map-toolbar button { min-width: 2.5rem; min-height: 2.5rem; padding: 4px 8px; font-size: 1.05rem; position: relative; background: var(--surface-3); }
-.ck-admin .map-toolbar button.active { border-color: var(--cyan); box-shadow: 0 0 0 1px var(--cyan) inset, var(--glow-cyan); }
-.ck-admin .map-toolbar button::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: var(--tool-color, transparent); opacity: .18; pointer-events: none; }
-.ck-admin .toolbar-sep { width: 1px; height: 1.6rem; background: var(--line); }
+.ck-admin .map-card .map-canvas { margin-top: 6px; }
+.ck-admin .map-large .map-canvas { max-height: 76vh; max-width: 76vh; margin: 8px auto 0; }
+.ck-admin .map-large { --accent: var(--teal); }
+.ck-admin .map-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px; border-radius: var(--r-m); background: rgba(8, 13, 25, .7); box-shadow: inset 0 0 0 1px var(--edge); }
+.ck-admin .map-toolbar button { min-width: 2.5rem; min-height: 2.5rem; padding: 4px 8px; font-size: 1.05rem; position: relative; }
+.ck-admin .map-toolbar button.active { border-color: var(--teal); border-bottom-color: #0b6e63; box-shadow: 0 0 0 1px var(--teal) inset, 0 0 14px -2px rgba(32, 217, 194, .6); }
+.ck-admin .map-toolbar button::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: var(--tool-color, transparent); opacity: .2; pointer-events: none; }
+.ck-admin .toolbar-sep { width: 1px; height: 1.6rem; background: var(--edge-2); }
 .ck-admin .map-player-select { width: auto; min-height: 2.5rem; padding: 4px 8px; font-size: .85rem; }
 .ck-admin .map-density { display: flex; align-items: center; gap: var(--s2); font-size: .85rem; color: var(--ink-2); }
 .ck-admin .map-density input[type="range"] { width: 7rem; }
 
 /* ── Earthquake page ────────────────────────────────────────────────────── */
 .ck-admin .quake-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: var(--s4); }
+.ck-admin .quake-grid > .card:not(.quake-card) { --accent: var(--teal); }
 .ck-admin .quake-form { display: flex; flex-wrap: wrap; align-items: end; gap: var(--s3); margin-bottom: var(--s3); }
-.ck-admin .quake-form label { display: grid; gap: 6px; color: var(--ink-2); font-size: .88rem; }
+.ck-admin .quake-form label { display: grid; gap: 6px; color: var(--ink-2); font-size: .88rem; font-weight: 600; }
 .ck-admin .quake-form input { width: 7.5rem; }
 .ck-admin .trend { display: flex; align-items: center; gap: var(--s3); margin-top: var(--s3); color: var(--ink-3); }
 
 /* ── Confirmation dialog ────────────────────────────────────────────────── */
-.ck-admin dialog.confirm { max-width: 28rem; padding: var(--s5); color: var(--ink); background: #0a1120; border: 1px solid var(--line); border-radius: var(--r-l); box-shadow: 0 20px 60px rgba(0, 0, 0, .6), var(--glow-cyan); }
+.ck-admin dialog.confirm { max-width: 28rem; padding: var(--s5); color: var(--ink); background: linear-gradient(180deg, #18243a, #111a2e); border: 1px solid var(--edge-2); border-top: 4px solid var(--coral); border-radius: var(--r-l); box-shadow: 0 24px 60px rgba(0, 0, 0, .65); }
 .ck-admin dialog.confirm[open] { animation: ck-pop .16s var(--ease); }
-.ck-admin dialog.confirm::backdrop { background: rgba(2, 6, 14, .72); backdrop-filter: blur(2px); }
+.ck-admin dialog.confirm::backdrop { background: rgba(4, 7, 16, .72); backdrop-filter: blur(3px); }
+.ck-admin dialog.confirm h2 { font-size: 1.15rem; }
 .ck-admin dialog.confirm p { color: var(--ink-2); margin: var(--s3) 0 var(--s5); }
 .ck-admin .confirm-actions { display: flex; justify-content: flex-end; gap: var(--s2); }
-.ck-admin .confirm-actions .danger { background: rgba(239, 68, 68, .22); color: #fff; }
 @keyframes ck-pop { from { opacity: 0; transform: translateY(6px) scale(.98); } to { opacity: 1; transform: none; } }
 
 /* ── Link lost: the values are the last known ones, not live ────────────── */
 .ck-admin.is-stale main :is(.dash, .table-card, .log, .quake-grid, .params-card) { opacity: .55; filter: saturate(.35); transition: opacity .2s var(--ease), filter .2s var(--ease); }
 .ck-admin.is-stale .topbar .timer { color: var(--ink-3); text-shadow: none; }
+.ck-admin.is-stale .match-strip .clock::after { animation: none; opacity: 0; }
 
 /* ── Responsive ─────────────────────────────────────────────────────────── */
 @media (max-width: 82rem) {
   .ck-admin .dash { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "strip strip" "kpi kpi" "map entity" "map eq" "quake quake" "quick quick" "recent recent"; }
-  .ck-admin .map-card .map-canvas { max-width: 34rem; margin: 0 auto; }
+  .ck-admin .map-card .map-canvas { max-width: 34rem; margin: 6px auto 0; }
+}
+@media (max-width: 68rem) {
+  .ck-admin .topbar { gap: var(--s3); }
+  .ck-admin .mark { order: 6; flex-basis: 100%; }
 }
 @media (max-width: 60rem) {
   .ck-admin .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -475,24 +514,27 @@
   .ck-admin .topbar { position: static; padding: var(--s3) var(--s4); gap: var(--s3); }
   .ck-admin .brand { margin-right: auto; }
   .ck-admin .server-pill { order: 2; }
-  .ck-admin .match { order: 3; width: 100%; padding: var(--s2) 0 0; border-left: 0; border-top: 1px solid var(--line-soft); justify-content: space-between; gap: var(--s3); }
+  .ck-admin .match { order: 3; width: 100%; justify-content: space-between; }
+  .ck-admin .match > div { flex: 1; }
   .ck-admin .mark { order: 4; width: 100%; }
   .ck-admin .match-controls { order: 5; width: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); }
   .ck-admin .shell { grid-template-columns: minmax(0, 1fr); min-height: 0; }
-  .ck-admin .sidebar { position: sticky; top: 0; z-index: 9; height: auto; flex-direction: row; align-items: center; padding: var(--s2) var(--s3); border-right: 0; border-bottom: 1px solid var(--line-soft); background: rgba(2, 4, 8, .94); backdrop-filter: blur(12px); }
+  .ck-admin .sidebar { position: sticky; top: 0; z-index: 9; height: auto; flex-direction: row; align-items: center; padding: var(--s2) var(--s3); border-right: 0; border-bottom: 1px solid var(--edge); background: rgba(11, 17, 32, .95); backdrop-filter: blur(10px); }
   .ck-admin .nav { flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; }
-  .ck-admin .nav ul { display: flex; gap: var(--s1); }
-  .ck-admin .nav a { white-space: nowrap; padding: var(--s2) var(--s3); }
+  .ck-admin .nav ul { display: flex; gap: 4px; }
+  .ck-admin .nav a { white-space: nowrap; padding: 5px 10px 5px 6px; }
+  .ck-admin .nav a svg { width: 1.8rem; height: 1.8rem; padding: 6px; }
   /* In the top row the lit strip sits under the item. */
-  .ck-admin .nav a[aria-current="page"] { background: linear-gradient(0deg, rgba(29, 99, 255, .3), transparent); box-shadow: inset 0 -3px 0 var(--cyan); }
+  .ck-admin .nav a[aria-current="page"] { background: linear-gradient(0deg, rgba(54, 120, 255, .26), transparent); }
+  .ck-admin .nav a[aria-current="page"]::before { left: 10px; right: 10px; top: auto; bottom: 0; width: auto; height: 3px; border-radius: 3px 3px 0 0; }
   .ck-admin .board-pill { display: none; }
   .ck-admin main { padding: var(--s4) var(--s3) var(--s6); }
   .ck-admin .banner { margin: var(--s3) var(--s3) 0; }
   .ck-admin .card { padding: var(--s4); }
   .ck-admin .match-strip { grid-template-columns: minmax(0, 1fr); gap: var(--s4); }
-  .ck-admin .clock-box { border-right: 0; border-bottom: 1px solid var(--line-soft); padding: 0 0 var(--s4); }
-  .ck-admin .clock { width: 9rem; font-size: 2.15rem; }
-  .ck-admin .kpi-value { font-size: 1.35rem; }
+  .ck-admin .clock-box { border-right: 0; border-bottom: 1px dashed var(--edge-2); padding: 0 0 var(--s4); }
+  .ck-admin .clock { width: 9rem; font-size: 2.2rem; }
+  .ck-admin .kpi-value { font-size: 1.4rem; }
   .ck-admin .log li { grid-template-columns: auto 1fr; }
   .ck-admin .log .msg { grid-column: 1 / -1; }
   .ck-admin .toolbar .ghost { margin-left: 0; }
@@ -502,10 +544,11 @@
 @media (max-width: 26rem) {
   .ck-admin .kpis { grid-template-columns: minmax(0, 1fr); }
   .ck-admin .brand-text small { display: none; }
+  .ck-admin .match > div { padding-inline: 8px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .ck-admin *, .ck-admin *::before, .ck-admin *::after { transition: none !important; animation: none !important; }
-  .ck-admin .kpi:hover { transform: none; }
+  .ck-admin .kpi:hover, .ck-admin button:hover:not(:disabled), .ck-admin .quake-go:hover { transform: none; }
 }
 @media (forced-colors: active) {
   .ck-admin :is(.led.on, .seg.on, .status-row .dot, .board-pill::before, .server-pill::before) { forced-color-adjust: none; }

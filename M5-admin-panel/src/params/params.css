@@ -1,12 +1,12 @@
 /* Parameter manager (M5-2), on the tokens of admin.css, scoped to the admin page. */
 .ck-admin #params { display: grid; gap: var(--s3); }
 .ck-admin .params-card { padding: var(--s4); }
-.ck-admin .param-group { border: 1px solid var(--line-soft); border-radius: var(--r-m); background: var(--bg-2); overflow: hidden; transition: border-color .15s var(--ease); }
-.ck-admin .param-group[open] { border-color: var(--line); }
+.ck-admin .param-group { border: 1px solid var(--line-soft); border-radius: var(--r-m); background: rgba(8, 13, 25, .55); overflow: hidden; transition: border-color .15s var(--ease); }
+.ck-admin .param-group[open] { border-color: rgba(54, 120, 255, .35); }
 .ck-admin .param-group > summary {
   cursor: pointer; display: flex; align-items: center; gap: var(--s2);
-  padding: var(--s3) var(--s4); font-weight: 650; list-style: none;
-  background: linear-gradient(90deg, rgba(29, 99, 255, .1), transparent 60%);
+  padding: var(--s3) var(--s4); font-weight: 700; list-style: none;
+  background: linear-gradient(90deg, rgba(54, 120, 255, .14), transparent 60%);
 }
 .ck-admin .param-group > summary::-webkit-details-marker { display: none; }
 .ck-admin .param-group > summary::before { content: ""; width: .5rem; height: .5rem; border-right: 2px solid var(--cyan-2); border-bottom: 2px solid var(--cyan-2); transform: rotate(-45deg); transition: transform .15s var(--ease); }

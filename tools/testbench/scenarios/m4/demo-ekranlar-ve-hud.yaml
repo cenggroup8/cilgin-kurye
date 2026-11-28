@@ -1,0 +1,11 @@
+# An existing demo or test, run as a command. From #108 (Muhib).
+module: M4
+title: Ekranlar ve HUD (M4-1)
+run:
+  cwd: M4-player-client
+  cmd: npm test
+needs:
+  - M4-player-client/package.json
+pr: "#66, #68, #79"
+fake: Sahte sunucu mesajları.
+result: Katılım, lobi, geri sayım, bitiş ekranları ve HUD.

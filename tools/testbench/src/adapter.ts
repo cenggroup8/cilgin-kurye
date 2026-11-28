@@ -1,5 +1,5 @@
 // What an adapter is (README "Adapter"), and a ready adapter for programs that print lines.
-import { spawn, type ChildProcess } from "node:child_process";
+import { spawn, spawnSync, type ChildProcess } from "node:child_process";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { createInterface } from "node:readline";
@@ -52,8 +52,10 @@ export async function loadAdapter(m: ModuleInfo): Promise<AdapterModule | string
 
 export interface CommandOptions {
   cmd: string;
-  args?: string[];
+  args?: string[]; // without args, cmd is run by the shell ("npm run demo:match")
   cwd: string;
+  /** Folders that need npm ci before the first run (done once, before the clock starts). */
+  install?: string[];
   env?: Record<string, string>;
   /** Turns a page control into a line on the standard input of the program (optional). */
   inputLine?(name: string, value: unknown): string | null;
@@ -72,15 +74,23 @@ export function commandAdapter(opts: CommandOptions): Adapter {
   let ctx: Ctx;
   let stopping = false;
   return {
-    start(s, c) {
+    async start(s, c) {
       ctx = c;
+      for (const dir of opts.install ?? []) {
+        if (existsSync(join(dir, "node_modules"))) continue;
+        const ci = existsSync(join(dir, "package-lock.json")) ? ["ci", "--no-audit", "--no-fund"] : ["install", "--no-audit", "--no-fund"];
+        ctx.emit({ kind: "log", text: `npm ${ci[0]} in ${dir} (first run only) …` });
+        const r = spawnSync("npm", ci, { cwd: dir, shell: process.platform === "win32", encoding: "utf8" });
+        if (r.status !== 0) throw new Error(`npm ${ci[0]} in ${dir} failed: ${(r.stderr || r.stdout || "").trim().split("\n").pop()}`);
+      }
       const env: Record<string, string> = { ...process.env, NO_COLOR: "1", FORCE_COLOR: "0" } as Record<string, string>;
       // PORT is the setting of the bench page; demos (M2) read PORT too, so it must not reach them.
       delete env.PORT;
       Object.assign(env, opts.env);
       for (const [k, v] of Object.entries(s.params)) env[`BENCH_${k.toUpperCase().replace(/[^A-Z0-9]/g, "_")}`] = String(v);
       if (s.seconds !== null) env.BENCH_SECONDS = String(s.seconds);
-      child = spawn(opts.cmd, opts.args ?? [], { cwd: opts.cwd, env, stdio: ["pipe", "pipe", "pipe"], detached: true });
+      const shell = opts.args === undefined;
+      child = spawn(opts.cmd, opts.args ?? [], { cwd: opts.cwd, env, shell, stdio: ["pipe", "pipe", "pipe"], detached: process.platform !== "win32" });
       const read = (stream: NodeJS.ReadableStream | null, err: boolean) => {
         if (!stream) return;
         createInterface({ input: stream }).on("line", (line) => {
@@ -115,6 +125,10 @@ export function commandAdapter(opts: CommandOptions): Adapter {
         stopping = true;
         // The program may start its own programs (make → server + board): stop the whole group.
         const kill = (sig: NodeJS.Signals) => {
+          if (process.platform === "win32") {
+            spawnSync("taskkill", ["/pid", String(child!.pid), "/T", "/F"], { stdio: "ignore" });
+            return;
+          }
           try {
             process.kill(-child!.pid!, sig);
           } catch {

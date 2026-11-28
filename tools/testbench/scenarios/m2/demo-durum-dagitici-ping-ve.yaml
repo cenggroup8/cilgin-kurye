@@ -1,0 +1,16 @@
+# An existing demo or test, run as a command. From #108 (Muhib).
+module: M2
+title: Durum dağıtıcı, ping ve metrikler (M2-3)
+run:
+  cwd: M2-network
+  cmd: npm run demo:broadcast
+install:
+  - M2-network
+needs:
+  - M2-network/src/demo-broadcast.ts
+files:
+  - M2-network/src/demo-broadcast.ts
+  - M2-network/test/fakes/fakeM1.ts
+  - M2-network/test/fakes/botPhone.ts
+fake: Sahte M1 oyun durumu üretiyor, 8 bot telefon dinliyor (10 s).
+result: Her bot her tick'in durumunu alıyor, kayıp yok; ping ve kare hızı ölçülüyor.

@@ -1,0 +1,32 @@
+# What the module takes and gives (v2.1 tables), shown on the page. From #108 (Muhib).
+name: LED tahta ve ESP32
+team: Tuğberk, Hasan Alperen, Hasan Hüseyin, Muhib, Umutcan
+doc: docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.md (bölüm 10)
+summary: "Fiziksel şehir tahtası ve ESP32 programı: sunucuyla bağlantı, vuruş algılama ve motorlar, LED haritası ve
+  animasyon. PC emülatörleri tahta ile sunucunun birbirini beklemeden test edilmesini sağlar."
+inputs:
+  - data: Tahta durumu
+    from: M2, UDP
+    content: "saniyede 10–30: aşama, oyuncular, teslimat noktaları, engeller, deprem"
+  - data: Config, titreşim, gecikme ölçümü
+    from: M2, TCP / UDP
+    content: renkler, parlaklık, güç sınırı; motorlar, güç, süre; sunucu saati
+  - data: Sensör
+    from: donanım
+    content: ivme ve jiroskop verisi
+  - data: Şehir planı
+    from: ortak dosya
+    content: derlenirken LED haritasına çevrilir
+outputs:
+  - data: Işık
+    to: LED şeritleri
+    content: her LED'in rengi, saniyede 60 kare
+  - data: Titreşim
+    to: 4 motor
+    content: yumuşak başlangıçlı motor gücü
+  - data: Deprem olayı
+    to: M2 → M1, M5
+    content: kaynak, güç 0–10, merkez, bölge 0–8, güven
+  - data: Sensör örnekleri, durum, gecikme cevabı
+    to: M2 → M5
+    content: sismik grafik, fps, Wi-Fi, güç tahmini, hatalar

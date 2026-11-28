@@ -1,0 +1,11 @@
+# An existing demo or test, run as a command. From #108 (Muhib).
+module: M4
+title: Kontroller ve sahte sunucu (M4-2)
+run:
+  cwd: M4-player-client
+  cmd: npm test
+needs:
+  - M4-player-client/package.json
+pr: "#72"
+fake: Sahte sunucu.
+result: "Telefon sahte sunucuya bağlanır: katıl, sür, pusula."

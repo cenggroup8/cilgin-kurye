@@ -1,0 +1,19 @@
+# An existing demo or test, run as a command. From #108 (Muhib).
+module: M6
+title: "Emülatörler: tahta ↔ sunucu (M6-5)"
+run:
+  cwd: tools/emulators
+  cmd: npm run demo
+install:
+  - M2-network
+  - tools/emulators
+needs:
+  - tools/emulators/src/demo.ts
+files:
+  - tools/emulators/src/server/serverEmulator.ts
+  - tools/emulators/src/board/boardEmulator.ts
+  - M2-network/src/board/boardLink.ts
+fake: Sunucu emülatörü şehir planından sahte bir oyun oynatıyor; tahta emülatörü sahte sensör, vuruş ve durum raporu
+  üretiyor.
+result: "16 kontrol: bağlanma, config, durumlar, gecikme, sensör, durum raporu; bir vuruş = bir deprem olayı; titreşim =
+  yumuşak başlangıç ve tek motor olayı; %30 kayıpta bağlantı sürüyor; Wi-Fi kesilip gelince yeniden bağlanıyor."

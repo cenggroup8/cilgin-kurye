@@ -1,0 +1,17 @@
+# An existing demo or test, run as a command. From #108 (Muhib).
+module: M1
+title: Maç ve lobi (M1-2)
+run:
+  cwd: M1-game-server
+  cmd: npm run demo:match
+install:
+  - M1-game-server
+needs:
+  - M1-game-server/test/scenarios/match-demo.ts
+files:
+  - M1-game-server/src/match/match.ts
+  - M1-game-server/test/scenarios/match-demo.ts
+fake: "Script M2 ve M3'ün yerine geçiyor: oyuncular katılıyor, skorlar veriliyor, bir oyuncu kopup geri geliyor, admin
+  komut gönderiyor. Süreler belgedeki gibi (3 s geri sayım, 5 dk oyun, kopan oyuncu için 30 s)."
+result: "Aşamalar sırayla: lobi → geri sayım → oyun → bitiş. Kopan oyuncuyu bot devralıyor, geri gelince motoru geri
+  veriyor. Sonunda kazanan takım (ya da berabere)."

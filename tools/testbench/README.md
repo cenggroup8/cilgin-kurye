@@ -38,8 +38,10 @@ npm test                            # tests of the bench itself + check-imports
 
 Exit code 0 only when every scenario passed. Options: `--seconds N`, `--no-save`, `--verbose`.
 
-On the page: choose a scenario on the left; it starts at once. A link can start one too:
-`http://localhost:5173/#run=m2/3-loss30`, or play a saved run: `#replay=<file>.ndjson&speed=2`.
+On the page: choose a scenario on the left. Its card shows what the module takes and gives,
+the fake data, the expected result and **where the data comes from** (below); **Başlat**
+runs it. A link can open one (`#show=m2/3-loss30`), start one (`#run=m2/3-loss30`) or play a
+saved run (`#replay=<file>.ndjson&speed=2`).
 
 A scenario **passes** when it sent at least one check, every check is ok (the last one with
 each name counts), and every name in `expect` came.
@@ -78,7 +80,9 @@ reads its standard output line by line:
 @check "zone right or next to it" fail 352/360
 ```
 
-A JSON line works too. Every other line goes to the log box.
+A JSON line works too. A line that starts with `✓` / `✔` (passed) or `✗` / `✘` (failed) is a
+check as well (`✓ name: detail`), so existing demos that print their checks need no change.
+Every other line goes to the log box.
 
 Every run is saved as `runs/<module>-<scenario>-<time>.ndjson`: one record per line, a
 `run` line first and a `result` line last. A saved run can be played again on the page
@@ -109,6 +113,46 @@ views: [board]            # module views (below), optional
 ```
 
 A file name starting with a number keeps the order on the page (`1-clean`, `2-delay80`).
+
+**An existing demo or test, without an adapter.** A scenario with `run:` only runs a command
+until it ends (5 minutes at most). Its `✓ / ✗` lines are the checks, and its exit code is the
+check "program ends without error":
+
+```yaml
+module: M1
+title: "Maç ve lobi (M1-2)"
+run: { cwd: M1-game-server, cmd: "npm run demo:match" }
+install: [M1-game-server]        # npm ci there before the first run
+needs: [M1-game-server/test/scenarios/match-demo.ts]   # not there: shown as waiting for `pr`
+pr: "#59"
+tool: make                       # optional: a program that must be on the computer
+files: [M1-game-server/src/match/match.ts]
+fake: "Script M2 ve M3'ün yerine geçiyor …"     # what the module gets instead of the others
+result: "Aşamalar sırayla: lobi → geri sayım → oyun → bitiş …"   # what a person must see
+```
+
+The `demo-*.yaml` files came from the module demo page of #108 (Muhib).
+
+**What the module takes and gives:** `scenarios/<module>/module.yaml` (`name`, `team`, `doc`,
+`summary`, `inputs` and `outputs` as in the v2.1 tables). The page shows it on top of the card.
+
+## Where the data comes from
+
+The teacher must be able to see that the input is not made up. Every scenario lists its files:
+
+```yaml
+sources:
+  - { file: M2-network/src/board/boardLink.ts, role: code, note: "test edilen kod" }
+  - { file: M2-network/test/fakes/boardEmu.ts, role: fake, note: "sahte tahta" }
+  - { file: contracts/board_protocol.md, role: contract }
+```
+
+Roles: `code` (the tested code), `fake` (fake input), `contract`, `data`, `test`. The files of
+`files:`, the scenario file and the adapter are added by themselves. For each file the page
+shows the last commit that changed it, a sha256 of its content and a GitHub link to exactly
+this version (or a warning when it has changes that are not committed). The same list, with
+the commit of the repository, is saved at the top of every run in `runs/`, so a replay shows
+which code and which input made it. `npm test` checks that every listed file exists.
 
 ## Adapter
 

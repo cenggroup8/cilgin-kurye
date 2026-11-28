@@ -1,0 +1,17 @@
+# An existing demo or test, run as a command. From #108 (Muhib).
+module: M2
+title: Tahta bağlantısı ve ağ emülatörü (M2-4)
+run:
+  cwd: M2-network
+  cmd: npm run demo:board
+install:
+  - M2-network
+needs:
+  - M2-network/src/demo-board.ts
+files:
+  - M2-network/src/board/boardLink.ts
+  - M2-network/src/netem/netem.ts
+  - M2-network/test/fakes/boardEmu.ts
+fake: Gerçek tahta yerine tahta emülatörü; arada eklenen gecikme ve kayıp.
+result: Dört adım (temiz → 80 ms gecikme → %30 kayıp → temiz); her adımda titreşim komutu ve el vuruşu tam bir kez
+  ulaşıyor, ölçülen gecikme ve kayıp raporda.

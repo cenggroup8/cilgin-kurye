@@ -1,0 +1,13 @@
+# An existing demo or test, run as a command. From #108 (Muhib).
+module: M3
+title: Yol grafiği ve rota planlayıcı (M3-3)
+run:
+  cwd: M3-physics-traffic
+  cmd: npm run demo:routes
+needs:
+  - M3-physics-traffic/src/traffic/routes/routePlanner.ts
+files:
+  - contracts/city_plan.json
+pr: "#71"
+fake: Şehir planından gerçek grafik, engelsiz.
+result: Dört takım için 60 teslimat noktasının süresi.

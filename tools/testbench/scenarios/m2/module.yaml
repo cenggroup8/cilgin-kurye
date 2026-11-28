@@ -1,0 +1,32 @@
+# What the module takes and gives (v2.1 tables), shown on the page. From #108 (Muhib).
+name: Ağ ve senkronizasyon
+team: Tuğberk, Ayşe, Hasan Hüseyin, Umutcan
+doc: docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.md (bölüm 6)
+summary: Telefon, admin ve tahta bağlantıları; mesajların kodlanması ve kontrolü; oyun durumunun dağıtılması; ping ve ağ
+  gecikme / kayıp ayarı.
+inputs:
+  - data: Telefon mesajları
+    from: M4, WebSocket
+    content: merhaba, katıl, kontroller, "Beni bul", ping cevabı
+  - data: Admin mesajları
+    from: M5, WebSocket
+    content: komutlar, parametre değişiklikleri, istekler
+  - data: Tahta mesajları
+    from: M6, TCP ve UDP
+    content: deprem olayı, durum raporu, sensör örnekleri, gecikme cevabı
+  - data: Durum ve metrikler
+    from: M1
+    content: her tick oyun ve tahta durumu, saniyede iki kez metrikler
+outputs:
+  - data: M1'e
+    to: M1
+    content: kontrol edilmiş kontroller, katılımlar, admin komutları, tahta olayları, kopan / dönen oyuncular
+  - data: Telefonlara
+    to: M4
+    content: saniyede 30 oyun durumu, katılım cevabı, ping
+  - data: Admine
+    to: M5
+    content: saniyede 10 durum, metrikler, cevaplar, tahta verisi
+  - data: Tahtaya
+    to: M6
+    content: config ve titreşim (TCP), tahta durumu ve gecikme ölçümü (UDP)

@@ -1,0 +1,17 @@
+# An existing demo or test, run as a command. From #108 (Muhib).
+module: M1
+title: "M1 testleri: maç, teslimat, engeller, cezalar, admin"
+run:
+  cwd: M1-game-server
+  cmd: npm test
+install:
+  - M1-game-server
+needs:
+  - M1-game-server/package.json
+files:
+  - M1-game-server/test/delivery-fakes.ts
+  - M1-game-server/test/hazards-fakes.ts
+  - M1-game-server/test/city_plan.json
+fake: "delivery-fakes.ts: M1-5 parametreleri, M1-1'in seed'li rastgele sayıları, şehir planı ve M3'ün süre tablosu.
+  hazards-fakes.ts: M1-2'nin saati ve M1-5 parametreleri."
+result: 'Bütün testler geçer (Vitest özeti: "Tests … passed").'

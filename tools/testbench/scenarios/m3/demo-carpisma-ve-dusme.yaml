@@ -1,0 +1,11 @@
+# An existing demo or test, run as a command. From #108 (Muhib).
+module: M3
+title: Çarpışma ve düşme (M3-2)
+run:
+  cwd: M3-physics-traffic
+  cmd: npm test
+needs:
+  - M3-physics-traffic/src/physics/collide/colliders.ts
+pr: "#80"
+fake: Sahte binalar, engeller, NPC arabalar.
+result: Duvara, arabaya ve motora çarpma; hızlı çarpmada düşme.

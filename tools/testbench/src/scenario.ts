@@ -36,6 +36,12 @@ export interface Step {
   value?: unknown;
 }
 
+/** A scenario that only runs a command (an existing demo or test): no adapter needed. */
+export interface RunCmd {
+  cwd: string; // folder, from the repository root
+  cmd: string; // shell command; must end by itself
+}
+
 export interface Scenario {
   module: string; // "M2"
   id: string; // "m2"
@@ -48,6 +54,34 @@ export interface Scenario {
   expect: string[];
   views: string[];
   file: string;
+  run: RunCmd | null;
+  install: string[]; // folders that need npm ci before the first run
+  needs: string[]; // files that must be there (else: not on this branch yet)
+  pr: string | null; // the PR the files come in
+  tool: string | null; // a program that must be there (make)
+  files: string[]; // the files the demo uses (shown on the page)
+  fake: string | null; // what the module gets instead of the other modules
+  result: string | null; // what a person must see when it works
+  untilExit: boolean; // runs until the command ends (seconds is only a time limit)
+  sources: Source[]; // where the data comes from (shown on the page, saved with the run)
+}
+
+/** A file the run uses. role: code (the tested code), fake (fake input), contract, data, test. */
+export interface Source {
+  file: string; // from the repository root
+  role: "code" | "fake" | "contract" | "data" | "test";
+  note?: string;
+}
+export const ROLES = ["code", "fake", "contract", "data", "test"] as const;
+
+/** What the module takes and gives (scenarios/<module>/module.yaml), shown on the page. */
+export interface ModuleAbout {
+  name?: string;
+  team?: string;
+  doc?: string;
+  summary?: string;
+  inputs: { data: string; from?: string; content?: string }[];
+  outputs: { data: string; to?: string; content?: string }[];
 }
 
 export const SCENARIO_DIR = join(BENCH_DIR, "scenarios");
@@ -133,7 +167,14 @@ export async function loadScenario(file: string, id: string, name: string): Prom
     return fail(file, (e as Error).message);
   }
   if (doc.module !== undefined && String(doc.module).toUpperCase() !== m.mod) fail(file, `module is ${doc.module}, but the file is in scenarios/${id}`);
-  const seconds = doc.seconds === undefined || doc.seconds === null ? null : num(doc.seconds, file, "seconds");
+  let run: RunCmd | null = null;
+  if (doc.run !== undefined) {
+    const r = doc.run as Record<string, unknown>;
+    if (typeof r?.cmd !== "string" || typeof r?.cwd !== "string") fail(file, "run needs cwd and cmd");
+    run = { cwd: r.cwd as string, cmd: r.cmd as string };
+  }
+  // A command scenario runs until the command ends; 5 minutes at most.
+  const seconds = doc.seconds === undefined || doc.seconds === null ? (run ? 300 : null) : num(doc.seconds, file, "seconds");
   if (seconds !== null && (seconds <= 0 || seconds > 3600)) fail(file, "seconds must be between 0 and 3600");
   const params = (doc.params ?? {}) as Record<string, unknown>;
   const inputs = await Promise.all(((doc.inputs ?? []) as unknown[]).map((x) => input(x, file)));
@@ -159,6 +200,21 @@ export async function loadScenario(file: string, id: string, name: string): Prom
     expect: list(doc.expect, "expect"),
     views: list(doc.views, "views"),
     file,
+    run,
+    install: list(doc.install, "install"),
+    needs: list(doc.needs, "needs"),
+    pr: doc.pr === undefined || doc.pr === null ? null : String(doc.pr),
+    tool: typeof doc.tool === "string" ? doc.tool : null,
+    files: list(doc.files, "files"),
+    fake: typeof doc.fake === "string" ? doc.fake : null,
+    result: typeof doc.result === "string" ? doc.result : null,
+    untilExit: run !== null && (doc.seconds === undefined || doc.seconds === null),
+    sources: ((doc.sources ?? []) as Record<string, unknown>[]).map((x) => {
+      if (typeof x?.file !== "string") return fail(file, "every source needs file:");
+      const role = String(x.role ?? "code") as Source["role"];
+      if (!ROLES.includes(role)) fail(file, `source role must be one of ${ROLES.join(", ")}`);
+      return typeof x.note === "string" ? { file: x.file, role, note: x.note } : { file: x.file, role };
+    }),
   };
 }
 
@@ -166,6 +222,15 @@ export async function loadScenario(file: string, id: string, name: string): Prom
 export async function loadScenarios(id: string): Promise<Scenario[]> {
   const dir = join(SCENARIO_DIR, id);
   if (!existsSync(dir)) return [];
-  const files = readdirSync(dir).filter((f) => /\.ya?ml$/.test(f)).sort();
-  return Promise.all(files.map((f) => loadScenario(join(dir, f), id, f.replace(/\.ya?ml$/, ""))));
+  const files = readdirSync(dir).filter((f) => /\.ya?ml$/.test(f) && !/^module\.ya?ml$/.test(f)).sort();
+  const all = await Promise.all(files.map((f) => loadScenario(join(dir, f), id, f.replace(/\.ya?ml$/, ""))));
+  // Scenarios with graphs (adapter) first, then the existing demos run as commands.
+  return all.sort((a, b) => Number(a.run !== null) - Number(b.run !== null) || a.name.localeCompare(b.name));
+}
+
+export function loadAbout(id: string): ModuleAbout | null {
+  const file = join(SCENARIO_DIR, id, "module.yaml");
+  if (!existsSync(file)) return null;
+  const doc = (parse(readFileSync(file, "utf8")) ?? {}) as Partial<ModuleAbout>;
+  return { ...doc, inputs: doc.inputs ?? [], outputs: doc.outputs ?? [] };
 }

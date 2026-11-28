@@ -1,0 +1,11 @@
+# An existing demo or test, run as a command. From #108 (Muhib).
+module: M4
+title: Ağ istemcisi (M4-3), tahmin (M4-4), 3D şehir (M4-5)
+run:
+  cwd: M4-player-client
+  cmd: npm test
+needs:
+  - M4-player-client/src/net/client.ts
+pr: "#93, #76, #87"
+fake: Sahte sunucu, kayıtlı durumlar.
+result: Bağlanma ve yeniden bağlanma, tahmin ve düzeltme, şehir sahnesi.

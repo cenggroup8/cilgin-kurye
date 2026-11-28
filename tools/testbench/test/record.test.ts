@@ -17,6 +17,11 @@ describe("parseLine", () => {
   it("reads JSON records and adds mod", () => {
     expect(parseLine('{"kind":"metric","name":"x","value":1}', "M3")).toEqual({ kind: "metric", name: "x", value: 1, mod: "M3" });
   });
+  it("reads the ✓ / ✗ lines of a demo as checks", () => {
+    expect(parseLine("  ✓ sunucu deprem olayını bir kez aldı", "M6")).toEqual({ kind: "check", mod: "M6", name: "sunucu deprem olayını bir kez aldı", ok: true });
+    expect(parseLine("  ✘ 30 % loss both ways: state loss 12 %", "M2")).toEqual({ kind: "check", mod: "M2", name: "30 % loss both ways", ok: false, detail: "state loss 12 %" });
+    expect(parseLine("\x1b[32m✔\x1b[0m clean", "M2")).toMatchObject({ kind: "check", ok: true, name: "clean" });
+  });
   it("keeps other lines and broken lines as log", () => {
     expect(parseLine("plain text", "M1")).toEqual({ kind: "log", mod: "M1", text: "plain text" });
     expect(parseLine("@metric x abc", "M1").kind).toBe("log");

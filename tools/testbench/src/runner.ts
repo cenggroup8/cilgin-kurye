@@ -7,6 +7,7 @@ import type { Adapter, Out } from "./adapter.js";
 import { validate, type CheckRec, type Rec } from "./record.js";
 import type { Scenario } from "./scenario.js";
 import { BENCH_DIR } from "./modules.js";
+import { provenance } from "./provenance.js";
 
 export interface Result {
   module: string;
@@ -81,7 +82,7 @@ export class Run {
       mkdirSync(RUN_DIR, { recursive: true });
       this.file = join(RUN_DIR, `${s.id}-${s.name}-${stamp(new Date())}.ndjson`);
       this.out = createWriteStream(this.file);
-      this.write({ kind: "run", module: s.module, scenario: s.name, title: s.title, started: new Date().toISOString(), params: s.params, inputs: s.inputs, expect: s.expect, views: s.views });
+      this.write({ kind: "run", module: s.module, scenario: s.name, title: s.title, started: new Date().toISOString(), params: s.params, inputs: s.inputs, expect: s.expect, views: s.views, run: s.run, fake: s.fake, result: s.result, provenance: provenance(s) });
     }
     const seconds = this.opts.seconds !== undefined ? this.opts.seconds : s.seconds;
     try {

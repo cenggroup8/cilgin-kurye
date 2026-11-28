@@ -1,0 +1,16 @@
+# An existing demo or test, run as a command. From #108 (Muhib).
+module: M3
+title: NPC trafiği testleri (M3-4)
+run:
+  cwd: M3-physics-traffic
+  cmd: npx vitest run test/traffic/npc
+install:
+  - M3-physics-traffic
+needs:
+  - M3-physics-traffic/test/traffic/npc/npcTraffic.test.ts
+files:
+  - M3-physics-traffic/test/traffic/npc/
+  - M3-physics-traffic/src/traffic/npc/contract.ts
+pr: "#65"
+fake: Sahte yol grafiği, sahte motorlar, M1 biçiminde sahte engeller ve admin parametreleri.
+result: "35 test geçer: kilitlenmeyen trafik, üst üste binmeyen arabalar, kapalı yola girmeme, M1 sınırındaki çevirmeler."

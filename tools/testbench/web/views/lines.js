@@ -69,7 +69,7 @@ export class LineCharts {
     g.ys.push(g.xs.map(() => null));
     g.plot.addSeries(
       {
-        label: set ? `${name.slice(4)} (set)` : name,
+        label: set ? `${name.slice(4)} (ayar)` : name,
         stroke: color,
         width: set ? 1.5 : 2,
         dash: set ? [6, 4] : undefined,

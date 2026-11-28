@@ -4,11 +4,12 @@ import { createReadStream, existsSync, readdirSync, readFileSync, statSync } fro
 import { createServer } from "node:http";
 import { extname, join, normalize, sep } from "node:path";
 import { WebSocketServer, type WebSocket } from "ws";
-import { loadAdapter } from "./adapter.js";
+import { adapterFor, catalog, moduleEntry } from "./catalog.js";
 import { BENCH_DIR, MODULES } from "./modules.js";
+import { provenance } from "./provenance.js";
 import type { Rec } from "./record.js";
 import { RUN_DIR, Run, type Result } from "./runner.js";
-import { loadScenarios, type Scenario } from "./scenario.js";
+import type { Scenario } from "./scenario.js";
 
 const PORT = Number(process.env.PORT ?? 5173);
 const WEB = join(BENCH_DIR, "web");
@@ -55,19 +56,11 @@ interface Current {
 const cur: Current = { run: null, replay: null, scenario: null, head: null, history: [] };
 
 async function listModules(): Promise<Msg[]> {
-  return Promise.all(
-    MODULES.map(async (m) => {
-      const a = await loadAdapter(m);
-      let scenarios: Scenario[] = [];
-      let error: string | null = null;
-      try {
-        scenarios = await loadScenarios(m.id);
-      } catch (e) {
-        error = (e as Error).message;
-      }
-      return { ...m, ready: typeof a !== "string", reason: typeof a === "string" ? a : error, scenarios };
-    }),
-  );
+  return (await catalog()).map(({ adapter, entries, ...m }) => ({
+    ...m,
+    hasAdapter: adapter !== null,
+    scenarios: entries.map((e) => ({ ...e.scenario, file: undefined, state: e.state, why: e.why })),
+  }));
 }
 
 function listRuns(): string[] {
@@ -93,20 +86,21 @@ function ended(result: Result | Msg): void {
 
 async function start(id: string, name: string): Promise<string | null> {
   if (busy()) return "a run is going on: stop it first";
-  const m = MODULES.find((x) => x.id === id);
-  if (!m) return `no module ${id}`;
-  const a = await loadAdapter(m);
-  if (typeof a === "string") return a;
-  const s = (await loadScenarios(id)).find((x) => x.name === name);
-  if (!s) return `no scenario ${name}`;
-  const run = new Run(s, a.create(), {
+  const info = MODULES.find((x) => x.id === id);
+  if (!info) return `no module ${id}`;
+  const m = await moduleEntry(info);
+  const e = m.entries.find((x) => x.scenario.name === name);
+  if (!e) return `no scenario ${name}`;
+  if (e.state !== "ready") return `${m.mod} ${name}: ${e.why}`;
+  const s = e.scenario;
+  const run = new Run(s, adapterFor(m, s).create(), {
     onRec: (r) => {
       cur.history.push(r);
       batch.push(r);
     },
   });
   cur.run = run;
-  begin({ module: s.module, id: s.id, scenario: s.name, title: s.title, seconds: s.seconds, inputs: s.inputs, expect: s.expect, views: s.views, replay: false }, s);
+  begin({ module: s.module, id: s.id, scenario: s.name, title: s.title, seconds: s.untilExit ? null : s.seconds, inputs: s.inputs, expect: s.expect, views: s.views, replay: false, run: s.run, fake: s.fake, result: s.result, provenance: provenance(s) }, s);
   run.result.then((r) => {
     cur.run = null;
     ended(r);
@@ -123,7 +117,7 @@ function replay(file: string, speed: number): string | null {
   const result = lines.find((l) => l.kind === "result") ?? { passed: false, checks: [], missing: [], error: "the saved run has no result" };
   const recs = lines.filter((l) => l.kind !== "run" && l.kind !== "result") as unknown as Rec[];
   const id = String(head.module ?? "").toLowerCase();
-  begin({ module: head.module, id, scenario: head.scenario, title: head.title, seconds: head.seconds ?? null, inputs: [], expect: head.expect ?? [], views: head.views ?? [], replay: file }, null);
+  begin({ module: head.module, id, scenario: head.scenario, title: head.title, seconds: head.seconds ?? null, inputs: [], expect: head.expect ?? [], views: head.views ?? [], replay: file, run: head.run ?? null, fake: head.fake ?? null, result: head.result ?? null, provenance: head.provenance ?? null, started: head.started ?? null }, null);
   const k = speed > 0 ? 1000 / speed : 0;
   const timers = recs.map((r) =>
     setTimeout(() => {
@@ -170,6 +164,15 @@ wss.on("connection", async (ws) => {
         case "modules":
           send(ws, { op: "modules", modules: await listModules(), runs: listRuns() });
           break;
+        case "about": {
+          // What the page shows before a run: the module tables, the scenario and where its data comes from.
+          const info = MODULES.find((x) => x.id === String(m.id));
+          const me = info && (await moduleEntry(info));
+          const e = me?.entries.find((x) => x.scenario.name === String(m.scenario));
+          if (!me || !e) err = "no such scenario";
+          else send(ws, { op: "about", id: me.id, scenario: e.scenario.name, provenance: provenance(e.scenario) });
+          break;
+        }
         case "start":
           err = await start(String(m.id), String(m.scenario));
           break;

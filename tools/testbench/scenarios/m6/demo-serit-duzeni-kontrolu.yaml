@@ -1,0 +1,13 @@
+# An existing demo or test, run as a command. From #108 (Muhib).
+module: M6
+title: Şerit düzeni kontrolü (M6-5)
+run:
+  cwd: .
+  cmd: node tools/strip_layout/gen-strip-layout.mjs --check
+needs:
+  - tools/strip_layout/gen-strip-layout.mjs
+files:
+  - contracts/city_plan.json
+  - M6-led-board/hardware/strip_layout.json
+fake: "Sahte veri yok: şerit düzeni şehir planından üretilip kontrol ediliyor."
+result: 788 LED, 2 zincir, 60 yolun her birinde bir parça.

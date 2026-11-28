@@ -1,0 +1,16 @@
+# An existing demo or test, run as a command. From #108 (Muhib).
+module: M6
+title: "Emülatör testleri: 10 örnek mesaj (M6-5)"
+run:
+  cwd: tools/emulators
+  cmd: npm test
+install:
+  - M2-network
+  - tools/emulators
+needs:
+  - tools/emulators/test/vectors.test.ts
+files:
+  - contracts/board_protocol_vectors.json
+  - tools/emulators/test/
+fake: Sözleşmedeki 10 örnek mesaj; iki emülatör gerçek soketlerle.
+result: "32 test geçer: iki taraf da 10 mesajı bayt bayt doğru kodluyor ve çözüyor."

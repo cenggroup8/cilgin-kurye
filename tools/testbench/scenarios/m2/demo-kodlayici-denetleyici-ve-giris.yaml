@@ -1,0 +1,18 @@
+# An existing demo or test, run as a command. From #108 (Muhib).
+module: M2
+title: Kodlayıcı, denetleyici ve giriş kuyruğu (M2-2)
+run:
+  cwd: M2-network
+  cmd: npm run demo:checks
+install:
+  - M2-network
+needs:
+  - M2-network/src/demo-checks.ts
+files:
+  - M2-network/src/demo-checks.ts
+  - M2-network/test/m2-2-stack.ts
+  - M2-network/test/fakes/botPhone.ts
+fake: 6 normal bot telefon ve her tür bozuk mesajı gönderen 2 bağlantı (MessagePack olmayan, tipsiz, aralık dışı, başka
+  oyuncunun kontrolü, çok büyük, eski sıra numarası, sel).
+result: Bozuk mesajların hiçbiri M1'e ulaşmıyor, iyi botların her "Beni bul" isteği ulaşıyor; rapor sonunda bütün
+  kontroller geçiyor.

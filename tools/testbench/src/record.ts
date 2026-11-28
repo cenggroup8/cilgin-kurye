@@ -86,7 +86,7 @@ function value(s: string): unknown {
  * Every other line (and a broken @ line) becomes a log record, so nothing is lost.
  */
 export function parseLine(line: string, mod: string): Rec {
-  const text = line.replace(/\r$/, "");
+  const text = line.replace(/\r$/, "").replace(/\x1b\[[0-9;?]*[A-Za-z]/g, ""); // colours off
   const log = (why?: string): LogRec => ({ kind: "log", mod, text: why ? `${text}   (bench: ${why})` : text });
   const trimmed = text.trim();
 
@@ -100,6 +100,14 @@ export function parseLine(line: string, mod: string): Rec {
     if (isObj(x) && x.mod === undefined) x.mod = mod;
     const r = validate(x);
     return typeof r === "string" ? log(r) : r;
+  }
+  // A demo that prints its own checks: "✓ text" / "✔ text" passed, "✗ text" / "✘ text" failed.
+  const mark = trimmed.match(/^([✓✔✗✘])\s+(.+)$/u);
+  if (mark) {
+    const ok = mark[1] === "✓" || mark[1] === "✔";
+    const [name, ...rest] = mark[2].split(/:\s+/);
+    const detail = rest.join(": ");
+    return detail ? { kind: "check", mod, name: name.slice(0, 120), ok, detail } : { kind: "check", mod, name: name.slice(0, 120), ok };
   }
   if (!trimmed.startsWith("@")) return log();
 

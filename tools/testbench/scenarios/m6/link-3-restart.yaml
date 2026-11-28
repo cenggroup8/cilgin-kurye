@@ -5,3 +5,12 @@ params: { part: link, state_hz: 30 }
 script:
   - { at: 8, input: restart }
 expect: ["board connects", "board finds the server again after a restart", "board takes the states", "no bad messages", "board program ends connected"]
+fake: "M2 yerine konsolun sahte sunucusu (yalnız contracts/board_protocol.md'den yazıldı, M2 kodu yok). M1 yerine sahte oyun: bir motor doğuya gidiyor; tahtadan vuruş gelince 2 s deprem ve titreşim."
+result: "Tahta sunucuyu bulur, saniyede ~30 durum alır, motor doğuya ilerler (u artar); 5. saniyedeki vuruş tek deprem olayı olur, titreşimler ulaşır, kötü mesaj yoktur."
+sources:
+  - { file: M6-led-board/firmware/src/link/link.cpp, role: code, note: "test edilen kod: tahta programının bağlantı kısmı (C++)" }
+  - { file: M6-led-board/firmware/src/link/protocol.cpp, role: code, note: "mesajları okuma ve yazma" }
+  - { file: M6-led-board/firmware/test/link/demo_board.cpp, role: test, note: "bağlantı kodunu PC soketleriyle çalıştıran program" }
+  - { file: tools/testbench/fakes/boardServer.ts, role: fake, note: "M2'nin yerine geçen sahte sunucu" }
+  - { file: contracts/board_protocol.md, role: contract, note: "M2 ile M6 arasındaki mesajlar" }
+  - { file: contracts/board_protocol_vectors.json, role: contract, note: "sahte sunucu bu 10 örnekle bayt bayt aynı (test)" }

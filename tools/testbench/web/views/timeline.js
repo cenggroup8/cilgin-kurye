@@ -52,7 +52,7 @@ export class Timeline {
   draw() {
     const w = Math.max(400, this.el.clientWidth);
     if (!this.rows.length) {
-      this.el.innerHTML = `<p class="empty">No events yet.</p>`;
+      this.el.innerHTML = `<p class="empty">Henüz olay yok.</p>`;
       return;
     }
     const h = this.rows.length * ROW + 26;
@@ -85,7 +85,7 @@ export class Timeline {
       const i = this.rows.indexOf(e.row);
       const c = el("circle", { cx: x(e.t), cy: i * ROW + ROW / 2, r: 5, fill: e.r.name === "input" ? "var(--set)" : "var(--s1)" });
       const t = document.createElementNS(NS, "title");
-      t.textContent = `${e.row} at ${e.t.toFixed(2)} s${e.r.data ? "\n" + JSON.stringify(e.r.data) : ""}`;
+      t.textContent = `${e.row}, ${e.t.toFixed(2)} s${e.r.data ? "\n" + JSON.stringify(e.r.data) : ""}`;
       c.append(t);
     }
     this.el.replaceChildren(svg);

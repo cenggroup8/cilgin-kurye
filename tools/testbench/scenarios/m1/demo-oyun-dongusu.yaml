@@ -1,0 +1,11 @@
+# An existing demo or test, run as a command. From #108 (Muhib).
+module: M1
+title: Oyun döngüsü (M1-1)
+run:
+  cwd: M1-game-server
+  cmd: npm test
+needs:
+  - M1-game-server/src/loop/tick.ts
+pr: "#78"
+fake: Sahte M2 ve sahte M3 ile tam bir oyun.
+result: Lobiden kazanana tam bir oyun; aynı seed aynı sonucu verir.

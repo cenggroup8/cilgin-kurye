@@ -9,3 +9,11 @@ inputs:
   - { name: vibrate, type: button, label: "Vibrate all motors" }
   - { name: hit, type: button, label: "Hand hit, zone", options: [0, 1, 2, 3, 4, 5, 6, 7, 8] }
 expect: ["link stays connected"]
+fake: "Gerçek tahta yerine M2'nin sahte tahtası (boardEmu). M1 yerine sabit bir sahte oyun durumu: ortada bir bot, 12. yolda yol çalışması."
+result: "Ayarlanan gecikme ölçülen gecikmede görünür; kayıpta durumlar kaybolur ama titreşim ve deprem olayı tam bir kez ulaşır; bağlantı kopmaz."
+sources:
+  - { file: M2-network/src/board/boardLink.ts, role: code, note: "test edilen kod: M2-4 tahta bağlantısı" }
+  - { file: M2-network/src/board/codec.ts, role: code, note: "mesajların baytları" }
+  - { file: M2-network/src/netem/netem.ts, role: code, note: "gecikme, jitter ve kayıp ekleyen ağ emülatörü" }
+  - { file: M2-network/test/fakes/boardEmu.ts, role: fake, note: "tahtanın yerine geçen sahte tahta" }
+  - { file: contracts/board_protocol.md, role: contract, note: "M2 ile M6 arasındaki mesajlar" }

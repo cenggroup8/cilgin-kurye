@@ -1,0 +1,11 @@
+# An existing demo or test, run as a command. From #108 (Muhib).
+module: M5
+title: Canlı harita (M5-3), grafikler (M5-4)
+run:
+  cwd: M5-admin-panel
+  cmd: npm test
+needs:
+  - M5-admin-panel/src/map/mapManager.ts
+pr: "#77"
+fake: Kayıtlı oyun.
+result: Harita ve grafikler canlı güncelleniyor.

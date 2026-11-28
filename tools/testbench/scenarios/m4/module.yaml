@@ -1,0 +1,28 @@
+# What the module takes and gives (v2.1 tables), shown on the page. From #108 (Muhib).
+name: Oyuncu istemcisi ve 3D şehir
+team: Abdullatif, Batuhan, Ayşe, Berk, Selim
+doc: docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.md (bölüm 8)
+summary: Telefondaki 3D şehir, kontroller, pusula, ekranlar, tahmin ve düzeltme.
+inputs:
+  - data: Sayfa, modeller, şehir planı
+    from: M2, HTTP
+    content: sayfa açılınca program, 3D modeller ve şehir planı
+  - data: Oyun durumu
+    from: M2 ← M1
+    content: oyuncular, NPC arabalar, engeller, puanlar, pusula hedefi, son kullanılan kontrol numarası
+  - data: Katılım cevabı, ping, ağ ayarı
+    from: M2
+    content: oyuncu, takım, renk, sunucu saati, kare hızı sınırı
+  - data: Dokunma
+    from: oyuncu
+    content: butonlar
+outputs:
+  - data: Kontroller
+    to: M2 → M1
+    content: gaz, fren, direksiyon, kontrol numarası
+  - data: Katılım, "Beni bul"
+    to: M2 → M1
+    content: oyuncu anahtarı, ad, oyun kodu, takım
+  - data: Ping cevabı
+    to: M2
+    content: telefon saati, kare hızı, son alınan durum

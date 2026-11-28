@@ -1,0 +1,17 @@
+# An existing demo or test, run as a command. From #108 (Muhib).
+module: M1
+title: Admin komutları ve parametreler (M1-5)
+run:
+  cwd: M1-game-server
+  cmd: npx tsx test/scenarios/admin-demo.ts
+install:
+  - M1-game-server
+needs:
+  - M1-game-server/test/scenarios/admin-demo.ts
+files:
+  - M1-game-server/src/admin/admin.ts
+  - M1-game-server/src/admin/param-list.ts
+  - M1-game-server/test/scenarios/admin-demo.ts
+fake: Sahte maç ve sahte engel listesi; script admin sayfasının yerine komut gönderiyor (iyi ve hatalı değerler).
+result: 'Her komuta tek cevap: geçerli değer kaydedilir ve sahibi modüle gider, hatalı değer "out_of_range" gibi bir
+  hatayla reddedilir, yanlış aşamadaki komut "wrong_phase" alır.'

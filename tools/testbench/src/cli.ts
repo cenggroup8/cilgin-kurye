@@ -7,11 +7,12 @@
 // Options: --seconds N (also runs a live scenario), --no-save, --verbose (logs and every metric).
 // Exit code 0 only when every scenario that ran has passed.
 import { readFileSync } from "node:fs";
-import { loadAdapter, type AdapterModule } from "./adapter.js";
-import { MODULES, moduleById, type ModuleInfo } from "./modules.js";
+import type { AdapterModule } from "./adapter.js";
+import { adapterFor, catalog, moduleEntry, type ModuleEntry } from "./catalog.js";
+import { MODULES, moduleById } from "./modules.js";
 import type { Rec } from "./record.js";
 import { Run, type Result } from "./runner.js";
-import { loadScenarios, type Scenario } from "./scenario.js";
+import type { Scenario } from "./scenario.js";
 
 const tty = process.stdout.isTTY;
 const c = (code: string) => (s: string) => (tty ? `\x1b[${code}m${s}\x1b[0m` : s);
@@ -41,13 +42,15 @@ function fmt(n: number): string {
 }
 
 async function list(): Promise<void> {
-  for (const m of MODULES) {
-    const a = await loadAdapter(m);
-    const sc = await loadScenarios(m.id).catch((e: Error) => e);
-    const state = typeof a === "string" ? grey(`not ready: ${a}`) : green("ready");
-    console.log(`${bold(`${m.mod} ${m.title}`)}  ${state}`);
-    if (sc instanceof Error) console.log(`   ${red(sc.message)}`);
-    else for (const s of sc) console.log(`   ${s.name.padEnd(14)} ${s.title}${s.seconds === null ? grey("  (live)") : grey(`  (${s.seconds} s)`)}`);
+  for (const m of await catalog()) {
+    const ready = m.entries.filter((e) => e.state === "ready").length;
+    console.log(`${bold(`${m.mod} ${m.title}`)}  ${grey(`${ready} of ${m.entries.length} ready`)}${m.adapter ? "" : grey(`  (${m.adapterWhy})`)}`);
+    if (m.error) console.log(`   ${red(m.error)}`);
+    for (const e of m.entries) {
+      const s = e.scenario;
+      const kind = s.run ? grey("  [command]") : s.seconds === null ? grey("  (live)") : grey(`  (${s.seconds} s)`);
+      console.log(`   ${e.state === "ready" ? green("●") : grey("○")} ${s.name.padEnd(22)} ${s.title}${kind}${e.why ? grey(`  — ${e.why}`) : ""}`);
+    }
   }
 }
 
@@ -111,28 +114,31 @@ async function main(): Promise<number> {
     return replay(names[0]) ? 0 : 1;
   }
 
-  const mods: ModuleInfo[] = what === "all" ? [...MODULES] : [moduleById(what) ?? (() => { throw new Error(`no module ${what} (m1 … m6)`); })()];
+  const mods: ModuleEntry[] =
+    what === "all" ? await catalog() : [await moduleEntry(moduleById(what) ?? (() => { throw new Error(`no module ${what} (m1 … m6)`); })())];
   const results: Result[] = [];
   const skipped: string[] = [];
   for (const m of mods) {
-    const a = await loadAdapter(m);
-    if (typeof a === "string") {
-      if (what !== "all") throw new Error(`${m.mod}: ${a}`);
-      skipped.push(`${m.mod}: ${a}`);
-      continue;
-    }
-    let sc = await loadScenarios(m.id);
+    let entries = m.entries;
     if (names.length) {
-      sc = names.map((n) => {
-        const hit = sc.filter((s) => s.name === n || s.name.includes(n));
-        if (hit.length !== 1) throw new Error(`${m.mod}: ${hit.length ? "more than one" : "no"} scenario matches "${n}" (${sc.map((s) => s.name).join(", ")})`);
+      entries = names.map((n) => {
+        const hit = m.entries.filter((e) => e.scenario.name === n || e.scenario.name.includes(n));
+        const exact = hit.filter((e) => e.scenario.name === n);
+        if (exact.length === 1) return exact[0];
+        if (hit.length !== 1) throw new Error(`${m.mod}: ${hit.length ? "more than one" : "no"} scenario matches "${n}" (${m.entries.map((e) => e.scenario.name).join(", ")})`);
         return hit[0];
       });
-    } else sc = sc.filter((s) => s.seconds !== null || flags.seconds !== undefined);
-    if (!sc.length) skipped.push(`${m.mod}: no timed scenario`);
-    for (const s of sc) {
+    } else entries = entries.filter((e) => e.scenario.seconds !== null || flags.seconds !== undefined);
+    if (!m.entries.length) skipped.push(`${m.mod}: no scenario`);
+    for (const e of entries) {
+      const s = e.scenario;
+      if (e.state !== "ready") {
+        if (names.length) throw new Error(`${m.mod} ${s.name}: ${e.why}`);
+        skipped.push(`${m.mod} ${s.name}: ${e.why}`);
+        continue;
+      }
       if (s.seconds === null && flags.seconds === undefined) console.log(grey(`${s.module} ${s.name} is live: it runs until Ctrl-C (or give --seconds)`));
-      results.push(await runOne(a, s, flags));
+      results.push(await runOne(adapterFor(m, s), s, flags));
     }
   }
 

@@ -138,7 +138,7 @@ M1 calls `fleet.update(obstacles, roadSpeeds)` when the obstacles change and
   before corners and before the goal, keeps a gap to cars in front.
 - Fallen: sends empty controls and goes on in the same state when M1 lifts it.
 - Stuck (standing still before the goal for 2.5 s): asks for a new route; the second time it
-  turns round and leaves the road.
+  turns round and leaves the road at the other end by another road.
 - New obstacle list: every bot gets a new route when the planner says routes changed.
 - Skill 0–1 (`skillFromLevel`): top speed 7–16 m/s, reaction 0.6–0.05 s, steer noise 0.25–0.01.
 - Metric: `bot.routeChanges`, `fleet.routeChanges()`.

@@ -255,19 +255,47 @@ export class BotDriver {
   }
 
   /** Finds a route from where the motorcycle is now to the goal. */
-  private plan(pose: BotPose, goal: Goal, avoidEdge?: number): void {
+  /**
+   * Finds a route from where the motorcycle is now to the goal. With `turnBack` the bot
+   * turns round on its road and leaves it at the other end by another road, so it does
+   * not drive into the same block again.
+   */
+  private plan(pose: BotPose, goal: Goal, turnBack = false): void {
     const { planner } = this.fleet;
     const graph = planner.graph;
-    const here = this.locate(pose, avoidEdge);
+    let here = this.locate(pose);
+    let avoidRoad: number | undefined;
+    if (turnBack) {
+      const back = graph.edges[here.edgeId].reverseId;
+      avoidRoad = graph.edges[here.edgeId].roadId;
+      here = { edgeId: back, s: Math.max(0, this.fleet.frames[back].length - here.s) };
+    }
     const startNode = graph.edges[here.edgeId].to;
 
     let route: number[] | null = null;
     let endS: number | undefined;
+    const c = goal.kind === 'delivery' ? this.fleet.candidate(goal.id) : undefined;
+    const search = (node: number, incoming: number) => goal.kind === 'store'
+      ? planner.route(node, goal.id, incoming)
+      : planner.routeToCandidate(node, goal.id);
+    let r = search(startNode, here.edgeId);
+    if (avoidRoad !== undefined && r && r.edgeIds.length > 0 && graph.edges[r.edgeIds[0]].roadId === avoidRoad) {
+      // The best way goes back onto the blocked road: take the best way that starts on another road.
+      r = null;
+      let best = Infinity;
+      for (const e of graph.outgoing(startNode)) {
+        if (e.roadId === avoidRoad) continue;
+        const rest = search(e.to, e.id);
+        const seconds = rest ? rest.seconds + this.fleet.frames[e.id].length / this.skill.maxSpeedMps : Infinity;
+        if (rest && seconds < best) {
+          best = seconds;
+          r = { edgeIds: [e.id, ...rest.edgeIds], seconds };
+        }
+      }
+    }
     if (goal.kind === 'store') {
-      route = planner.route(startNode, goal.id, here.edgeId)?.edgeIds ?? null;
+      route = r?.edgeIds ?? null;
     } else {
-      const c = this.fleet.candidate(goal.id);
-      const r = planner.routeToCandidate(startNode, goal.id);
       if (c && r) {
         route = r.edgeIds;
         const last = route[route.length - 1];
@@ -309,13 +337,12 @@ export class BotDriver {
   }
 
   /** The directed edge the motorcycle is on (or nearest to), facing its heading. */
-  private locate(pose: BotPose, avoidEdge?: number): { edgeId: number; s: number } {
+  private locate(pose: BotPose): { edgeId: number; s: number } {
     const graph = this.fleet.planner.graph;
     let best = { edgeId: 0, s: 0, cost: Infinity };
     const dirX = Math.cos(pose.heading);
     const dirY = Math.sin(pose.heading);
     for (const e of graph.edges) {
-      if (e.id === avoidEdge) continue;
       const f = this.fleet.frames[e.id];
       const a = lanePoint(graph, f, this.lane(), 0);
       const t = (pose.x - a.x) * f.dir.x + (pose.y - a.y) * f.dir.y;
@@ -383,9 +410,8 @@ export class BotDriver {
     if (this.stuckTime >= this.fleet.tuning.stuckSeconds && this.goal) {
       this.stuckTime = 0;
       this.stuckTries++;
-      // First try: a new route from here. Then: turn round and leave this road.
-      const here = this.locate(pose);
-      this.plan(pose, this.goal, this.stuckTries > 1 ? here.edgeId : undefined);
+      // First try: a new route from here. Then: turn round and leave this road by another one.
+      this.plan(pose, this.goal, this.stuckTries > 1);
     }
   }
 

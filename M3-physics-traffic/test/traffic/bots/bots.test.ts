@@ -114,6 +114,26 @@ describe('bot drivers (M3-5)', () => {
     expect(bot.routeChanges).toBeGreaterThanOrEqual(1);
   });
 
+  it('leaves a road that stays blocked by another road', () => {
+    const { fleet, bot, bike } = setup();
+    // Something stands on the road for good, 25 m in front of where the bot is at 20 s.
+    let wall: { x: number; y: number; speed: number } | null = null;
+    let blockedRoad = -1;
+    const r = runDeliveries(fleet, bot, bike, [33], {
+      maxSeconds: 600,
+      neighbours: (t) => {
+        if (t > 20 && !wall) {
+          wall = { x: bike.x + Math.cos(bike.heading) * 25, y: bike.y + Math.sin(bike.heading) * 25, speed: 0 };
+          blockedRoad = fleet.planner.graph.edges[bot.routeEdges[0]].roadId;
+        }
+        return wall ? [wall] : [];
+      },
+    });
+    expect(r.deliveries).toBe(1);
+    expect(blockedRoad).toBeGreaterThanOrEqual(0);
+    expect(bot.routeChanges).toBeGreaterThanOrEqual(1);
+  });
+
   it('keeps a gap to a slow car in front', () => {
     const { fleet, bot, bike } = setup(1);
     let minGap = Infinity;

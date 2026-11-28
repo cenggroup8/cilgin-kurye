@@ -4,7 +4,7 @@
 CXX ?= c++
 CXXFLAGS ?= -std=c++17 -O2 -Wall -Wextra -Wpedantic
 
-QUAKE_SRC = ../src/quake/hit_detector.cpp ../src/quake/motor_controller.cpp ../src/quake/calibration.cpp
+QUAKE_SRC = ../src/quake/hit_detector.cpp ../src/quake/motor_controller.cpp ../src/quake/calibration.cpp ../src/quake/motor_shield.cpp
 QUAKE_HDR = $(wildcard ../src/quake/*.h) sim_board.h
 
 test: build/test_quake

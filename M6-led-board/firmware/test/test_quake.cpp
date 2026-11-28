@@ -10,6 +10,7 @@
 #include "../src/quake/fixed_rate.h"
 #include "../src/quake/hit_detector.h"
 #include "../src/quake/motor_controller.h"
+#include "../src/quake/motor_shield.h"
 #include "../src/quake/quake_unit.h"
 #include "../src/quake/sample_batcher.h"
 #include "sim_board.h"
@@ -345,6 +346,111 @@ static void testMotorController() {
   CHECK(m6.running() && o6.duty[0] == 0.5f, "over the wrap");
 }
 
+// ---- motor shield ----
+// Keeps every pin call in order, and the pin levels.
+struct FakePins : ShieldPins {
+  struct Call { char what; int pin; uint32_t value; };  // 'o' output, 'w' write, 'a' attach, 'p' pwm
+  std::vector<Call> calls;
+  std::map<int, uint32_t> pwm;
+  bool failAttach = false;
+  void output(int pin) override { calls.push_back({'o', pin, 0}); }
+  void write(int pin, bool high) override { calls.push_back({'w', pin, high ? 1u : 0u}); }
+  bool pwmAttach(int pin, uint32_t hz, uint8_t bits) override {
+    calls.push_back({'a', pin, hz * 100 + bits});
+    return !(failAttach && pin == PIN_MOTOR[1]);
+  }
+  void pwmWrite(int pin, uint32_t value) override { calls.push_back({'p', pin, value}); pwm[pin] = value; }
+  size_t count(char what) const {
+    size_t n = 0;
+    for (const auto& c : calls) n += c.what == what;
+    return n;
+  }
+};
+
+// The byte the 74HC595 holds after the calls: data is read on each clock rise, the outputs
+// change when the latch rises.
+static int shiftedByte(const FakePins& p, int* latches) {
+  bool clock = false, data = false, latch = false;
+  uint8_t shift = 0;
+  int out = -1;
+  *latches = 0;
+  for (const auto& c : p.calls) {
+    if (c.what != 'w') continue;
+    const bool v = c.value != 0;
+    if (c.pin == PIN_SR_DATA) data = v;
+    if (c.pin == PIN_SR_CLOCK) {
+      if (v && !clock) shift = uint8_t((shift << 1) | (data ? 1 : 0));
+      clock = v;
+    }
+    if (c.pin == PIN_SR_LATCH) {
+      if (v && !latch) { out = shift; (*latches)++; }
+      latch = v;
+    }
+  }
+  return out;
+}
+
+static void testMotorShield() {
+  title("motor shield: begin sets the speed pins low, sends 0x27 once, starts PWM at 0");
+  FakePins pins;
+  MotorShield shield(pins);
+  shield.setDuty(0, 0.5f);
+  CHECK(pins.calls.empty(), "%zu pin calls before begin", pins.calls.size());
+  CHECK(shield.begin(), "begin");
+  CHECK(shield.ready(), "ready");
+  int latches = 0;
+  const int byte = shiftedByte(pins, &latches);
+  CHECK(byte == 0x27, "74HC595 holds 0x%02X", byte);
+  CHECK(latches == 1, "%d latch pulses", latches);
+  // Speed pins: output and low before anything else.
+  for (int i = 0; i < kMotorCount; i++) {
+    CHECK(pins.calls[size_t(2 * i)].what == 'o' && pins.calls[size_t(2 * i)].pin == PIN_MOTOR[i], "pin %d first", PIN_MOTOR[i]);
+    CHECK(pins.calls[size_t(2 * i + 1)].what == 'w' && pins.calls[size_t(2 * i + 1)].value == 0, "pin %d low", PIN_MOTOR[i]);
+  }
+  CHECK(pins.count('a') == 4, "%zu PWM pins", pins.count('a'));
+  for (int i = 0; i < kMotorCount; i++) CHECK(pins.pwm[PIN_MOTOR[i]] == 0, "motor %d starts at 0", i);
+  CHECK(pins.calls[size_t(pins.calls.size() - 2)].what == 'a', "PWM starts after the byte");
+
+  title("motor shield: duty 0..1 -> 0..255 on the motor's own pin, out of range is cut");
+  shield.setDuty(0, 1.0f);
+  shield.setDuty(1, 0.5f);
+  shield.setDuty(2, 2.0f);
+  shield.setDuty(3, -1.0f);
+  CHECK(pins.pwm[32] == 255, "M1 %u", pins.pwm[32]);
+  CHECK(pins.pwm[33] == 128, "M2 %u", pins.pwm[33]);
+  CHECK(pins.pwm[25] == 255, "M3 cut to 1: %u", pins.pwm[25]);
+  CHECK(pins.pwm[26] == 0, "M4 cut to 0: %u", pins.pwm[26]);
+  shield.setDuty(0, std::nanf(""));
+  CHECK(pins.pwm[32] == 0, "NaN is 0: %u", pins.pwm[32]);
+  const size_t before = pins.calls.size();
+  shield.setDuty(4, 0.5f);
+  shield.setDuty(-1, 0.5f);
+  CHECK(pins.calls.size() == before, "wrong motor number does nothing");
+
+  title("motor shield: the motor controller drives it, link lost stops all pins");
+  FakePins p2;
+  MotorShield s2(p2);
+  s2.begin();
+  MotorController mc(s2);
+  mc.start({0x05, 0.8f, 1000, 200}, 0);  // M1 and M3
+  mc.update(500, true);
+  CHECK(p2.pwm[32] == 204 && p2.pwm[25] == 204, "M1 %u M3 %u", p2.pwm[32], p2.pwm[25]);
+  CHECK(p2.pwm[33] == 0 && p2.pwm[26] == 0, "M2 %u M4 %u stay off", p2.pwm[33], p2.pwm[26]);
+  mc.update(600, false);
+  for (int i = 0; i < kMotorCount; i++) CHECK(p2.pwm[PIN_MOTOR[i]] == 0, "motor %d off", i);
+
+  title("motor shield: a PWM pin that did not start stays off, the others work");
+  FakePins p3;
+  p3.failAttach = true;
+  MotorShield s3(p3);
+  CHECK(!s3.begin(), "begin says false");
+  const size_t n = p3.count('p');
+  s3.setDuty(1, 0.5f);
+  CHECK(p3.count('p') == n, "no write to the broken pin");
+  s3.setDuty(0, 0.5f);
+  CHECK(p3.pwm[32] == 128, "M1 still works: %u", p3.pwm[32]);
+}
+
 static void testBatcher() {
   title("sensor samples: 200 Hz -> 100 Hz groups of 10, a short peak is kept");
   SampleBatcher<10> sb(200, 100);
@@ -441,7 +547,7 @@ static void testUnit() {
 }
 
 int main() {
-  std::printf("M6-2 hit detector and motor controller tests\n");
+  std::printf("M6-2 hit detector, motor controller and motor shield tests\n");
   testQuietTable();
   testNoisyTable();
   testNineZones();
@@ -453,6 +559,7 @@ int main() {
   testMountingFlags();
   testCalibrationStore();
   testMotorController();
+  testMotorShield();
   testBatcher();
   testFixedRate();
   testUnit();

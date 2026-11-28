@@ -46,14 +46,17 @@ Each part can be built and tested alone with test data, as the module document d
 
 ## M6-2 Hit detector and motor controller
 
-Code in `firmware/src/quake/`. It is plain C++17 with no Arduino headers, so the same files
-run in the ESP32 program and in the PC tests.
+Code in `firmware/src/quake/`. It is plain C++17 with no Arduino headers (except
+`shield_pins_arduino.h`, built only for the board), so the same files run in the ESP32 program
+and in the PC tests.
 
 | File | What it does |
 |---|---|
 | `fixed_rate.h` | Reads the sensor at a fixed rate (200 Hz) without waiting in the main loop |
 | `hit_detector.*` | Filter, room noise threshold, hit window, strength 0–10, zone 0–8, confidence, wait after a hit, one event for motor shaking |
 | `motor_controller.*` | Four motors with a soft start, a strength and time limit, and a stop at once when the link is lost |
+| `motor_shield.*` | Output to the bought motor shield (2 × L293D + 74HC595): one PWM speed pin per motor, the direction byte `0x27` once at start. Pins as in `hardware/pins_and_power.md` |
+| `shield_pins_arduino.h` | The shield's pin calls on the ESP32 (`pinMode`, `digitalWrite`, `ledcAttach`, `ledcWrite`); the PC tests use a fake |
 | `sample_batcher.h` | Sensor samples for the seismic graph: 100 per second in groups of 10, short peaks are kept |
 | `calibration.*` | Calibration values and their keys in the board settings (flash, changed over USB) |
 | `quake_unit.h` | Puts the parts together for the main loop. M6-1 gives the link state and sends the events and samples |
@@ -77,6 +80,8 @@ How a hit is found:
 
 Motors: bit i of the vibrate mask is motor i, under zone 0, 2, 6 and 8 (bits 0 to 3).
 Limits by default: strength at most 0.8, time at most 5 s, soft start at least 150 ms.
+The shield runs the speed pins with 1 kHz, 8-bit PWM (strength 1 = 255). `begin()` is the first
+call in `setup()`: until then the speed pins float, and the L293D may read that as "on".
 
 ### Tests on the PC
 

@@ -3,7 +3,7 @@ import { WebSocketServer, type RawData, type WebSocket } from "ws";
 import { Codec } from "../codec/codec.js";
 import { PHONE_IN, checkFields } from "../codec/schema.js";
 import type { SessionRegistry } from "./registry.js";
-import type { Session } from "./types.js";
+import { TEAM_COLORS, type JoinAnswer, type Session } from "./types.js";
 
 /**
  * Accepts WebSocket links and keeps the session record (M2-1).
@@ -14,6 +14,9 @@ import type { Session } from "./types.js";
  * Message shapes: contracts/messages.md (M2-2). Every message first goes through
  * `admit` (M2-2 limits, on the raw bytes), then it is decoded with the M2-2 codec.
  * Messages after the hello and the join go to onMessage, where the M2-2 checker takes over.
+ *
+ * A join goes to M1 as a request. M1 answers with `answerJoin`, and only then the phone gets
+ * `joined` (or `bad_join`).
  */
 export const CLOSE = {
   adminReplaced: 4001,
@@ -39,6 +42,12 @@ export interface WsHandle {
   sendRaw(connId: number, bytes: Uint8Array): void;
   /** Bytes queued on this link and not sent yet (0 for an unknown link). M2-3 skips a slow phone with it. */
   buffered(connId: number): number;
+  /**
+   * M1's answer to a join: `joined {player, team, color}` or `error bad_join` to that player.
+   * False when the player has no open link now (an accepted team is still kept for its return)
+   * or when the team is not 0–3.
+   */
+  answerJoin(a: JoinAnswer): boolean;
   close(): void;
 }
 
@@ -70,6 +79,21 @@ export function attachWebSockets(http: Server, opts: WsOptions): WsHandle {
 
   function buffered(connId: number): number {
     return links.get(connId)?.bufferedAmount ?? 0;
+  }
+
+  function joined(connId: number, player: number, team: number): void {
+    send(connId, { t: "joined", player, team, color: TEAM_COLORS[team] });
+  }
+
+  function answerJoin(a: JoinAnswer): boolean {
+    const team = a.team;
+    const okTeam = typeof team === "number" && Number.isInteger(team) && team >= 0 && team < TEAM_COLORS.length;
+    if (a.ok && !okTeam) return false;
+    const link = registry.answerJoin(a);
+    if (!link || !links.has(link.connId)) return false;
+    if (a.ok) joined(link.connId, link.playerNo, team as number);
+    else send(link.connId, { t: "error", reason: "bad_join", ref: "join" });
+    return true;
   }
 
   function drop(connId: number, code: number, reason: string): void {
@@ -139,12 +163,15 @@ export function attachWebSockets(http: Server, opts: WsOptions): WsHandle {
     }
     if (r.replacedConnId !== undefined) drop(r.replacedConnId, CLOSE.playerReplaced, "same player opened elsewhere");
     send(connId, { t: "welcome", player: r.playerNo, returning: r.returning });
+    // A player that comes back (reload, lost link) learns its team again without a new join.
+    if (r.team !== undefined) joined(connId, r.playerNo, r.team);
   }
 
   return {
     send,
     sendRaw,
     buffered,
+    answerJoin,
     close() {
       for (const ws of links.values()) ws.terminate();
       links.clear();

@@ -6,7 +6,7 @@ import { createHttpServer, type StaticPaths } from "./http/httpServer.js";
 import { joinUrl, lanAddress } from "./http/joinInfo.js";
 import { Codec } from "./codec/codec.js";
 import { SessionRegistry } from "./session/registry.js";
-import type { PlayerEvents, Session } from "./session/types.js";
+import type { JoinAnswer, PlayerEvents, Session } from "./session/types.js";
 import { attachWebSockets } from "./session/wsServer.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -45,6 +45,8 @@ export interface M2Server {
   sendRaw(connId: number, bytes: Uint8Array): void;
   /** Bytes queued on a link and not sent yet. */
   buffered(connId: number): number;
+  /** M1's answer to a join: the phone gets `joined` or `bad_join` (see `JoinAnswer`). */
+  answerJoin(a: JoinAnswer): boolean;
   close(): Promise<void>;
 }
 
@@ -79,6 +81,7 @@ export async function startM2Server(opts: M2Options): Promise<M2Server> {
     send: ws.send,
     sendRaw: ws.sendRaw,
     buffered: ws.buffered,
+    answerJoin: ws.answerJoin,
     close: () =>
       new Promise((ok) => {
         ws.close();

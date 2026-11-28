@@ -30,8 +30,7 @@ test/
   fake-server/ M5-2  fake server and recorded game
 ```
 
-The code is not written yet. Each part can be built and tested alone with test data, as the module
-document describes.
+Each part can be built and tested with test data, as the module document describes.
 
 ## Team
 
@@ -41,3 +40,22 @@ Batuhan Yanar, Ayşe Poyraz, Berk Andaçgil, Hasan Hüseyin Özdemir
 
 - Modules and Requirements v2.1: [PDF](../docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.pdf) · [Markdown](../docs/modules-and-requirements/Cilgin_Kurye_Modules_and_Requirements.md)
 - Plan for the 4 December demo: issue #27
+
+## M5-1 demo
+
+With Node 24 or later, run `npm ci` and `npm run demo` here. Open
+`http://localhost:5175`, start the match and try pausing or starting an earthquake.
+To simulate a drop, run `curl -X POST http://localhost:5175/demo/disconnect`.
+The page reconnects and reloads the demo's parameters, map state and metrics.
+Opening another tab replaces the first admin session.
+
+`AdminConnection` connects to `/ws/admin`. Its `subscribe()` method delivers
+snapshots and updates to the parameter, map and graph packages. Use `command()`
+for a request and its reply. The connection emits one change mark for each
+successful reply. See `src/comm/protocol.ts` for the MessagePack message types.
+The command and reply fields follow #61. The snapshot and live stream fields
+are provisional while #35 is open. The demo under `test/comm` is a fixture
+for this package. The shared playback server belongs to M5-2 (#49).
+
+Run `npm test`, `npm run typecheck` and `npm run build` to verify the package.
+The build writes the admin page to `dist/`.

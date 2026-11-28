@@ -1,0 +1,22 @@
+{
+  "name": "@cilgin-kurye/m3-physics-traffic",
+  "version": "0.1.0",
+  "private": true,
+  "description": "M3 Physics, Traffic and AI - Cilgin Kurye, CSE 396 Group 8",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "demo:npc": "tsx debug/npc-demo.ts"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.1"
+  }
+}

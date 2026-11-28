@@ -98,3 +98,28 @@ The metric names (`score.<team>`, `traffic.*`, `speed.mean_mps`, `falls.total`,
 `net.<p>.ping_ms|jitter_ms|loss_pct|fps`, `board.delay_ms`, `board.loss_pct`,
 `board.accel_g`, `quake.mag`, `delivery.time_s`, `delivery.distance_m`) are provisional
 until M1, M2 and M3 publish their metric lists with #35.
+
+## M5-4: graph engine
+
+| Part | Files |
+|---|---|
+| Data of the graphs: every metric and board sample as a time series (15 minutes kept), change marks at server time, earthquake marks with strength, zone and source; history after a reconnect is merged, never twice | `src/graphs/model.ts` |
+| Which metric goes in which graph (one table; a metric no graph knows gets a graph of its own) and the data of one graph for a time window | `src/graphs/charts.ts` |
+| CSV file from the same data the graphs draw: one row per value, change and earthquake | `src/graphs/csv.ts` |
+| Drawing with uPlot: live graphs, a thin vertical line with the name on every graph for each change, the seismic graph with the earthquake marks; 1, 2, 5 minutes or all; game or network graphs; CSV button | `src/graphs/view.ts`, `src/graphs/graphs.css` |
+
+```ts
+mountGraphs({ root, seismicRoot, connection });   // connection: AdminConnection of M5-1
+```
+
+Graphs: team scores, delivery times and distances, motorcycle speeds, falls, NPC speed and
+count, ping (with the board delay), jitter, loss (with the board), frame rate, and the seismic
+graph of the board sensor. A change mark comes from M5-1 when a command is accepted; it is made
+on the admin's clock and moved to the server's clock, so the line stands where the samples are
+even when the admin page runs on another laptop.
+
+```
+npm test                 # graphs: test/graphs (model, CSV, and against the fake server)
+npm run fake-server      # http://localhost:5175: change a parameter or start an earthquake and watch the lines
+```
+

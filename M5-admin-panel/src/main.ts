@@ -1,15 +1,13 @@
 import './admin.css';
 import { AdminConnection } from './comm/connection.ts';
-import type { AdminState, LogEntry, MetricSample } from './comm/protocol.ts';
+import type { AdminState, LogEntry } from './comm/protocol.ts';
+import { mountGraphs } from './graphs/index.ts';
 import { bindParams } from './params/paramManager.ts';
-import { bindTopbar, commandLabel } from './topbar/topbar.ts';
+import { bindTopbar } from './topbar/topbar.ts';
 
 const connection = new AdminConnection(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/admin`);
 const map = document.querySelector<HTMLDListElement>('#map')!;
-const metrics = document.querySelector<HTMLDListElement>('#metrics')!;
-const marks = document.querySelector<HTMLElement>('#marks')!;
 const events = document.querySelector<HTMLOListElement>('#events')!;
-const metricValues = new Map<string, MetricSample>();
 const logEntries: LogEntry[] = [];
 const clock = new Intl.DateTimeFormat('tr-TR', { timeStyle: 'medium' });
 
@@ -32,13 +30,6 @@ function showMap(state: AdminState) {
   ]);
 }
 
-function showMetrics(samples: readonly MetricSample[]) {
-  for (const sample of samples) {
-    if ((metricValues.get(sample.name)?.time ?? -Infinity) <= sample.time) metricValues.set(sample.name, sample);
-  }
-  showValues(metrics, Array.from(metricValues, ([name, sample]) => [name, sample.value]));
-}
-
 function addEvents(entries: readonly LogEntry[]) {
   for (const entry of entries) {
     if (!logEntries.some(({ time, message }) => entry.time === time && entry.message === message)) {
@@ -58,25 +49,20 @@ function addEvents(entries: readonly LogEntry[]) {
 
 bindTopbar(connection, (entry) => addEvents([entry]));
 bindParams(connection, document.querySelector<HTMLElement>('#params')!);
+// M5-4: live graphs with change marks and CSV; the seismic graph sits in the earthquake panel.
+mountGraphs({
+  root: document.querySelector<HTMLElement>('#graphs')!,
+  seismicRoot: document.querySelector<HTMLElement>('#seismic')!,
+  connection,
+});
 connection.subscribe((update) => {
   switch (update.t) {
     case 'snapshot':
       showMap(update.state);
-      metricValues.clear();
-      showMetrics([...update.metrics, ...update.board.samples]);
       addEvents(update.events);
       break;
     case 'state':
       showMap(update.state);
-      break;
-    case 'metrics':
-      showMetrics(update.samples);
-      break;
-    case 'board':
-      showMetrics(update.board.samples);
-      break;
-    case 'mark':
-      marks.textContent = `${clock.format(update.mark.time)} · ${commandLabel(update.mark.name)}`;
       break;
     case 'event':
       addEvents([update.entry]);

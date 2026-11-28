@@ -1,0 +1,15 @@
+/* Graph engine (M5-4). Fits the dark admin page; uPlot's own styles come first. */
+.ck-graphs { display: flex; flex-direction: column; gap: .6rem; }
+.graphs-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.graphs-bar select, .graphs-bar button { font: inherit; padding: .3rem .55rem; border-radius: .45rem; border: 1px solid var(--border, #334155); background: rgba(148, 163, 184, .08); color: inherit; }
+.graphs-bar button { cursor: pointer; }
+.graphs-status { margin: 0; font-size: .8rem; opacity: .8; flex: 1 1 12rem; text-align: right; }
+.graphs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: .6rem; }
+.graph-card { margin: 0; padding: .5rem .5rem .2rem; border: 1px solid var(--border, #334155); border-radius: .55rem; background: rgba(2, 6, 23, .25); min-width: 0; }
+.graph-card figcaption { font-size: .85rem; font-weight: 600; margin-bottom: .2rem; }
+.graph-unit { font-weight: 400; opacity: .7; }
+.graph-plot { width: 100%; min-width: 0; }
+.graph-empty, .graphs-waiting { font-size: .8rem; opacity: .7; margin: .4rem 0; }
+.ck-graphs .u-legend { font-size: .72rem; text-align: left; }
+.ck-graphs .u-legend .u-series th { font-weight: 400; }
+.ck-graphs .u-legend .u-series td { padding-inline: .2rem; }

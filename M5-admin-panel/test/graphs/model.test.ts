@@ -203,3 +203,34 @@ describe('mark details', () => {
     assert.deepEqual(chartData(m, scores, 0, 5000).marks.map((x) => x.label), ['quake']);
   });
 });
+
+describe('contract additions (snapshot marks, quake source)', () => {
+  const snapshot = (extra: Record<string, unknown>) => ({
+    t: 'snapshot',
+    state: { phase: 'playing', timeLeftSeconds: 0, gameCode: '', players: [], npcCars: [], obstacles: [], deliveryPoints: [] },
+    params: [], metrics: [S('score.0', 1000, 1)], board: { connected: true, samples: [] }, events: [], ...extra,
+  }) as never;
+
+  it('the change marks of the snapshot come back after a page reload, at server time', () => {
+    const m = new GraphModel({ now: () => 0 });
+    m.apply(snapshot({ marks: [{ time: 900, name: 'physics.grip' }, { time: 950, name: 'quake' }, { time: 'x', name: 'bad' }, { name: 'no time' }] }));
+    assert.deepEqual(m.allMarks().map((x) => `${x.label}@${x.time}`), ['physics.grip@900', 'quake@950']);
+    // The same marks again (a second reconnect) are not drawn twice.
+    m.apply(snapshot({ marks: [{ time: 900, name: 'physics.grip' }] }));
+    assert.equal(m.allMarks().length, 2);
+  });
+
+  it('a snapshot without marks is fine', () => {
+    const m = new GraphModel();
+    m.apply(snapshot({}));
+    assert.deepEqual(m.allMarks(), []);
+  });
+
+  it('source names of the contract', () => {
+    const m = new GraphModel();
+    m.apply(board([S('board.accel_g', 1000, 1)], { mag: 3, zone: 2, source: 'motors' }));
+    m.apply(board([S('board.accel_g', 5000, 1)]));
+    m.apply(board([S('board.accel_g', 9000, 1)], { mag: 5, zone: 6, source: 'admin' }));
+    assert.deepEqual(m.allMarks().map((x) => x.label), ['M3.0 · kuzeydoğu · motor', 'M5.0 · güneybatı · yönetici']);
+  });
+});

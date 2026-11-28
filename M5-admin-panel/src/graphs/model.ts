@@ -122,6 +122,7 @@ export class GraphModel {
         // page already had stays, and marks made on this page are kept.
         this.addSamples(update.metrics);
         this.addBoard(update.board);
+        this.addSnapshotMarks((update as { marks?: unknown }).marks);
         return this.bump();
       case 'metrics':
         this.addSamples(update.samples);
@@ -183,6 +184,20 @@ export class GraphModel {
       }
     }
     this.lastQuake = q ? { mag: q.mag, zone: q.zone } : undefined;
+  }
+
+  /**
+   * `snapshot.marks` (contracts/messages.md, optional): the commands accepted in the last two
+   * minutes, already at server time, so the lines come back after a page reload.
+   */
+  private addSnapshotMarks(marks: unknown): void {
+    if (!Array.isArray(marks)) return;
+    for (const m of marks) {
+      const { time, name } = (m ?? {}) as { time?: unknown; name?: unknown };
+      if (typeof name === 'string' && name && typeof time === 'number' && Number.isFinite(time)) {
+        this.addMark({ time, kind: 'change', label: name });
+      }
+    }
   }
 
   private addSamples(samples: readonly MetricSample[]): void {

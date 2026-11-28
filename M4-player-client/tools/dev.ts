@@ -3,6 +3,8 @@
 //   npm run dev                                   page on port 5173, server at localhost:8080 (M2)
 //   npm run dev -- --server http://localhost:5174  the fake server of M4-2 instead
 //   npm run dev -- --port 5000
+//   npm run dev -- --fake                         no game server needed: a small server that follows
+//                                                 contracts/messages.md answers (game code 123456)
 //
 // The page is built again on every load, so a change shows after a reload. Everything the
 // page does not have itself (the WebSocket `/ws`, `/city_plan.json`, `/models/`) goes on to
@@ -15,10 +17,17 @@ import { join } from "node:path";
 import { parseArgs } from "node:util";
 import { context } from "esbuild";
 import { BUILD_OPTIONS, ROOT } from "./esbuild-options.ts";
+import { ContractServer } from "../test/net/contract-server.ts";
 
-const { values } = parseArgs({ options: { port: { type: "string", default: "5173" }, server: { type: "string", default: "http://localhost:8080" } } });
+const { values } = parseArgs({ options: {
+  port: { type: "string", default: "5173" },
+  server: { type: "string", default: "http://localhost:8080" },
+  fake: { type: "boolean", default: false },
+} });
 const port = Number(values.port);
-const target = new URL(values.server!);
+// --fake: a small server that speaks the contract, for trying the page on a phone alone.
+const fake = values.fake ? await ContractServer.start() : null;
+const target = new URL(fake ? `http://127.0.0.1:${fake.port}` : values.server!);
 if (!Number.isInteger(port) || port < 1 || port > 65535) throw new RangeError("--port must be 1–65535");
 const targetPort = Number(target.port || 80);
 
@@ -73,7 +82,8 @@ server.on("upgrade", (req, socket, head) => {
 });
 
 server.listen(port, "0.0.0.0", () => {
-  console.log(`Phone page: http://localhost:${port}  (game server: ${target.origin})`);
+  console.log(`Phone page: http://localhost:${port}  (game server: ${fake ? "the small test server" : target.origin})`);
+  if (fake) console.log(`  game code: ${fake.code}`);
   for (const list of Object.values(networkInterfaces())) {
     for (const a of list ?? []) if (a.family === "IPv4" && !a.internal) console.log(`  on a phone in the same Wi-Fi: http://${a.address}:${port}`);
   }

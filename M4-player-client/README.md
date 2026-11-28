@@ -45,6 +45,7 @@ npm test            # tests of the network client (M4-3)
 npm run typecheck
 npm run dev         # phone page on port 5173; the game server is http://localhost:8080 (M2)
 npm run dev -- --server http://localhost:5174   # another server, for example a fake server
+npm run dev -- --fake   # no game server: a small server that follows the contract (game code 123456)
 npm run build       # the page in dist/, for M2 to serve
 ```
 

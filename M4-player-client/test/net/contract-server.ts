@@ -1,4 +1,4 @@
-// A small server for the M4-3 tests that speaks the phone messages of contracts/messages.md
+// A small server for the M4-3 tests (and `npm run dev -- --fake`) that speaks the phone messages of contracts/messages.md
 // like M2 does (hello, player key, close codes 4002 and 4003, join, state, ping, net).
 // It can also misbehave on purpose: broken messages, a dropped link, a silent link, a restart.
 import { createServer, type Server } from "node:http";
@@ -8,7 +8,9 @@ import { WebSocketServer, type WebSocket } from "ws";
 
 export interface Received { player: number; msg: Record<string, unknown> }
 
-interface Slot { key: string; player: number; link: WebSocket | null }
+const COLORS = ["blue", "green", "purple", "yellow"];
+
+interface Slot { key: string; player: number; link: WebSocket | null; team?: number }
 
 export class ContractServer {
   readonly received: Received[] = [];
@@ -21,6 +23,8 @@ export class ContractServer {
   private slots = new Map<string, Slot>();
   private links = new Map<WebSocket, Slot | null>();
   private tick = 0;
+  /** Last control number of each player, given back in the state like M1 does. */
+  private readonly lastControl = new Map<number, number>();
   private timers: ReturnType<typeof setInterval>[] = [];
 
   static async start(port = 0): Promise<ContractServer> {
@@ -56,6 +60,7 @@ export class ContractServer {
     for (const ws of this.links.keys()) ws.terminate();
     this.links.clear();
     this.slots.clear();
+    this.lastControl.clear();
     this.received.length = 0;
     this.talking = true;
   }
@@ -99,9 +104,11 @@ export class ContractServer {
       const slot = this.links.get(ws);
       if (!slot) return this.hello(ws, msg);
       this.received.push({ player: slot.player, msg });
+      if (msg.t === "control" && typeof msg.seq === "number") this.lastControl.set(slot.player, msg.seq);
       if (msg.t === "join") {
         const team = msg.team as number;
-        this.send(ws, { t: "joined", player: slot.player, team, color: ["blue", "green", "purple", "yellow"][team] });
+        slot.team = team;
+        this.send(ws, { t: "joined", player: slot.player, team, color: COLORS[team] });
       }
     });
   }
@@ -129,12 +136,15 @@ export class ContractServer {
     this.links.set(ws, slot);
     this.received.push({ player: slot.player, msg });
     this.send(ws, { t: "welcome", player: slot.player, returning });
+    // Like M2-1 (#94): a returning player with a team hears it again right after the welcome.
+    if (slot.team !== undefined) this.send(ws, { t: "joined", player: slot.player, team: slot.team, color: COLORS[slot.team] });
   }
 
   private broadcastState(): void {
     this.tick++;
     if (!this.talking) return;
-    const bytes = encode({ t: "state", seq: this.tick, s: { phase: "playing", players: [] } });
+    const players = [...this.slots.values()].map((sl) => ({ index: sl.player, connected: sl.link !== null, control: { seq: this.lastControl.get(sl.player) ?? 0 } }));
+    const bytes = encode({ t: "state", seq: this.tick, s: { phase: "playing", players } });
     for (const [ws, s] of this.links) if (s && ws.readyState === ws.OPEN) ws.send(bytes);
   }
 

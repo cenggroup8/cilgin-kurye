@@ -5,12 +5,19 @@ import { CarLayer } from "./cars.ts";
 import { buildCity, type CityParts } from "./city.ts";
 import { Effects } from "./effects.ts";
 import { Gearbox, type Shift } from "./gearbox.ts";
+import { ObstacleLayer } from "./obstacles.ts";
 import { forwardOf } from "./pose.ts";
-import type { CityPlan, ScenePlayer, SceneState } from "./types.ts";
+import type { CityPlan, ScenePlayer, SceneQuake, SceneState } from "./types.ts";
 
 const SKY = "#bfe3ff";
 
 export type CameraMode = "chase" | "overview" | "showroom";
+
+export function quakeShake(quake: SceneQuake | null, x: number, z: number): number {
+  if (!quake || quake.radius <= 0) return 0;
+  const near = 1.25 - Math.hypot(x - quake.x, z - quake.z) / quake.radius;
+  return Math.max(0, Math.min(1, quake.magnitude / 10)) * Math.max(0, Math.min(1, near));
+}
 
 export class CityScene {
   readonly renderer: THREE.WebGLRenderer;
@@ -20,6 +27,7 @@ export class CityScene {
   private readonly cars = new CarLayer();
   private readonly bikes = new Map<number, BikeModel>();
   private readonly fx = new Effects();
+  readonly obstacles: ObstacleLayer;
   private readonly trails = new Map<number, { rx: number; rz: number; speed: number; dust: number; smoke: number }>();
   private readonly sun: THREE.DirectionalLight;
   private readonly size: number;
@@ -58,7 +66,8 @@ export class CityScene {
     this.scene.add(this.sun, this.sun.target);
 
     this.city = buildCity(plan);
-    this.scene.add(this.city.group, this.cars.group, this.fx.group);
+    this.obstacles = new ObstacleLayer(plan);
+    this.scene.add(this.city.group, this.cars.group, this.fx.group, this.obstacles.group);
     this.view = new ChaseCamera(canvas.clientWidth / Math.max(1, canvas.clientHeight));
   }
 
@@ -85,10 +94,12 @@ export class CityScene {
     }
     for (const id of [...this.bikes.keys()]) if (!seen.has(id)) this.drop(id);
     this.cars.update(state.cars);
+    this.obstacles.update(state.obstacles ?? []);
     this.fx.update(dt);
 
     const self = state.players.find((p) => p.id === state.self);
     if (self && dt > 0) this.shiftGears(self, dt);
+    this.view.quakeTarget = self ? quakeShake(state.quake ?? null, self.x, self.z) : 0;
     this.scene.fog = this.cameraMode === "chase" ? this.fog : null;
     const focus = self ?? { x: this.size / 2, z: this.size / 2 };
     this.orbit += dt * 0.45;

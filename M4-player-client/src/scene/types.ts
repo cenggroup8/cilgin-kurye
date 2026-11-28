@@ -30,8 +30,27 @@ export interface SceneCar {
   offroad: boolean;
 }
 
+export type ObstacleType = "heavy_traffic" | "road_work" | "accident" | "puddle";
+
+export interface SceneObstacle {
+  id: number;
+  type: ObstacleType;
+  segment: number;
+  lane: number;
+  pos: number;
+}
+
+export interface SceneQuake {
+  x: number;
+  z: number;
+  radius: number;
+  magnitude: number;
+}
+
 export interface SceneState {
   self: number | null;
   players: readonly ScenePlayer[];
   cars: readonly SceneCar[];
+  obstacles?: readonly SceneObstacle[];
+  quake?: SceneQuake | null;
 }

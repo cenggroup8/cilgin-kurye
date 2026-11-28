@@ -26,6 +26,9 @@ export class ChaseCamera {
   private readonly push = new Spring(0, 2.2, 0.45);
   private placed = false;
   private fov = 60;
+  private quake = 0;
+  private clock = 0;
+  quakeTarget = 0;
 
   constructor(aspect: number) {
     this.camera = new THREE.PerspectiveCamera(60, aspect, 0.3, 1600);
@@ -43,8 +46,16 @@ export class ChaseCamera {
     }
     const f = forwardOf(target.heading);
     const shake = this.push.step(0, dt);
-    this.camera.position.set(this.base.x - f.x * shake, this.base.y, this.base.z - f.z * shake);
-    this.camera.lookAt(this.look);
+    this.clock += dt;
+    this.quake += (this.quakeTarget - this.quake) * smoothing(this.quakeTarget > this.quake ? 6 : 2, dt);
+    const q = this.quake;
+    const t = this.clock;
+    const jx = (Math.sin(t * 23.3) * 0.6 + Math.sin(t * 37.1 + 1.3) * 0.4) * 0.32 * q;
+    const jy = (Math.sin(t * 29.7 + 0.4) * 0.6 + Math.sin(t * 43.9) * 0.4) * 0.18 * q;
+    const jz = (Math.sin(t * 19.1 + 2.1) * 0.6 + Math.sin(t * 31.3 + 0.7) * 0.4) * 0.32 * q;
+    this.camera.position.set(this.base.x - f.x * shake + jx, this.base.y + jy, this.base.z - f.z * shake + jz);
+    this.camera.lookAt(this.look.x + jx * 0.4, this.look.y + jy * 0.4, this.look.z + jz * 0.4);
+    this.camera.rotateZ((Math.sin(t * 17.3) * 0.6 + Math.sin(t * 27.9 + 0.9) * 0.4) * 0.025 * q);
     this.setFov(60 + Math.min(Math.abs(target.speed), 22) * 0.28 + shake * 2.5, dt);
   }
 

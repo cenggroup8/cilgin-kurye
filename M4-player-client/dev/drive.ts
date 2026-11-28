@@ -1,8 +1,23 @@
 import "./ui.css";
-import { CityScene, EngineAudio, PLAYER_TONES, TEAM_NAMES, type CameraMode, type CityPlan, type SceneCar, type ScenePlayer } from "../src/scene/index.ts";
+import {
+  blendCar,
+  blendPlayer,
+  CityScene,
+  EngineAudio,
+  PLAYER_TONES,
+  SnapshotBuffer,
+  TEAM_NAMES,
+  type CameraMode,
+  type CityPlan,
+  type SceneCar,
+  type SceneObstacle,
+  type ScenePlayer,
+  type SceneQuake,
+} from "../src/scene/index.ts";
 import plan from "@m3/test/fakes/city_plan.json";
 import { FakeM1 } from "@m3/test/fakes/fakeM1.ts";
-import { toContractHeading, toContractPoint } from "@m3/src/common/coords.ts";
+import { fromContractHeading, fromContractPoint, toContractHeading, toContractPoint } from "@m3/src/common/coords.ts";
+import { fromContractObstacles } from "@m3/src/traffic/npc/contract.ts";
 
 const PLAYER = 0;
 const NORTH = Math.PI / 2;
@@ -11,6 +26,19 @@ const STEER_SWAP = 6;
 const STEER_OUT = 6.5;
 const PEDAL_IN = 7;
 const PEDAL_OUT = 12;
+const PENALTY_TICKS = 90;
+const RIVALS = [
+  { team: 1, tone: 0 },
+  { team: 2, tone: 1 },
+  { team: 3, tone: 0 },
+];
+const DEMO_OBSTACLES: SceneObstacle[] = [
+  { id: 1, type: "puddle", segment: 0, lane: 1, pos: 0.55 },
+  { id: 2, type: "accident", segment: 0, lane: 3, pos: 0.82 },
+  { id: 3, type: "road_work", segment: 31, lane: 0, pos: 0.5 },
+  { id: 4, type: "heavy_traffic", segment: 1, lane: 0, pos: 0.5 },
+];
+const QUAKE: SceneQuake = { x: 250, z: 250, radius: 140, magnitude: 7 };
 
 const ALIAS: Record<string, string> = { arrowleft: "a", arrowright: "d", arrowup: "w", arrowdown: "s" };
 const held = new Set<string>();
@@ -18,13 +46,18 @@ const isHeld = (...keys: string[]) => keys.some((k) => held.has(k));
 const input = { steer: 0, throttle: 0, brake: 0 };
 
 type Pose = { x: number; y: number; heading: number };
-type Car = { id: number; x: number; y: number; heading: number; length: number; width: number; state: string };
+type Car = { id: number; x: number; y: number; heading: number; speed: number; length: number; width: number; state: string };
 let m1: FakeM1;
 let prevBike: Pose;
 let prevCars = new Map<number, Pose>();
 let cars: Car[] = [];
 let paused = false;
 let showCars = true;
+let obstaclesOn = true;
+let quakeOn = false;
+let standUpAt: number | null = null;
+const carFeed = new SnapshotBuffer<SceneCar>(blendCar);
+const rivalFeed = new SnapshotBuffer<ScenePlayer>(blendPlayer);
 
 const towards = (v: number, target: number, step: number) => (Math.abs(target - v) <= step ? target : v + Math.sign(target - v) * step);
 
@@ -48,9 +81,30 @@ function reset(): void {
   });
   const b = m1.physics.bikes.get(PLAYER)!;
   b.heading = NORTH;
+  const spawn = new URLSearchParams(location.search).get("spawn")?.split(",").map(Number);
+  if (spawn && spawn.length === 3 && spawn.every(Number.isFinite)) {
+    const p = fromContractPoint(spawn[0], spawn[1]);
+    b.x = p.x;
+    b.y = p.y;
+    b.heading = fromContractHeading(spawn[2]);
+  }
   prevBike = { x: b.x, y: b.y, heading: b.heading };
   prevCars = new Map();
   cars = [];
+  standUpAt = null;
+  carFeed.clear();
+  rivalFeed.clear();
+  applyWorld();
+}
+
+function applyWorld(): void {
+  if (!m1) return;
+  const events = (m1.scenario.events ??= []);
+  events.push({
+    at: m1.tick,
+    obstacles: obstaclesOn ? fromContractObstacles(DEMO_OBSTACLES, m1.city.graph) : [],
+    quake: quakeOn ? { x: QUAKE.x, y: -QUAKE.z, radius: QUAKE.radius, strength: QUAKE.magnitude } : null,
+  });
 }
 reset();
 
@@ -144,6 +198,8 @@ function toggle(k: string): void {
     gearText.textContent = "1";
   }
   if (k === "p") paused = !paused;
+  if (k === "o") toggleObstacles();
+  if (k === "q") toggleQuake();
 }
 
 window.addEventListener("keydown", (e) => {
@@ -196,6 +252,9 @@ PLAYER_TONES.forEach((tones, team) => {
 });
 const swatches = [...liveries.querySelectorAll<HTMLElement>(".swatch")];
 $("resume").addEventListener("click", () => (paused = false));
+const toggles = { obstacles: $("t-obstacles"), quake: $("t-quake") };
+toggles.obstacles.addEventListener("click", toggleObstacles);
+toggles.quake.addEventListener("click", toggleQuake);
 let cameraBeforePause: CameraMode = "chase";
 let wasPaused = false;
 document.addEventListener("contextmenu", (e) => e.preventDefault());
@@ -209,12 +268,51 @@ function toScene(p: Pose): { x: number; z: number; heading: number } {
   return { x: c.x, z: c.z, heading: toContractHeading(p.heading) };
 }
 
+function toggleObstacles(): void {
+  obstaclesOn = !obstaclesOn;
+  applyWorld();
+}
+
+function toggleQuake(): void {
+  quakeOn = !quakeOn;
+  applyWorld();
+}
+
 function stepOnce(): void {
   readInput(m1.dt);
   const b = m1.physics.bikes.get(PLAYER)!;
   prevBike = { x: b.x, y: b.y, heading: b.heading };
   prevCars = new Map(cars.map((c) => [c.id, { x: c.x, y: c.y, heading: c.heading }]));
   cars = m1.step().cars;
+  const after = m1.physics.bikes.get(PLAYER)!;
+  if (after.fallen && standUpAt === null) {
+    standUpAt = m1.tick + PENALTY_TICKS;
+    (m1.scenario.events ??= []).push({ at: standUpAt, standUp: [PLAYER] });
+  }
+  if (!after.fallen) standUpAt = null;
+
+  const serverTime = m1.tick * m1.dt;
+  const local = performance.now() / 1000;
+  const rivals = cars.slice(0, RIVALS.length);
+  rivalFeed.push(
+    serverTime,
+    rivals.map((c, i) => ({
+      id: 100 + i,
+      team: RIVALS[i].team,
+      tone: RIVALS[i].tone,
+      ...toScene(c),
+      lean: 0,
+      speed: c.speed,
+      sliding: false,
+      fallen: false,
+    })),
+    local,
+  );
+  carFeed.push(
+    serverTime,
+    cars.slice(RIVALS.length).map((c) => ({ id: c.id, ...toScene(c), length: c.length, width: c.width, offroad: c.state === "offroad" })),
+    local,
+  );
 }
 
 let last = performance.now();
@@ -247,9 +345,9 @@ function frame(now: number): void {
     sliding: b.sliding,
     fallen: b.fallen,
   };
-  const sceneCars: SceneCar[] = showCars
-    ? cars.map((c) => ({ id: c.id, ...toScene(blend(prevCars.get(c.id) ?? c, c, t)), length: c.length, width: c.width, offroad: c.state === "offroad" }))
-    : [];
+  const localNow = now / 1000;
+  const sceneCars: SceneCar[] = showCars ? carFeed.sample(localNow) : [];
+  const rivals: ScenePlayer[] = showCars ? rivalFeed.sample(localNow) : [];
 
   scene.topSpeed = m1.physics.params.topSpeed;
   if (paused !== wasPaused) {
@@ -262,7 +360,18 @@ function frame(now: number): void {
     wasPaused = paused;
   }
   swatches.forEach((b) => b.classList.toggle("on", Number(b.dataset.team) === livery.team && Number(b.dataset.tone) === livery.tone));
-  scene.update({ self: PLAYER, players: [me], cars: sceneCars }, dt);
+  scene.update(
+    {
+      self: PLAYER,
+      players: [me, ...rivals],
+      cars: sceneCars,
+      obstacles: obstaclesOn ? DEMO_OBSTACLES : [],
+      quake: quakeOn ? QUAKE : null,
+    },
+    dt,
+  );
+  toggles.obstacles.classList.toggle("on", obstaclesOn);
+  toggles.quake.classList.toggle("on", quakeOn);
   audio.update(paused ? 0.1 : scene.gearbox.rpm, paused ? 0 : scene.gearbox.load, dt);
   scene.render();
 

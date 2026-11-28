@@ -116,6 +116,21 @@ canvas {
   padding: 0;
 }
 .swatch.on { border-color: #fff; box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35); }
+.menu .label + .switches { margin-bottom: 2px; }
+.liveries + .label { margin-top: 14px; }
+.switches { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.switch {
+  height: 38px;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.switch.on { background: rgba(255, 255, 255, 0.32); border-color: #fff; }
+.switch kbd { font: 600 10px ui-monospace, Menlo, monospace; opacity: 0.7; margin-left: 4px; }
 .resume {
   width: 100%;
   margin-top: 14px;

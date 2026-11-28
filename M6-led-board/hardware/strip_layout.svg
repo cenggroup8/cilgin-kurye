@@ -1157,7 +1157,7 @@
 <text x="541.6666666666666" y="553.6666666666666" font-size="3.5" fill="#7c3aed" text-anchor="middle">motor M3 zone 8</text>
 <line x1="10" y1="660" x2="110" y2="660" stroke="#000" stroke-width="0.8"/><line x1="10" y1="658" x2="10" y2="662" stroke="#000" stroke-width="0.8"/><line x1="110" y1="658" x2="110" y2="662" stroke="#000" stroke-width="0.8"/>
 <text x="60" y="666" font-size="4" text-anchor="middle">100 mm (check after printing)</text>
-<text x="130" y="659" font-size="4">Strip layout 0.1.0 from city plan 0.2.0: 788 LEDs (5.5 m), 13 per segment, road pitch 118 mm, gap at crossings 27.7 mm.</text>
+<text x="130" y="659" font-size="4">Strip layout 0.1.0 from city plan 0.3.0: 788 LEDs (5.5 m), 13 per segment, road pitch 118 mm, gap at crossings 27.7 mm.</text>
 <text x="130" y="665" font-size="4"><tspan fill="#2563eb">Chain A</tspan>: east-west roads and stores (398 LEDs).  <tspan fill="#16a34a">Chain B</tspan>: north-south roads (390 LEDs).  Arrow = data direction, dashed = jumper wire, A12 = first LED index.</text>
 <text x="130" y="671" font-size="4">View from above. North is up. Sensor and motors sit under the base.</text>
 </svg>

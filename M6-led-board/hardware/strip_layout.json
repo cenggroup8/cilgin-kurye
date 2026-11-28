@@ -1,7 +1,7 @@
 {
   "version": "0.1.0",
   "status": "proposal - pin numbers and power come with the parts list (#20)",
-  "city_plan": "0.2.0",
+  "city_plan": "0.3.0",
   "board": {
     "size_mm": 650,
     "margin_mm": 30,

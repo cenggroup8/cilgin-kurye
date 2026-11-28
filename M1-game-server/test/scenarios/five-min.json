@@ -1,0 +1,72 @@
+{
+  "seed": 20261127,
+  "description": "5-minute demo: 3 players join, game starts, controls, fall, obstacle, earthquake, pause/resume, end.",
+  "entries": [
+    {
+      "tick": 0,
+      "joins": [
+        { "playerKey": "pk-alice", "playerNo": 0, "name": "Alice", "team": 0 },
+        { "playerKey": "pk-bob", "playerNo": 1, "name": "Bob", "team": 1 },
+        { "playerKey": "pk-carol", "playerNo": 2, "name": "Carol", "team": 2 }
+      ]
+    },
+    {
+      "tick": 1,
+      "adminCommands": [{ "id": 1, "name": "start" }]
+    },
+    {
+      "tick": 100,
+      "controls": [
+        { "player": 0, "seq": 1, "throttle": 1, "brake": 0, "steer": 0 },
+        { "player": 1, "seq": 1, "throttle": 0.8, "brake": 0, "steer": 0.2 }
+      ]
+    },
+    {
+      "tick": 200,
+      "controls": [
+        { "player": 0, "seq": 2, "throttle": 0.5, "brake": 0.3, "steer": -0.5 },
+        { "player": 2, "seq": 1, "throttle": 1, "brake": 0, "steer": 0 }
+      ]
+    },
+    {
+      "tick": 500,
+      "controls": [
+        { "player": 0, "seq": 3, "throttle": 1, "brake": 0, "steer": 0 }
+      ],
+      "findMe": [{ "player": 0 }]
+    },
+    {
+      "tick": 1000,
+      "adminCommands": [
+        { "id": 2, "name": "param_set", "args": { "name": "game.penalty_s", "value": 5 } }
+      ]
+    },
+    {
+      "tick": 2000,
+      "boardEvents": [
+        { "source": "hand", "magnitude": 7, "zone": 4, "confidence": 0.9 }
+      ]
+    },
+    {
+      "tick": 3000,
+      "adminCommands": [{ "id": 3, "name": "pause" }]
+    },
+    {
+      "tick": 3030,
+      "adminCommands": [{ "id": 4, "name": "resume" }]
+    },
+    {
+      "tick": 5000,
+      "controls": [
+        { "player": 0, "seq": 10, "throttle": 1, "brake": 0, "steer": 0.3 },
+        { "player": 1, "seq": 10, "throttle": 0.6, "brake": 0, "steer": -0.1 }
+      ]
+    },
+    {
+      "tick": 7000,
+      "adminCommands": [
+        { "id": 5, "name": "param_set", "args": { "name": "game.penalty_s", "value": 99 } }
+      ]
+    }
+  ]
+}

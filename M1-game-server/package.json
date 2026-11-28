@@ -7,7 +7,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "vitest run",
-    "demo:match": "tsx test/scenarios/match-demo.ts"
+    "demo:match": "tsx test/scenarios/match-demo.ts",
+    "demo:loop": "tsx test/scenarios/loop-demo.ts"
   },
   "engines": {
     "node": ">=20"

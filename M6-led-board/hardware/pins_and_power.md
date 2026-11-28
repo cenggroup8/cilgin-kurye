@@ -13,7 +13,7 @@ The order of the LED strip pieces is in [`strip_layout.md`](strip_layout.md).
 |---|---|---|
 | Controller | ESP32-WROOM-32D development board, **38 pins**, CP2102 USB, micro USB | fits `board = esp32dev` of the firmware (M6-1) |
 | Motion sensor | MPU-6050 on a GY-521 board (2 bought) | I2C address 0x68 |
-| LED strip | WS2812B, 144 LEDs/m, 15 mm wide, 2 × 5 m | 728 LEDs used, see `strip_layout.md` |
+| LED strip | WS2812B, 144 LEDs/m, 12 mm wide, 2 × 5 m | 788 LEDs used on the 65 cm base, see `strip_layout.md` |
 | Level shifter | 2 × 4 channel 3.3 V ↔ 5 V logic level converter | instead of the 74HCT245 of #20, see "LED data" below |
 | Motor driver | motor shield for Arduino: 2 × L293D and a 74HC595 (the common "motor shield v1" design) | instead of one MOSFET per motor in #20 |
 | Motors | 4 × 3–6 V DC motor | no spare |
@@ -99,8 +99,8 @@ small MOSFET type, which is fine for the slow 74HC595 lines but may be too slow 
 
 ```cpp
 // M6-led-board/hardware/pins_and_power.md
-constexpr int PIN_LED_A    = 16;  // chain A: east-west roads and stores (368 LEDs)
-constexpr int PIN_LED_B    = 17;  // chain B: north-south roads (360 LEDs)
+constexpr int PIN_LED_A    = 16;  // chain A: east-west roads and stores (398 LEDs)
+constexpr int PIN_LED_B    = 17;  // chain B: north-south roads (390 LEDs)
 constexpr int PIN_IMU_SDA  = 21;
 constexpr int PIN_IMU_SCL  = 22;
 constexpr int PIN_MOTOR[4] = {32, 33, 25, 26};  // M1..M4 = zone 0, 2, 6, 8 = mask bit 0..3
@@ -135,13 +135,13 @@ constexpr int PIN_SR_DATA  = 13;  // shield pin 8 (shield pin 7 to GND)
 | Set the output with the ADJ screw to 5.0–5.1 V, measured with a multimeter | WS2812B and the ESP32 want 5 V |
 | A fuse on each 5 V branch: F1 10 A (chain A), F2 10 A (chain B), F3 3 A (shield and ESP32) | 40 A can melt a thin wire before the supply stops; a fuse makes a short safe |
 | Main 5 V and ground wires 18 AWG; from the bus to each feed point 22 AWG | the jumper wires that were bought are for signals only |
-| Power goes in at the start of **every row** of chain A and **every column** of chain B (12 feed points), 5 V and ground from the bus. Inside a row the pieces are joined by 3-wire jumpers | a 144 LEDs/m strip has thin copper; one row is 60 LEDs |
+| Power goes in at the start of **every row** of chain A and **every column** of chain B (12 feed points), 5 V and ground from the bus. Inside a row the pieces are joined by 3-wire jumpers | a 144 LEDs/m strip has thin copper; one row is 65 LEDs |
 | A 1000 µF capacitor between 5 V and ground at the start of each bus | the first LEDs do not get a voltage jump at power on |
 | All grounds together: power supply V−, ESP32 GND, shield GND, sensor GND, both sides of the level shifters | without a common ground the data signal has no reference |
 | Remove the shield jumper **PWRJMP** | it would join the motor power with the shield logic power in a way we do not use |
 | Power limit in the config: `max_ma` = **8000** (8 A for all LEDs) | about 4 A per chain, far under the 10 A fuses; the LED part (M6-3) lowers the brightness when a frame would need more |
 
-Full white on all 728 LEDs would be about 44 A; with the power limit the board never draws that.
+Full white on all 788 LEDs would be about 47 A; with the power limit the board never draws that.
 The supply (40 A) has a large margin for the ESP32 (about 0.25 A) and the motors (4 × about
 0.3 A).
 

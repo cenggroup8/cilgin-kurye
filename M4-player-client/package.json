@@ -1,0 +1,25 @@
+{
+  "name": "@cilgin-kurye/m4-player-client",
+  "version": "0.1.0",
+  "private": true,
+  "description": "M4 Player Client and 3D City - Cilgin Kurye, CSE 396 Group 8",
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev --port 5174 --strictPort",
+    "test": "node --test \"test/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit",
+    "phone": "vite dev --port 5174 --strictPort --host"
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
+  "dependencies": {
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/three": "^0.187.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.4.0"
+  }
+}

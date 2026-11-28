@@ -1,0 +1,10 @@
+{
+  "name": "Çılgın Kurye",
+  "short_name": "Kurye",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#9fdcff",
+  "theme_color": "#9fdcff"
+}

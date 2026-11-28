@@ -124,7 +124,9 @@ const soundBtn = $("sound");
 const fullBtn = $("full");
 const hint = $("hint");
 const audio = new EngineAudio();
-audio.useSample("./sounds/engine-loop.mp3");
+audio.useSample("./sounds/engine-loop.wav");
+audio.useSqueal("./sounds/tyre-squeal.wav");
+audio.start();
 
 scene.onShift = (_shift, gear) => {
   gearText.textContent = String(gear);
@@ -135,8 +137,7 @@ scene.onShift = (_shift, gear) => {
 };
 
 const wake = () => audio.start();
-window.addEventListener("pointerdown", wake);
-window.addEventListener("keydown", wake);
+for (const type of ["pointerdown", "touchstart", "touchend", "keydown", "click"]) window.addEventListener(type, wake, { capture: true });
 soundBtn.addEventListener("click", () => {
   audio.start();
   audio.setMuted(!audio.isMuted);
@@ -385,6 +386,7 @@ function frame(now: number): void {
   toggles.obstacles.classList.toggle("on", obstaclesOn);
   toggles.quake.classList.toggle("on", quakeOn);
   audio.update(paused ? 0.1 : scene.gearbox.rpm, paused ? 0 : scene.gearbox.load, drawDt);
+  audio.skid(paused ? 0 : scene.skid, b.speed);
   scene.render();
 
   const speed = Math.round(Math.abs(b.speed) * 3.6);

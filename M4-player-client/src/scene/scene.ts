@@ -38,6 +38,7 @@ export class CityScene {
   readonly gearbox = new Gearbox();
   onShift: ((shift: Shift, gear: number) => void) | null = null;
   private selfSpeed = 0;
+  skid = 0;
   private orbit = 0;
   private clock = 0;
 
@@ -123,6 +124,11 @@ export class CityScene {
   private shiftGears(self: ScenePlayer, dt: number): void {
     const accel = (self.speed - this.selfSpeed) / dt;
     this.selfSpeed = self.speed;
+    const moving = Math.abs(self.speed) > 2.5 && !self.fallen;
+    const braking = moving ? Math.max(0, Math.min(1, (-accel - 4.5) / 5)) : 0;
+    const sliding = moving && self.sliding ? Math.min(1, 0.45 + Math.abs(self.speed) / 30) : 0;
+    const want = Math.max(braking, sliding);
+    this.skid += (want - this.skid) * (1 - Math.exp(-(want > this.skid ? 18 : 6) * dt));
     const shift = this.gearbox.update(self.fallen ? 0 : self.speed, self.fallen ? 0 : accel, this.topSpeed, dt);
     if (!shift) return;
     if (self.fallen) {

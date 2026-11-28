@@ -1,4 +1,26 @@
 const VOLUME = 0.36;
+const SEAM_S = 0.015;
+
+export function crossfadeLoop(input: Float32Array, fade: number): Float32Array<ArrayBuffer> {
+  const f = Math.min(fade, Math.floor(input.length / 3));
+  const out = new Float32Array(input.length - f);
+  out.set(input.subarray(0, input.length - f));
+  for (let i = 0; i < f; i++) {
+    const k = i / f;
+    out[i] = input[i] * k + input[input.length - f + i] * (1 - k);
+  }
+  return out;
+}
+
+function seamless(ctx: BaseAudioContext, buffer: AudioBuffer): AudioBuffer {
+  const fade = Math.floor(buffer.sampleRate * SEAM_S);
+  const first = crossfadeLoop(buffer.getChannelData(0), fade);
+  const out = ctx.createBuffer(buffer.numberOfChannels, first.length, buffer.sampleRate);
+  for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+    out.copyToChannel(ch === 0 ? first : crossfadeLoop(buffer.getChannelData(ch), fade), ch);
+  }
+  return out;
+}
 
 export class EngineAudio {
   private ctx: AudioContext | null = null;
@@ -10,7 +32,9 @@ export class EngineAudio {
   private pulse!: OscillatorNode;
   private pulseDepth!: GainNode;
   private sample: { source: AudioBufferSourceNode; gain: GainNode } | null = null;
-  private sampleUrl: string | null = null;
+  private sampleUrls: string[] = [];
+  private squealUrl: string | null = null;
+  private squeal: { source: AudioBufferSourceNode; gain: GainNode } | null = null;
   private muted = false;
   private time = 0;
 
@@ -22,8 +46,8 @@ export class EngineAudio {
     return this.sample !== null;
   }
 
-  useSample(url: string): void {
-    this.sampleUrl = url;
+  useSample(...urls: string[]): void {
+    this.sampleUrls = urls;
     if (this.ctx) void this.loadSample();
   }
 
@@ -69,15 +93,50 @@ export class EngineAudio {
     this.pulse.connect(this.pulseDepth);
     this.pulseDepth.connect(this.body.gain);
     this.pulse.start();
-    if (this.sampleUrl) void this.loadSample();
+    if (this.sampleUrls.length) void this.loadSample();
+    if (this.squealUrl) void this.loadSqueal();
   }
 
   private async loadSample(): Promise<void> {
-    if (!this.ctx || !this.sampleUrl || this.sample) return;
+    if (!this.ctx || this.sample) return;
+    for (const url of this.sampleUrls) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok || !(res.headers.get("content-type") ?? "").startsWith("audio")) continue;
+        const buffer = seamless(this.ctx, await this.ctx.decodeAudioData(await res.arrayBuffer()));
+        const source = this.ctx.createBufferSource();
+        source.buffer = buffer;
+        source.loop = true;
+        const gain = this.ctx.createGain();
+        gain.gain.value = 0;
+        source.connect(gain);
+        gain.connect(this.master);
+        source.start();
+        this.sample = { source, gain };
+        const now = this.ctx.currentTime;
+        this.body.gain.cancelScheduledValues(now);
+        this.body.gain.setTargetAtTime(0, now, 0.05);
+        this.pulseDepth.gain.cancelScheduledValues(now);
+        this.pulseDepth.gain.setValueAtTime(0, now);
+        this.pulse.stop(now + 0.1);
+        return;
+      } catch {
+        continue;
+      }
+    }
+  }
+
+  useSqueal(url: string): void {
+    this.squealUrl = url;
+    if (this.ctx) void this.loadSqueal();
+  }
+
+  private async loadSqueal(): Promise<void> {
+    if (!this.ctx || !this.squealUrl || this.squeal) return;
     try {
-      const res = await fetch(this.sampleUrl);
-      if (!res.ok || !(res.headers.get("content-type") ?? "").startsWith("audio")) return;
-      const buffer = await this.ctx.decodeAudioData(await res.arrayBuffer());
+      const res = await fetch(this.squealUrl);
+      if (!res.ok) return;
+      const buffer = seamless(this.ctx, await this.ctx.decodeAudioData(await res.arrayBuffer()));
       const source = this.ctx.createBufferSource();
       source.buffer = buffer;
       source.loop = true;
@@ -86,12 +145,19 @@ export class EngineAudio {
       source.connect(gain);
       gain.connect(this.master);
       source.start();
-      this.sample = { source, gain };
-      this.body.gain.cancelScheduledValues(this.ctx.currentTime);
-      this.body.gain.setTargetAtTime(0, this.ctx.currentTime, 0.1);
+      this.squeal = { source, gain };
     } catch {
-      this.sample = null;
+      this.squeal = null;
     }
+  }
+
+  skid(amount: number, speed: number): void {
+    if (!this.ctx || !this.squeal) return;
+    const t = this.ctx.currentTime;
+    const k = Math.max(0, Math.min(1, amount));
+    const level = k * k * 0.54;
+    this.squeal.gain.gain.setTargetAtTime(level, t, level > this.squeal.gain.gain.value ? 0.04 : 0.16);
+    this.squeal.source.playbackRate.setTargetAtTime(0.88 + Math.min(Math.abs(speed), 20) * 0.008 + k * 0.08, t, 0.08);
   }
 
   update(rpm: number, load: number, dt: number): void {
